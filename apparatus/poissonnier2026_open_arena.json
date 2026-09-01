@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "id": "poissonnier2026_open_arena",
+  "title": "Poissonnier et al. 2026 A4 open arena",
+  "world": {"width": 297, "height": 210},
+  "geometry": {"primitives": [{"type":"rect","name":"a4_arena","x":0,"y":0,"width":297,"height":210}]},
+  "boundary": {"mode":"terminate","outcome":"arena_edge"},
+  "entry_points": {"default":{"x":148.5,"y":105,"heading_rad":0},"center":{"x":148.5,"y":105,"heading_rad":0}},
+  "terminal_regions": [],
+  "metadata": {"reference":"Poissonnier et al. 2026, Insectes Sociaux, doi:10.1007/s00040-026-01106-9","note":"Ant emerges through the central hole; exact post-toothpick heading distribution remains to be taken from the reference data."}
+}

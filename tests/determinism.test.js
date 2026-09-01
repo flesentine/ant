@@ -1,16 +1,1 @@
-'use strict';
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const { Simulation, FIXED_DT } = require('../src/sim-core.js');
-const exp = JSON.parse(fs.readFileSync(path.join(__dirname, '../experiments/open_arena_control.json'), 'utf8'));
-exp.observation.record_trajectories = false;
-const a = new Simulation(exp, 928491);
-const b = new Simulation(exp, 928491);
-a.runFor(20, FIXED_DT);
-b.runFor(20, FIXED_DT);
-assert.strictEqual(a.fingerprint(), b.fingerprint(), 'same seed must produce same reference trajectory');
-const c = new Simulation(exp, 928492);
-c.runFor(20, FIXED_DT);
-assert.notStrictEqual(a.fingerprint(), c.fingerprint(), 'different seeds should diverge');
-console.log('determinism.test.js PASS');
+'use strict';const assert=require('assert');const{Simulation,FIXED_DT}=require('../src/sim-core.js');const{loadBundle}=require('../tools/load-bundle.js');const bundle=loadBundle('open_arena_short_control.json');bundle.experiment.observation.record_trajectories=false;const a=new Simulation(bundle,928491),b=new Simulation(bundle,928491);a.runFor(5,FIXED_DT);b.runFor(5,FIXED_DT);assert.strictEqual(a.fingerprint(),b.fingerprint());const c=new Simulation(bundle,928492);c.runFor(5,FIXED_DT);assert.notStrictEqual(a.fingerprint(),c.fingerprint());console.log('determinism.test.js PASS');

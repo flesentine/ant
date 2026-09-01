@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "datasets": {
+    "poissonnier2026_open_arena": {
+      "role": "calibration_and_within_assay_validation",
+      "allowed_for_fitting": true,
+      "article_doi": "10.1007/s00040-026-01106-9",
+      "supplement": {"name":"Supplementary Material 2","format":"xlsx","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM2_ESM.xlsx","materialized_in_repo":false},
+      "inventory_status": "published_binary_located_not_yet_materialized",
+      "expected_fields": "unknown_until_binary_is_ingested",
+      "published_protocol": {"camera_fps":25,"arena_mm":[297,210],"approach_mm":[200,1000],"n_per_condition":26}
+    },
+    "poissonnier2026_ymaze": {
+      "role": "locked_holdout_validation",
+      "allowed_for_fitting": false,
+      "article_doi": "10.1007/s00040-026-01106-9",
+      "published_target": {"n":398,"pheromone_followed":348,"rate":0.874},
+      "lock_reason": "Cross-apparatus validation. Result may be reported but must not enter fitting or model selection."
+    }
+  }
+}

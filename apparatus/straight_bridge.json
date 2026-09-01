@@ -1,0 +1,1 @@
+{"schema_version":1,"id":"straight_bridge","title":"Straight bridge substrate","world":{"width":300,"height":80},"geometry":{"primitives":[{"type":"rect","x":0,"y":0,"width":300,"height":80}]},"boundary":{"mode":"reflect","outcome":"wall"},"entry_points":{"default":{"x":15,"y":40,"heading_rad":0}},"terminal_regions":[]}

@@ -1,16 +1,1 @@
-{
-  "schema_version": 1,
-  "id": "straight_bridge_v1",
-  "title": "Straight bridge substrate",
-  "units": {"distance":"mm","time":"s"},
-  "world": {"width":300,"height":80},
-  "workers": 40,
-  "duration_s": 120,
-  "observation": {"fps":10,"record_trajectories":false},
-  "geometry": {"primitives":[{"type":"rect","name":"bridge","x":0,"y":35,"width":300,"height":10}]},
-  "spawn": {"type":"point","x":25,"y":40,"heading_rad":0,"position_jitter_mm":4,"heading_jitter_rad":0.15},
-  "movement": {"base_speed_mm_s":14,"speed_sd_mm_s":1.5,"angular_sigma_rad_sqrt_s":0.6,"speed_reversion_rate_s":2.0,"speed_noise_sigma_sqrt_s":0.07,"pause_rate_s":0.015,"pause_min_s":0.12,"pause_max_s":0.8},
-  "contacts": {"enabled":true,"radius_mm":1.6,"avoidance_turn_rad":0.18},
-  "terminal_regions": [],
-  "metadata": {"purpose":"Locomotion/contact substrate only. No food and no hidden nest/food directional bias."}
-}
+{"schema_version":2,"id":"straight_bridge_v1","title":"Straight bridge substrate","model":"lasius_niger_locomotion_v1","apparatus":"straight_bridge","workers":120,"duration_s":60,"protocol":{"entry_point":"default","entry_state":{"heading_rad":0,"position_jitter_mm":4,"heading_jitter_rad":0.2},"treatment":{"type":"none"}},"observation":{"fps":25,"record_trajectories":false,"metrics":["mean_moving_speed","total_distance"]},"calibration_role":"engineering_control"}

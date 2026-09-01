@@ -1,62 +1,32 @@
 # Roadmap
 
 ## v0.1 — substrate
-- deterministic clock
-- per-agent RNG
-- continuous locomotion
-- spatial contacts
-- local inspection
-- basic metrics
+Deterministic clock, per-agent RNG, continuous locomotion, local contacts, inspection and metrics.
 
-## v0.2 — honest experiment engine (current)
-- experiment JSON is an actual simulation input
-- no hidden nest/food steering
-- reusable geometry primitives
-- configurable spawn and terminal/scoring regions
-- observation sampler independent of physics timestep
-- persistent movement noise
-- contact begin/end lifecycle
-- neutral Y-maze control
-- timestep convergence test
-- statistical left/right neutrality test
+## v0.2 — honest experiment engine
+JSON-driven geometry, no navigation cheats, virtual observation cadence, persistent movement noise, contact lifecycle, neutral Y-maze and timestep convergence tests.
 
-## v0.3a — baseline locomotion calibration
-- ingest/control open-arena trajectory data
-- compare at matched observation cadence
-- calibrate speed, turning, persistence, and pause behavior only
-- preserve approach-condition effects without pheromone parameters
+## v0.3 — experimental integrity (current)
+- biological model separated from apparatus/protocol/observation
+- one shared Lasius niger locomotion model across assays
+- experiment biology overrides rejected
+- Poissonnier 2026 open arena corrected to center entry and terminating A4 boundary
+- 20 cm / 100 cm approach conditions represented as protocol metadata
+- provenance hashes on every run
+- calibration/holdout registry with enforced Y-maze lock
+- published XLSX supplement located and inventoried, not yet materialized
 
-## v0.3b — externally painted trail response
-- local egocentric chemical samples
-- dose-aware experimental trail stimulus
-- calibrate detection/noise/steering against open-arena pheromone trajectories
-- no ant deposition yet
+## v0.3.1 — baseline locomotion calibration
+Materialize and inspect open-arena reference data. Fit only ordinary locomotion to DCM/control data.
 
-## v0.4 — cross-apparatus prediction
-- freeze locomotion and trail-response parameters
-- reproduce Y-maze geometry/treatment
-- predict marked-arm choice without Y-maze tuning
-- report uncertainty across simulated seeds
+## v0.3.2 — externally painted trail response
+Freeze locomotion, add local egocentric chemical samples and dose-aware trail stimulus, fit only pheromone-response parameters to open-arena pheromone trials.
+
+## v0.4 — locked cross-apparatus validation
+Freeze the model and evaluate the Y-maze without using Y-maze outcomes in fitting/model selection.
 
 ## v0.5 — trail deposition
-- fed-returning assay condition
-- discrete deposition events
-- independent deposition policy and response policy
-- spatial/context-dependent deposition benchmark
+Discrete deposition events with independent deposition and response policies.
 
 ## v0.6 — self recruitment
-- ants read other ants' deposits
-- field decay
-- positive and negative feedback
-- first emergent trail test
-
-## v0.7 — resource physics
-- finite sucrose source
-- crop volume
-- conserved loading/unloading
-- food return
-
-## v0.8 — social traffic
-- directional contact events
-- returning-ant information
-- congestion and negative feedback
+Ants read other ants' deposits; field decay and feedback produce the first genuine emergent trail test.

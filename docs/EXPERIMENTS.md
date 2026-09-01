@@ -1,36 +1,18 @@
-# Experiment definitions
+# Experiments and reference assays
 
-Experiment JSON files live in `experiments/` and are first-class inputs to ANTLAB.
+## Open arena — Poissonnier et al. 2026
+- A4 arena: 297 × 210 mm
+- entry: center via the experimental central hole
+- approach conditions: 200 mm and 1000 mm, represented as protocol metadata
+- current treatment: DCM control
+- observation: 25 fps
+- termination: first arena-border contact
+- safety timeout: 120 s
 
-A definition may specify:
+The exact post-toothpick entry heading distribution is intentionally provisional until the published reference data are materialized and inspected. ANTLAB does not invent a seamless runway-to-arena transition.
 
-```json
-{
-  "id": "neutral_y_maze_v1",
-  "world": { "width": 215, "height": 240 },
-  "workers": 1,
-  "duration_s": 90,
-  "observation": { "fps": 25, "record_trajectories": true },
-  "geometry": { "primitives": [] },
-  "spawn": {},
-  "movement": {},
-  "contacts": {},
-  "terminal_regions": []
-}
-```
+## Neutral Y-maze
+An engineering control before pheromone response exists. It uses the same `lasius_niger_locomotion_v1` model as the open arena. CI runs 600 seeds and rejects persistent left/right bias.
 
-## Why this matters
-
-Published observations should become experiment definitions and benchmarks, not hard-coded behavior inside an ant.
-
-The worker should never be told that `left` is correct. `left` and `right` are labels used by instrumentation after the ant physically enters a scored region.
-
-## Neutral Y-maze acceptance test
-
-Before any pheromone is added, the symmetric Y-maze is run across hundreds of deterministic seeds. CI requires:
-
-- at least 85% of trials reach a scored branch within the trial duration
-- left choice among scored trials remains between 44% and 56%
-- timeout rate remains below 15%
-
-This is deliberately broad enough to test unwanted apparatus bias without pretending the exact no-cue choice proportion is a biological calibration target.
+## Data policy
+`reference/calibration_manifest.json` registers the open-arena dataset for future fitting and the Y-maze as a locked holdout. `tools/calibration-policy.js` rejects fitting attempts against a locked dataset.

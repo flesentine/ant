@@ -1,74 +1,30 @@
-# ANTLAB v0.2 — Boring Ant Laboratory
+# ANTLAB v0.3 — Boring Ant Laboratory
 
-**Live laboratory:** https://flesentine.github.io/ant/
+**Live lab:** https://flesentine.github.io/ant/
 
-ANTLAB is a deliberately small experimental substrate for building a biologically constrained ant simulator one falsifiable capability at a time.
+ANTLAB is a falsifiable ant-simulation substrate built one experimentally testable capability at a time. v0.3 is the **Experimental Integrity** release.
 
-## What changed in v0.2
+## What changed
+Biology now lives in `models/`, physical setups in `apparatus/`, and experiment files contain protocol/observation only. The core rejects experiments that try to override locomotion biology.
 
-The experiment files are now real inputs to the engine instead of documentation.
+The Poissonnier 2026 open-arena assay is represented as a 297 × 210 mm A4 arena with center entry, 25-fps observation, and trial termination on first border contact. Separate 20 cm and 100 cm control protocols both use the same model.
 
-- `Simulation(experimentDefinition, seed)` — geometry, spawn, duration, observation cadence, contacts, and scoring come from the experiment definition
-- removed the provisional east/west nest-food steering cheat
-- removed provisional food/carrying state from the worker model
-- rectangle, corridor, circle, and polygon geometry primitives
-- terminal regions and labeled outcomes
-- persistent continuous-time speed variation instead of per-frame speed rerolls
-- contact begin/end lifecycle instead of repeatedly counting an overlap every tick
-- 25 fps observation sampling independent of the physics step
-- neutral Y-maze control experiment
-- open-arena control experiment
-- generic multi-seed benchmark runner
-- timestep-convergence and Y-maze-neutrality CI tests
+Every result records `model_hash`, `apparatus_hash`, `experiment_hash`, and `bundle_hash`. A calibration manifest registers the open-arena data for future fitting and locks the Y-maze against fitting/model selection.
 
-There is still **no pheromone** in v0.2. That is intentional.
-
-## Run the live lab
-
-https://flesentine.github.io/ant/
-
-Choose an assay from the Experiment menu. The most important new one is **Neutral Y-maze**. With no chemical cue, repeated trials should not systematically prefer left or right.
-
-## Run locally
-
+## Run
 ```bash
 python3 -m http.server 8080
 ```
+Open `http://localhost:8080`.
 
-Then open `http://localhost:8080`.
-
-On macOS you can also run `./start.command`.
-
-## Run the tests
-
+## Tests
 ```bash
 ./tests/run-tests.sh
 ```
 
-The v0.2 suite checks:
-
-- deterministic reproduction for identical seeds
-- real-time hazard math
-- experiment definitions actually control simulation behavior
-- locomotion statistics remain stable at 10, 20, and 50 ms timesteps
-- a symmetric Y-maze remains statistically neutral across hundreds of seeded trials
-
-## Run a headless experiment
-
+## Headless
 ```bash
-node tools/run-benchmark.js --experiment neutral_y_maze.json --trials 1000 --seed 928491
+node tools/run-benchmark.js --experiment open_arena_short_control.json --trials 100 --seed 928491
 ```
 
-This writes `benchmark-results.json` and reports left/right/timeout outcomes.
-
-## Current experiments
-
-- `experiments/neutral_y_maze.json` — symmetric no-pheromone control
-- `experiments/open_arena_control.json` — baseline locomotion/observation apparatus
-- `experiments/straight_bridge.json` — constrained locomotion/contact substrate
-
-## Next scientific milestone
-
-Calibrate ordinary locomotion against the **control** open-arena trajectories first. Then add an externally painted pheromone stimulus and calibrate only chemical sensing/steering. Freeze those parameters and use the Y-maze as a cross-apparatus prediction.
-
-Only after trail response is independently defensible will ants be allowed to deposit their own pheromone.
+Next: **v0.3.1 baseline locomotion calibration**, only after the published open-arena XLSX is materialized and its actual fields are inventoried.

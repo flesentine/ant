@@ -1,0 +1,2 @@
+'use strict';
+const fs=require('fs'),path=require('path');function readJson(p){return JSON.parse(fs.readFileSync(p,'utf8'));}function loadBundle(experimentPath){const root=path.resolve(__dirname,'..'),full=path.isAbsolute(experimentPath)?experimentPath:path.resolve(root,'experiments',experimentPath),experiment=readJson(full),model=readJson(path.resolve(root,'models',`${experiment.model}.json`)),apparatus=readJson(path.resolve(root,'apparatus',`${experiment.apparatus}.json`));return{experiment,model,apparatus};}module.exports={loadBundle,readJson};
