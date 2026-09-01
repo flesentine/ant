@@ -1,4 +1,4 @@
-name: Deploy ANTLAB to GitHub Pages
+name: Test and deploy ANTLAB
 
 on:
   push:
@@ -31,25 +31,47 @@ jobs:
     needs: test
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check whether GitHub Pages is enabled
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(curl -sS -o /tmp/pages.json -w "%{http_code}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages")
+          if [ "$status" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Pages setup notice
+        if: steps.pages.outputs.enabled != 'true'
+        run: |
+          echo "## GitHub Pages needs one-time enablement" >> "$GITHUB_STEP_SUMMARY"
+          echo "Open Settings → Pages → Build and deployment → Source → GitHub Actions, then run this workflow again." >> "$GITHUB_STEP_SUMMARY"
       - name: Checkout
+        if: steps.pages.outputs.enabled == 'true'
         uses: actions/checkout@v4
       - name: Configure Pages
+        if: steps.pages.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Assemble static site
+        if: steps.pages.outputs.enabled == 'true'
         run: |
           mkdir -p _site/src
           cp index.html _site/index.html
           cp src/app.js src/sim-core.js src/style.css _site/src/
           touch _site/.nojekyll
       - name: Upload Pages artifact
+        if: steps.pages.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
       - name: Deploy to GitHub Pages
+        if: steps.pages.outputs.enabled == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
