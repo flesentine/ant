@@ -1,6 +1,8 @@
 # ANTLAB v0.1 — Boring Ant Laboratory
 
-**Live laboratory:** https://flesentine.github.io/ant/
+**Temporary remote demo:** https://raw.githack.com/flesentine/ant/main/index.html
+
+**Official GitHub Pages URL (ready after one-time Pages enablement):** https://flesentine.github.io/ant/
 
 A deliberately small experimental substrate for building a biologically constrained ant simulator.
 
@@ -21,7 +23,7 @@ A deliberately small experimental substrate for building a biologically constrai
 - no A* or navmesh pathfinding
 - no pheromone yet
 
-## Run it
+## Run it locally
 
 From this directory:
 
@@ -71,4 +73,8 @@ These currently verify deterministic reproduction for identical seeds and the re
 
 ## Remote deployment
 
-Every push to `main` runs the reference tests and deploys the browser laboratory to GitHub Pages via `.github/workflows/pages.yml`. The deployed site contains the same `src/sim-core.js` used by the headless benchmark runner.
+Every push to `main` runs the reference tests. If GitHub Pages is enabled for the repository, the same workflow deploys the browser laboratory to the official GitHub Pages URL.
+
+For a brand-new repository, GitHub requires a one-time Pages setting that the default workflow token cannot create itself. In the repository UI open **Settings → Pages**, choose **GitHub Actions** under **Build and deployment → Source**, then manually run the `Test and deploy ANTLAB` workflow (or push another commit). After that, future pushes deploy automatically.
+
+Until then, the temporary RawGitHack development URL above serves the public repository files directly with browser-safe MIME types. It is intended for development/demo use, not permanent production hosting.
