@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ANTLAB v0.1</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">ANTLAB</div>
+        <h1>Boring Ant Laboratory <span>v0.1</span></h1>
+        <p>Deterministic locomotion substrate for <em>Lasius niger</em> experiments.</p>
+      </div>
+      <div class="status-pill" id="runStatus">PAUSED</div>
+    </header>
+
+    <section class="workspace">
+      <aside class="panel controls">
+        <h2>Experiment</h2>
+        <label>Seed <input id="seedInput" type="number" value="928491" min="1" step="1" /></label>
+        <label>Workers <input id="antCountInput" type="number" value="120" min="1" max="2000" step="1" /></label>
+        <label>Speed
+          <select id="speedSelect">
+            <option value="1">1×</option>
+            <option value="5">5×</option>
+            <option value="20">20×</option>
+            <option value="100">100×</option>
+          </select>
+        </label>
+        <div class="button-row">
+          <button id="playBtn" class="primary">Run</button>
+          <button id="stepBtn">Step 1 s</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+
+        <h2>Display</h2>
+        <label class="check"><input id="showTrails" type="checkbox" checked /> trajectory tails</label>
+        <label class="check"><input id="showIds" type="checkbox" /> worker IDs</label>
+        <label class="check"><input id="showContacts" type="checkbox" checked /> contact flashes</label>
+
+        <h2>Reference geometry</h2>
+        <dl class="compact">
+          <div><dt>Arena</dt><dd>300 × 80 mm</dd></div>
+          <div><dt>Nest zone</dt><dd>x ≤ 30 mm</dd></div>
+          <div><dt>Food zone</dt><dd>x ≥ 270 mm</dd></div>
+          <div><dt>Physics step</dt><dd>20 ms</dd></div>
+        </dl>
+      </aside>
+
+      <section class="lab">
+        <div class="canvas-wrap">
+          <canvas id="labCanvas" width="1200" height="420" aria-label="ANTLAB experiment arena"></canvas>
+          <div class="legend">
+            <span><i class="dot nest"></i>Nest zone</span>
+            <span><i class="dot food"></i>Sucrose zone</span>
+            <span><i class="dot ant"></i>Worker</span>
+          </div>
+        </div>
+
+        <section class="metrics-grid">
+          <article><span>Sim time</span><strong id="simTime">0.0 s</strong></article>
+          <article><span>Mean speed</span><strong id="meanSpeed">0.0 mm/s</strong></article>
+          <article><span>Moving</span><strong id="movingCount">0</strong></article>
+          <article><span>Contacts</span><strong id="contactCount">0</strong></article>
+          <article><span>Food visits</span><strong id="foodVisits">0</strong></article>
+          <article><span>Nest returns</span><strong id="nestReturns">0</strong></article>
+        </section>
+      </section>
+
+      <aside class="panel inspector">
+        <h2>Worker inspector</h2>
+        <p class="muted">Click an ant in the arena.</p>
+        <div id="inspectorEmpty" class="empty-state">No worker selected.</div>
+        <div id="inspectorData" hidden>
+          <div class="worker-title">Worker <strong id="workerId">—</strong></div>
+          <dl>
+            <div><dt>x</dt><dd id="workerX">—</dd></div>
+            <div><dt>y</dt><dd id="workerY">—</dd></div>
+            <div><dt>heading</dt><dd id="workerHeading">—</dd></div>
+            <div><dt>speed</dt><dd id="workerSpeed">—</dd></div>
+            <div><dt>state</dt><dd id="workerState">—</dd></div>
+            <div><dt>contacts</dt><dd id="workerContacts">—</dd></div>
+            <div><dt>food trips</dt><dd id="workerTrips">—</dd></div>
+          </dl>
+          <h3>Accessible information</h3>
+          <ul id="accessibleInfo" class="info-list"></ul>
+          <h3>Not accessible</h3>
+          <ul class="info-list muted-list">
+            <li>global food count</li>
+            <li>shortest path</li>
+            <li>global worker positions</li>
+            <li>colony strategy</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      <span>Build 0 / Phase 0–1 substrate</span>
+      <span>Real units • deterministic seed • no colony brain</span>
+    </footer>
+  </main>
+
+  <script src="./src/sim-core.js"></script>
+  <script src="./src/app.js"></script>
+</body>
+</html>

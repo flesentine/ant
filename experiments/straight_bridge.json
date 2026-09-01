@@ -1,0 +1,11 @@
+{
+  "id": "straight_bridge_v0",
+  "units": { "distance": "mm", "time": "s" },
+  "arena": { "width": 300, "height": 80 },
+  "nest_zone": { "x_max": 30 },
+  "food_zone": { "x_min": 270 },
+  "workers": 120,
+  "seed": 928491,
+  "duration_s": 600,
+  "notes": "Locomotion substrate only. No pheromone; food loop is provisional."
+}

@@ -1,0 +1,12 @@
+'use strict';
+const assert = require('assert');
+const { Simulation, FIXED_DT } = require('../src/sim-core.js');
+const a = new Simulation(928491, 50);
+const b = new Simulation(928491, 50);
+a.runFor(30, FIXED_DT);
+b.runFor(30, FIXED_DT);
+assert.strictEqual(a.fingerprint(), b.fingerprint(), 'same seed must produce same reference trajectory');
+const c = new Simulation(928492, 50);
+c.runFor(30, FIXED_DT);
+assert.notStrictEqual(a.fingerprint(), c.fingerprint(), 'different seeds should diverge');
+console.log('determinism.test.js PASS');
