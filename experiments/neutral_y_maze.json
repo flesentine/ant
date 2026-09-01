@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "neutral_y_maze_v1",
+  "title": "Neutral Y-maze (no pheromone)",
+  "units": {"distance":"mm","time":"s"},
+  "world": {"width":215,"height":240},
+  "workers": 1,
+  "duration_s": 90,
+  "observation": {"fps":25,"record_trajectories":true},
+  "geometry": {"primitives":[
+    {"type":"corridor","name":"approach","x1":20,"y1":120,"x2":135,"y2":120,"width":10},
+    {"type":"corridor","name":"fork_neck","x1":132,"y1":120,"x2":143,"y2":120,"width":2},
+    {"type":"corridor","name":"left_arm","x1":140,"y1":120,"x2":190.0,"y2":33.3975,"width":10},
+    {"type":"corridor","name":"right_arm","x1":140,"y1":120,"x2":190.0,"y2":206.6025,"width":10}
+  ]},
+  "spawn": {"type":"point","x":30,"y":120,"heading_rad":0,"position_jitter_mm":0.4,"heading_jitter_rad":0.05},
+  "movement": {"base_speed_mm_s":18,"speed_sd_mm_s":1.8,"angular_sigma_rad_sqrt_s":0.55,"speed_reversion_rate_s":2.0,"speed_noise_sigma_sqrt_s":0.06,"pause_rate_s":0.01,"pause_min_s":0.1,"pause_max_s":0.6},
+  "contacts": {"enabled":false,"radius_mm":1.6,"avoidance_turn_rad":0.18},
+  "terminal_regions": [
+    {"label":"left","shape":{"type":"circle","x":190,"y":33.3975,"radius":7}},
+    {"label":"right","shape":{"type":"circle","x":190,"y":206.6025,"radius":7}}
+  ],
+  "metadata": {
+    "purpose":"Geometry/control benchmark before pheromone exists",
+    "expected_control":"approximately 50/50 left/right across many seeds",
+    "reference_geometry":"100 mm arms, 10 mm outer width, approximately 2 mm fork, 120 degree branch angle"
+  }
+}

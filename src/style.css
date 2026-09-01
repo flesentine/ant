@@ -7,7 +7,7 @@
   --muted: #8e99a4;
   --accent: #d9f99d;
   --accent-2: #a3e635;
-  --warm: #fbbf24;
+  --terminal: #60a5fa;
   --danger: #fb7185;
 }
 * { box-sizing: border-box; }
@@ -20,14 +20,16 @@ h1 { margin:4px 0 4px; font:700 26px/1.15 system-ui,sans-serif; letter-spacing:-
 h1 span { color:var(--muted); font-weight:500; }
 .topbar p { margin:0; color:var(--muted); }
 .status-pill { border:1px solid var(--line); border-radius:999px; padding:8px 12px; color:var(--muted); }
-.workspace { display:grid; grid-template-columns:260px minmax(520px,1fr) 260px; gap:14px; padding:14px; flex:1; }
+.workspace { display:grid; grid-template-columns:270px minmax(520px,1fr) 260px; gap:14px; padding:14px; flex:1; }
 .panel,.canvas-wrap,.metrics-grid article { background:var(--panel); border:1px solid var(--line); border-radius:14px; }
 .panel { padding:16px; }
 .panel h2 { margin:0 0 14px; font:700 14px/1.2 system-ui,sans-serif; }
 .panel h2:not(:first-child) { margin-top:24px; }
 .panel h3 { margin:18px 0 8px; font:700 12px/1.2 system-ui,sans-serif; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
 .controls label { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:10px 0; color:var(--muted); }
-.controls input,.controls select { width:110px; background:#0d1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:7px 8px; }
+.controls label.stacked { display:block; }
+.controls label.stacked select { width:100%; margin-top:6px; }
+.controls input,.controls select { width:116px; background:#0d1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:7px 8px; }
 .controls .check { justify-content:flex-start; }
 .controls .check input { width:auto; }
 .button-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
@@ -38,9 +40,9 @@ button.primary { background:var(--accent); color:#111; border-color:var(--accent
 .lab { min-width:0; }
 .canvas-wrap { padding:12px; overflow:hidden; }
 canvas { display:block; width:100%; height:auto; background:#090b0d; border-radius:10px; cursor:crosshair; }
-.legend { display:flex; gap:18px; margin-top:10px; color:var(--muted); font-size:12px; }
+.legend { display:flex; flex-wrap:wrap; gap:18px; margin-top:10px; color:var(--muted); font-size:12px; }
 .dot { width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:-1px; }
-.dot.nest { background:#84cc16; }.dot.food { background:#fbbf24; }.dot.ant { background:#f5f5f4; }
+.dot.geometry { background:#64748b; }.dot.terminal { background:var(--terminal); }.dot.ant { background:#f5f5f4; }
 .metrics-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
 .metrics-grid article { padding:14px; }
 .metrics-grid span { display:block; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
@@ -49,9 +51,10 @@ dl { margin:0; }
 dl div { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.05); }
 dt { color:var(--muted); } dd { margin:0; text-align:right; }
 .compact { font-size:12px; }
+.experiment-note { margin:12px 0 0; color:#6f7b85; font-size:11px; }
 .worker-title { font:700 18px/1.2 system-ui,sans-serif; margin-bottom:10px; }
 .muted { color:var(--muted); }.empty-state { color:var(--muted); padding:20px 0; }
 .info-list { padding-left:18px; margin:6px 0; }.muted-list { color:#68737d; }
 footer { display:flex; justify-content:space-between; gap:20px; padding:12px 20px; color:var(--muted); border-top:1px solid var(--line); font-size:11px; }
-@media (max-width:1050px) { .workspace { grid-template-columns:220px 1fr; }.inspector { grid-column:1/-1; }.metrics-grid { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:1050px) { .workspace { grid-template-columns:230px 1fr; }.inspector { grid-column:1/-1; }.metrics-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width:760px) { .workspace { grid-template-columns:1fr; }.controls,.inspector { grid-column:auto; }.metrics-grid { grid-template-columns:1fr 1fr; }.topbar { padding:18px; } }

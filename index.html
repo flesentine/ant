@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ANTLAB v0.1</title>
+  <title>ANTLAB v0.2</title>
   <link rel="stylesheet" href="./src/style.css" />
 </head>
 <body>
@@ -11,17 +11,23 @@
     <header class="topbar">
       <div>
         <div class="eyebrow">ANTLAB</div>
-        <h1>Boring Ant Laboratory <span>v0.1</span></h1>
-        <p>Deterministic locomotion substrate for <em>Lasius niger</em> experiments.</p>
+        <h1>Boring Ant Laboratory <span>v0.2</span></h1>
+        <p>Experiment-driven locomotion substrate for <em>Lasius niger</em> assays.</p>
       </div>
-      <div class="status-pill" id="runStatus">PAUSED</div>
+      <div class="status-pill" id="runStatus">LOADING</div>
     </header>
 
     <section class="workspace">
       <aside class="panel controls">
         <h2>Experiment</h2>
+        <label class="stacked">Assay
+          <select id="experimentSelect">
+            <option value="neutral_y_maze.json">Neutral Y-maze</option>
+            <option value="open_arena_control.json">Open arena control</option>
+            <option value="straight_bridge.json">Straight bridge</option>
+          </select>
+        </label>
         <label>Seed <input id="seedInput" type="number" value="928491" min="1" step="1" /></label>
-        <label>Workers <input id="antCountInput" type="number" value="120" min="1" max="2000" step="1" /></label>
         <label>Speed
           <select id="speedSelect">
             <option value="1">1×</option>
@@ -41,21 +47,23 @@
         <label class="check"><input id="showIds" type="checkbox" /> worker IDs</label>
         <label class="check"><input id="showContacts" type="checkbox" checked /> contact flashes</label>
 
-        <h2>Reference geometry</h2>
+        <h2>Definition</h2>
         <dl class="compact">
-          <div><dt>Arena</dt><dd>300 × 80 mm</dd></div>
-          <div><dt>Nest zone</dt><dd>x ≤ 30 mm</dd></div>
-          <div><dt>Food zone</dt><dd>x ≥ 270 mm</dd></div>
-          <div><dt>Physics step</dt><dd>20 ms</dd></div>
+          <div><dt>Workers</dt><dd id="defWorkers">—</dd></div>
+          <div><dt>World</dt><dd id="defWorld">—</dd></div>
+          <div><dt>Duration</dt><dd id="defDuration">—</dd></div>
+          <div><dt>Observation</dt><dd id="defObservation">—</dd></div>
+          <div><dt>Physics step</dt><dd>20 ms ref.</dd></div>
         </dl>
+        <p class="experiment-note" id="experimentNote"></p>
       </aside>
 
       <section class="lab">
         <div class="canvas-wrap">
-          <canvas id="labCanvas" width="1200" height="420" aria-label="ANTLAB experiment arena"></canvas>
+          <canvas id="labCanvas" width="1200" height="620" aria-label="ANTLAB experiment arena"></canvas>
           <div class="legend">
-            <span><i class="dot nest"></i>Nest zone</span>
-            <span><i class="dot food"></i>Sucrose zone</span>
+            <span><i class="dot geometry"></i>Allowed arena</span>
+            <span><i class="dot terminal"></i>Scored endpoint</span>
             <span><i class="dot ant"></i>Worker</span>
           </div>
         </div>
@@ -65,8 +73,8 @@
           <article><span>Mean speed</span><strong id="meanSpeed">0.0 mm/s</strong></article>
           <article><span>Moving</span><strong id="movingCount">0</strong></article>
           <article><span>Contacts</span><strong id="contactCount">0</strong></article>
-          <article><span>Food visits</span><strong id="foodVisits">0</strong></article>
-          <article><span>Nest returns</span><strong id="nestReturns">0</strong></article>
+          <article><span>Completed</span><strong id="completedCount">0</strong></article>
+          <article><span>Outcome</span><strong id="outcomeValue">—</strong></article>
         </section>
       </section>
 
@@ -83,24 +91,25 @@
             <div><dt>speed</dt><dd id="workerSpeed">—</dd></div>
             <div><dt>state</dt><dd id="workerState">—</dd></div>
             <div><dt>contacts</dt><dd id="workerContacts">—</dd></div>
-            <div><dt>food trips</dt><dd id="workerTrips">—</dd></div>
+            <div><dt>wall contacts</dt><dd id="workerWalls">—</dd></div>
+            <div><dt>outcome</dt><dd id="workerOutcome">—</dd></div>
           </dl>
           <h3>Accessible information</h3>
           <ul id="accessibleInfo" class="info-list"></ul>
           <h3>Not accessible</h3>
           <ul class="info-list muted-list">
-            <li>global food count</li>
+            <li>global map or experiment endpoint labels</li>
             <li>shortest path</li>
             <li>global worker positions</li>
-            <li>colony strategy</li>
+            <li>which branch is “correct”</li>
           </ul>
         </div>
       </aside>
     </section>
 
     <footer>
-      <span>Build 0 / Phase 0–1 substrate</span>
-      <span>Real units • deterministic seed • no colony brain</span>
+      <span>Build 0.2 • honest experiment engine</span>
+      <span>Real units • JSON-driven geometry • deterministic seed • no navigation cheat • no pheromone</span>
     </footer>
   </main>
 

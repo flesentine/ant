@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "open_arena_control_v1",
+  "title": "Open arena control (no pheromone)",
+  "units": {"distance":"mm","time":"s"},
+  "world": {"width":297,"height":210},
+  "workers": 1,
+  "duration_s": 20,
+  "observation": {"fps":25,"record_trajectories":true},
+  "geometry": {"primitives":[{"type":"rect","name":"arena","x":0,"y":0,"width":297,"height":210}]},
+  "spawn": {"type":"point","x":12,"y":105,"heading_rad":0,"position_jitter_mm":1,"heading_jitter_rad":0.08},
+  "movement": {"base_speed_mm_s":24,"speed_sd_mm_s":2.0,"angular_sigma_rad_sqrt_s":0.7,"speed_reversion_rate_s":2.0,"speed_noise_sigma_sqrt_s":0.07,"pause_rate_s":0.008,"pause_min_s":0.1,"pause_max_s":0.5},
+  "contacts": {"enabled":false,"radius_mm":1.6,"avoidance_turn_rad":0.18},
+  "terminal_regions": [],
+  "metadata": {
+    "purpose":"Baseline locomotion/control apparatus. Parameters remain provisional until raw trajectory calibration.",
+    "observation_note":"25 fps virtual observation stream matches the planned experimental measurement cadence."
+  }
+}

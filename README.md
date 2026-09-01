@@ -1,74 +1,74 @@
-# ANTLAB v0.1 — Boring Ant Laboratory
+# ANTLAB v0.2 — Boring Ant Laboratory
 
 **Live laboratory:** https://flesentine.github.io/ant/
 
-A deliberately small experimental substrate for building a biologically constrained ant simulator.
+ANTLAB is a deliberately small experimental substrate for building a biologically constrained ant simulator one falsifiable capability at a time.
 
-## What this build contains
+## What changed in v0.2
 
-- continuous 2D ant positions in **millimetres**
-- simulation time in **seconds**
-- fixed 20 ms biological physics step, decoupled from rendering
-- deterministic world seed + independent RNG stream per worker
-- dt-safe stochastic pauses using real-time hazard rates
-- correlated random-walk locomotion
-- reflecting physical arena boundaries
-- local ant-ant contacts through a spatial hash
-- very crude food pickup / nest return loop
-- per-worker identity and inspection
-- basic experiment metrics
-- no global colony controller
-- no A* or navmesh pathfinding
-- no pheromone yet
+The experiment files are now real inputs to the engine instead of documentation.
 
-## Run it locally
+- `Simulation(experimentDefinition, seed)` — geometry, spawn, duration, observation cadence, contacts, and scoring come from the experiment definition
+- removed the provisional east/west nest-food steering cheat
+- removed provisional food/carrying state from the worker model
+- rectangle, corridor, circle, and polygon geometry primitives
+- terminal regions and labeled outcomes
+- persistent continuous-time speed variation instead of per-frame speed rerolls
+- contact begin/end lifecycle instead of repeatedly counting an overlap every tick
+- 25 fps observation sampling independent of the physics step
+- neutral Y-maze control experiment
+- open-arena control experiment
+- generic multi-seed benchmark runner
+- timestep-convergence and Y-maze-neutrality CI tests
 
-From this directory:
+There is still **no pheromone** in v0.2. That is intentional.
+
+## Run the live lab
+
+https://flesentine.github.io/ant/
+
+Choose an assay from the Experiment menu. The most important new one is **Neutral Y-maze**. With no chemical cue, repeated trials should not systematically prefer left or right.
+
+## Run locally
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Then open:
-
-```text
-http://localhost:8080
-```
+Then open `http://localhost:8080`.
 
 On macOS you can also run `./start.command`.
 
-## Why it is intentionally boring
-
-This is **Build 0 / early Build 1**. The goal is to make locomotion, time, identity, spatial contacts, instrumentation, and experimental reproducibility trustworthy before adding pheromone recruitment.
-
-## Next build
-
-1. add benchmark runner and CSV export
-2. add locomotion convergence tests (5/10/30 Hz statistical equivalence)
-3. add explicit sensory sectors
-4. add sucrose volume / crop volume conservation
-5. add pheromone only after the substrate passes those tests
-
-## Headless laboratory
-
-The browser and command-line benchmark use the **same `src/sim-core.js`** model.
-
-Run 20 trials of 5 simulated minutes:
-
-```bash
-node tools/run-benchmark.js --trials 20 --seconds 300 --workers 120 --seed 928491
-```
-
-This writes `benchmark-results.json` with per-trial and aggregate measurements.
-
-Run the current reference tests:
+## Run the tests
 
 ```bash
 ./tests/run-tests.sh
 ```
 
-These currently verify deterministic reproduction for identical seeds and the real-time hazard probability implementation.
+The v0.2 suite checks:
 
-## Remote deployment
+- deterministic reproduction for identical seeds
+- real-time hazard math
+- experiment definitions actually control simulation behavior
+- locomotion statistics remain stable at 10, 20, and 50 ms timesteps
+- a symmetric Y-maze remains statistically neutral across hundreds of seeded trials
 
-GitHub Pages is configured for this repository. Every push to `main` runs the reference tests and, when they pass, deploys the browser laboratory to https://flesentine.github.io/ant/ through `.github/workflows/pages.yml`.
+## Run a headless experiment
+
+```bash
+node tools/run-benchmark.js --experiment neutral_y_maze.json --trials 1000 --seed 928491
+```
+
+This writes `benchmark-results.json` and reports left/right/timeout outcomes.
+
+## Current experiments
+
+- `experiments/neutral_y_maze.json` — symmetric no-pheromone control
+- `experiments/open_arena_control.json` — baseline locomotion/observation apparatus
+- `experiments/straight_bridge.json` — constrained locomotion/contact substrate
+
+## Next scientific milestone
+
+Calibrate ordinary locomotion against the **control** open-arena trajectories first. Then add an externally painted pheromone stimulus and calibrate only chemical sensing/steering. Freeze those parameters and use the Y-maze as a cross-apparatus prediction.
+
+Only after trail response is independently defensible will ants be allowed to deposit their own pheromone.
