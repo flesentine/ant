@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "parameter_statuses": ["directly_measured","fitted","inferred","assumed","placeholder"],
+  "rules": {
+    "experiment_may_override_model": false,
+    "protocol_may_set_state_facts": true,
+    "protocol_may_directly_change_behavior_parameters": false,
+    "holdout_may_enter_fitting": false
+  },
+  "sources": {
+    "poissonnier2026": {
+      "doi": "10.1007/s00040-026-01106-9",
+      "species": "Lasius niger",
+      "open_arena": {
+        "apparatus_status": "article_defined",
+        "observation_status": "25fps_matched_AnimalTA_details_pending",
+        "scoring_status": "first_border_article_defined"
+      },
+      "y_maze": {
+        "apparatus_status": "article_defined",
+        "scoring_status": "exact_choice_criterion_pending_supplementary_inventory",
+        "validation_role": "locked_holdout"
+      }
+    }
+  }
+}

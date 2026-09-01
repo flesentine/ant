@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "id": "engineering_25fps",
+  "fps": 25,
+  "record_trajectories": true,
+  "tracking": {
+    "position_noise_mm_sd": 0,
+    "movement_classifier": "simulation_truth",
+    "status": "engineering_control"
+  },
+  "default_metrics": ["mean_moving_speed", "total_distance"]
+}

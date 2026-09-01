@@ -1,21 +1,46 @@
-# Architecture v0.3 — Experimental Integrity
+# Architecture v0.3
 
-ANTLAB separates four concepts that must not leak into one another.
+ANTLAB separates the simulation into six scientific layers so an assay cannot silently redefine the animal it is supposed to test.
 
-## Model
-`models/lasius_niger_locomotion_v1.json` contains biological/behavioral parameters. Experiments are forbidden from overriding movement, contacts, chemical sensing, memory, or physiology fields. `compileBundle()` rejects such definitions.
+## 1. Species model
 
-## Apparatus
-`apparatus/*.json` describes physical geometry, entry points, boundary behavior, and scored terminal regions. The 2026 open arena is 297 × 210 mm and uses a terminating border.
+`models/` contains persistent biological capabilities and parameters: locomotion, individual variability, contacts, and later sensing/memory/physiology. Experiments are rejected if they contain model parameter overrides.
 
-## Protocol
-`experiments/*.json` describes what researchers did: approach distance, treatment, entry point, and trial conditions. It references a model and apparatus by ID; it does not define the ant.
+## 2. Agent state
 
-## Observation
-Experiments declare camera cadence and intended measurements. The virtual camera remains independent of the physics timestep.
+`states/` contains factual conditions of an individual at assay entry: experience, travel direction, feeding state, crop state, food memory, recent travel history, etc. Protocol can establish state facts, but state cannot contain model parameters.
 
-## Provenance
-Each compiled run records deterministic content hashes for model, apparatus, experiment, and combined bundle. Cross-assay validation must use an identical model hash.
+## 3. Apparatus
 
-## Scientific status
-The locomotion model remains provisional and uncalibrated. The published XLSX supplement has been located and registered but is not stored in the repository yet.
+`apparatus/` contains geometry, entry points and physical boundary behavior. Choice/scoring regions do not belong here.
+
+## 4. Protocol
+
+Each experiment records what the researcher did: treatment, approach distance, transition, entry condition, and factual state changes. Protocol is not allowed to directly change walking/sensing parameters.
+
+## 5. Observation model
+
+`observations/` defines sampling cadence and measurement assumptions. Poissonnier 2026 is sampled at 25 fps; unresolved AnimalTA movement classification/tracking settings remain explicitly marked pending rather than guessed.
+
+## 6. Scoring
+
+`scoring/` defines how trajectories become outcomes: first border contact, first scoring-region entry, etc. The neutral Y-maze endpoint rule is engineering-only until the exact biological scoring rule is recovered.
+
+## Integrity orchestration
+
+`src/integrity.js` resolves the six layers, applies scoring to a clone of the apparatus for execution, resolves protocol state facts, and then runs the unchanged physics core. Results include independent hashes for every layer.
+
+## Randomness firewall
+
+Named deterministic streams isolate biology from experimental machinery:
+
+- `biology:<ant_id>`
+- `protocol`
+- `treatment`
+- `observation`
+
+Changing observation noise therefore cannot consume biological random numbers and alter the underlying trajectory.
+
+## Calibration firewall
+
+`reference/calibration_manifest.json` defines which datasets may enter fitting. Holdout data may be reported but must not enter parameter fitting or model selection.

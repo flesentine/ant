@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "id": "no_scoring_v1",
+  "type": "none",
+  "irreversible": true,
+  "provenance": {"status":"engineering_control"}
+}

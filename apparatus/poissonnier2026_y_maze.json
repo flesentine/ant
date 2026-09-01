@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "poissonnier2026_y_maze",
   "title": "Poissonnier et al. 2026 Y-maze",
   "world": {"width":215,"height":240},
@@ -11,6 +11,9 @@
   ]},
   "boundary": {"mode":"reflect","outcome":"wall"},
   "entry_points": {"default":{"x":30,"y":120,"heading_rad":0},"stem":{"x":30,"y":120,"heading_rad":0}},
-  "terminal_regions": [{"label":"left","shape":{"type":"circle","x":190,"y":33.3975,"radius":7}},{"label":"right","shape":{"type":"circle","x":190,"y":206.6025,"radius":7}}],
-  "metadata": {"reference_geometry":"100 mm arms, 10 mm width, tapering to 2 mm at bifurcation, 120 degree branch angle"}
+  "terminal_regions": [],
+  "metadata": {
+    "reference_geometry":"100 mm arms, 10 mm width, tapering to 2 mm at bifurcation, 120 degree branch angle",
+    "integrity_note":"Apparatus contains geometry only. Choice criteria live in scoring profiles."
+  }
 }

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "poissonnier2026_tracking_25fps",
+  "fps": 25,
+  "record_trajectories": true,
+  "tracking": {
+    "position_noise_mm_sd": 0,
+    "movement_classifier": "pending_AnimalTA_settings_inventory",
+    "status": "sampling_cadence_matched_tracking_pipeline_pending"
+  },
+  "default_metrics": [
+    "central_zone_fraction",
+    "mean_moving_speed",
+    "total_distance",
+    "time_to_arena_edge",
+    "path_straightness",
+    "exit_coordinate"
+  ],
+  "provenance": {
+    "source": "Poissonnier et al. 2026",
+    "doi": "10.1007/s00040-026-01106-9",
+    "note": "25 fps is matched. Tracking thresholds/smoothing remain explicitly unresolved until supplementary analysis settings are inventoried."
+  }
+}

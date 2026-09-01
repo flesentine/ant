@@ -1,13 +1,24 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "id": "open_arena_long_control_v1",
   "title": "Open arena — 100 cm approach, DCM control",
   "model": "lasius_niger_locomotion_v1",
+  "state": "naive_outbound_v1",
   "apparatus": "poissonnier2026_open_arena",
+  "observation": "poissonnier2026_tracking_25fps",
+  "scoring": "open_arena_first_border_v1",
   "workers": 1,
   "duration_s": 120,
-  "protocol": {"entry_point":"center","entry_state":{"heading_rad":0,"position_jitter_mm":0.5,"heading_jitter_rad":0.08},"approach_distance_mm":1000,"approach_width_mm":10,"apparatus_transition":"vertical_toothpick_through_central_hole","treatment":{"type":"solvent_control","solvent":"DCM"}},
-  "observation": {"fps":25,"record_trajectories":true,"metrics":["central_zone_fraction","mean_moving_speed","total_distance","time_to_arena_edge","path_straightness","exit_coordinate"]},
+  "protocol": {
+    "entry_point": "center",
+    "entry_state": {"heading_rad":0,"position_jitter_mm":0.5,"heading_jitter_rad":0.08},
+    "state_facts": {"recent_travel_mm":1000,"travel_direction":"outbound"},
+    "approach_distance_mm": 1000,
+    "approach_width_mm": 10,
+    "apparatus_transition": "vertical_toothpick_through_central_hole",
+    "treatment": {"type":"solvent_control","solvent":"DCM"}
+  },
+  "requested_metrics": ["central_zone_fraction","mean_moving_speed","total_distance","time_to_arena_edge","path_straightness","exit_coordinate"],
   "calibration_role": "calibration_candidate",
   "metadata": {"entry_state_status":"provisional_pending_reference_data_inventory"}
 }

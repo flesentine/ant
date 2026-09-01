@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "id": "open_arena_first_border_v1",
+  "type": "apparatus_boundary",
+  "outcome": "arena_exit",
+  "irreversible": true,
+  "provenance": {
+    "source": "Poissonnier et al. 2026",
+    "doi": "10.1007/s00040-026-01106-9",
+    "status": "article_defined",
+    "note": "Trial ends at first contact with the arena border."
+  }
+}

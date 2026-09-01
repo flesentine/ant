@@ -47,12 +47,15 @@ jobs:
       - name: Assemble static site
         if: steps.pages.outputs.enabled == 'true'
         run: |
-          mkdir -p _site/src _site/experiments _site/models _site/apparatus _site/reference
+          mkdir -p _site/src _site/experiments _site/models _site/apparatus _site/states _site/observations _site/scoring _site/reference
           cp index.html _site/index.html
-          cp src/app.js src/sim-core.js src/style.css _site/src/
+          cp src/app.js src/sim-core.js src/integrity.js src/style.css _site/src/
           cp experiments/*.json _site/experiments/
           cp models/*.json _site/models/
           cp apparatus/*.json _site/apparatus/
+          cp states/*.json _site/states/
+          cp observations/*.json _site/observations/
+          cp scoring/*.json _site/scoring/
           cp reference/*.json _site/reference/
           touch _site/.nojekyll
       - name: Upload Pages artifact

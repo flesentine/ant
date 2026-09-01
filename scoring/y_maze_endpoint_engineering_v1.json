@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "y_maze_endpoint_engineering_v1",
+  "type": "first_region_entry",
+  "irreversible": true,
+  "regions": [
+    {"label":"left","shape":{"type":"circle","x":190,"y":33.3975,"radius":7}},
+    {"label":"right","shape":{"type":"circle","x":190,"y":206.6025,"radius":7}}
+  ],
+  "provenance": {
+    "status": "engineering_only_not_biological_replication",
+    "note": "Endpoint scoring preserves the v0.2 neutrality benchmark. Exact 2026 biological Y-maze choice criterion remains a reference-data/supplementary-code inventory item."
+  }
+}

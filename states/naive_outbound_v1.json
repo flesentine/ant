@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "naive_outbound_v1",
+  "species": "Lasius niger",
+  "initial": {
+    "experience": "naive",
+    "travel_direction": "outbound",
+    "feeding_state": "unfed",
+    "crop_fraction": 0,
+    "food_memory": false,
+    "recent_travel_mm": 0
+  },
+  "provenance": {
+    "status": "protocol_state_profile",
+    "note": "State records what is true about the individual at assay entry. It may not redefine species-model parameters."
+  }
+}
