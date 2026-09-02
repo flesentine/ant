@@ -32,6 +32,16 @@ jobs:
           name: h2-mechanism-reachability
           path: /tmp/antlab-h2/h2-mechanism-results.json
           retention-days: 7
+      - name: Run frozen H3 mechanism reachability
+        run: |
+          mkdir -p /tmp/antlab-h3
+          node tools/run-h3-mechanism.js --trials 400 --seed 928491 --out /tmp/antlab-h3/h3-mechanism-results.json
+      - name: Upload H3 mechanism report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h3-mechanism-reachability
+          path: /tmp/antlab-h3/h3-mechanism-results.json
+          retention-days: 7
       - name: Probe final-version reference supplements
         id: reference_probe
         continue-on-error: true
@@ -112,7 +122,7 @@ jobs:
         run: |
           mkdir -p _site/src _site/experiments _site/models _site/apparatus _site/states _site/observations _site/scoring _site/reference _site/hypotheses
           cp index.html _site/index.html
-          cp src/app.js src/sim-core.js src/measurement.js src/integrity.js src/style.css _site/src/
+          cp src/app.js src/sim-core.js src/measurement.js src/h3.js src/integrity.js src/style.css _site/src/
           cp experiments/*.json _site/experiments/
           cp models/*.json _site/models/
           cp apparatus/*.json _site/apparatus/
