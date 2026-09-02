@@ -26,6 +26,13 @@ jobs:
         id: reference_probe
         continue-on-error: true
         run: ./tools/fetch-poissonnier2026-reference.sh /tmp/antlab-reference
+      - name: Verify pinned control-effect screening target
+        if: steps.reference_probe.outcome == 'success'
+        run: |
+          python3 tools/derive-poissonnier2026-control-effects.py \
+            /tmp/antlab-reference/40_2026_1106_MOESM2_ESM.xlsx \
+            /tmp/antlab-reference/control-effects-regenerated.json >/tmp/control-effects.log
+          cmp reference/poissonnier2026_control_effects.json /tmp/antlab-reference/control-effects-regenerated.json
       - name: Upload reference probe
         if: steps.reference_probe.outcome == 'success'
         uses: actions/upload-artifact@v4
