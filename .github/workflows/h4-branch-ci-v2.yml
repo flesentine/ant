@@ -1,0 +1,26 @@
+name: H4 branch verification v2
+on:
+  push:
+    branches: [h4-transient-locomotor-activation-v1]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB tests
+        run: ./tests/run-tests.sh
+      - name: Run H4 400-trial mechanism reachability
+        run: |
+          mkdir -p /tmp/h4
+          node tools/run-h4-mechanism.js --trials 400 --seed 928491 --out /tmp/h4/h4-mechanism-results.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h4-implementation-reachability-v2
+          path: /tmp/h4/h4-mechanism-results.json
+          retention-days: 7
