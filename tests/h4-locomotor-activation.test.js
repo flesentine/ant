@@ -34,6 +34,24 @@ assert.strictEqual(cfg.rho,0.25);
   near(whole,split,2e-14);
 }
 
+// Full H4 displacement contribution converges across physics dt in an isolated deterministic walk.
+{
+  function effectAt(dt){
+    const active=h4Bundle();
+    active.experiment.protocol.entry_state.position_jitter_mm=0;
+    active.experiment.protocol.entry_state.heading_jitter_rad=0;
+    Object.assign(active.model.movement,{speed_sd_mm_s:0,speed_reversion_rate_s:0,speed_noise_sigma_sqrt_s:0,angular_sigma_rad_sqrt_s:0,pause_rate_s:0});
+    const nullBundle=clone(active);
+    nullBundle.model.locomotor_activation.effect.max_speed_gain_fraction=0;
+    const a=new Simulation(active,445566),n=new Simulation(nullBundle,445566);
+    a.runFor(1,dt);n.runFor(1,dt);
+    return a.ants[0].distanceTravelled-n.ants[0].distanceTravelled;
+  }
+  const effects=[0.04,0.02,0.01].map(effectAt);
+  near(effects[0],effects[1],2e-9);
+  near(effects[1],effects[2],2e-9);
+}
+
 // Longer observable travel changes displacement only: biology RNG cadence, heading, and pause state stay matched.
 {
   const short=h4Bundle('open_arena_short_control.json');
@@ -47,6 +65,25 @@ assert.strictEqual(cfg.rho,0.25);
   assert.strictEqual(s.ants[0].state,l.ants[0].state,'H4 must not alter pause-state draws');
   near(s.ants[0].pauseRemaining,l.ants[0].pauseRemaining,1e-12);
   assert.ok(l.ants[0].distanceTravelled>s.ants[0].distanceTravelled,'longer history should increase early displacement');
+}
+
+// Observation/logging changes may consume observation RNG differently but must not perturb biology.
+{
+  const standard=h4Bundle();
+  const altered=clone(standard);
+  altered.observation.fps=13;
+  altered.observation.record_trajectories=false;
+  altered.observation.tracking.position_noise_mm_sd=3;
+  const a=new Simulation(standard,667788),b=new Simulation(altered,667788);
+  for(let i=0;i<50;i++){a.step(0.02);b.step(0.02);}
+  near(a.ants[0].x,b.ants[0].x,1e-12);
+  near(a.ants[0].y,b.ants[0].y,1e-12);
+  near(a.ants[0].heading,b.ants[0].heading,1e-12);
+  near(a.ants[0].speedFactor,b.ants[0].speedFactor,1e-12);
+  near(a.ants[0].locomotorActivation,b.ants[0].locomotorActivation,1e-12);
+  assert.strictEqual(a.ants[0].rng.state,b.ants[0].rng.state,'observation configuration must not perturb biology RNG');
+  assert.strictEqual(a.ants[0].state,b.ants[0].state);
+  near(a.ants[0].pauseRemaining,b.ants[0].pauseRemaining,1e-12);
 }
 
 // Zero history is exactly context-free for matched seeds despite the H4 model being present.
