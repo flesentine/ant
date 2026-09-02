@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "source": "poissonnier2026_final_record",
+  "files": {
+    "analysis_rmd": {"filename":"40_2026_1106_MOESM1_ESM.rmd","sha256":"098b3e9af67f17084ee89673a98ac4f5d17f581ad6fcc0dcaffbe293ef0270fa","lines":324},
+    "dataset_xlsx": {"filename":"40_2026_1106_MOESM2_ESM.xlsx","sha256":"b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318","sheets":["Exp 1","Exp 2","Details"]}
+  },
+  "experiment_1": {
+    "rows": 102,
+    "columns": ["ant_ID","Date","Colony","Video","Path_length","Pheromone","Xmin_Arena","Xmax_Arena","Ymin_Arena","Ymax_Arena","Y_Line","Scale_factor","Prop_time_moving","Average_Speed","Average_Speed_Moving","Traveled_Dist","Traveled_Dist_Moving","Mean_Y","Proportion_Frames_MiddleZone","Total_Frames","Xlast","Ylast","Xstart","Ystart","Beeline","Straightness"],
+    "missing_cells": 0,
+    "colonies": [0,7,16,20,21,27],
+    "colony_counts": {"0":17,"7":18,"16":15,"20":26,"21":14,"27":12},
+    "treatment_groups": {
+      "n_l": {"n":26,"mean_average_speed_moving_mm_s":27.156454003576926,"mean_traveled_dist_moving_mm":265.7464629961538,"mean_straightness":0.5405448024002575,"mean_total_frames":278.2307692307692,"mean_time_to_exit_s_at_25fps":11.12923076923077,"mean_middle_zone_fraction":0.23178885330710763,"mean_prop_time_moving":0.9919612285384615},
+      "n_s": {"n":25,"mean_average_speed_moving_mm_s":23.826448495999998,"mean_traveled_dist_moving_mm":439.005194708,"mean_straightness":0.3614743406122991,"mean_total_frames":497.56,"mean_time_to_exit_s_at_25fps":19.9024,"mean_middle_zone_fraction":0.2372214612257384,"mean_prop_time_moving":0.99438770756},
+      "y_l": {"n":25,"mean_average_speed_moving_mm_s":24.8732758204,"mean_traveled_dist_moving_mm":283.066650108,"mean_straightness":0.5568244755920898,"mean_total_frames":308.76,"mean_time_to_exit_s_at_25fps":12.3504,"mean_middle_zone_fraction":0.47134201960662536,"mean_prop_time_moving":0.9947898084800001},
+      "y_s": {"n":26,"mean_average_speed_moving_mm_s":23.127216897307694,"mean_traveled_dist_moving_mm":317.9145833038462,"mean_straightness":0.5205307603512238,"mean_total_frames":360.53846153846155,"mean_time_to_exit_s_at_25fps":14.421538461538463,"mean_middle_zone_fraction":0.5389219360790827,"mean_prop_time_moving":0.999059064423077}
+    },
+    "straightness_formula_verified": true,
+    "details_sheet_confirms": {
+      "prop_time_moving": "Proportion of time the ant was moving according to AnimalTA threshold",
+      "average_speed_moving": "Average speed of the ant while she was moving",
+      "traveled_dist_moving": "Total distance the ant walked from entering the platform until she reached a border while she was moving",
+      "total_frames": "Total number of frames between the start and end of the experiment",
+      "middle_zone": "Proportion of frames when the ant was in the zone one centimeter on each side of the Y-line",
+      "straightness": "Beeline/Travel_Dist_Moving"
+    },
+    "raw_frame_coordinates_in_xlsx": false,
+    "rmd_reads_raw_coordinates_from_external_folder": true,
+    "external_raw_pattern": "Detailed_data_exp1/<Video>/Arena_0Ind0.csv",
+    "animalta_threshold_value_available_in_supplements": false,
+    "entry_heading_distribution_available_in_supplements": false,
+    "cohort_reconciliation": {"article_attempted":143,"article_fell_off_path":34,"article_other_pre_arena_exclusions":2,"remaining_after_stated_exclusions":107,"published_xlsx_analyzed":102,"unexplained_difference":5,"article_methods_claim":"N=26 per condition","xlsx_group_counts":{"n_l":26,"n_s":25,"y_l":25,"y_s":26}}
+  },
+  "experiment_2": {
+    "rows": 398,
+    "columns": ["date","colony","ant","treatment","treatment_name","direction","memory","phero_side","decision","correct"],
+    "missing_cells": 0,
+    "colonies": [7,8,10,11,16,18,20,25],
+    "condition_counts": {"OE":{"n":100,"correct":88,"rate":0.88},"ON":{"n":100,"correct":88,"rate":0.88},"RE":{"n":99,"correct":88,"rate":0.8888888888888888},"RN":{"n":99,"correct":84,"rate":0.8484848484848485}},
+    "pheromone_side_counts": {"Left":{"n":200,"correct":170,"rate":0.85},"Right":{"n":198,"correct":178,"rate":0.898989898989899}},
+    "overall": {"n":398,"correct":348,"rate":0.8743718592964824},
+    "correct_equals_decision_matches_pheromone_side": true,
+    "decision_field_definition": "Whether the ant chose the left or right branch of the Y-maze during the test",
+    "spatial_decision_criterion_available_in_supplements": false
+  },
+  "reconstruction_gate": {
+    "per_ant_summary_metrics_reproducible_from_xlsx": true,
+    "raw_trajectory_measurement_reconstruction_possible_from_published_supplements": false,
+    "blocking_unknowns": ["AnimalTA movement threshold/settings","raw Detailed_data_exp1 coordinate CSVs","open-arena entry heading distribution","Y-maze spatial decision criterion"],
+    "biological_fitting_unlocked": false
+  }
+}

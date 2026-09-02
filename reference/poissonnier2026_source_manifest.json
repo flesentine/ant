@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "poissonnier2026_final_record",
   "citation": "Poissonnier LA, Winter D, Olivera-Rodriguez F-J, Werneke C, Czaczkes TJ (2026). Insectes Sociaux. doi:10.1007/s00040-026-01106-9",
   "doi": "10.1007/s00040-026-01106-9",
@@ -8,8 +8,9 @@
   "license": "CC BY 4.0",
   "article_url": "https://link.springer.com/article/10.1007/s00040-026-01106-9",
   "supplements": [
-    {"role":"analysis_code","filename":"40_2026_1106_MOESM1_ESM.rmd","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM1_ESM.rmd","sha256":null,"materialization_status":"remote_located_checksum_pending"},
-    {"role":"published_dataset","filename":"40_2026_1106_MOESM2_ESM.xlsx","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM2_ESM.xlsx","sha256":null,"materialization_status":"remote_located_checksum_pending"}
+    {"role":"analysis_code","filename":"40_2026_1106_MOESM1_ESM.rmd","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM1_ESM.rmd","sha256":"098b3e9af67f17084ee89673a98ac4f5d17f581ad6fcc0dcaffbe293ef0270fa","materialization_status":"verified_2026-09-01_via_github_actions"},
+    {"role":"published_dataset","filename":"40_2026_1106_MOESM2_ESM.xlsx","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM2_ESM.xlsx","sha256":"b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318","materialization_status":"verified_2026-09-01_via_github_actions"}
   ],
-  "priority_rule": "Definitions and values from the final version of record outrank the 2025 preprint."
+  "inventory": "poissonnier2026_inventory.json",
+  "priority_rule": "Definitions and values from the final version of record and its checksummed supplements outrank the 2025 preprint."
 }

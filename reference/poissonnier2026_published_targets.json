@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "source": "poissonnier2026_final_record",
   "open_arena": {
     "apparatus_mm": [297,210],
@@ -8,10 +8,17 @@
     "approach_width_mm": 10,
     "central_zone_half_width_mm": 10,
     "article_methods_n_per_condition": 26,
-    "figure_caption_n_per_condition": "25_or_26",
-    "cohort_accounting": {"attempted":143,"fell_off_path":34,"other_pre_arena_exclusions":2,"analysis_count_requires_dataset_reconciliation":true},
-    "control_descriptives": {"short_mean_speed_mm_s":23.5,"long_mean_speed_mm_s":26.0,"short_mean_time_to_edge_s":17.1,"long_mean_time_to_edge_s":11.7,"short_mean_distance_mm":501,"long_mean_distance_mm":266},
-    "published_effects": {"central_zone_pheromone_estimate":0.1964,"speed_path_estimate":-2.784,"straightness_path_estimate":-0.693,"time_to_edge_path_estimate":0.56131,"distance_path_estimate":0.4593}
+    "published_xlsx_n": 102,
+    "published_xlsx_group_counts": {"no_pheromone_short":25,"no_pheromone_long":26,"pheromone_short":26,"pheromone_long":25},
+    "supplement_derived_control_means": {
+      "short": {"average_speed_moving_mm_s":23.826448496,"traveled_dist_moving_mm":439.005194708,"time_to_exit_s":19.9024,"straightness":0.3614743406,"middle_zone_fraction":0.2372214612},
+      "long": {"average_speed_moving_mm_s":27.156454004,"traveled_dist_moving_mm":265.7464629962,"time_to_exit_s":11.1292307692,"straightness":0.5405448024,"middle_zone_fraction":0.2317888533}
+    },
+    "article_reported_model_effects": {"central_zone_pheromone_estimate":0.1964,"speed_path_estimate":-2.784,"straightness_path_estimate":-0.693,"time_to_edge_path_estimate":0.56131,"distance_path_estimate":0.4593}
   },
-  "y_maze": {"n":398,"pheromone_followed":348,"rate":0.874,"n_per_condition":"99_or_100","scoring_criterion_status":"not_explicit_in_main_article_pending_supplement_inventory"}
+  "y_maze": {
+    "n":398,"pheromone_followed":348,"rate":0.8743718593,
+    "condition_results":{"outwards_experienced":{"n":100,"correct":88},"outwards_naive":{"n":100,"correct":88},"return_experienced":{"n":99,"correct":88},"return_naive":{"n":99,"correct":84}},
+    "scoring_criterion_status":"decision side is present in XLSX, but spatial operational decision line/criterion is not specified in the final article or supplied Rmd/XLSX"
+  }
 }
