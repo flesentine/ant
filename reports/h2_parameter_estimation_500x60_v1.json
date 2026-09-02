@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "id": "H2_parameter_estimation_500x60_v1",
+  "status": "development_estimation_failed_promotion_guard",
+  "execution": {
+    "repo_commit": "83d3a14906df9fe32faee5b77ba30c65cd50fc2c",
+    "pages_artifact_sha256": "9688d054e27b415ac6ff584c40c87013c54567c22fe455e09ed1c9c390830997",
+    "source_xlsx_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+    "candidates_per_model": 500,
+    "trials_per_condition": 60,
+    "seed": 970000,
+    "physics_dt_s": 0.02,
+    "method": "deterministic Halton low-discrepancy search; six LOCO folds",
+    "parallelization": "folds parallelized only; per-fold candidate sequence, seeds, simulation physics, and scoring unchanged",
+    "equivalence_check": "20 candidates x 10 trials: all six parallel fold outputs byte-equivalent at JSON object level to official sequential estimator"
+  },
+  "fit_policy": {
+    "threshold_independent_metrics": [
+      "time_to_exit_s",
+      "middle_zone_fraction",
+      "beeline_mm",
+      "exit_edge"
+    ],
+    "ymaze_accessed": false,
+    "canonical_parameters_updated": false,
+    "promotion_rule": "H2 must win >=5/6 held-out colonies and median relative improvement >0"
+  },
+  "internal_cv": {
+    "H2_wins": 4,
+    "total_folds": 6,
+    "median_relative_improvement": 0.015548606059043324,
+    "promotion_guard_passed": false
+  },
+  "folds": [
+    {
+      "held_out_colony": 0,
+      "train_n": 42,
+      "test_n": 9,
+      "baseline": {
+        "train_loss": 0.13404304191791042,
+        "heldout_loss": 0.4415187419081292,
+        "sigma0": 0.9291015625,
+        "q": 0.0054869684499314125
+      },
+      "H2": {
+        "train_loss": 0.10669626727935276,
+        "heldout_loss": 0.4380865170820455,
+        "sigma0": 0.9888671874999999,
+        "q": 0.07133058984910837,
+        "lambda_mm": 1276.639846569256,
+        "tau_s": 28.74716787893808,
+        "rho": 0.6098797896318557,
+        "A200": 0.0884364514098231,
+        "A1000": 0.3312300446814761
+      },
+      "heldout_relative_improvement": 0.007773678669336894
+    },
+    {
+      "held_out_colony": 7,
+      "train_n": 41,
+      "test_n": 10,
+      "baseline": {
+        "train_loss": 0.11135693800249011,
+        "heldout_loss": 0.3752550302090931,
+        "sigma0": 1.0154296875,
+        "q": 0.8175582990397804
+      },
+      "H2": {
+        "train_loss": 0.09540039703081486,
+        "heldout_loss": 0.36650275696019974,
+        "sigma0": 1.1847656249999998,
+        "q": 0.7325102880658436,
+        "lambda_mm": 342.0794976081503,
+        "tau_s": 37.52478000333209,
+        "rho": 0.3110067618332081,
+        "A200": 0.13768405121798113,
+        "A1000": 0.29428823386003694
+      },
+      "heldout_relative_improvement": 0.023323533448749753
+    },
+    {
+      "held_out_colony": 16,
+      "train_n": 44,
+      "test_n": 7,
+      "baseline": {
+        "train_loss": 0.13845095798698384,
+        "heldout_loss": 3.984926536408161,
+        "sigma0": 1.304296875,
+        "q": 0.6995884773662551
+      },
+      "H2": {
+        "train_loss": 0.1286608484942415,
+        "heldout_loss": 3.866302609474652,
+        "sigma0": 1.3640625,
+        "q": 0.7160493827160495,
+        "lambda_mm": 1038.1483624397515,
+        "tau_s": 5.114142848278496,
+        "rho": 0.48140495867768596,
+        "A200": 0.0843565798703673,
+        "A1000": 0.29767714886672514
+      },
+      "heldout_relative_improvement": 0.029768159048781714
+    },
+    {
+      "held_out_colony": 20,
+      "train_n": 38,
+      "test_n": 13,
+      "baseline": {
+        "train_loss": 0.10870094567224911,
+        "heldout_loss": 0.3693127065780601,
+        "sigma0": 1.0453124999999999,
+        "q": 0.9382716049382716
+      },
+      "H2": {
+        "train_loss": 0.10819559733283642,
+        "heldout_loss": 0.3546896982033606,
+        "sigma0": 1.105078125,
+        "q": 0.97119341563786,
+        "lambda_mm": 1072.6049263416805,
+        "tau_s": 34.75585293790394,
+        "rho": 0.17712246431254697,
+        "A200": 0.030130277000407005,
+        "A1000": 0.10739936588025754
+      },
+      "heldout_relative_improvement": 0.03959519430076442
+    },
+    {
+      "held_out_colony": 21,
+      "train_n": 45,
+      "test_n": 6,
+      "baseline": {
+        "train_loss": 0.11198878912862435,
+        "heldout_loss": 0.4863953824243234,
+        "sigma0": 1.2212890625,
+        "q": 0.42524005486968447
+      },
+      "H2": {
+        "train_loss": 0.10445688694846787,
+        "heldout_loss": 0.5026349791306746,
+        "sigma0": 1.2876953125,
+        "q": 0.16186556927297668,
+        "lambda_mm": 463.956336113244,
+        "tau_s": 2.9150411711447317,
+        "rho": 0.6463936889556724,
+        "A200": 0.22636051427867285,
+        "A1000": 0.5715027054925891
+      },
+      "heldout_relative_improvement": -0.03338764571614294
+    },
+    {
+      "held_out_colony": 27,
+      "train_n": 45,
+      "test_n": 6,
+      "baseline": {
+        "train_loss": 0.12588352551650667,
+        "heldout_loss": 2.2449004232983674,
+        "sigma0": 1.1847656249999998,
+        "q": 0.7325102880658436
+      },
+      "H2": {
+        "train_loss": 0.11629824002368162,
+        "heldout_loss": 2.9921306290776157,
+        "sigma0": 1.4503906249999998,
+        "q": 0.5843621399176955,
+        "lambda_mm": 589.4764324295038,
+        "tau_s": 3.067878544930059,
+        "rho": 0.8762960180315553,
+        "A200": 0.2521278566283828,
+        "A1000": 0.7156371489475117
+      },
+      "heldout_relative_improvement": -0.3328567263047528
+    }
+  ],
+  "conclusion": "H2-v1 fails the frozen promotion guard (4/6 held-out wins; median improvement ~1.55%). Do not promote or average fold-specific lambda/tau/rho values. H2 remains a development hypothesis; H1 and alternative mechanisms remain open."
+}
