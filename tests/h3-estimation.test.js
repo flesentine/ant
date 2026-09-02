@@ -1,0 +1,27 @@
+'use strict';
+const assert=require('assert'),path=require('path');
+const {readJson}=require('../tools/load-bundle.js');
+const h3=require('../tools/run-h3-estimation.js');
+const h2=require('../tools/run-h2-estimation.js');
+const root=path.resolve(__dirname,'..');
+const policy=readJson(path.resolve(root,'hypotheses','h3_parameter_estimation_v1.json'));
+const target=readJson(path.resolve(root,'reference','poissonnier2026_h2_estimation_targets.json'));
+const cal=readJson(path.resolve(root,'reference','calibration_manifest.json'));
+const source=readJson(path.resolve(root,'reference','poissonnier2026_source_manifest.json'));
+const h2Report=readJson(path.resolve(root,'reports','h2_parameter_estimation_500x60_v1.json'));
+h3.validate(policy,target,cal,source,h2Report);
+assert.strictEqual(cal.datasets.poissonnier2026_open_arena.allowed_for_fitting,false);
+assert.strictEqual(cal.datasets.poissonnier2026_open_arena.allowed_for_development_parameter_estimation,true);
+assert.strictEqual(cal.datasets.poissonnier2026_ymaze.allowed_for_development_parameter_estimation,false);
+assert.strictEqual(target.rows.length,51);
+assert.deepStrictEqual([...new Set(target.rows.map(r=>r.colony))].sort((a,b)=>a-b),[0,7,16,20,21,27]);
+const c1=h3.candidate(11,policy,false),c2=h3.candidate(11,policy,false),n=h3.candidate(11,policy,true);assert.deepStrictEqual(c1,c2,'H3 candidate sequence must be deterministic');
+assert(c1.ell0>=5&&c1.ell0<=150);assert(c1.kappa>=0&&c1.kappa<=20);assert(c1.q>=0&&c1.q<=1);assert(c1.lambda_mm>=100&&c1.lambda_mm<=3000);assert(c1.tau_s>=.5&&c1.tau_s<=40);assert(c1.rho>=.05&&c1.rho<=.95);
+assert.strictEqual(n.rho,0,'H3-null must disable only the history gate');
+const e200=h3.effective(c1,200),e1000=h3.effective(c1,1000);assert(e1000.hazard_multiplier<e200.hazard_multiplier,'longer history must produce stronger initial hazard suppression');assert(e1000.effective_mean_free_path_mm>e200.effective_mean_free_path_mm);
+const en=h3.effective(n,1000);assert(Math.abs(en.hazard_multiplier-1)<1e-12);assert(Math.abs(en.effective_mean_free_path_mm-n.ell0)<1e-12);
+const syntheticSim=target.rows.slice(0,20).map(r=>({...r,time_to_exit_s:r.time_to_exit_s*1.03,middle_zone_fraction:Math.min(1,r.middle_zone_fraction+.01)})),real=target.rows.slice(0,20);assert(Math.abs(h3.score(syntheticSim,real).loss-h2.score(syntheticSim,real).loss)<1e-15,'H3 and H2 must use the exact same frozen objective');
+for(const fold of h2Report.folds){const hc=h3.h2CandidateFromReportFold(fold);assert.strictEqual(hc.q,fold.H2.q);assert.strictEqual(hc.lambda_mm,fold.H2.lambda_mm);}
+const tampered=JSON.parse(JSON.stringify(cal));tampered.datasets.poissonnier2026_ymaze.allowed_for_development_parameter_estimation=true;assert.throws(()=>h3.validate(policy,target,tampered,source,h2Report),/Y-maze/);
+const badH2=JSON.parse(JSON.stringify(h2Report));badH2.execution.source_xlsx_sha256='bad';assert.throws(()=>h3.validate(policy,target,cal,source,badH2),/different source XLSX/);
+console.log('h3-estimation.test.js PASS '+JSON.stringify({rows:target.rows.length,colonies:6,candidate:c1,effective:{M200:e200.hazard_multiplier,M1000:e1000.hazard_multiplier}}));
