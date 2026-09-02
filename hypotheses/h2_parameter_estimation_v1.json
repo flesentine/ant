@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "id": "H2_parameter_estimation_v1",
+  "status": "development_estimation_policy_frozen_before_parameter_search",
+  "honesty_note": "The open-arena outcomes were known before H2 was proposed. This procedure estimates development parameters and performs internal leave-one-colony-out checks; it is not independent validation of H2.",
+  "model_candidate": "lasius_niger_locomotion_h2_v1",
+  "reference_dataset": "poissonnier2026_open_arena",
+  "scope": "DCM-control 20 cm versus 100 cm approach only",
+  "estimated_parameters": {
+    "baseline_angular_sigma_rad_sqrt_s": {"role":"baseline_locomotion_nuisance","bounds":[0.7,2.4],"scale":"linear"},
+    "entry_orientation_retention_q": {"role":"shared_apparatus_transition_nuisance","bounds":[0.0,1.0],"scale":"linear","rule":"Same q in 20 cm and 100 cm conditions; it may not depend on treatment."},
+    "lambda_mm": {"role":"H2","bounds":[100,3000],"scale":"log"},
+    "tau_s": {"role":"H2","bounds":[0.5,40],"scale":"log"},
+    "rho": {"role":"H2","bounds":[0.05,0.95],"scale":"linear"}
+  },
+  "fixed_parameters": ["base_speed_mm_s","speed_sd_mm_s","speed_reversion_rate_s","speed_noise_sigma_sqrt_s","pause_rate_s","pause_min_s","pause_max_s","entry_position_distribution","observation_fps"],
+  "entry_transition_model": {
+    "type": "shared_orientation_retention_mixture",
+    "definition": "With probability q preserve the protocol-sampled post-transition heading; otherwise draw heading uniformly on [-pi, pi).",
+    "reason": "The vertical toothpick transition makes exact heading preservation unsupported. q is shared across treatments so it cannot itself create the short-versus-long effect.",
+    "H1_boundary": "Treatment-specific entry-heading distributions remain forbidden and unresolved; allowing them would turn this into the H1 explanation."
+  },
+  "fit_observables": [
+    {"name":"time_to_exit_s","source_column":"Total_Frames / 25","threshold_independent":true},
+    {"name":"middle_zone_fraction","source_column":"Proportion_Frames_MiddleZone","threshold_independent":true},
+    {"name":"beeline_mm","source_column":"Beeline","threshold_independent":true},
+    {"name":"exit_edge","source_columns":["Xlast","Ylast","Xmin_Arena","Xmax_Arena","Ymin_Arena","Ymax_Arena"],"threshold_independent":true}
+  ],
+  "forbidden_fit_observables": ["Average_Speed_Moving","Traveled_Dist_Moving","Straightness","Prop_time_moving","Y-maze decision/correct"],
+  "objective": {
+    "continuous_distance": "quantile Wasserstein-1 divided by pooled training SD",
+    "categorical_distance": "Hellinger distance for exit-edge distribution",
+    "aggregation": "equal-weight mean squared component distance across both path treatments",
+    "common_random_numbers": true
+  },
+  "cross_validation": {
+    "type": "leave_one_colony_out",
+    "colonies": 6,
+    "nested_models": {
+      "baseline": "Estimate sigma0 and q with H2 effect disabled (rho=0).",
+      "H2": "Estimate sigma0, q, lambda, tau and rho."
+    },
+    "comparison": "Fit each model on five colonies and score on the sixth with a separate evaluation seed stream.",
+    "promotion_guard": "H2 must improve held-out loss over the nested baseline in at least 5 of 6 folds and show positive median held-out improvement before any canonical parameter promotion is considered."
+  },
+  "identifiability": {
+    "report_effective_amplitudes": ["A200 = rho*(1-exp(-200/lambda))","A1000 = rho*(1-exp(-1000/lambda))"],
+    "rule": "If lambda and rho form a broad ridge while A200/A1000 are stable, report the amplitudes/ridge rather than a false point estimate.",
+    "boundary_warning": "Parameters repeatedly selected at search bounds are not considered identified."
+  },
+  "post_fit_diagnostics_only": ["moving speed","moving distance","straightness"],
+  "holdout_rule": "The Y-maze remains completely inaccessible to fitting, candidate ranking, stopping rules, and model selection.",
+  "canonical_model_rule": "Estimation tools write reports only. They may not modify models/lasius_niger_locomotion_h2_v1.json or promote an estimated model automatically."
+}
