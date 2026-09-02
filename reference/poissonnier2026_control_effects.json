@@ -27,12 +27,30 @@
       ],
       "cohens_d_descriptive": -0.5097588409244392,
       "leave_one_colony_out": [
-        {"held_out_colony": 0, "short_minus_long": -3.483618969727271},
-        {"held_out_colony": 7, "short_minus_long": -3.0995508847057422},
-        {"held_out_colony": 16, "short_minus_long": -4.331111413772728},
-        {"held_out_colony": 20, "short_minus_long": -0.6163101643684215},
-        {"held_out_colony": 21, "short_minus_long": -3.3905598786482223},
-        {"held_out_colony": 27, "short_minus_long": -4.473810334049411}
+        {
+          "held_out_colony": 0,
+          "short_minus_long": -3.483618969727271
+        },
+        {
+          "held_out_colony": 7,
+          "short_minus_long": -3.0995508847057422
+        },
+        {
+          "held_out_colony": 16,
+          "short_minus_long": -4.331111413772728
+        },
+        {
+          "held_out_colony": 20,
+          "short_minus_long": -0.6163101643684215
+        },
+        {
+          "held_out_colony": 21,
+          "short_minus_long": -3.3905598786482223
+        },
+        {
+          "held_out_colony": 27,
+          "short_minus_long": -4.473810334049411
+        }
       ],
       "loo_sign_stable": true
     },
@@ -50,12 +68,30 @@
       ],
       "cohens_d_descriptive": 1.1328266409651795,
       "leave_one_colony_out": [
-        {"held_out_colony": 0, "short_minus_long": 153.04859354818183},
-        {"held_out_colony": 7, "short_minus_long": 178.46197707129187},
-        {"held_out_colony": 16, "short_minus_long": 179.7165131863636},
-        {"held_out_colony": 20, "short_minus_long": 169.5994594578948},
-        {"held_out_colony": 21, "short_minus_long": 170.45453004802368},
-        {"held_out_colony": 27, "short_minus_long": 186.21970004229252}
+        {
+          "held_out_colony": 0,
+          "short_minus_long": 153.04859354818183
+        },
+        {
+          "held_out_colony": 7,
+          "short_minus_long": 178.46197707129187
+        },
+        {
+          "held_out_colony": 16,
+          "short_minus_long": 179.7165131863636
+        },
+        {
+          "held_out_colony": 20,
+          "short_minus_long": 169.5994594578948
+        },
+        {
+          "held_out_colony": 21,
+          "short_minus_long": 170.45453004802368
+        },
+        {
+          "held_out_colony": 27,
+          "short_minus_long": 186.21970004229252
+        }
       ],
       "loo_sign_stable": true
     },
@@ -73,12 +109,30 @@
       ],
       "cohens_d_descriptive": 0.9341766015913741,
       "leave_one_colony_out": [
-        {"held_out_colony": 0, "short_minus_long": 7.41509090909091},
-        {"held_out_colony": 7, "short_minus_long": 8.85177033492823},
-        {"held_out_colony": 16, "short_minus_long": 9.558181818181819},
-        {"held_out_colony": 20, "short_minus_long": 7.755789473684208},
-        {"held_out_colony": 21, "short_minus_long": 8.786403162055334},
-        {"held_out_colony": 27, "short_minus_long": 9.908379446640316}
+        {
+          "held_out_colony": 0,
+          "short_minus_long": 7.41509090909091
+        },
+        {
+          "held_out_colony": 7,
+          "short_minus_long": 8.85177033492823
+        },
+        {
+          "held_out_colony": 16,
+          "short_minus_long": 9.558181818181819
+        },
+        {
+          "held_out_colony": 20,
+          "short_minus_long": 7.755789473684208
+        },
+        {
+          "held_out_colony": 21,
+          "short_minus_long": 8.786403162055334
+        },
+        {
+          "held_out_colony": 27,
+          "short_minus_long": 9.908379446640316
+        }
       ],
       "loo_sign_stable": true
     },
@@ -96,12 +150,30 @@
       ],
       "cohens_d_descriptive": -1.2288090849875777,
       "leave_one_colony_out": [
-        {"held_out_colony": 0, "short_minus_long": -0.17739404796944702},
-        {"held_out_colony": 7, "short_minus_long": -0.17012081466054535},
-        {"held_out_colony": 16, "short_minus_long": -0.18594522969627414},
-        {"held_out_colony": 20, "short_minus_long": -0.17366547457806225},
-        {"held_out_colony": 21, "short_minus_long": -0.1772933421540101},
-        {"held_out_colony": 27, "short_minus_long": -0.18681366913738906}
+        {
+          "held_out_colony": 0,
+          "short_minus_long": -0.17739404796944702
+        },
+        {
+          "held_out_colony": 7,
+          "short_minus_long": -0.17012081466054535
+        },
+        {
+          "held_out_colony": 16,
+          "short_minus_long": -0.18594522969627414
+        },
+        {
+          "held_out_colony": 20,
+          "short_minus_long": -0.17366547457806225
+        },
+        {
+          "held_out_colony": 21,
+          "short_minus_long": -0.1772933421540101
+        },
+        {
+          "held_out_colony": 27,
+          "short_minus_long": -0.18681366913738906
+        }
       ],
       "loo_sign_stable": true
     },
@@ -119,12 +191,30 @@
       ],
       "cohens_d_descriptive": 0.031304374924161125,
       "leave_one_colony_out": [
-        {"held_out_colony": 0, "short_minus_long": -0.016324374192860314},
-        {"held_out_colony": 7, "short_minus_long": 0.014876776744331383},
-        {"held_out_colony": 16, "short_minus_long": 0.07429314051976885},
-        {"held_out_colony": 20, "short_minus_long": -0.039231042306537234},
-        {"held_out_colony": 21, "short_minus_long": -0.01188354794128127},
-        {"held_out_colony": 27, "short_minus_long": 0.007625134222148}
+        {
+          "held_out_colony": 0,
+          "short_minus_long": -0.016324374192860314
+        },
+        {
+          "held_out_colony": 7,
+          "short_minus_long": 0.014876776744331383
+        },
+        {
+          "held_out_colony": 16,
+          "short_minus_long": 0.07429314051976885
+        },
+        {
+          "held_out_colony": 20,
+          "short_minus_long": -0.039231042306537234
+        },
+        {
+          "held_out_colony": 21,
+          "short_minus_long": -0.01188354794128127
+        },
+        {
+          "held_out_colony": 27,
+          "short_minus_long": 0.007625134222148
+        }
       ],
       "loo_sign_stable": false
     }
