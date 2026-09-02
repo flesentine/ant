@@ -1,14 +1,14 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "datasets": {
     "poissonnier2026_open_arena": {
-      "role": "calibration_and_within_assay_validation",
-      "allowed_for_fitting": true,
+      "role": "measurement_reconstruction_then_calibration_and_within_assay_validation",
+      "allowed_for_fitting": false,
+      "fitting_unlock_condition": "ANTLAB measurement pipeline reproduces the final-version reference metrics/cohort from the published supplement and the reconstruction manifest is frozen.",
       "article_doi": "10.1007/s00040-026-01106-9",
-      "supplement": {"name":"Supplementary Material 2","format":"xlsx","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM2_ESM.xlsx","materialized_in_repo":false},
-      "inventory_status": "published_binary_located_not_yet_materialized",
-      "expected_fields": "unknown_until_binary_is_ingested",
-      "published_protocol": {"camera_fps":25,"arena_mm":[297,210],"approach_mm":[200,1000],"n_per_condition":26}
+      "source_manifest": "poissonnier2026_source_manifest.json",
+      "inventory_status": "remote_supplements_located_automated_inventory_probe_enabled",
+      "published_protocol": {"camera_fps":25,"arena_mm":[297,210],"approach_mm":[200,1000],"methods_n_per_condition":26}
     },
     "poissonnier2026_ymaze": {
       "role": "locked_holdout_validation",

@@ -1,46 +1,38 @@
-# Architecture v0.3
+# Architecture v0.3.1
 
-ANTLAB separates the simulation into six scientific layers so an assay cannot silently redefine the animal it is supposed to test.
+ANTLAB separates biological capability, experimental context and measurement so an assay cannot silently redefine either the animal or the evidence.
 
-## 1. Species model
+## Scientific layers
 
-`models/` contains persistent biological capabilities and parameters: locomotion, individual variability, contacts, and later sensing/memory/physiology. Experiments are rejected if they contain model parameter overrides.
+1. **Species model** (`models/`) — persistent biological parameters/capabilities.
+2. **Agent state profile** (`states/`) — observable labels/history at assay entry. Protocol cannot assert latent memory, motivation, path integration or other hidden biological state.
+3. **Apparatus** (`apparatus/`) — physical geometry and entry locations only. Scoring owns trial termination semantics.
+4. **Protocol** (`experiments/`) — researcher actions/treatments, approach history and entry assumptions, with provenance.
+5. **Observation model** (`observations/`) — camera cadence, tracking assumptions and metric definitions.
+6. **Scoring** (`scoring/`) — how observed behavior becomes an experimental outcome.
 
-## 2. Agent state
+## Measurement reconstruction
 
-`states/` contains factual conditions of an individual at assay entry: experience, travel direction, feeding state, crop state, food memory, recent travel history, etc. Protocol can establish state facts, but state cannot contain model parameters.
+`src/measurement.js` introduces the scientific measurement path:
 
-## 3. Apparatus
+`truth state -> exact-time observation sampler -> observed trajectory -> streaming MeasurementPipeline -> experimental metrics`
 
-`apparatus/` contains geometry, entry points and physical boundary behavior. Choice/scoring regions do not belong here.
+The core can step at 10/20/50 ms while a 25-fps observation model always samples at 0.04-s camera timestamps by interpolation. Measurement can stream online without retaining all frames; browser assays may retain frames for inspection.
 
-## 4. Protocol
+Results expose `truth_metrics` and `observed_metrics` separately. They must never be silently substituted for one another.
 
-Each experiment records what the researcher did: treatment, approach distance, transition, entry condition, and factual state changes. Protocol is not allowed to directly change walking/sensing parameters.
+## Event timing
 
-## 5. Observation model
+For apparatus-boundary trials, the integrity layer corrects the core's end-of-step terminal timestamp using distance travelled and within-step speed. Truth exit time is sub-step; observed exit time is quantized by the observation cadence.
 
-`observations/` defines sampling cadence and measurement assumptions. Poissonnier 2026 is sampled at 25 fps; unresolved AnimalTA movement classification/tracking settings remain explicitly marked pending rather than guessed.
+## Provenance
 
-## 6. Scoring
+Results include `model_hash`, `state_profile_hash`, `resolved_state_hash`, `apparatus_hash`, `protocol_hash`, `observation_hash`, `scoring_hash`, `experiment_hash`, and `integrity_bundle_hash`.
 
-`scoring/` defines how trajectories become outcomes: first border contact, first scoring-region entry, etc. The neutral Y-maze endpoint rule is engineering-only until the exact biological scoring rule is recovered.
+Named deterministic RNG streams isolate biology, protocol, treatment and observation.
 
-## Integrity orchestration
+## Reference evidence
 
-`src/integrity.js` resolves the six layers, applies scoring to a clone of the apparatus for execution, resolves protocol state facts, and then runs the unchanged physics core. Results include independent hashes for every layer.
+`reference/poissonnier2026_source_manifest.json` pins the final version of record and supplement URLs. Binary supplements are materialized locally with `tools/fetch-poissonnier2026-reference.sh`; the repository does not silently vendor mutable external binaries.
 
-## Randomness firewall
-
-Named deterministic streams isolate biology from experimental machinery:
-
-- `biology:<ant_id>`
-- `protocol`
-- `treatment`
-- `observation`
-
-Changing observation noise therefore cannot consume biological random numbers and alter the underlying trajectory.
-
-## Calibration firewall
-
-`reference/calibration_manifest.json` defines which datasets may enter fitting. Holdout data may be reported but must not enter parameter fitting or model selection.
+The open-arena dataset is locked against fitting until the measurement-reconstruction gate reproduces the published cohort/metrics. The Y-maze remains a locked cross-apparatus holdout.

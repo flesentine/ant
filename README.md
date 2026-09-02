@@ -1,50 +1,39 @@
-# ANTLAB v0.3 — Boring Ant Laboratory
+# ANTLAB v0.3.1 — Measurement Reconstruction
 
 **Live lab:** https://flesentine.github.io/ant/
 
-ANTLAB is a falsifiable ant-simulation substrate built one experimentally testable capability at a time. v0.3 is the **Scientific Integrity** release.
+ANTLAB is a falsifiable ant-simulation substrate built one experimentally testable capability at a time. v0.3.1 makes the experimental observation process operational before any biological calibration.
 
-## Six-layer experiment architecture
+## What changed
 
-ANTLAB now separates:
+The simulator now keeps **simulation truth** separate from **experimental measurement**. The scientific path samples trajectories at exact camera timestamps (25 fps for Poissonnier 2026), streams those observations through a measurement pipeline, and reports observed speed, distance, straightness, exit time, exit coordinate and central-zone occupancy independently from hidden physics truth.
 
-1. `models/` — species capabilities and biological parameters
-2. `states/` — factual state of an individual at assay entry
-3. `apparatus/` — physical geometry only
-4. experiment `protocol` — what the researcher did
-5. `observations/` — how behavior is sampled/measured
-6. `scoring/` — how behavior becomes an outcome
+The observation sampler interpolates to exact camera times even when the physics timestep is 10, 20 or 50 ms. Apparatus-boundary outcomes get sub-step truth timing; observed exit time is camera-quantized. Headless runs can calculate measurements without retaining every frame.
 
-Experiments cannot override biological model parameters. Protocol may establish state facts such as recent travel distance, fed/unfed status or travel direction, but cannot directly change speed, turning, sensing or other capabilities.
+State provenance is tightened: protocol may record observable history/labels, but may not assert latent memory/motivation/path-integration state. Results now distinguish `state_profile_hash` from `resolved_state_hash`.
 
-## Reproducibility
-
-Every headless result records hashes for model, state, apparatus, protocol, observation, scoring and experiment. Protocol, treatment, observation and biology use independent deterministic RNG streams so adding measurement noise cannot change the simulated ant's behavior.
-
-## Current assays
-
-The Poissonnier 2026 open arena is represented as a 297 × 210 mm A4 arena with center entry, 25-fps observation and first-border scoring. Separate 20 cm and 100 cm DCM-control protocols use the exact same species model and state profile, with recent travel recorded as state rather than hidden parameter changes.
-
-The neutral Y-maze remains an **engineering control**, not a biological replication. Its endpoint scoring is explicitly separated from the apparatus and marked provisional until the exact 2026 choice criterion is inventoried from supplementary materials/code.
+Published Poissonnier 2026 source manifests, article-level targets, supplement fetch/inventory tooling and a calibration lock are included. **No ant parameters are fitted in v0.3.1.**
 
 ## Run
-
 ```bash
 python3 -m http.server 8080
 ```
-
 Open `http://localhost:8080`.
 
 ## Tests
-
 ```bash
 ./tests/run-tests.sh
 ```
 
 ## Headless
-
 ```bash
 node tools/run-benchmark.js --experiment open_arena_short_control.json --trials 100 --seed 928491
 ```
 
-Next: **v0.3.1 reference-data ingestion and baseline locomotion calibration**, only after the published open-arena dataset fields and AnimalTA measurement settings are inventoried.
+## Reference reconstruction
+```bash
+./tools/fetch-poissonnier2026-reference.sh
+```
+This downloads the final-version Rmd/XLSX supplements into the ignored `reference/materialized/` directory, prints SHA-256 checksums, workbook sheets/headers/previews and analysis-code lines relevant to tracking/scoring.
+
+Next: finish the published-data reconstruction gate, then **v0.3.2 locomotion model competition**. The open-arena dataset remains locked against biological fitting until that gate passes.

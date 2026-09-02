@@ -1,7 +1,11 @@
-# Reference data registry
+# Reference evidence
 
-Primary reference: Poissonnier et al. (2026), *Insectes Sociaux*, DOI 10.1007/s00040-026-01106-9.
+ANTLAB keeps published evidence separate from simulation output.
 
-Springer exposes Supplementary Material 2 as an XLSX dataset. The binary has been located but is not committed here yet. v0.3 records provenance and availability without pretending the raw dataset has been ingested.
+## Poissonnier et al. 2026
 
-The open-arena dataset is registered for future calibration. The Y-maze outcome (348/398 pheromone following) is a locked holdout and must not enter parameter fitting or model selection.
+`poissonnier2026_source_manifest.json` pins the final version of record and the two Springer supplementary files. Raw binary supplements are not committed by default. `tools/fetch-poissonnier2026-reference.sh` materializes them locally and `tools/inventory-reference.py` records checksums, workbook structure, headers and relevant R-analysis snippets.
+
+`poissonnier2026_published_targets.json` contains only article-level targets used to verify reconstruction. It is not a substitute for the published dataset.
+
+The open-arena dataset remains **locked against biological fitting** until the measurement-reconstruction gate passes. The Y-maze remains a separate locked holdout.

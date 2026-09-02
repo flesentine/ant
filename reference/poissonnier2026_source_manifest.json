@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "poissonnier2026_final_record",
+  "citation": "Poissonnier LA, Winter D, Olivera-Rodriguez F-J, Werneke C, Czaczkes TJ (2026). Insectes Sociaux. doi:10.1007/s00040-026-01106-9",
+  "doi": "10.1007/s00040-026-01106-9",
+  "publication_date": "2026-05-23",
+  "source_version": "final_version_of_record",
+  "license": "CC BY 4.0",
+  "article_url": "https://link.springer.com/article/10.1007/s00040-026-01106-9",
+  "supplements": [
+    {"role":"analysis_code","filename":"40_2026_1106_MOESM1_ESM.rmd","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM1_ESM.rmd","sha256":null,"materialization_status":"remote_located_checksum_pending"},
+    {"role":"published_dataset","filename":"40_2026_1106_MOESM2_ESM.xlsx","url":"https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM2_ESM.xlsx","sha256":null,"materialization_status":"remote_located_checksum_pending"}
+  ],
+  "priority_rule": "Definitions and values from the final version of record outrank the 2025 preprint."
+}

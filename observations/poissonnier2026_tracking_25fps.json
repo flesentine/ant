@@ -1,24 +1,20 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "poissonnier2026_tracking_25fps",
   "fps": 25,
   "record_trajectories": true,
   "tracking": {
     "position_noise_mm_sd": 0,
-    "movement_classifier": "pending_AnimalTA_settings_inventory",
-    "status": "sampling_cadence_matched_tracking_pipeline_pending"
+    "movement_classifier": {"type":"frame_displacement_threshold","threshold_mm":0,"status":"provisional_until_AnimalTA_settings_inventory"},
+    "status": "sampling_cadence_matched_tracking_classifier_pending"
   },
-  "default_metrics": [
-    "central_zone_fraction",
-    "mean_moving_speed",
-    "total_distance",
-    "time_to_arena_edge",
-    "path_straightness",
-    "exit_coordinate"
-  ],
-  "provenance": {
-    "source": "Poissonnier et al. 2026",
-    "doi": "10.1007/s00040-026-01106-9",
-    "note": "25 fps is matched. Tracking thresholds/smoothing remain explicitly unresolved until supplementary analysis settings are inventoried."
-  }
+  "default_metrics": ["central_zone_fraction","mean_moving_speed","total_distance","time_to_arena_edge","path_straightness","exit_coordinate"],
+  "metric_definitions": {
+    "central_zone_fraction": {"type":"horizontal_band","center_y_mm":105,"half_width_mm":10,"source_status":"article_defined"},
+    "total_distance": {"source_status":"article_defined","definition":"sum of tracked frame-to-frame displacement"},
+    "time_to_arena_edge": {"source_status":"article_defined","definition":"first observed arena-border contact"},
+    "path_straightness": {"source_status":"article_defined","definition":"first-to-last beeline divided by tracked total distance"},
+    "mean_moving_speed": {"source_status":"classifier_pending","definition":"mean displacement speed for frames classified as moving"}
+  },
+  "provenance": {"source":"Poissonnier et al. 2026 final version of record","doi":"10.1007/s00040-026-01106-9","published":"2026-05-23","note":"25 fps and metric definitions are matched to the final article. AnimalTA movement thresholds/smoothing remain explicitly unresolved until the supplementary analysis is inventoried."}
 }

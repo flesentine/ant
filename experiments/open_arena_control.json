@@ -1,6 +1,6 @@
 {
-  "schema_version": 3,
-  "id": "open_arena_short_control_v1",
+  "schema_version": 4,
+  "id": "open_arena_short_control_v2",
   "title": "Open arena — 20 cm approach, DCM control",
   "model": "lasius_niger_locomotion_v1",
   "state": "naive_outbound_v1",
@@ -10,15 +10,14 @@
   "workers": 1,
   "duration_s": 120,
   "protocol": {
-    "entry_point": "center",
-    "entry_state": {"heading_rad":0,"position_jitter_mm":0.5,"heading_jitter_rad":0.08},
-    "state_facts": {"recent_travel_mm":200,"travel_direction":"outbound"},
-    "approach_distance_mm": 200,
-    "approach_width_mm": 10,
-    "apparatus_transition": "vertical_toothpick_through_central_hole",
-    "treatment": {"type":"solvent_control","solvent":"DCM"}
+    "entry_point":"center",
+    "entry_state":{"heading_rad":0,"position_jitter_mm":0.5,"heading_jitter_rad":0.08},
+    "entry_state_provenance":{"status":"assumed_pending_reference_entry_distribution","fit_against_downstream_metrics":false},
+    "state_facts":{"recent_travel_mm":200,"travel_direction":"outbound"},
+    "approach_distance_mm":200,"approach_width_mm":10,"apparatus_transition":"vertical_toothpick_through_central_hole",
+    "treatment":{"type":"solvent_control","solvent":"DCM"}
   },
-  "requested_metrics": ["central_zone_fraction","mean_moving_speed","total_distance","time_to_arena_edge","path_straightness","exit_coordinate"],
-  "calibration_role": "calibration_candidate",
-  "metadata": {"entry_state_status":"provisional_pending_reference_data_inventory"}
+  "requested_metrics":["central_zone_fraction","mean_moving_speed","total_distance","time_to_arena_edge","path_straightness","exit_coordinate"],
+  "calibration_role":"measurement_reconstruction_then_calibration_candidate",
+  "metadata":{"evidence_class":"published_assay","source_version":"final_version_of_record"}
 }
