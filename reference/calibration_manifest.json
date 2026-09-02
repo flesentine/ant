@@ -1,13 +1,16 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "datasets": {
     "poissonnier2026_open_arena": {
       "role": "measurement_reconstruction_then_calibration_and_within_assay_validation",
       "allowed_for_fitting": false,
+      "allowed_for_descriptive_model_screening": true,
+      "screening_constraints": ["Use only frozen pre-existing model behavior; do not optimize parameters against these summary contrasts.","Treat bootstrap intervals as descriptive because they do not model colony clustering.","Do not use the Y-maze in screening or model selection."],
       "fitting_unlock_condition": "Raw/detailed tracking or sufficiently specified AnimalTA movement classification must be obtained so simulated trajectories can be measured compatibly; then freeze the measurement reconstruction before fitting biology.",
       "article_doi": "10.1007/s00040-026-01106-9",
       "source_manifest": "poissonnier2026_source_manifest.json",
       "inventory": "poissonnier2026_inventory.json",
+      "control_effects": "poissonnier2026_control_effects.json",
       "inventory_status": "final_supplements_verified; per-ant summary table reconstructed; raw frame coordinate CSVs referenced by Rmd but absent from supplied XLSX; AnimalTA threshold unresolved",
       "published_protocol": {"camera_fps":25,"arena_mm":[297,210],"approach_mm":[200,1000]},
       "published_dataset": {"analyzed_n":102,"colonies":6,"group_n":[25,26,26,25]}
@@ -15,6 +18,7 @@
     "poissonnier2026_ymaze": {
       "role": "locked_holdout_validation",
       "allowed_for_fitting": false,
+      "allowed_for_descriptive_model_screening": false,
       "article_doi": "10.1007/s00040-026-01106-9",
       "published_target": {"n":398,"pheromone_followed":348,"rate":0.8743718593},
       "supplement_status": "all 398 decisions verified; exact spatial decision criterion unresolved",
