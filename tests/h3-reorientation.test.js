@@ -66,10 +66,11 @@ const angleSeed=speedShort.ants[0].h3StreamSeeds.angle,ar1=new core.RNG(angleSee
 
 const logged=makeLargeBundle(1000),unlogged=clone(logged);logged.observation.record_trajectories=true;unlogged.observation.record_trajectories=false;const sl=new Simulation(logged,13001),su=new Simulation(unlogged,13001);sl.runFor(5,.02);su.runFor(5,.02);assert.deepStrictEqual(eventRows(sl),eventRows(su),'observation retention must not perturb H3 event biology');assert.strictEqual(sl.ants[0].speedFactor,su.ants[0].speedFactor);
 
-const injected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});injected.experiment.protocol.state_facts.reorientation_gate=.9;assert.throws(()=>new Simulation(injected,1),/(Latent biological state forbidden|Model parameter forbidden)/);
-const protocolInjected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});protocolInjected.experiment.protocol.reorientation_gate={effect:{rho_gate:.9}};assert.throws(()=>new Simulation(protocolInjected,1),/Model parameter forbidden/);
-const ellInjected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});ellInjected.experiment.protocol.analysis_note={mean_free_path_mm:999};assert.throws(()=>new Simulation(ellInjected,1),/Model parameter forbidden/);
-const rhoInjected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});rhoInjected.experiment.protocol.analysis_note={rho_gate:.9};assert.throws(()=>new Simulation(rhoInjected,1),/Model parameter forbidden/);
+const rejection=/(Biology override forbidden|Latent biological state forbidden|Model parameter forbidden)/;
+const injected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});injected.experiment.protocol.state_facts.reorientation_gate=.9;assert.throws(()=>new Simulation(injected,1),rejection);
+const protocolInjected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});protocolInjected.experiment.protocol.reorientation_gate={effect:{rho_gate:.9}};assert.throws(()=>new Simulation(protocolInjected,1),rejection);
+const ellInjected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});ellInjected.experiment.protocol.analysis_note={mean_free_path_mm:999};assert.throws(()=>new Simulation(ellInjected,1),rejection);
+const rhoInjected=loadBundle('open_arena_short_control.json',{modelId:MODEL_ID});rhoInjected.experiment.protocol.analysis_note={rho_gate:.9};assert.throws(()=>new Simulation(rhoInjected,1),rejection);
 
 const report=runH3Mechanism({trials:20,firstSeed:810000,dt:.02});
 assert.strictEqual(report.fit_performed,false);assert.strictEqual(report.reference_targets_accessed,false);assert.strictEqual(report.ymaze_accessed,false);assert.strictEqual(report.selection_performed,false);assert.strictEqual(report.model_id,MODEL_ID);assert(report.short.gate_initial<report.long.gate_initial);assert.strictEqual(report.structural_checks.long_gate_exceeds_short,true);
