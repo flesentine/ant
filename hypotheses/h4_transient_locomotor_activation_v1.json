@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "id": "H4_transient_locomotor_activation_v1",
+  "status": "post_outcome_mechanism_freeze_before_implementation_or_parameter_search",
+  "honesty_note": "The Poissonnier 2026 open-arena outcome and the failures of H2-v1 and H3-v1 were known before H4 was specified. This is not a blind preregistration. It freezes a genuinely different speed-side mechanism class before H4 implementation or H4 parameter search.",
+  "species": "Lasius niger",
+  "scope": "open-arena DCM-control locomotion context only",
+  "mechanism_class": "transient_locomotor_activation_speed_gain",
+  "claim": "Recent sustained constrained walking transiently increases moving speed after arena entry while leaving the heading-noise process, pause process, entry state, and boundary behavior unchanged.",
+  "why_this_is_not_H2_or_H3": "H2 directly reduced continuous angular diffusion and H3 directly reduced the hazard of discrete reorientation events. H4 may not alter either heading process. Any increase in spatial straightness must arise indirectly because the ant covers more distance during the same amount of time-based angular noise.",
+  "outcome_aware_motivation": {
+    "descriptive_reference_only": true,
+    "moving_speed_short_mean_mm_s": 23.826448496,
+    "moving_speed_long_mean_mm_s": 27.156454003576922,
+    "short_minus_long_mm_s": -3.330005507576921,
+    "bootstrap95_short_minus_long_mm_s": [-6.843553453128461, 0.1197747599075002],
+    "leave_one_colony_out_sign_stable": true,
+    "interpretation": "The descriptive moving-speed contrast is compatible with a speed-side mechanism and has the same sign in all six leave-one-colony-out recalculations, but its descriptive bootstrap interval reaches zero. It motivates H4; it is not sufficient evidence for H4 and may not be used as an H4 fitting target while the AnimalTA movement classifier remains unrecovered."
+  },
+  "allowed_observable_inputs": ["recent_constrained_travel_mm"],
+  "forbidden_inputs": [
+    "Path_length treatment label",
+    "short/long condition id",
+    "reference metric values",
+    "measured or simulated current distance to an exit edge",
+    "arena centerline attraction",
+    "pheromone presence",
+    "Y-maze outcome",
+    "colony identity as a biological control input",
+    "future trajectory information"
+  ],
+  "baseline_walk": {
+    "description": "Retain the existing continuous-time locomotion substrate: individual base-speed heterogeneity, mean-reverting speed noise, continuous angular diffusion, and the existing pause process.",
+    "heading_process": "dtheta = sigma0 * turnScale * dW_t, unchanged by H4.",
+    "pause_process": "Existing pause hazard and pause-duration distribution, unchanged by H4.",
+    "speed_process": "The existing baseline moving-speed process produces v_baseline(t). H4 multiplies only the realized moving speed used for displacement.",
+    "entry_state": "Existing shared post-toothpick entry-state treatment, unchanged by H4.",
+    "timestep_rule": "H4 must use exact exponential latent-state decay. The activation contribution to displacement must be implemented so that changing physics dt does not create a material H4 effect solely from numerical integration."
+  },
+  "latent_state": {
+    "name": "locomotor_activation",
+    "symbol": "A",
+    "range": [0, 1],
+    "initialization": "A0 = 1 - exp(-L / lambda_activation_mm), where L is recent_constrained_travel_mm.",
+    "decay": "dA/dt = -A / tau_activation_s; exact update A(t+dt)=A(t)*exp(-dt/tau_activation_s).",
+    "behavioral_effect": "While the ant is moving, v_H4(t) = v_baseline(t) * (1 + rho_speed * A(t)).",
+    "parameter_constraints": {
+      "lambda_activation_mm": "> 0",
+      "tau_activation_s": "> 0",
+      "rho_speed": ">= 0"
+    },
+    "direct_effects_forbidden": [
+      "angular_sigma_rad_sqrt_s",
+      "turnScale",
+      "heading or heading drift",
+      "reorientation-event hazard",
+      "turn-angle distribution",
+      "pause hazard",
+      "pause duration",
+      "entry heading",
+      "entry position",
+      "boundary behavior",
+      "centerline or edge attraction",
+      "observation model"
+    ]
+  },
+  "rng_policy": {
+    "purpose": "H4 is a deterministic gain on the baseline moving-speed realization and must not create a new source of stochasticity or change baseline random-number consumption.",
+    "new_h4_rng_streams": "none",
+    "baseline_stream_rule": "For matched seeds, H4-null and H4-context consume exactly the same biology, protocol, treatment, and observation random draws in the same order. H4 changes displacement only through A(t) and rho_speed.",
+    "common_random_numbers_rule": "Matched H4-null/context trials use identical named stream seeds. Setting rho_speed=0 or recent_constrained_travel_mm=0 must recover the context-free trajectory to numerical tolerance.",
+    "observation_ablation_rule": "Changing observation metadata or H4 logging must not alter speed, heading, pause draws, or biological trajectories."
+  },
+  "structural_predictions": [
+    "Longer recent constrained travel produces a larger A0 and therefore a larger early moving-speed gain.",
+    "The long-travel condition should have higher early moving speed than the short-travel condition, with the difference decaying toward zero with time since arena entry.",
+    "Conditional on elapsed moving time, H4 does not change the heading-increment distribution or angular diffusion coefficient.",
+    "Conditional on elapsed moving time, H4 does not change pause hazard or pause-duration distributions.",
+    "Because baseline angular diffusion is time-based, a faster H4 ant can travel farther per unit accumulated angular variance; H4 can therefore increase path straightness indirectly without modifying heading dynamics.",
+    "If H4 explains the open-arena contrast, the long-travel condition should reach the arena edge sooner and with a shorter traveled path even though its heading-noise law is unchanged.",
+    "With recent_constrained_travel_mm = 0 or rho_speed = 0, the H4 context effect disappears exactly.",
+    "H4 predicts no treatment-specific exit-edge preference except any indirect change caused by reaching a boundary sooner under the same heading process."
+  ],
+  "raw_trajectory_discriminators_if_recovered": [
+    "moving speed as a function of time since arena entry",
+    "early-versus-late moving-speed contrast",
+    "heading-increment variance per unit time",
+    "heading-increment variance per unit distance",
+    "pause onset hazard and pause-duration distribution",
+    "time and distance to arena edge",
+    "test that an apparent straightness effect disappears after conditioning on elapsed time and speed"
+  ],
+  "relationship_to_other_hypotheses": {
+    "H0": "H0 has no path-history effect.",
+    "H1": "H1 remains an unresolved apparatus-entry explanation. H4 may not use treatment-specific entry-heading or entry-speed distributions.",
+    "H2": "H2 directly reduces continuous angular diffusion. H4 leaves angular diffusion unchanged and changes moving speed only.",
+    "H3": "H3 changes the timing of discrete major reorientations. H4 leaves the heading process and any reorientation representation unchanged.",
+    "non_equivalence_rule": "H4 must not be implemented as a renamed change to angular_sigma_rad_sqrt_s, turnScale, reorientation hazard, entry heading, or pause behavior."
+  },
+  "development_estimation_guardrails": {
+    "threshold_independent_fit_targets_only": ["time_to_exit_s", "middle_zone_fraction", "beeline_mm", "exit_edge"],
+    "moving_speed_fit_target": false,
+    "moving_speed_role": "diagnostic only until the AnimalTA movement classifier is recovered",
+    "nested_null_requirement": "Any H4 development estimator must compare H4-context against an H4-null model with the same shared nuisance baseline parameters and common random numbers.",
+    "shared_nuisance_candidates_to_consider": ["base_speed_mm_s", "angular_sigma_rad_sqrt_s", "shared post-toothpick orientation-retention q"],
+    "colony_identity_as_fit_input": false,
+    "ymaze_access": false,
+    "canonical_promotion": false
+  },
+  "implementation_freeze": {
+    "implement_model_before_search": true,
+    "fit_parameters_during_initial_mechanism_reachability": false,
+    "canonical_model_unchanged": true,
+    "use_ymaze": false,
+    "required_tests": [
+      "zero-history equivalence to the context-free walk for matched seeds",
+      "rho_speed=0 equivalence to the context-free walk for matched seeds",
+      "exact exponential A decay",
+      "long history produces larger A0 and larger early realized moving speed under matched random draws",
+      "H4 does not alter heading random draws or heading increment law",
+      "H4 does not alter pause random draws, pause hazard, or pause-duration law",
+      "H4 adds no RNG stream and does not change baseline RNG consumption",
+      "activation-induced displacement converges across physics dt",
+      "protocol cannot inject A or H4 biological parameters",
+      "same H4 biological model hash in short and long assays",
+      "observation/logging changes do not perturb H4 biological trajectories"
+    ]
+  },
+  "evidence_notes": {
+    "speed_contrast_status": "The observed descriptive moving-speed contrast supports testing a speed-side mechanism class but is not independently validated and is not an allowed fitting target under the current measurement-policy freeze.",
+    "mechanism_status": "The proposed history-dependent locomotor activation state is a candidate mechanism, not an established biological fact."
+  }
+}
