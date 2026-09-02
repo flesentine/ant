@@ -27,19 +27,27 @@ jobs:
         continue-on-error: true
         run: ./tools/fetch-poissonnier2026-reference.sh /tmp/antlab-reference
       - name: Verify pinned control-effect screening target
-        if: steps.reference_probe.outcome == 'success'
+        if: always()
         run: |
-          python3 tools/derive-poissonnier2026-control-effects.py \
-            /tmp/antlab-reference/40_2026_1106_MOESM2_ESM.xlsx \
-            /tmp/antlab-reference/control-effects-regenerated.json >/tmp/control-effects.log
-          cmp reference/poissonnier2026_control_effects.json /tmp/antlab-reference/control-effects-regenerated.json
+          xlsx=/tmp/antlab-reference/40_2026_1106_MOESM2_ESM.xlsx
+          if [ -f "$xlsx" ]; then
+            python3 tools/derive-poissonnier2026-control-effects.py \
+              "$xlsx" \
+              /tmp/antlab-reference/control-effects-regenerated.json >/tmp/control-effects.log
+            cmp reference/poissonnier2026_control_effects.json /tmp/antlab-reference/control-effects-regenerated.json
+            echo "Pinned control-effect target reproduced exactly from downloaded XLSX."
+          else
+            echo "::warning::Springer reference probe unavailable; live supplement regeneration gate was not run."
+          fi
       - name: Upload reference probe
-        if: steps.reference_probe.outcome == 'success'
+        if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: poissonnier2026-reference-probe
           path: /tmp/antlab-reference
           retention-days: 1
+          if-no-files-found: ignore
   deploy:
     needs: test
     environment:
