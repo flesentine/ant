@@ -22,7 +22,7 @@ jobs:
           for i in {1..30}; do curl -fsS http://127.0.0.1:8080/ >/dev/null && exit 0; sleep 0.2; done
           cat /tmp/antlab-http.log
           exit 1
-      - name: Launch Chromium and exercise UI
+      - name: Launch Chromium and exercise UI and H4 runtime
         shell: bash
         run: |
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
@@ -34,15 +34,12 @@ jobs:
           cat > /tmp/chromium-smoke.mjs <<'NODE'
           import fs from 'node:fs';
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          async function target(){
-            const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();
-            return tabs.find(t=>t.type==='page')||tabs[0];
-          }
+          async function target(){const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();return tabs.find(t=>t.type==='page')||tabs[0];}
           const t=await target();
           const ws=new WebSocket(t.webSocketDebuggerUrl);
           await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
           let seq=0; const pending=new Map(); const exceptions=[]; const consoleErrors=[];
-          ws.onmessage=e=>{const m=JSON.parse(e.data); if(m.id&&pending.has(m.id)){const {resolve,reject}=pending.get(m.id);pending.delete(m.id);m.error?reject(new Error(JSON.stringify(m.error))):resolve(m.result);} if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params); if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);};
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const {resolve,reject}=pending.get(m.id);pending.delete(m.id);m.error?reject(new Error(JSON.stringify(m.error))):resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);};
           function send(method,params={}){return new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});}
           async function evalv(expression){const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'Runtime evaluation failed');return r.result.value;}
           async function waitFor(expr,label,timeout=6000){const start=Date.now();while(Date.now()-start<timeout){try{if(await evalv(expr))return;}catch{}await sleep(100);}throw new Error(`Timed out waiting for ${label}`);}
@@ -68,8 +65,7 @@ jobs:
           await evalv(`seedInput.value='928492';seedInput.dispatchEvent(new Event('change',{bubbles:true}));true`);
           await waitFor(`runStatus.textContent==='PAUSED' && simTime.textContent.startsWith('0.0')`,'seed reset');
           await evalv(`speedSelect.value='20';playBtn.click();true`); await sleep(500);
-          const statusBeforePause=await evalv(`runStatus.textContent`);
-          if(statusBeforePause==='RUNNING')await evalv(`playBtn.click();true`);
+          const statusBeforePause=await evalv(`runStatus.textContent`); if(statusBeforePause==='RUNNING')await evalv(`playBtn.click();true`);
           const played=await evalv(`({time:parseFloat(simTime.textContent),status:runStatus.textContent})`);
           if(!(played.time>0))throw new Error('Run/Pause did not advance simulation');
           if(!['PAUSED','COMPLETE','DURATION'].includes(played.status))throw new Error('Unexpected post-run status '+played.status);
@@ -78,13 +74,29 @@ jobs:
           await evalv(`stepBtn.click();true`); await waitFor(`parseFloat(simTime.textContent)>=0.9`,'straight bridge step');
           const finalState=await evalv(`({status:runStatus.textContent,model:modelId.textContent,experiment:protocolNote.textContent,time:simTime.textContent,canvas:[labCanvas.width,labCanvas.height]})`);
           if(finalState.status==='LOAD ERROR')throw new Error('Straight bridge LOAD ERROR');
+
+          const h4Runtime=await evalv(`(async()=>{
+            async function j(path){const r=await fetch(path);if(!r.ok)throw new Error(path+' '+r.status);return r.json();}
+            async function b(file){const experiment=await j('./experiments/'+file);experiment.model='lasius_niger_locomotion_h4_v1';const [model,apparatus,state,observation,scoring]=await Promise.all([j('./models/lasius_niger_locomotion_h4_v1.json'),j('./apparatus/'+experiment.apparatus+'.json'),j('./states/'+experiment.state+'.json'),j('./observations/'+experiment.observation+'.json'),j('./scoring/'+experiment.scoring+'.json')]);return {experiment,model,apparatus,state,observation,scoring};}
+            const sb=await b('open_arena_short_control.json'),lb=await b('open_arena_long_control.json');
+            const s=new AntLabIntegrity.Simulation(sb,424242),l=new AntLabIntegrity.Simulation(lb,424242);
+            const out={model:s.model.id,shortA0:s.ants[0].locomotorActivationInitial,longA0:l.ants[0].locomotorActivationInitial,shortHash:s.layerHashes.model_hash,longHash:l.layerHashes.model_hash};
+            for(let i=0;i<50;i++){s.step(0.02);l.step(0.02);}
+            Object.assign(out,{shortDistance:s.ants[0].distanceTravelled,longDistance:l.ants[0].distanceTravelled,shortHeading:s.ants[0].heading,longHeading:l.ants[0].heading,shortSpeedFactor:s.ants[0].speedFactor,longSpeedFactor:l.ants[0].speedFactor,shortRng:s.ants[0].rng.state,longRng:l.ants[0].rng.state});
+            return out;
+          })()`);
+          if(h4Runtime.model!=='lasius_niger_locomotion_h4_v1')throw new Error('H4 browser runtime loaded wrong model');
+          if(!(h4Runtime.longA0>h4Runtime.shortA0))throw new Error('H4 browser runtime activation ordering failed');
+          if(!(h4Runtime.longDistance>h4Runtime.shortDistance))throw new Error('H4 browser runtime displacement ordering failed');
+          if(h4Runtime.shortHash!==h4Runtime.longHash)throw new Error('H4 browser short/long model hashes differ');
+          if(Math.abs(h4Runtime.shortHeading-h4Runtime.longHeading)>1e-12)throw new Error('H4 browser altered matched heading evolution');
+          if(Math.abs(h4Runtime.shortSpeedFactor-h4Runtime.longSpeedFactor)>1e-12)throw new Error('H4 browser altered matched speed-noise realization');
+          if(h4Runtime.shortRng!==h4Runtime.longRng)throw new Error('H4 browser altered biology RNG cadence');
           if(exceptions.length)throw new Error('Browser exceptions: '+JSON.stringify(exceptions));
           if(consoleErrors.length)throw new Error('Console errors: '+JSON.stringify(consoleErrors));
           const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});fs.writeFileSync('/tmp/h4-chromium-final.png',Buffer.from(shot.data,'base64'));
-          const report={browser_target:t.url,initial,stepped,toggles,longState,statusBeforePause,played,finalState,exceptions:exceptions.length,consoleErrors:consoleErrors.length,ymaze_loaded:false};
-          fs.writeFileSync('/tmp/h4-chromium-report.json',JSON.stringify(report,null,2));
-          console.log(JSON.stringify(report,null,2));
-          ws.close();
+          const report={browser_target:t.url,initial,stepped,toggles,longState,statusBeforePause,played,finalState,h4Runtime,exceptions:exceptions.length,consoleErrors:consoleErrors.length,ymaze_loaded:false};
+          fs.writeFileSync('/tmp/h4-chromium-report.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));ws.close();
           NODE
           node /tmp/chromium-smoke.mjs
       - name: Upload Chromium review artifact
