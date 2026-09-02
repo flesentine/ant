@@ -1,12 +1,27 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "datasets": {
     "poissonnier2026_open_arena": {
-      "role": "measurement_reconstruction_then_calibration_and_within_assay_validation",
+      "role": "measurement_reconstruction_then_development_estimation_and_within_assay_validation",
       "allowed_for_fitting": false,
       "allowed_for_descriptive_model_screening": true,
-      "screening_constraints": ["Use only frozen pre-existing model behavior; do not optimize parameters against these summary contrasts.","Treat bootstrap intervals as descriptive because they do not model colony clustering.","Do not use the Y-maze in screening or model selection."],
-      "fitting_unlock_condition": "Raw/detailed tracking or sufficiently specified AnimalTA movement classification must be obtained so simulated trajectories can be measured compatibly; then freeze the measurement reconstruction before fitting biology.",
+      "allowed_for_development_parameter_estimation": true,
+      "screening_constraints": [
+        "Use only frozen pre-existing model behavior; do not optimize parameters against the descriptive contrast file.",
+        "Treat bootstrap intervals as descriptive because they do not model colony clustering.",
+        "Do not use the Y-maze in screening or model selection."
+      ],
+      "development_estimation_constraints": [
+        "Use only threshold-independent DCM-control observables pinned in poissonnier2026_h2_estimation_targets.json.",
+        "Moving-speed, moving-distance, straightness and Prop_time_moving are diagnostics only until AnimalTA movement classification is recovered.",
+        "Use leave-one-colony-out internal cross-validation and a nested baseline model.",
+        "Entry-orientation nuisance parameters must be shared across short and long treatments; treatment-specific entry-heading fitting is forbidden because that belongs to H1.",
+        "The estimation tool may write reports only and may not update a canonical model file.",
+        "The Y-maze remains inaccessible to fitting, ranking, stopping rules and model selection."
+      ],
+      "development_estimation_policy": "../hypotheses/h2_parameter_estimation_v1.json",
+      "development_estimation_targets": "poissonnier2026_h2_estimation_targets.json",
+      "fitting_unlock_condition": "Raw/detailed tracking or sufficiently specified AnimalTA movement classification must be obtained so simulated trajectories can be measured compatibly; then freeze the measurement reconstruction before canonical biological fitting.",
       "article_doi": "10.1007/s00040-026-01106-9",
       "source_manifest": "poissonnier2026_source_manifest.json",
       "inventory": "poissonnier2026_inventory.json",
@@ -19,6 +34,7 @@
       "role": "locked_holdout_validation",
       "allowed_for_fitting": false,
       "allowed_for_descriptive_model_screening": false,
+      "allowed_for_development_parameter_estimation": false,
       "article_doi": "10.1007/s00040-026-01106-9",
       "published_target": {"n":398,"pheromone_followed":348,"rate":0.8743718593},
       "supplement_status": "all 398 decisions verified; exact spatial decision criterion unresolved",
