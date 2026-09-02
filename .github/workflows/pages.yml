@@ -49,6 +49,33 @@ jobs:
           else
             echo "::warning::Springer reference probe unavailable; live supplement regeneration gate was not run."
           fi
+      - name: Verify H2 estimation target from Springer XLSX
+        if: always()
+        run: |
+          xlsx=/tmp/antlab-reference/40_2026_1106_MOESM2_ESM.xlsx
+          if [ -f "$xlsx" ]; then
+            python3 tools/derive-h2-estimation-targets.py "$xlsx" /tmp/antlab-reference/h2-estimation-targets-regenerated.json >/tmp/h2-targets.log
+            python3 - <<'PY'
+          import json
+          a=json.load(open('reference/poissonnier2026_h2_estimation_targets.json'))
+          b=json.load(open('/tmp/antlab-reference/h2-estimation-targets-regenerated.json'))
+          assert a==b, 'Pinned H2 estimation target differs from XLSX regeneration'
+          print('Pinned H2 threshold-independent estimation target reproduced from downloaded XLSX.')
+          PY
+          else
+            echo "::warning::Springer reference probe unavailable; H2 estimation-target regeneration gate was not run."
+          fi
+      - name: Run H2 LOCO estimator smoke test
+        run: |
+          mkdir -p /tmp/antlab-h2-estimation
+          node tools/run-h2-estimation.js --mode loco --candidates 8 --trials 4 --seed 981000 --out /tmp/antlab-h2-estimation/loco-smoke.json >/tmp/h2-estimation-smoke.log
+          echo "Low-resolution estimator smoke only; not a parameter estimate." > /tmp/antlab-h2-estimation/README.txt
+      - name: Upload H2 estimator smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-estimator-smoke
+          path: /tmp/antlab-h2-estimation
+          retention-days: 7
       - name: Upload reference probe
         if: always()
         continue-on-error: true
