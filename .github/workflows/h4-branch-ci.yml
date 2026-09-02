@@ -1,0 +1,16 @@
+name: H4 branch verification
+on:
+  push:
+    branches: [h4-transient-locomotor-activation-v1]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: ./tests/run-tests.sh
+      - run: node tools/run-h4-mechanism.js --trials 400 --seed 928491 --out /tmp/h4.json
