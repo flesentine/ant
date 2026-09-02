@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "id": "open_arena_locomotion_context_v1",
   "reference_dataset": "poissonnier2026_open_arena",
   "scope": "DCM control treatments only",
@@ -59,12 +59,21 @@
       },
       "reason": "Failed both frozen guards under the corrected scorer: only 1/6 held-out wins versus H3-null and 2/6 versus matched re-evaluated H2-v1 candidates. Do not tune this same H3 mechanism harder on these outcomes.",
       "distinction_from_H2": "H2 continuously scales angular diffusion; H3 changes only event timing in a run-and-reorientation locomotion family."
+    },
+    {
+      "id": "H4_transient_locomotor_activation",
+      "status": "mechanism_frozen_not_implemented_not_searched",
+      "freeze": "h4_transient_locomotor_activation_v1.json",
+      "claim": "Recent sustained constrained walking transiently increases moving speed after arena entry while leaving heading noise, pause behavior, entry state, and boundary behavior unchanged.",
+      "selection_status": "not_evaluated",
+      "motivation": "The descriptive moving-speed contrast has the H4-predicted sign in every leave-one-colony-out recalculation, while H2 and H3 show that directly increasing directional persistence is not a generalizing explanation. Moving speed remains diagnostic-only and is not an allowed fitting target until the AnimalTA movement classifier is recovered.",
+      "distinction_from_H2_H3": "H4 changes displacement speed only. It may increase spatial straightness indirectly because angular diffusion is time-based, but it is forbidden from changing angular sigma, turn events, turn angles, or entry heading."
     }
   ],
   "screening_decision": {
     "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
     "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
-    "current_decision": "H2-v1 and H3-v1 are both not promoted. H1 remains unresolved because the raw entry-state evidence is missing; a genuinely different mechanism class is required before further open-arena development fitting.",
+    "current_decision": "H2-v1 and H3-v1 are both not promoted. H1 remains unresolved because raw entry-state evidence is missing. H4-v1 is now frozen as the next genuinely different mechanism class and must undergo mechanism-reachability implementation before any H4 parameter search.",
     "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
   }
 }
