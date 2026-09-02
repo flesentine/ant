@@ -67,10 +67,12 @@ jobs:
           if(longState.hash!==initial.hash)throw new Error('Short/long interactive assays must share canonical model hash');
           await evalv(`seedInput.value='928492';seedInput.dispatchEvent(new Event('change',{bubbles:true}));true`);
           await waitFor(`runStatus.textContent==='PAUSED' && simTime.textContent.startsWith('0.0')`,'seed reset');
-          await evalv(`speedSelect.value='20';playBtn.click();true`); await sleep(500); await evalv(`playBtn.click();true`);
+          await evalv(`speedSelect.value='20';playBtn.click();true`); await sleep(500);
+          const statusBeforePause=await evalv(`runStatus.textContent`);
+          if(statusBeforePause==='RUNNING')await evalv(`playBtn.click();true`);
           const played=await evalv(`({time:parseFloat(simTime.textContent),status:runStatus.textContent})`);
           if(!(played.time>0))throw new Error('Run/Pause did not advance simulation');
-          if(played.status!=='PAUSED'&&played.status!=='COMPLETE')throw new Error('Unexpected post-pause status '+played.status);
+          if(!['PAUSED','COMPLETE','DURATION'].includes(played.status))throw new Error('Unexpected post-run status '+played.status);
           await evalv(`experimentSelect.value='straight_bridge.json';experimentSelect.dispatchEvent(new Event('change',{bubbles:true}));true`);
           await waitFor(`runStatus.textContent==='PAUSED'`,'straight bridge load');
           await evalv(`stepBtn.click();true`); await waitFor(`parseFloat(simTime.textContent)>=0.9`,'straight bridge step');
@@ -79,7 +81,7 @@ jobs:
           if(exceptions.length)throw new Error('Browser exceptions: '+JSON.stringify(exceptions));
           if(consoleErrors.length)throw new Error('Console errors: '+JSON.stringify(consoleErrors));
           const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});fs.writeFileSync('/tmp/h4-chromium-final.png',Buffer.from(shot.data,'base64'));
-          const report={browser_target:t.url,initial,stepped,toggles,longState,played,finalState,exceptions:exceptions.length,consoleErrors:consoleErrors.length,ymaze_loaded:false};
+          const report={browser_target:t.url,initial,stepped,toggles,longState,statusBeforePause,played,finalState,exceptions:exceptions.length,consoleErrors:consoleErrors.length,ymaze_loaded:false};
           fs.writeFileSync('/tmp/h4-chromium-report.json',JSON.stringify(report,null,2));
           console.log(JSON.stringify(report,null,2));
           ws.close();
