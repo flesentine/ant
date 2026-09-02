@@ -18,5 +18,6 @@ assert(!target.excluded_from_estimation.includes('Total_Frames'));
 for(const forbidden of ['Average_Speed_Moving','Traveled_Dist_Moving','Straightness','Prop_time_moving'])assert(target.excluded_from_estimation.includes(forbidden));
 const c1=est.candidate(7,policy,false),c2=est.candidate(7,policy,false);assert.deepStrictEqual(c1,c2,'candidate sequence must be deterministic');
 assert(c1.rho>0&&c1.rho<1);assert(est.effective(c1,1000)>est.effective(c1,200));
+const probs=est.edgeProbs([{exit_edge:'left'},{exit_edge:'timeout'}]);assert.strictEqual(probs.length,5);assert(Math.abs(probs.reduce((a,b)=>a+b,0)-1)<1e-15,'exit outcome probabilities must sum to one including timeout mass');assert.strictEqual(probs[4],.5);
 const tampered=JSON.parse(JSON.stringify(cal));tampered.datasets.poissonnier2026_ymaze.allowed_for_development_parameter_estimation=true;assert.throws(()=>est.validate(policy,target,tampered,source),/Y-maze/);
 console.log('h2-estimation.test.js PASS '+JSON.stringify({rows:target.rows.length,colonies:6,candidate:c1}));
