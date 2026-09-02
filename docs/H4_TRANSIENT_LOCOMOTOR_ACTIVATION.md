@@ -55,17 +55,20 @@ These are mechanism-reachability values, **not biological estimates**.
 
 `src/integrity.js` owns H4 latent-state initialization, exact decay, step-averaged speed gain, provenance, and integrity firewalls. `src/sim-core.js` exposes a neutral per-ant `speedMultiplier` whose default is exactly `1`, leaving H0/H2/H3 unchanged unless H4 explicitly sets it.
 
-The H4 test suite verifies:
+The complete H4 test suite verifies:
 
 - exact exponential activation decay;
 - exact activation-integral consistency when a step is split;
+- H4-induced displacement convergence across physics steps `0.04`, `0.02`, and `0.01` s in an isolated deterministic walk;
 - matched short/long trials retain identical heading evolution, speed-noise state, pause state, and biology RNG cadence;
+- changing observation FPS, observation noise, and trajectory logging does not perturb the biological trajectory or biology RNG;
 - zero history is trajectory-equivalent to H4 disabled;
 - `rho_speed = 0` is trajectory-equivalent to H4 disabled;
 - protocol/state layers cannot inject H4 parameters or latent `A`;
-- the intended speed-side signature is mechanically reachable.
+- the intended speed-side signature is mechanically reachable;
+- short and long assays use the same H4 model hash.
 
-The full H0–H4 implementation suite passed on commit `1e9e16366ffc87dfd38407abf08abda015fbce76` in GitHub Actions run `33680653375` before the one-shot branch verification workflow was removed.
+The final full H0–H4 implementation suite and 400-trial H4 reachability rerun passed on commit `820a69695168922f59f54f51d82262662c1cf3b6` in GitHub Actions run `33681326517`. The temporary branch-only verification workflow was removed after the successful run.
 
 ## 400-trial mechanism reachability
 
@@ -79,7 +82,7 @@ The verified reachability run used 400 matched trials per condition, seeds `9284
 | Observed distance | 214.793 mm | 212.107 mm |
 | Straightness | 0.73214 | 0.74451 |
 
-All frozen qualitative reachability checks passed: the long-history condition had greater activation, greater moving speed, earlier edge arrival, and slightly greater spatial straightness. The exact execution is recorded in `reports/h4_mechanism_reachability_v1.json`.
+All frozen qualitative reachability checks passed: the long-history condition had greater activation, greater moving speed, earlier edge arrival, and slightly greater spatial straightness. The exact execution and final verification are recorded in `reports/h4_mechanism_reachability_v1.json`.
 
 This result answers only **can this mechanism produce the intended structural signature without contaminating the other processes?** It does not answer whether H4 explains the data better than a matched null or H2/H3.
 
@@ -98,7 +101,7 @@ Moving speed remains a **diagnostic only** until the AnimalTA movement classifie
 
 1. **Freeze H4 mechanism** — complete.
 2. Implement H4 with engineering-only values — complete.
-3. Add mechanism/invariance tests — complete.
+3. Add the complete frozen mechanism/invariance tests — complete.
 4. Run reachability only — complete.
 5. **Freeze a separate H4 estimation policy before any H4 parameter search.**
 6. Only then, if estimation is authorized, compare H4-context against a matched H4-null baseline with shared nuisance parameters and common random numbers under leave-one-colony-out evaluation.
@@ -110,7 +113,7 @@ H0  -> inadequate
 H1  -> unresolved; entry-state evidence missing
 H2  -> not promoted
 H3  -> not promoted
-H4  -> implemented; mechanism reachability verified; not fitted; not searched; not promoted
+H4  -> implemented; complete mechanism reachability verified; not fitted; not searched; not promoted
 ```
 
 The canonical ant remains unchanged.
