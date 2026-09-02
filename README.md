@@ -16,7 +16,7 @@ H4  -> implemented; mechanism reachability verified; not fitted or searched
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a genuinely different speed-side mechanism: recent constrained travel creates a transient locomotor activation state that increases moving speed while leaving heading noise, pauses, entry state, and boundary behavior unchanged.
 
-See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record.
+See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record. The original H4 freeze file remains unchanged after implementation so the pre-code mechanism specification stays auditable.
 
 ## What data may enter development estimation
 
