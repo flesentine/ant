@@ -5,6 +5,7 @@
   "scope": "DCM control treatments only",
   "contrast": "20 cm approach minus 100 cm approach",
   "rules": {
+    "fit_parameters": false,
     "use_ymaze_for_model_selection": false,
     "common_random_numbers": true,
     "development_estimation_is_not_external_validation": true,
