@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "H3_parameter_estimation_v1",
+  "status": "development_estimation_policy_frozen_before_H3_implementation_or_search",
+  "honesty_note": "The open-arena outcomes and H2-v1 high-resolution LOCO failure were known before H3. This policy provides internal development model comparison only, not independent validation.",
+  "model_candidate": "lasius_niger_locomotion_h3_v1",
+  "mechanism_freeze": "h3_transient_reorientation_gate_v1.json",
+  "reference_dataset": "poissonnier2026_open_arena",
+  "scope": "DCM-control 20 cm versus 100 cm approach only",
+  "estimated_parameters": {
+    "baseline_mean_free_path_mm": {"symbol":"ell0","role":"H3_family_baseline_locomotion_nuisance","bounds":[5,150],"scale":"log"},
+    "baseline_turn_concentration": {"symbol":"kappa_turn","role":"H3_family_baseline_locomotion_nuisance","bounds":[0,20],"scale":"linear","definition":"von Mises concentration for turn angle conditional on a reorientation; shared across treatments and unaffected by G"},
+    "entry_orientation_retention_q": {"symbol":"q","role":"shared_apparatus_transition_nuisance","bounds":[0,1],"scale":"linear","rule":"Same q in 20 cm and 100 cm conditions; it may not depend on treatment."},
+    "lambda_history_mm": {"role":"H3","bounds":[100,3000],"scale":"log"},
+    "tau_gate_s": {"role":"H3","bounds":[0.5,40],"scale":"log"},
+    "rho_gate": {"role":"H3","bounds":[0.05,0.95],"scale":"linear"}
+  },
+  "fixed_parameters": [
+    "base_speed_mm_s",
+    "speed_sd_mm_s",
+    "speed_reversion_rate_s",
+    "speed_noise_sigma_sqrt_s",
+    "pause_rate_s",
+    "pause_min_s",
+    "pause_max_s",
+    "entry_position_distribution",
+    "observation_fps",
+    "major_turn_background_angular_diffusion = 0"
+  ],
+  "entry_transition_model": {
+    "type": "shared_orientation_retention_mixture",
+    "definition": "With probability q preserve the protocol-sampled post-transition heading; otherwise draw heading uniformly on [-pi, pi).",
+    "H1_boundary": "Treatment-specific entry-heading distributions remain forbidden. Allowing them would evaluate H1, not H3."
+  },
+  "fit_observables": [
+    {"name":"time_to_exit_s","source_column":"Total_Frames / 25","threshold_independent":true},
+    {"name":"middle_zone_fraction","source_column":"Proportion_Frames_MiddleZone","threshold_independent":true},
+    {"name":"beeline_mm","source_column":"Beeline","threshold_independent":true},
+    {"name":"exit_edge","source_columns":["Xlast","Ylast","Xmin_Arena","Xmax_Arena","Ymin_Arena","Ymax_Arena"],"threshold_independent":true}
+  ],
+  "forbidden_fit_observables": [
+    "Average_Speed_Moving",
+    "Traveled_Dist_Moving",
+    "Straightness",
+    "Prop_time_moving",
+    "Y-maze decision/correct"
+  ],
+  "objective": {
+    "continuous_distance": "quantile Wasserstein-1 divided by pooled training SD",
+    "categorical_distance": "Hellinger distance for exit-edge distribution",
+    "aggregation": "equal-weight mean squared component distance across both path treatments",
+    "common_random_numbers": true,
+    "compatibility_rule": "Use the same objective and threshold-independent reference rows as H2 so held-out loss comparisons remain interpretable."
+  },
+  "cross_validation": {
+    "type": "leave_one_colony_out",
+    "colonies": 6,
+    "nested_models": {
+      "H3_null": "Estimate ell0, kappa_turn, and q with the history gate disabled (rho_gate=0).",
+      "H3_context": "Estimate ell0, kappa_turn, q, lambda_history, tau_gate, and rho_gate."
+    },
+    "comparison": "Fit both models on five colonies and score on the sixth with a separate evaluation seed stream.",
+    "promotion_guard": "The history-dependent H3_context must improve held-out loss over H3_null in at least 5 of 6 folds and show positive median held-out improvement.",
+    "H2_comparison_guard": "To call H3 development-preferred over H2-v1, H3_context must also have lower held-out loss than the recorded H2-v1 candidate in at least 4 of 6 matching colony folds and positive median relative improvement versus H2-v1."
+  },
+  "identifiability": {
+    "report_effective_hazard_multipliers": [
+      "M200 = 1 - rho_gate*(1-exp(-200/lambda_history))",
+      "M1000 = 1 - rho_gate*(1-exp(-1000/lambda_history))"
+    ],
+    "report_effective_initial_mean_free_paths": [
+      "ell200 = ell0 / M200",
+      "ell1000 = ell0 / M1000"
+    ],
+    "rule": "If lambda_history and rho_gate form a broad ridge while M200/M1000 are stable, report the effective multipliers/mean-free-paths rather than false point identification.",
+    "boundary_warning": "Parameters repeatedly selected at search bounds are not considered identified."
+  },
+  "structural_negative_controls": [
+    "No direct speed modulation is permitted.",
+    "Turn-angle distribution conditional on a reorientation must be identical across short and long histories.",
+    "No direct centerline attraction or exit-edge targeting is permitted."
+  ],
+  "post_fit_diagnostics_only_until_measurement_threshold_is_recovered": [
+    "moving speed",
+    "moving distance",
+    "straightness"
+  ],
+  "raw_trajectory_tests_if_data_recovered": [
+    "first-reorientation distance/time",
+    "reorientation count by early/late time window",
+    "free-path-length distribution",
+    "conditional turn-angle distribution",
+    "hazard decay with time since entry"
+  ],
+  "holdout_rule": "The Y-maze remains completely inaccessible to fitting, candidate ranking, stopping rules, and model selection.",
+  "canonical_model_rule": "H3 estimation tools may write reports only. Even a passed internal promotion guard creates at most a development-preferred candidate; it does not automatically modify the canonical ant model."
+}
