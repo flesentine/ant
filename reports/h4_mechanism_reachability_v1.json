@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "H4_mechanism_reachability_v1",
+  "status": "mechanically_reachable_not_fitted_not_selected",
+  "execution": {
+    "repo_commit": "1e9e16366ffc87dfd38407abf08abda015fbce76",
+    "workflow_run_id": 33680653375,
+    "artifact_id": 9866099124,
+    "artifact_zip_sha256": "2527ce8324c02553d3217c038489262f6c4e53b9e41fb789d11fdf39e42f462a",
+    "trials_per_condition": 400,
+    "seed_start": 928491,
+    "seed_end": 928890,
+    "physics_dt_s": 0.02,
+    "common_random_numbers": true
+  },
+  "model": {
+    "id": "lasius_niger_locomotion_h4_v1",
+    "model_hash": "fcea34e0",
+    "parameter_status": "ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED",
+    "lambda_activation_mm": 500,
+    "tau_activation_s": 5,
+    "rho_speed": 0.25
+  },
+  "short_200mm": {
+    "activation_initial": 0.3296799539643594,
+    "mean_exit_time_s": 8.787100000000002,
+    "mean_observed_distance_mm": 214.79349179265452,
+    "mean_observed_straightness": 0.7321427610557718,
+    "mean_observed_moving_speed_mm_s": 24.922941924906617
+  },
+  "long_1000mm": {
+    "activation_initial": 0.8646647167633948,
+    "mean_exit_time_s": 8.183600000000002,
+    "mean_observed_distance_mm": 212.10736509443512,
+    "mean_observed_straightness": 0.7445127057796086,
+    "mean_observed_moving_speed_mm_s": 26.640026244149873
+  },
+  "structural_checks": {
+    "long_activation_exceeds_short": true,
+    "long_moving_speed_exceeds_short": true,
+    "long_exit_time_lower": true,
+    "long_straightness_exceeds_short": true,
+    "zero_history_context_equivalence_tested": true,
+    "rho_zero_context_equivalence_tested": true,
+    "heading_rng_cadence_unchanged_tested": true,
+    "pause_rng_cadence_unchanged_tested": true,
+    "exact_exponential_activation_decay_tested": true,
+    "activation_integral_step_split_invariance_tested": true
+  },
+  "restrictions": {
+    "fit_performed": false,
+    "reference_targets_accessed_by_reachability_runner": false,
+    "moving_speed_used_as_fit_target": false,
+    "ymaze_accessed": false,
+    "selection_performed": false,
+    "canonical_model_updated": false
+  },
+  "conclusion": "H4-v1 is mechanically reachable: with fixed engineering-only parameters it produces the frozen qualitative speed-side signature while invariant tests show that matched short/long trials preserve the baseline biology RNG cadence, heading process, and pause process. This is a reachability result only. It is not a parameter estimate, held-out model comparison, or promotion result."
+}
