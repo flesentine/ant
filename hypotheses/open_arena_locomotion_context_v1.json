@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "id": "open_arena_locomotion_context_v1",
   "reference_dataset": "poissonnier2026_open_arena",
   "scope": "DCM control treatments only",
@@ -29,33 +29,42 @@
     },
     {
       "id": "H2_persistent_directional_state",
-      "status": "implemented_and_high_resolution_internal_cv_failed_promotion",
+      "status": "implemented_high_resolution_not_promoted_historical_scorer_audited",
       "model": "lasius_niger_locomotion_h2_v1",
       "freeze": "h2_persistent_directional_state_v1.json",
       "estimation_policy": "h2_parameter_estimation_v1.json",
-      "result": "reports/h2_parameter_estimation_500x60_v1.json",
+      "historical_result": "reports/h2_parameter_estimation_500x60_v1.json",
+      "scoring_audit": "reports/estimator_scoring_audit_v1.json",
       "claim": "Sustained constrained travel creates a decaying directional-persistence state that continuously reduces angular diffusion after arena entry.",
       "selection_status": "not_promoted",
-      "internal_cv": {"heldout_wins": 4, "folds": 6, "median_relative_improvement": 0.015548606059043324},
-      "reason": "Failed the frozen >=5/6 held-out-colony promotion guard and showed unstable parameter estimates."
+      "reason": "The historical 500x60 run failed its frozen promotion rule. Its original held-out losses used the pre-audit scorer and are retained only as history; H3 comparisons re-evaluate the recorded H2 fold candidates under the corrected matched scorer."
     },
     {
       "id": "H3_transient_reorientation_gate",
-      "status": "mechanism_and_loco_estimator_implemented_not_high_resolution_evaluated",
+      "status": "implemented_and_high_resolution_internal_cv_failed_promotion",
       "model": "lasius_niger_locomotion_h3_v1",
       "freeze": "h3_transient_reorientation_gate_v1.json",
       "estimation_policy": "h3_parameter_estimation_v1.json",
       "reachability_runner": "tools/run-h3-mechanism.js",
       "estimation_runner": "tools/run-h3-estimation.js",
+      "result": "reports/h3_parameter_estimation_500x60_v1.json",
       "claim": "Recent sustained constrained walking transiently suppresses the hazard of discrete major reorientation events, while leaving turn angles conditional on an event unchanged.",
-      "selection_status": "not_high_resolution_evaluated",
-      "distinction_from_H2": "H2 continuously scales angular diffusion; H3 changes only event timing in a run-and-reorientation locomotion family.",
-      "next_gate": "Run the frozen high-resolution six-fold H3 LOCO estimation; promote only if H3 beats H3-null on >=5/6 folds with positive median improvement and separately clears the frozen H2 comparison guard."
+      "selection_status": "not_promoted",
+      "internal_cv": {
+        "heldout_wins_vs_H3_null": 1,
+        "folds": 6,
+        "median_relative_improvement_vs_H3_null": -0.005956929513208382,
+        "heldout_wins_vs_H2_v1": 2,
+        "median_relative_improvement_vs_H2_v1": -0.06202315374689982
+      },
+      "reason": "Failed both frozen guards under the corrected scorer: only 1/6 held-out wins versus H3-null and 2/6 versus matched re-evaluated H2-v1 candidates. Do not tune this same H3 mechanism harder on these outcomes.",
+      "distinction_from_H2": "H2 continuously scales angular diffusion; H3 changes only event timing in a run-and-reorientation locomotion family."
     }
   ],
   "screening_decision": {
     "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
     "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
+    "current_decision": "H2-v1 and H3-v1 are both not promoted. H1 remains unresolved because the raw entry-state evidence is missing; a genuinely different mechanism class is required before further open-arena development fitting.",
     "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
   }
 }
