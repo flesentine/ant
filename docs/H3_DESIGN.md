@@ -1,6 +1,6 @@
 # H3 — transient reorientation gate
 
-Status: **mechanism implemented and frozen; not fitted; not selected**.
+Status: **mechanism and LOCO estimator implemented and frozen; not high-resolution fitted; not selected**.
 
 H3 is a distinct locomotion mechanism proposed after H2-v1 failed its high-resolution internal leave-one-colony-out promotion guard. The mechanism and estimation policy were frozen before H3 implementation or parameter search.
 
@@ -61,6 +61,10 @@ H3 does **not** use one Bernoulli turn draw per physics tick. Each ant carries a
 
 This is required so event time, event count, and free-path length converge across physics timesteps.
 
+## Exact observation sampling through turns
+
+H3 writes a piecewise sub-step truth trace for each physics step. The 25-fps observation sampler uses those segments whenever a virtual camera timestamp falls inside a step, so a frame immediately before a sub-step turn cannot interpolate across the later corner. A deterministic CI test requires identical H3 camera trajectories at 10, 20, and 50 ms physics timesteps.
+
 ## RNG isolation
 
 H3 stochastic events have dedicated named streams:
@@ -112,6 +116,7 @@ The implemented H3 runtime now has CI tests for:
 - exact exponential `G` decay;
 - zero-history and `rho=0` context removal;
 - integrated-hazard event time/count convergence at 10, 20, and 50 ms physics timesteps;
+- observation-level trajectory convergence at 10, 20, and 50 ms physics timesteps;
 - sub-step event times rather than tick-boundary turns;
 - dedicated event/angle RNG streams;
 - baseline speed/pause RNG isolation across different history conditions;
@@ -147,11 +152,11 @@ sigma_effective = sigma0 * (1 - rho * P)
 
 H3 leaves turn size conditional on an event unchanged and changes only the event timing/frequency. If raw trajectories are recovered, useful discriminators include first-turn distance/time, early/late turn counts, free-path-length distributions, and conditional turn-angle distributions.
 
-## Development estimation policy
+## Implemented development estimator
 
-The already-frozen policy is `hypotheses/h3_parameter_estimation_v1.json`.
+The frozen policy is `hypotheses/h3_parameter_estimation_v1.json`; the implementation is `tools/run-h3-estimation.js`.
 
-For each leave-one-colony-out fold it will compare:
+For each leave-one-colony-out fold it compares:
 
 ```text
 H3-null
@@ -165,10 +170,44 @@ H3-context
   + lambda_history + tau_gate + rho_gate
 ```
 
-Only threshold-independent open-arena measurements may be used. H3-context must beat H3-null on at least **5 of 6** held-out colonies with positive median improvement. To be considered development-preferred over H2-v1, it must additionally beat H2-v1 on at least **4 of 6** matching held-out folds with positive median improvement.
+Only the 51 threshold-independent DCM-control rows are available to the estimator: `Total_Frames/25`, middle-zone frame fraction, beeline, and exit edge. Moving speed, moving distance, straightness, and proportion moving remain forbidden fit observables until the AnimalTA movement-classifier details are recovered.
 
-The Y-maze remains inaccessible to fitting, ranking, stopping rules, and model selection.
+The estimator uses deterministic Halton candidates and matched simulation seeds. The post-toothpick orientation nuisance `q` is shared across short and long conditions; the exact same orientation RNG draw is used for a matched short/long simulation seed, so `q` cannot itself create the treatment contrast.
+
+For the H2 comparison, the estimator does not compare against a stale Monte Carlo loss. It loads each recorded high-resolution H2-v1 fold candidate and re-evaluates that candidate on the same held-out colony using the same evaluation seeds, trial count, and shared entry-transition random-number stream used for H3.
+
+Every H3 candidate reports:
+
+```text
+M200
+M1000
+ell200
+ell1000
+```
+
+and flags parameters selected within 1% of a search bound. This is intended to expose `lambda_history`/`rho_gate` ridges and boundary non-identifiability rather than hide them behind a point estimate.
+
+The two guards are reported separately:
+
+1. H3-context must beat H3-null on at least **5 of 6** held-out colonies with positive median improvement.
+2. To be called development-preferred over H2-v1, H3 must also beat the re-evaluated H2-v1 candidate on at least **4 of 6** held-out colonies with positive median improvement.
+
+Passing the second guard does not substitute for the first. Even passing both creates only an internally development-preferred candidate; it does not modify the canonical ant and does not unlock the Y-maze.
+
+## CI estimator smoke
+
+CI executes:
+
+```bash
+node tools/run-h3-estimation.js \
+  --mode loco \
+  --candidates 8 \
+  --trials 4 \
+  --seed 982000
+```
+
+This is deliberately too small to be interpreted scientifically. Its purpose is only to prove that all six folds, both nested H3 models, the matched H2 re-evaluation path, report generation, policy checks, and no-Y-maze guardrails execute successfully.
 
 ## Next gate
 
-H3 parameter estimation is still locked. The next step is to implement the frozen H3 LOCO estimator without changing this mechanism or its promotion rules. Even a passed internal promotion guard would create only a development-preferred candidate; it would not automatically modify the canonical ant.
+Run the frozen high-resolution H3 LOCO estimation without changing the H3 mechanism, objective, parameter bounds, or promotion rules. The resulting six held-out-colony comparisons—not pooled fit quality—determine whether H3-v1 earns internal development preference.
