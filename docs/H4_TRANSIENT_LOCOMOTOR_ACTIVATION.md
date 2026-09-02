@@ -21,6 +21,8 @@ v_H4(t) = v_baseline(t) * (1 + rho_speed * A(t))
 
 `L` is `recent_constrained_travel_mm`. The short/long treatment label itself is not an input.
 
+The implementation integrates the exponentially decaying activation over each physics step and uses its exact step mean as the speed multiplier. H4 adds no random-number stream: matched trials consume the same baseline speed, heading, pause, protocol, and observation draws.
+
 ## Why test a speed-side mechanism
 
 In the descriptive DCM-control record, long-history ants have higher mean moving speed than short-history ants, and the sign of that contrast is stable in all six leave-one-colony-out recalculations. The descriptive bootstrap interval still reaches zero, so this is motivation rather than proof.
@@ -37,6 +39,46 @@ That makes H4 falsifiably different from H2/H3:
 - speed contrast: decays with time;
 - zero history or `rho_speed = 0`: exact context-free behavior.
 
+## Implementation
+
+The engineering-only model is `models/lasius_niger_locomotion_h4_v1.json`. Its demonstration values are:
+
+```text
+lambda_activation = 500 mm
+tau_activation    = 5 s
+rho_speed         = 0.25
+```
+
+These are mechanism-reachability values, **not biological estimates**.
+
+`src/integrity.js` owns H4 latent-state initialization, exact decay, step-averaged speed gain, provenance, and integrity firewalls. `src/sim-core.js` exposes a neutral per-ant `speedMultiplier` whose default is exactly `1`, leaving H0/H2/H3 unchanged unless H4 explicitly sets it.
+
+The H4 test suite verifies:
+
+- exact exponential activation decay;
+- exact activation-integral consistency when a step is split;
+- matched short/long trials retain identical heading evolution, speed-noise state, pause state, and biology RNG cadence;
+- zero history is trajectory-equivalent to H4 disabled;
+- `rho_speed = 0` is trajectory-equivalent to H4 disabled;
+- protocol/state layers cannot inject H4 parameters or latent `A`;
+- the intended speed-side signature is mechanically reachable.
+
+## 400-trial mechanism reachability
+
+The verified reachability run used 400 matched trials per condition, seeds `928491..928890`, and 20-ms physics. No reference target file was loaded, no optimization was performed, and the Y-maze was not accessed.
+
+| Metric | 200 mm history | 1000 mm history |
+| --- | ---: | ---: |
+| Initial activation | 0.32968 | 0.86466 |
+| Observed moving speed | 24.923 mm/s | 26.640 mm/s |
+| Time to edge | 8.787 s | 8.184 s |
+| Observed distance | 214.793 mm | 212.107 mm |
+| Straightness | 0.73214 | 0.74451 |
+
+All frozen qualitative reachability checks passed: the long-history condition had greater activation, greater moving speed, earlier edge arrival, and slightly greater spatial straightness. The exact execution is recorded in `reports/h4_mechanism_reachability_v1.json`.
+
+This result answers only **can this mechanism produce the intended structural signature without contaminating the other processes?** It does not answer whether H4 explains the data better than a matched null or H2/H3.
+
 ## Measurement firewall
 
 The existing threshold-independent H2/H3 estimation targets remain the only allowed development-fit targets:
@@ -50,12 +92,12 @@ Moving speed remains a **diagnostic only** until the AnimalTA movement classifie
 
 ## Required order of work
 
-1. **Freeze H4 mechanism** — this document and `hypotheses/h4_transient_locomotor_activation_v1.json`.
-2. Implement H4 with engineering-only values.
-3. Add mechanism tests proving that H4 changes speed but not heading RNG, pause RNG, entry state, or observation RNG.
-4. Run reachability only — no target fitting and no Y-maze access.
-5. Freeze a separate H4 estimation policy only after the implementation passes.
-6. If estimation is later run, compare H4-context against a matched H4-null baseline with shared nuisance parameters and common random numbers under leave-one-colony-out evaluation.
+1. **Freeze H4 mechanism** — complete.
+2. Implement H4 with engineering-only values — complete.
+3. Add mechanism/invariance tests — complete.
+4. Run reachability only — complete.
+5. **Freeze a separate H4 estimation policy before any H4 parameter search.**
+6. Only then, if estimation is authorized, compare H4-context against a matched H4-null baseline with shared nuisance parameters and common random numbers under leave-one-colony-out evaluation.
 
 ## Current scientific status
 
@@ -64,7 +106,7 @@ H0  -> inadequate
 H1  -> unresolved; entry-state evidence missing
 H2  -> not promoted
 H3  -> not promoted
-H4  -> mechanism frozen; not implemented; not searched
+H4  -> implemented; mechanism reachability verified; not fitted; not searched; not promoted
 ```
 
 The canonical ant remains unchanged.
