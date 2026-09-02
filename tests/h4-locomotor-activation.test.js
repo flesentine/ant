@@ -52,6 +52,25 @@ assert.strictEqual(cfg.rho,0.25);
   near(effects[1],effects[2],2e-9);
 }
 
+// A mid-step boundary exit solves the decaying H4 speed integral, not a constant full-step mean speed.
+{
+  const b=h4Bundle();
+  b.experiment.protocol.entry_state.position_jitter_mm=0;
+  b.experiment.protocol.entry_state.heading_jitter_rad=0;
+  Object.assign(b.model.movement,{speed_sd_mm_s:0,speed_reversion_rate_s:0,speed_noise_sigma_sqrt_s:0,angular_sigma_rad_sqrt_s:0,pause_rate_s:0});
+  const sim=new Simulation(b,445577),ant=sim.ants[0],a0=ant.locomotorActivationInitial;
+  const v0=ant.baseSpeed*ant.speedFactor,tau=sim.h4Config.tau,rho=sim.h4Config.rho;
+  const target=sim.apparatus.world.width-ant.x;
+  const travel=t=>v0*(t+rho*a0*tau*(1-Math.exp(-t/tau)));
+  let lo=0,hi=20;
+  for(let i=0;i<90;i++){const mid=(lo+hi)/2;if(travel(mid)<target)lo=mid;else hi=mid;}
+  const expected=(lo+hi)/2;
+  sim.runUntilComplete(30,0.5);
+  assert.ok(sim.ants[0].finished,'deterministic H4 ant should reach the arena boundary');
+  near(sim.ants[0].completedAt,expected,2e-9);
+  near(sim.ants[0].locomotorActivation,a0*Math.exp(-expected/tau),2e-10);
+}
+
 // Longer observable travel changes displacement only: biology RNG cadence, heading, and pause state stay matched.
 {
   const short=h4Bundle('open_arena_short_control.json');
