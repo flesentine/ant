@@ -68,6 +68,7 @@
     ant.h3AngleRng = null;
     ant.h3HazardRemaining = null;
     ant.h3StreamSeeds = null;
+    ant.substepTrace = [];
     if (!cfg) return null;
     const L = Math.max(0, Number(resolvedState[cfg.inputFact]) || 0);
     const g0 = clamp(1 - Math.exp(-L / cfg.lambda), 0, 1);
@@ -122,11 +123,17 @@
     return lo;
   }
 
+  function traceSegment(ant, start_s, end_s, x0, y0, x1, y1, heading, state, outcome) {
+    if (!(end_s > start_s + EPS)) return;
+    ant.substepTrace = ant.substepTrace || [];
+    ant.substepTrace.push({ start_s, end_s, x0, y0, x1, y1, heading, state, outcome: outcome || null });
+  }
+
   function moveSegment(ant, segmentDt, sim, elapsedBefore, speed) {
     if (!(segmentDt > EPS) || ant.finished) return { activeDt: 0, finished: ant.finished };
-    const ox = ant.x, oy = ant.y;
-    const nx = ox + Math.cos(ant.heading) * speed * segmentDt;
-    const ny = oy + Math.sin(ant.heading) * speed * segmentDt;
+    const ox = ant.x, oy = ant.y, segmentHeading = ant.heading;
+    const nx = ox + Math.cos(segmentHeading) * speed * segmentDt;
+    const ny = oy + Math.sin(segmentHeading) * speed * segmentDt;
     if (!core.pointInGeometry(nx, ny, sim.apparatus.geometry)) {
       if (sim.apparatus.boundary.mode !== 'terminate') {
         throw new Error('H3 v1 currently requires a terminating apparatus boundary; reflective H3 geometry is not implemented.');
@@ -138,7 +145,9 @@
       const moved = Math.hypot(ant.x - ox, ant.y - oy);
       ant.distanceTravelled += moved;
       if (moved > 0) ant.movingTime += activeDt;
-      ant.finish(sim.apparatus.boundary.outcome || 'boundary_exit', sim.time + elapsedBefore + activeDt, sim, { x: ant.x, y: ant.y });
+      const outcome = sim.apparatus.boundary.outcome || 'boundary_exit';
+      ant.finish(outcome, sim.time + elapsedBefore + activeDt, sim, { x: ant.x, y: ant.y });
+      traceSegment(ant, elapsedBefore, elapsedBefore + activeDt, ox, oy, ant.x, ant.y, segmentHeading, 'moving', outcome);
       return { activeDt, finished: true };
     }
     ant.x = nx;
@@ -147,7 +156,12 @@
     ant.distanceTravelled += moved;
     if (moved > 0) ant.movingTime += segmentDt;
     const terminal = core.terminalAt(ant.x, ant.y, sim.apparatus.terminal_regions);
-    if (terminal) ant.finish(terminal.label || 'terminal', sim.time + elapsedBefore + segmentDt, sim, { x: ant.x, y: ant.y });
+    let outcome = null;
+    if (terminal) {
+      outcome = terminal.label || 'terminal';
+      ant.finish(outcome, sim.time + elapsedBefore + segmentDt, sim, { x: ant.x, y: ant.y });
+    }
+    traceSegment(ant, elapsedBefore, elapsedBefore + segmentDt, ox, oy, ant.x, ant.y, segmentHeading, 'moving', outcome);
     return { activeDt: segmentDt, finished: ant.finished };
   }
 
@@ -156,6 +170,7 @@
     const cfg = sim.h3Config || reorientationGateConfig(sim.model);
     if (!cfg) throw new Error('H3 update called without an enabled reorientation_gate model.');
     ant.contactFlash = Math.max(0, ant.contactFlash - dt);
+    ant.substepTrace = [];
     const m = sim.model.movement;
     const gate0 = clamp(Number(ant.reorientationGate) || 0, 0, 1);
 
@@ -164,7 +179,9 @@
       ant.state = 'paused';
     }
     if (ant.pauseRemaining > 0) {
+      const px = ant.x, py = ant.y, ph = ant.heading;
       ant.pauseRemaining -= dt;
+      traceSegment(ant, 0, dt, px, py, px, py, ph, 'paused', null);
       if (ant.pauseRemaining <= 0) ant.state = 'moving';
       setGate(ant, cfg, gate0, dt);
       ant.recordTail(dt);
@@ -221,6 +238,7 @@
     initializeAnt,
     integratedHazard,
     solveEventOffset,
-    updateAnt
+    updateAnt,
+    traceSegment
   };
 });
