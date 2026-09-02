@@ -13,7 +13,7 @@
     "entry_point":"center",
     "entry_state":{"heading_rad":0,"position_jitter_mm":0.5,"heading_jitter_rad":0.08},
     "entry_state_provenance":{"status":"assumed_pending_reference_entry_distribution","fit_against_downstream_metrics":false},
-    "state_facts":{"recent_travel_mm":1000,"travel_direction":"outbound"},
+    "state_facts":{"recent_travel_mm":1000,"recent_constrained_travel_mm":1000,"travel_direction":"outbound"},
     "approach_distance_mm":1000,"approach_width_mm":10,"apparatus_transition":"vertical_toothpick_through_central_hole",
     "treatment":{"type":"solvent_control","solvent":"DCM"}
   },
