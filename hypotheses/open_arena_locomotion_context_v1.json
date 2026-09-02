@@ -41,13 +41,15 @@
     },
     {
       "id": "H3_transient_reorientation_gate",
-      "status": "mechanism_and_estimation_design_frozen_not_implemented",
+      "status": "implemented_mechanism_demo_not_fitted",
+      "model": "lasius_niger_locomotion_h3_v1",
       "freeze": "h3_transient_reorientation_gate_v1.json",
       "estimation_policy": "h3_parameter_estimation_v1.json",
+      "reachability_runner": "tools/run-h3-mechanism.js",
       "claim": "Recent sustained constrained walking transiently suppresses the hazard of discrete major reorientation events, while leaving turn angles conditional on an event unchanged.",
-      "selection_status": "not_evaluated",
+      "selection_status": "not_evaluated_against_reference_targets",
       "distinction_from_H2": "H2 continuously scales angular diffusion; H3 changes only event timing in a run-and-reorientation locomotion family.",
-      "next_gate": "Implement the frozen mechanism and pass mechanism-only invariants before any H3 parameter search."
+      "next_gate": "Pass mechanism-only invariants and no-reference reachability; only then may the already-frozen H3 LOCO estimation policy be implemented."
     }
   ],
   "screening_decision": {
