@@ -1,0 +1,48 @@
+{
+  "schema_version": 3,
+  "id": "lasius_niger_locomotion_h3_v1",
+  "species": "Lasius niger",
+  "status": "mechanism_demo_not_fitted",
+  "movement": {
+    "base_speed_mm_s": 24,
+    "speed_sd_mm_s": 2.0,
+    "angular_sigma_rad_sqrt_s": 0,
+    "speed_reversion_rate_s": 2.0,
+    "speed_noise_sigma_sqrt_s": 0.07,
+    "pause_rate_s": 0.008,
+    "pause_min_s": 0.1,
+    "pause_max_s": 0.5
+  },
+  "reorientation_gate": {
+    "enabled": true,
+    "mechanism_id": "H3_transient_reorientation_gate_v1",
+    "input_fact": "recent_constrained_travel_mm",
+    "baseline": {
+      "type": "run_and_reorientation",
+      "mean_free_path_mm": 40,
+      "turn_concentration": 2
+    },
+    "initialization": {
+      "type": "saturating_distance",
+      "history_distance_scale_mm": 500
+    },
+    "decay": {
+      "type": "exponential",
+      "gate_tau_s": 5
+    },
+    "effect": {
+      "type": "turn_hazard_reduction",
+      "max_hazard_reduction_fraction": 0.5
+    }
+  },
+  "contacts": {
+    "enabled": false,
+    "radius_mm": 1.6,
+    "avoidance_turn_rad": 0.18
+  },
+  "provenance": {
+    "parameter_status": "ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED",
+    "mechanism_freeze": "hypotheses/h3_transient_reorientation_gate_v1.json",
+    "note": "H3 uses the existing speed and pause substrate but replaces continuous angular diffusion with discrete reorientation events. Engineering values are for mechanism reachability only and are not biological estimates."
+  }
+}
