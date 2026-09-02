@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "H4_mechanism_reachability_v1",
   "status": "mechanically_reachable_not_fitted_not_selected",
   "execution": {
@@ -12,6 +12,17 @@
     "seed_end": 928890,
     "physics_dt_s": 0.02,
     "common_random_numbers": true
+  },
+  "final_verification": {
+    "repo_commit": "820a69695168922f59f54f51d82262662c1cf3b6",
+    "workflow_run_id": 33681326517,
+    "full_h0_h4_test_suite_passed": true,
+    "reachability_400x2_rerun_passed": true,
+    "additional_frozen_checks": {
+      "activation_induced_displacement_converged_dt_0_04_0_02_0_01": true,
+      "observation_fps_noise_logging_ablation_preserved_biology": true
+    },
+    "temporary_branch_workflow_removed_after_success": true
   },
   "model": {
     "id": "lasius_niger_locomotion_h4_v1",
@@ -45,7 +56,11 @@
     "heading_rng_cadence_unchanged_tested": true,
     "pause_rng_cadence_unchanged_tested": true,
     "exact_exponential_activation_decay_tested": true,
-    "activation_integral_step_split_invariance_tested": true
+    "activation_integral_step_split_invariance_tested": true,
+    "activation_induced_displacement_timestep_convergence_tested": true,
+    "observation_logging_ablation_tested": true,
+    "same_model_hash_short_long_enforced": true,
+    "protocol_h4_parameter_injection_rejected": true
   },
   "restrictions": {
     "fit_performed": false,
@@ -55,5 +70,5 @@
     "selection_performed": false,
     "canonical_model_updated": false
   },
-  "conclusion": "H4-v1 is mechanically reachable: with fixed engineering-only parameters it produces the frozen qualitative speed-side signature while invariant tests show that matched short/long trials preserve the baseline biology RNG cadence, heading process, and pause process. This is a reachability result only. It is not a parameter estimate, held-out model comparison, or promotion result."
+  "conclusion": "H4-v1 is mechanically reachable: with fixed engineering-only parameters it produces the frozen qualitative speed-side signature while the complete frozen implementation checks show that matched short/long trials preserve the baseline biology RNG cadence, heading process, pause process, and observation-to-biology separation, with the H4 displacement contribution converging across tested physics timesteps. This is a reachability result only. It is not a parameter estimate, held-out model comparison, or promotion result."
 }
