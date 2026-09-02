@@ -77,7 +77,7 @@ assert.strictEqual(cfg.rho,0.25);
 // Protocol/state cannot inject latent H4 state or H4 biological parameters.
 {
   const badA=h4Bundle();badA.experiment.protocol.state_facts.A=0.9;
-  assert.throws(()=>new Simulation(badA,1),/Latent biological state forbidden/);
+  assert.throws(()=>new Simulation(badA,1),/Latent biological state forbidden|Biology override forbidden/);
   const badRho=h4Bundle();badRho.experiment.protocol.state_facts.rho_speed=2;
   assert.throws(()=>new Simulation(badRho,1),/Model parameter forbidden|Biology override forbidden/);
   const badModelOverride=h4Bundle();badModelOverride.experiment.protocol.locomotor_activation={effect:{max_speed_gain_fraction:9}};
