@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "id": "locomotion_estimator_scoring_audit_v1",
+  "status": "corrected_before_H3_high_resolution_search",
+  "date": "2026-09-02",
+  "scope": [
+    "tools/run-h2-estimation.js",
+    "tools/run-h3-estimation.js"
+  ],
+  "corrections": [
+    {
+      "issue": "Simulated timeout outcomes were omitted from the exit-edge probability vector while the denominator still included all trials.",
+      "impact": "The four-element vector could sum to less than one, so the quantity passed to the Hellinger formula was not a normalized probability distribution and timeout-heavy candidates were under-penalized categorically.",
+      "correction": "Use a normalized five-category outcome distribution: left, right, top, bottom, timeout. Published rows have zero timeout mass; simulated timeouts are explicit probability mass."
+    },
+    {
+      "issue": "LOCO held-out continuous metric distances were standardized using the held-out colony's own SD.",
+      "impact": "This violated the frozen objective specification of pooled training SD and allowed small held-out folds to determine their own metric weights.",
+      "correction": "Compute time, middle-zone, and beeline SDs once from the five training colonies in each fold and freeze those scales for all held-out H3-null, H3-context, and matched H2-v1 evaluations."
+    }
+  ],
+  "historical_H2_report": {
+    "path": "reports/h2_parameter_estimation_500x60_v1.json",
+    "treatment": "Preserved unchanged as the historical pre-audit execution record.",
+    "interpretation": "Its no-promotion decision remains conservative, but its recorded held-out loss values and 4/6 count must not be used as the current quantitative comparator without corrected re-evaluation.",
+    "candidate_use": "Its fold-specific fitted H2 parameter candidates may be re-evaluated under the corrected scorer because the H3 comparison runner explicitly performs fresh matched held-out simulations and scoring."
+  },
+  "H3_rule": "No high-resolution H3 parameter search or promotion decision may use the pre-audit scorer.",
+  "canonical_model_updated": false,
+  "ymaze_accessed": false
+}
