@@ -65,6 +65,8 @@ The H4 test suite verifies:
 - protocol/state layers cannot inject H4 parameters or latent `A`;
 - the intended speed-side signature is mechanically reachable.
 
+The full H0–H4 implementation suite passed on commit `1e9e16366ffc87dfd38407abf08abda015fbce76` in GitHub Actions run `33680653375` before the one-shot branch verification workflow was removed.
+
 ## 400-trial mechanism reachability
 
 The verified reachability run used 400 matched trials per condition, seeds `928491..928890`, and 20-ms physics. No reference target file was loaded, no optimization was performed, and the Y-maze was not accessed.
