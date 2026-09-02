@@ -20,6 +20,7 @@ node tests/model-competition.test.js
 node tests/h2-persistence.test.js
 node tests/h2-estimation.test.js
 node tests/h3-reorientation.test.js
+node tests/h3-observation-convergence.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
