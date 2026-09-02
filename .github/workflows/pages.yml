@@ -22,6 +22,16 @@ jobs:
           node-version: '22'
       - name: Run reference tests
         run: ./tests/run-tests.sh
+      - name: Run frozen H2 mechanism reachability
+        run: |
+          mkdir -p /tmp/antlab-h2
+          node tools/run-h2-mechanism.js --trials 400 --seed 928491 --out /tmp/antlab-h2/h2-mechanism-results.json
+      - name: Upload H2 mechanism report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-mechanism-reachability
+          path: /tmp/antlab-h2/h2-mechanism-results.json
+          retention-days: 7
       - name: Probe final-version reference supplements
         id: reference_probe
         continue-on-error: true
@@ -73,7 +83,7 @@ jobs:
       - name: Assemble static site
         if: steps.pages.outputs.enabled == 'true'
         run: |
-          mkdir -p _site/src _site/experiments _site/models _site/apparatus _site/states _site/observations _site/scoring _site/reference
+          mkdir -p _site/src _site/experiments _site/models _site/apparatus _site/states _site/observations _site/scoring _site/reference _site/hypotheses
           cp index.html _site/index.html
           cp src/app.js src/sim-core.js src/measurement.js src/integrity.js src/style.css _site/src/
           cp experiments/*.json _site/experiments/
@@ -83,6 +93,7 @@ jobs:
           cp observations/*.json _site/observations/
           cp scoring/*.json _site/scoring/
           cp reference/*.json _site/reference/
+          cp hypotheses/*.json _site/hypotheses/
           touch _site/.nojekyll
       - name: Upload Pages artifact
         if: steps.pages.outputs.enabled == 'true'
