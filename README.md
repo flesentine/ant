@@ -1,29 +1,48 @@
-# ANTLAB v0.3.2b — Frozen H2 Mechanism
+# ANTLAB v0.3.2c — H2 Development Estimation
 
 **Live lab:** https://flesentine.github.io/ant/
 
-ANTLAB is a falsifiable ant-simulation substrate built one experimentally testable capability at a time. v0.3.2b keeps the v0.3.1 measurement foundation and v0.3.2a H0 screen intact, then adds a minimal persistent-directional-state mechanism without fitting it to the published targets.
+ANTLAB is a falsifiable ant-simulation substrate built one experimentally testable capability at a time. v0.3.2c keeps the frozen H2 mechanism intact and adds a guarded development-estimation procedure without unlocking canonical biological fitting or touching the Y-maze holdout.
 
-## What changed
-H0 remains screened out descriptively: the context-invariant locomotion substrate predicts no 20 cm vs 100 cm difference, while the verified Poissonnier 2026 DCM-control summaries show robust differences in moving distance, exit time, and straightness.
+## Why H2 cannot be fit alone
+The current baseline angular diffusion and the vertical-toothpick entry orientation were never independently calibrated. Both can strongly alter arena exit time and path geometry. Fitting only `lambda`, `tau`, and `rho` would risk forcing apparatus/baseline error into H2.
 
-H1 — different measured arena-entry conditions — remains blocked because the raw initial trajectory frames / entry-heading distributions are unavailable in the published supplements we have.
+The estimator therefore includes five development parameters:
 
-H2 is now implemented as `lasius_niger_locomotion_h2_v1`, governed by `hypotheses/h2_persistent_directional_state_v1.json`. Because we already know the reference outcome, this is explicitly a **post-outcome mechanism freeze before parameter tuning**, not a blind preregistration.
+- `sigma0`: baseline angular diffusion nuisance parameter.
+- `q`: shared post-toothpick orientation-retention probability; the same value must apply to 20 cm and 100 cm conditions.
+- `lambda_mm`, `tau_s`, `rho`: the frozen H2 mechanism parameters.
 
-The H2 latent state is intentionally tiny:
+Treatment-specific entry-heading fitting is forbidden because that would become H1 rather than H2.
+
+## What data may enter estimation
+Only threshold-independent DCM-control observables from the checksummed final Springer XLSX are allowed:
+
+- time to edge = `Total_Frames / 25`;
+- middle-zone frame fraction;
+- beeline distance;
+- exit-edge category.
+
+Moving speed, moving distance, straightness and proportion-time-moving remain diagnostics only until the AnimalTA movement classifier is recovered. The Y-maze is unavailable to fitting, candidate ranking, stopping rules and model selection.
+
+The 51 DCM-control rows are pinned in `reference/poissonnier2026_h2_estimation_targets.json` and regenerated from the final XLSX by `tools/derive-h2-estimation-targets.py`.
+
+## Internal cross-validation
+`tools/run-h2-estimation.js` performs simulation-based minimum-distance estimation using deterministic Halton candidates and common random numbers.
+
+Leave-one-colony-out mode fits two nested models on five colonies and evaluates them on the sixth:
+
+1. Baseline: estimate only `sigma0` and shared `q` with H2 disabled (`rho=0`).
+2. H2: estimate `sigma0`, `q`, `lambda_mm`, `tau_s`, and `rho`.
+
+H2 is not eligible for canonical promotion unless it improves held-out loss over the nested baseline in at least 5 of 6 folds and has positive median held-out improvement. Passing that gate would still be internal development evidence, not independent validation.
+
+Because `lambda` and `rho` may be weakly identifiable with only 200 mm and 1000 mm travel histories, reports also include the more directly identifiable effective amplitudes:
 
 ```text
-P0 = 1 - exp(-L / lambda)
-P(t + dt) = P(t) * exp(-dt / tau)
-sigma_heading_effective = sigma_heading_base * (1 - rho * P)
+A200  = rho * (1 - exp(-200/lambda))
+A1000 = rho * (1 - exp(-1000/lambda))
 ```
-
-where `L` is the observable fact `recent_constrained_travel_mm`. The frozen demonstration values are `lambda=500 mm`, `tau=5 s`, and `rho=0.5`; all are marked **ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED**.
-
-H2 cannot directly change speed, pause behavior, entry conditions, boundary rules, or measurement. Protocol JSON cannot inject `directional_persistence` directly. With zero constrained travel, H2 is tested to collapse exactly to H0 for the same random seed.
-
-**No H2 parameter was tuned. The H2 mechanism runner does not load the open-arena target file and does not access the Y-maze holdout.**
 
 ## Run
 ```bash
@@ -41,16 +60,22 @@ Open `http://localhost:8080`.
 node tools/run-model-competition.js --trials 400 --seed 928491
 ```
 
-## H2 mechanism reachability
+## Frozen H2 mechanism reachability
 ```bash
 node tools/run-h2-mechanism.js --trials 400 --seed 928491
 ```
-This reports the frozen H2 candidate's short/long predictions but performs no reference-target comparison, fitting, or model-selection decision.
 
-## Reference reconstruction
+## H2 development estimation
+Quick pooled search:
 ```bash
-./tools/fetch-poissonnier2026-reference.sh
+node tools/run-h2-estimation.js --mode pooled --candidates 400 --trials 50 --seed 970000
 ```
-The probe downloads the final-version Rmd/XLSX, verifies checksums, reconstructs the published summaries, regenerates the control-effect screening file, and requires an exact match with the pinned reference.
 
-Next: inspect the frozen H2 mechanism's behavior and decide whether the project has enough independent evidence to justify unlocking any parameter estimation. H1 remains the simpler unresolved alternative and must stay visible.
+Leave-one-colony-out internal cross-validation:
+```bash
+node tools/run-h2-estimation.js --mode loco --candidates 500 --trials 60 --seed 970000
+```
+
+Search resolution must always be reported. The small CI LOCO run is only a code-path smoke test and is not a scientific estimate.
+
+See `docs/H2_ESTIMATION.md` for the full estimation policy.
