@@ -22,6 +22,7 @@ node tests/h2-estimation.test.js
 node tests/h3-reorientation.test.js
 node tests/h3-observation-convergence.test.js
 node tests/h3-estimation.test.js
+node tests/h4-locomotor-activation.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
@@ -33,6 +34,7 @@ node --check tools/run-h2-mechanism.js
 node --check tools/run-h2-estimation.js
 node --check tools/run-h3-mechanism.js
 node --check tools/run-h3-estimation.js
+node --check tools/run-h4-mechanism.js
 node --check tools/load-bundle.js
 python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py tools/derive-poissonnier2026-control-effects.py tools/derive-h2-estimation-targets.py
-echo "All ANTLAB v0.3.2e H3-estimator tests PASS"
+echo "All ANTLAB H0-H4 implementation tests PASS"
