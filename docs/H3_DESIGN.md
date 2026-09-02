@@ -30,6 +30,20 @@ delta_heading ~ vonMises(mean = 0, concentration = kappa_turn)
 
 There is no left/right bias and no attraction to the arena centerline, start, or edge.
 
+## Continuous event clock
+
+H3 reorientations are a genuine continuous-time hazard process, **not a chance-per-tick rule**. Each ant carries a unit-exponential hazard threshold. The simulator integrates `h_turn(t)` through elapsed movement until that threshold is crossed.
+
+When a threshold is crossed inside a physics step:
+
+1. resolve the crossing at a sub-step time;
+2. move to that point under the pre-turn heading;
+3. draw and apply the turn there;
+4. draw a fresh exponential threshold;
+5. continue the remainder of the physics step under the new heading.
+
+A sufficiently large physics step must be capable of containing more than one turn event. Deferring all events to the end of a physics tick is forbidden because it would create timestep-dependent free paths and exit geometry.
+
 ## History-dependent H3 gate
 
 Observable protocol history provides only:
@@ -61,6 +75,21 @@ ell_effective(t)
 ```
 
 Longer constrained travel therefore predicts a lower early turn-event rate and longer early free paths. As `G` decays, the walk returns to the same context-free event process.
+
+## RNG isolation
+
+H3 gets dedicated named biological random streams:
+
+```text
+biology_h3_turn_event:<ant_id>
+biology_h3_turn_angle:<ant_id>
+```
+
+The event stream supplies exponential hazard thresholds. The turn-angle stream supplies von Mises draws.
+
+These draws may **not** consume the existing baseline ant RNG used by speed dynamics, pauses, or individual heterogeneity. Otherwise simply enabling H3 would shift later speed/pause draws and confound the nested H3-null versus H3-context comparison.
+
+Matched H3-null and H3-context trials use the same named stream seeds. Observation metadata, logging, and trajectory retention must not perturb any biological H3 stream.
 
 ## What H3 is not allowed to do
 
@@ -182,22 +211,26 @@ These are the effective initial reorientation-hazard multipliers and mean free p
 ## Implementation order
 
 1. Add an H3 model profile separate from H0/H2.
-2. Add continuous-time reorientation-event hazard.
-3. Add deterministic seeded von Mises turn sampling.
-4. Add latent `G` initialization and exact exponential decay.
-5. Extend the biology firewall with all H3 parameter/state keys.
-6. Add mechanism-only tests.
-7. Run a no-reference reachability report.
-8. Only after all of the above pass, implement H3 LOCO estimation using the already-frozen policy.
+2. Add dedicated H3 event-threshold and turn-angle RNG streams.
+3. Add the integrated continuous-time reorientation hazard clock with sub-step event timing.
+4. Add deterministic seeded von Mises turn sampling.
+5. Add latent `G` initialization and exact exponential decay.
+6. Extend the biology firewall with all H3 parameter/state keys.
+7. Add mechanism-only tests.
+8. Run a no-reference reachability report.
+9. Only after all of the above pass, implement H3 LOCO estimation using the already-frozen policy.
 
 ## Required mechanism tests before fitting
 
 - deterministic replay;
-- turn-hazard timestep convergence;
+- integrated turn-hazard event-count and free-path convergence across timestep sizes;
+- sub-step turn timing rather than end-of-step application;
 - exact `G` decay;
 - `G0(long) > G0(short)`;
 - zero-history / `rho=0` removes the context effect exactly;
 - matched `kappa_turn` gives the same conditional turn-angle distribution across histories;
+- dedicated H3 RNG streams do not perturb baseline speed or pause random draws;
+- observation/logging changes do not perturb H3 event times or turn angles;
 - H3 does not change speed directly;
 - protocol cannot inject H3 latent state or parameters;
 - short/long treatments use the exact same H3 biological model hash;
