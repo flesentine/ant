@@ -16,11 +16,13 @@ node tests/neutral-y-maze.test.js
 node tests/reference-manifest.test.js
 node tests/reference-source.test.js
 node tests/calibration-policy.test.js
+node tests/model-competition.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/integrity.js
 node --check src/app.js
 node --check tools/run-benchmark.js
+node --check tools/run-model-competition.js
 node --check tools/load-bundle.js
-python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py
-echo "All ANTLAB v0.3.1 measurement reconstruction tests PASS"
+python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py tools/derive-poissonnier2026-control-effects.py
+echo "All ANTLAB v0.3.2a null-model screening tests PASS"
