@@ -70,10 +70,10 @@ jobs:
           a=json.load(open('reference/poissonnier2026_h2_estimation_targets.json'))
           b=json.load(open('/tmp/antlab-reference/h2-estimation-targets-regenerated.json'))
           assert a==b, 'Pinned H2 estimation target differs from XLSX regeneration'
-          print('Pinned H2 threshold-independent estimation target reproduced from downloaded XLSX.')
+          print('Pinned threshold-independent estimation target reproduced from downloaded XLSX.')
           PY
           else
-            echo "::warning::Springer reference probe unavailable; H2 estimation-target regeneration gate was not run."
+            echo "::warning::Springer reference probe unavailable; estimation-target regeneration gate was not run."
           fi
       - name: Run H2 LOCO estimator smoke test
         run: |
@@ -85,6 +85,17 @@ jobs:
         with:
           name: h2-estimator-smoke
           path: /tmp/antlab-h2-estimation
+          retention-days: 7
+      - name: Run H3 LOCO estimator smoke test
+        run: |
+          mkdir -p /tmp/antlab-h3-estimation
+          node tools/run-h3-estimation.js --mode loco --candidates 8 --trials 4 --seed 982000 --out /tmp/antlab-h3-estimation/loco-smoke.json >/tmp/h3-estimation-smoke.log
+          echo "Low-resolution H3 LOCO execution-path smoke only; not a parameter estimate or model-selection result." > /tmp/antlab-h3-estimation/README.txt
+      - name: Upload H3 estimator smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h3-estimator-smoke
+          path: /tmp/antlab-h3-estimation
           retention-days: 7
       - name: Upload reference probe
         if: always()
