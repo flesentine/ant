@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "open_arena_locomotion_context_v1",
+  "reference_dataset": "poissonnier2026_open_arena",
+  "scope": "DCM control treatments only",
+  "contrast": "20 cm approach minus 100 cm approach",
+  "rules": {"fit_parameters":false,"use_ymaze_for_model_selection":false,"common_random_numbers_for_null_screen":true,"screening_is_not_calibration":true},
+  "primary_structural_metrics": ["total_distance_mm","time_to_arena_edge_s","path_straightness"],
+  "secondary_metrics": ["mean_moving_speed_mm_s","central_zone_fraction"],
+  "hypotheses": [
+    {"id":"H0_context_invariant","status":"implemented_screening_candidate","model":"lasius_niger_locomotion_v1","claim":"Approach distance does not alter subsequent open-arena locomotion beyond ordinary stochastic variation.","parameter_changes":"none"},
+    {"id":"H1_entry_condition","status":"blocked_by_missing_reference_input","claim":"The short/long difference is explained by different measured arena-entry conditions without a persistent internal state.","requires":["raw initial trajectory frames or measured entry heading/speed distributions"]},
+    {"id":"H2_persistent_directional_state","status":"candidate_not_fitted","claim":"Sustained constrained travel creates a decaying directional-persistence state that survives entry into the arena.","requires":["pre-registered state equation","parameter provenance","fitting unlock or independent prior constraints"]}
+  ],
+  "screening_decision": {"rule":"H0 is screening-incompatible when at least two primary structural metric contrasts fall outside the descriptive 95% bootstrap intervals and the observed contrast signs are stable under leave-one-colony-out recalculation.","warning":"This is a descriptive model screen, not a formal inferential test and not biological parameter fitting."}
+}
