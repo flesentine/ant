@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "id": "H3_transient_reorientation_gate_v1",
+  "status": "post_outcome_mechanism_freeze_before_implementation_or_parameter_search",
+  "honesty_note": "The Poissonnier 2026 open-arena outcome and the failure of H2-v1 were known before H3 was specified. This is not a blind preregistration. It freezes a genuinely different mechanism class before implementation or H3 parameter search.",
+  "species": "Lasius niger",
+  "scope": "open-arena DCM-control locomotion context only",
+  "mechanism_class": "piecewise_ballistic_run_and_reorientation",
+  "claim": "Recent sustained constrained walking transiently lowers the probability per unit distance of a major reorientation event after arena entry, without directly changing speed or the distribution of turn angles conditional on a reorientation.",
+  "biological_motivation": [
+    "Lasius niger locomotion has been modeled as straight runs separated by discrete reorientation events (Boltzmann-walker family).",
+    "H2-v1 changed continuous angular diffusion and failed its frozen 5/6 held-out-colony promotion guard.",
+    "H3 changes event timing rather than continuously scaling every heading perturbation, creating a distinct and falsifiable trajectory signature."
+  ],
+  "allowed_observable_inputs": ["recent_constrained_travel_mm"],
+  "forbidden_inputs": [
+    "Path_length treatment label",
+    "short/long condition id",
+    "reference metric values",
+    "pheromone presence",
+    "Y-maze outcome",
+    "colony identity as a biological control input",
+    "distance to arena centerline",
+    "distance to exit edge",
+    "future trajectory information"
+  ],
+  "baseline_walk": {
+    "description": "Piecewise ballistic motion with ordinary speed dynamics and pauses retained from the existing locomotion substrate, but large directional changes occur through explicit stochastic reorientation events rather than continuous Gaussian angular diffusion.",
+    "reorientation_hazard_per_mm": "k0 = 1 / ell0_mm",
+    "continuous_time_hazard": "h0_per_s(t) = speed_mm_s(t) / ell0_mm",
+    "event_probability": "p_turn(dt) = 1 - exp(-h_turn_per_s(t) * dt)",
+    "turn_angle_family": "symmetric von Mises distribution centered on zero heading change with concentration kappa_turn",
+    "directional_bias": "none",
+    "background_major_turns_between_events": "none; major changes in direction occur only at reorientation events",
+    "timestep_rule": "Turn events must use the continuous-time hazard expression; no probability-per-tick parameter is allowed."
+  },
+  "latent_state": {
+    "name": "reorientation_gate",
+    "symbol": "G",
+    "range": [0, 1],
+    "initialization": "G0 = 1 - exp(-L / lambda_history_mm), where L is recent_constrained_travel_mm",
+    "decay": "dG/dt = -G / tau_gate_s; exact step update G(t+dt)=G(t)*exp(-dt/tau_gate_s)",
+    "behavioral_effect": "h_turn_per_s(t) = speed_mm_s(t) / ell0_mm * (1 - rho_gate * G(t))",
+    "equivalent_mean_free_path": "ell_effective(t) = ell0_mm / (1 - rho_gate * G(t))",
+    "direct_effects_forbidden": [
+      "base speed",
+      "speed noise",
+      "pause hazard",
+      "pause duration",
+      "turn-angle distribution conditional on a turn",
+      "entry heading",
+      "entry position",
+      "boundary behavior",
+      "centerline attraction",
+      "observation model"
+    ]
+  },
+  "structural_predictions": [
+    "Longer recent constrained travel produces a larger G0 and therefore a lower early reorientation-event hazard.",
+    "The long-travel condition should have a longer first free path and fewer major reorientation events early after arena entry than the short-travel condition.",
+    "Conditional on a major reorientation occurring, the turn-angle distribution must be the same in short and long conditions.",
+    "H3 does not directly predict a speed difference between short and long conditions.",
+    "G decays toward zero, so path-history effects on reorientation frequency should weaken with time since arena entry.",
+    "With recent_constrained_travel_mm = 0 or rho_gate = 0, the H3 context effect disappears exactly.",
+    "No centerline or pheromone variable is available to H3, so any central-zone occupancy difference can arise only from geometry and trajectories, not targeted steering."
+  ],
+  "raw_trajectory_discriminators_if_recovered": [
+    "time and distance from entry to first major reorientation",
+    "number of major reorientation events in successive time windows",
+    "free-path-length distribution",
+    "turn-angle distribution conditional on a reorientation",
+    "early-versus-late reorientation hazard",
+    "comparison of H2 continuous heading-increment variance versus H3 discrete event timing"
+  ],
+  "relationship_to_other_hypotheses": {
+    "H0": "H0 has no path-history effect.",
+    "H1": "H1 remains an unresolved apparatus-entry explanation. H3 may not use treatment-specific entry-heading distributions.",
+    "H2": "H2 continuously reduces angular diffusion. H3 instead modulates only the timing/frequency of discrete major reorientation events.",
+    "non_equivalence_rule": "H3 must not be implemented as a renamed multiplier on angular_sigma_rad_sqrt_s."
+  },
+  "implementation_freeze": {
+    "implement_model_before_search": true,
+    "fit_parameters_during_initial_mechanism_reachability": false,
+    "canonical_model_unchanged": true,
+    "use_ymaze": false,
+    "required_tests": [
+      "zero-history equivalence to the context-free H3 walk",
+      "exact exponential G decay",
+      "continuous-time turn hazard convergence across dt",
+      "same conditional turn-angle distribution across short/long histories for matched kappa_turn",
+      "protocol cannot inject G or H3 biological parameters",
+      "same H3 biological model hash in short and long assays"
+    ]
+  },
+  "evidence_notes": {
+    "representation_support": "Piecewise runs separated by reorientation events is grounded in published Lasius niger random-walk/Boltzmann-walker analyses. This supports the representation, not the specific history-dependent gate.",
+    "history_gate_status": "The proposed dependence of reorientation hazard on recent constrained-travel history is a candidate mechanism, not an established biological fact."
+  }
+}
