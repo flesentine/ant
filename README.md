@@ -51,6 +51,8 @@ The engineering demonstration uses `lambda=500 mm`, `tau=5 s`, and `rho_speed=0.
 
 A 400-trial-per-condition mechanism reachability run passed all intended qualitative checks while matched-seed tests verified unchanged heading, pause, and biology RNG cadence. The exact result is recorded in `reports/h4_mechanism_reachability_v1.json`.
 
+The full H0–H4 implementation suite passed in GitHub Actions before the temporary branch-only verification workflow was removed. The permanent main workflow now includes H4 reachability and will exercise it after merge.
+
 No H4 parameter estimation policy has been frozen yet, so **no H4 search should be run yet**.
 
 ## Run
