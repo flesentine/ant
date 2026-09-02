@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "id": "H2_persistent_directional_state_v1",
+  "status": "post_outcome_mechanism_freeze_before_parameter_tuning",
+  "honesty_note": "The open-arena outcomes were already known before this mechanism was specified, so this is not a blind preregistration. It freezes the mechanism before any H2 parameter tuning or selection.",
+  "species": "Lasius niger",
+  "model_candidate": "lasius_niger_locomotion_h2_v1",
+  "scope": "open-arena DCM-control locomotion context only",
+  "allowed_observable_inputs": ["recent_constrained_travel_mm"],
+  "forbidden_inputs": ["Path_length treatment label", "short/long condition id", "reference metric values", "pheromone presence", "Y-maze outcome", "colony-specific target values"],
+  "latent_state": {
+    "name": "directional_persistence",
+    "symbol": "P",
+    "range": [0, 1],
+    "initialization": "P0 = 1 - exp(-L / lambda_mm), where L is recent_constrained_travel_mm",
+    "decay": "dP/dt = -P / tau_s; exact step update P(t+dt)=P(t)*exp(-dt/tau_s)",
+    "behavioral_effect": "sigma_heading_effective = sigma_heading_base * (1 - rho * P)",
+    "direct_effects_forbidden": ["base speed", "speed noise", "pause hazard", "pause duration", "entry heading", "entry position", "boundary behavior", "observation model"]
+  },
+  "parameters": {
+    "lambda_mm": {"value": 500, "status": "ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED", "locked_for_v0_3_2b": true},
+    "tau_s": {"value": 5, "status": "ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED", "locked_for_v0_3_2b": true},
+    "rho": {"value": 0.5, "status": "ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED", "locked_for_v0_3_2b": true}
+  },
+  "structural_predictions": [
+    "For identical ants and entry conditions, larger recent_constrained_travel_mm produces larger P0.",
+    "P decays monotonically toward zero after arena entry.",
+    "At equal instantaneous random draws, larger P reduces heading diffusion but does not directly alter translational speed.",
+    "When recent_constrained_travel_mm is zero, P0 is zero and the H2 candidate reduces exactly to the baseline locomotion substrate."
+  ],
+  "evaluation_rules": {
+    "fit_parameters": false,
+    "compare_to_reference_targets_for_selection": false,
+    "use_ymaze": false,
+    "common_random_numbers": true,
+    "purpose": "mechanism implementation and reachability check only"
+  },
+  "future_unlock": "Parameter fitting or model selection requires a separately recorded fitting policy. The current open-arena summary contrasts must not be used to tune lambda_mm, tau_s, or rho under v0.3.2b."
+}
