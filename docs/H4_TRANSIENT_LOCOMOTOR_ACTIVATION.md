@@ -23,6 +23,8 @@ v_H4(t) = v_baseline(t) * (1 + rho_speed * A(t))
 
 The implementation integrates the exponentially decaying activation over each physics step and uses its exact step mean as the speed multiplier. H4 adds no random-number stream: matched trials consume the same baseline speed, heading, pause, protocol, and observation draws.
 
+The original freeze in `hypotheses/h4_transient_locomotor_activation_v1.json` is intentionally left unchanged after implementation so it remains an auditable record of what was specified before code or H4 search.
+
 ## Why test a speed-side mechanism
 
 In the descriptive DCM-control record, long-history ants have higher mean moving speed than short-history ants, and the sign of that contrast is stable in all six leave-one-colony-out recalculations. The descriptive bootstrap interval still reaches zero, so this is motivation rather than proof.
