@@ -166,11 +166,11 @@
   }
 
   function updateAnt(ant, dt, sim) {
+    ant.substepTrace = [];
     if (ant.finished) return;
     const cfg = sim.h3Config || reorientationGateConfig(sim.model);
     if (!cfg) throw new Error('H3 update called without an enabled reorientation_gate model.');
     ant.contactFlash = Math.max(0, ant.contactFlash - dt);
-    ant.substepTrace = [];
     const m = sim.model.movement;
     const gate0 = clamp(Number(ant.reorientationGate) || 0, 0, 1);
 
