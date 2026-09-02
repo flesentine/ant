@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "H3_transient_reorientation_gate_v1",
   "status": "post_outcome_mechanism_freeze_before_implementation_or_parameter_search",
   "honesty_note": "The Poissonnier 2026 open-arena outcome and the failure of H2-v1 were known before H3 was specified. This is not a blind preregistration. It freezes a genuinely different mechanism class before implementation or H3 parameter search.",
@@ -28,11 +28,11 @@
     "description": "Piecewise ballistic motion with ordinary speed dynamics and pauses retained from the existing locomotion substrate, but large directional changes occur through explicit stochastic reorientation events rather than continuous Gaussian angular diffusion.",
     "reorientation_hazard_per_mm": "k0 = 1 / ell0_mm",
     "continuous_time_hazard": "h0_per_s(t) = speed_mm_s(t) / ell0_mm",
-    "event_probability": "p_turn(dt) = 1 - exp(-h_turn_per_s(t) * dt)",
+    "event_process": "Treat reorientations as a continuous-time hazard process, not one Bernoulli draw per physics tick. Maintain an exponential unit-hazard threshold, integrate h_turn through elapsed motion, resolve a threshold crossing at sub-step time, apply the turn at that time, and continue the remainder of the physics step. Draw a fresh threshold after each event; more than one event in a large step must be representable.",
     "turn_angle_family": "symmetric von Mises distribution centered on zero heading change with concentration kappa_turn",
     "directional_bias": "none",
     "background_major_turns_between_events": "none; major changes in direction occur only at reorientation events",
-    "timestep_rule": "Turn events must use the continuous-time hazard expression; no probability-per-tick parameter is allowed."
+    "timestep_rule": "No probability-per-tick parameter is allowed. Event timing must be sub-step/integrated-hazard based and pass timestep-convergence tests."
   },
   "latent_state": {
     "name": "reorientation_gate",
@@ -54,6 +54,14 @@
       "centerline attraction",
       "observation model"
     ]
+  },
+  "rng_policy": {
+    "purpose": "Adding H3 stochastic events must not consume the baseline locomotion RNG and thereby change speed or pause randomness merely because H3 exists.",
+    "turn_event_threshold_stream": "biology_h3_turn_event:<ant_id>",
+    "turn_angle_stream": "biology_h3_turn_angle:<ant_id>",
+    "baseline_stream_separation": "Speed, pause, individual locomotion heterogeneity, protocol, treatment, and observation randomness remain on their pre-existing streams. H3 event-threshold and turn-angle draws use only the dedicated H3 streams.",
+    "common_random_numbers_rule": "H3-null and H3-context use the same named stream seeds for matched trials. Disabling the history gate changes hazard timing through the model equation, not through unrelated random-number consumption.",
+    "future_ablation_rule": "Changing observation metadata or H3 logging must not alter H3 event times, turn angles, speed draws, or pause draws."
   },
   "structural_predictions": [
     "Longer recent constrained travel produces a larger G0 and therefore a lower early reorientation-event hazard.",
@@ -86,8 +94,11 @@
     "required_tests": [
       "zero-history equivalence to the context-free H3 walk",
       "exact exponential G decay",
-      "continuous-time turn hazard convergence across dt",
+      "integrated-hazard event timing and event-count convergence across dt",
+      "sub-step event timing rather than end-of-step turn application",
       "same conditional turn-angle distribution across short/long histories for matched kappa_turn",
+      "dedicated H3 event and turn-angle RNG streams do not perturb baseline speed/pause randomness",
+      "observation/logging changes do not perturb H3 biological RNG streams",
       "protocol cannot inject G or H3 biological parameters",
       "same H3 biological model hash in short and long assays"
     ]
