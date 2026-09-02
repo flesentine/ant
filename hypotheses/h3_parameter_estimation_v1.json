@@ -1,7 +1,12 @@
 {
   "schema_version": 1,
   "id": "H3_parameter_estimation_v1",
-  "status": "development_estimation_policy_frozen_before_H3_implementation_or_search",
+  "status": "estimator_implemented_not_high_resolution_evaluated",
+  "implementation": {
+    "runner": "tools/run-h3-estimation.js",
+    "ci_smoke": "8 candidates x 4 trials per condition x 6 LOCO folds; execution-path smoke only, not evidence",
+    "h2_comparison": "Each recorded H2-v1 fold candidate is re-evaluated on the same held-out rows, evaluation seed stream, trial count, and shared entry-transition CRN stream used for H3."
+  },
   "honesty_note": "The open-arena outcomes and H2-v1 high-resolution LOCO failure were known before H3. This policy provides internal development model comparison only, not independent validation.",
   "model_candidate": "lasius_niger_locomotion_h3_v1",
   "mechanism_freeze": "h3_transient_reorientation_gate_v1.json",
