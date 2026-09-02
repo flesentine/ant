@@ -1,16 +1,57 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "id": "open_arena_locomotion_context_v1",
   "reference_dataset": "poissonnier2026_open_arena",
   "scope": "DCM control treatments only",
   "contrast": "20 cm approach minus 100 cm approach",
-  "rules": {"fit_parameters":false,"use_ymaze_for_model_selection":false,"common_random_numbers_for_null_screen":true,"screening_is_not_calibration":true},
-  "primary_structural_metrics": ["total_distance_mm","time_to_arena_edge_s","path_straightness"],
-  "secondary_metrics": ["mean_moving_speed_mm_s","central_zone_fraction"],
+  "rules": {
+    "use_ymaze_for_model_selection": false,
+    "common_random_numbers": true,
+    "development_estimation_is_not_external_validation": true,
+    "canonical_model_changes_require_explicit_promotion": true
+  },
+  "primary_structural_metrics": ["total_distance_mm", "time_to_arena_edge_s", "path_straightness"],
+  "secondary_metrics": ["mean_moving_speed_mm_s", "central_zone_fraction"],
   "hypotheses": [
-    {"id":"H0_context_invariant","status":"screening_incompatible","model":"lasius_niger_locomotion_v1","claim":"Approach distance does not alter subsequent open-arena locomotion beyond ordinary stochastic variation.","parameter_changes":"none"},
-    {"id":"H1_entry_condition","status":"blocked_by_missing_reference_input","claim":"The short/long difference is explained by different measured arena-entry conditions without a persistent internal state.","requires":["raw initial trajectory frames or measured entry heading/speed distributions"]},
-    {"id":"H2_persistent_directional_state","status":"implemented_mechanism_demo_not_fitted","model":"lasius_niger_locomotion_h2_v1","freeze":"h2_persistent_directional_state_v1.json","claim":"Sustained constrained travel creates a decaying directional-persistence state that survives entry into the arena.","selection_status":"not_evaluated_against_reference_targets","requires_before_fitting":["explicit fitting unlock","measurement limitations resolved or separately accepted","new parameter provenance status"]}
+    {
+      "id": "H0_context_invariant",
+      "status": "screening_incompatible",
+      "model": "lasius_niger_locomotion_v1",
+      "claim": "Approach distance does not alter subsequent open-arena locomotion beyond ordinary stochastic variation.",
+      "parameter_changes": "none"
+    },
+    {
+      "id": "H1_entry_condition",
+      "status": "blocked_by_missing_reference_input",
+      "claim": "The short/long difference is explained by different measured arena-entry conditions without a persistent internal state.",
+      "requires": ["raw initial trajectory frames or measured entry heading/speed distributions"]
+    },
+    {
+      "id": "H2_persistent_directional_state",
+      "status": "implemented_and_high_resolution_internal_cv_failed_promotion",
+      "model": "lasius_niger_locomotion_h2_v1",
+      "freeze": "h2_persistent_directional_state_v1.json",
+      "estimation_policy": "h2_parameter_estimation_v1.json",
+      "result": "reports/h2_parameter_estimation_500x60_v1.json",
+      "claim": "Sustained constrained travel creates a decaying directional-persistence state that continuously reduces angular diffusion after arena entry.",
+      "selection_status": "not_promoted",
+      "internal_cv": {"heldout_wins": 4, "folds": 6, "median_relative_improvement": 0.015548606059043324},
+      "reason": "Failed the frozen >=5/6 held-out-colony promotion guard and showed unstable parameter estimates."
+    },
+    {
+      "id": "H3_transient_reorientation_gate",
+      "status": "mechanism_and_estimation_design_frozen_not_implemented",
+      "freeze": "h3_transient_reorientation_gate_v1.json",
+      "estimation_policy": "h3_parameter_estimation_v1.json",
+      "claim": "Recent sustained constrained walking transiently suppresses the hazard of discrete major reorientation events, while leaving turn angles conditional on an event unchanged.",
+      "selection_status": "not_evaluated",
+      "distinction_from_H2": "H2 continuously scales angular diffusion; H3 changes only event timing in a run-and-reorientation locomotion family.",
+      "next_gate": "Implement the frozen mechanism and pass mechanism-only invariants before any H3 parameter search."
+    }
   ],
-  "screening_decision": {"rule":"H0 is screening-incompatible when at least two primary structural metric contrasts fall outside the descriptive 95% bootstrap intervals and the observed contrast signs are stable under leave-one-colony-out recalculation.","warning":"This is a descriptive model screen, not a formal inferential test and not biological parameter fitting."}
+  "screening_decision": {
+    "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
+    "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
+    "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
+  }
 }
