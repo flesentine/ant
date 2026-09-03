@@ -1,0 +1,40 @@
+name: H4 estimator implementation review
+on:
+  push:
+    branches: [h4-transient-locomotor-activation-v1]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen policy blob
+        run: |
+          test "$(git hash-object hypotheses/h4_parameter_estimation_v1.json)" = "a889007f988628a8e61139f4349c23714cc1dd68"
+      - name: Run full H0-H4 test suite
+        run: ./tests/run-tests.sh
+      - name: Run reference-free H4 estimator qualification
+        run: |
+          mkdir -p /tmp/h4-estimator-review
+          node tools/run-h4-estimation.js --mode qualification --trials 3 --out /tmp/h4-estimator-review/qualification.json
+      - name: Run low-resolution H4 LOCO smoke
+        run: |
+          node tools/run-h4-estimation.js --mode smoke --candidates 8 --trials 4 --eval-trials 8 --seed 990000 --out /tmp/h4-estimator-review/smoke.json
+      - name: Verify frozen high-resolution overrides are rejected
+        run: |
+          if node tools/run-h4-estimation.js --mode highres --candidates 499 --out /tmp/h4-estimator-review/should-not-exist.json; then
+            echo "High-resolution override unexpectedly accepted" >&2
+            exit 1
+          fi
+      - name: Upload review reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: h4-estimator-review
+          path: /tmp/h4-estimator-review
+          retention-days: 7
