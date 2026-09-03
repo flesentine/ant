@@ -20,7 +20,7 @@ jobs:
           const d=JSON.parse(fs.readFileSync('hypotheses/h5_origin_referenced_search_v1.draft.json','utf8'));
           const r=JSON.parse(fs.readFileSync('reports/h5_biological_origin_choice_audit_v1.json','utf8'));
           if(d.biological_origin_decision.selected_origin!=='central_physical_entry_reference') throw new Error('origin not frozen to central physical entry');
-          if(d.biological_origin_decision.first_track_position_role.indexOf('not the H5 biological origin')<0) throw new Error('first-track role not separated');
+          if(d.biological_origin_decision.first_track_position_role.indexOf('forbidden as the H5 biological origin')<0) throw new Error('first-track role not separated');
           if(d.firewall.H5_biological_origin_still_unfrozen!==false) throw new Error('origin still marked unfrozen');
           if(d.firewall.H5_biological_origin_frozen_to_central_physical_entry_reference!==true) throw new Error('central-origin freeze flag missing');
           if(d.firewall.parameter_search_allowed!==false) throw new Error('parameter search unexpectedly allowed');
