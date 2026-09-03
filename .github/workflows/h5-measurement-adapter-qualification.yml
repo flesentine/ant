@@ -1,0 +1,76 @@
+name: H5 measurement adapter qualification
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm H5 remains unimplemented and policy parses
+        run: |
+          set -euo pipefail
+          python3 -m json.tool reference/poissonnier2026_open_arena_measurement_policy_v1.json >/dev/null
+          python3 -m json.tool reference/poissonnier2026_open_arena_measurement_geometry_v1.json >/dev/null
+          python3 -m json.tool hypotheses/h5_origin_referenced_search_v1.draft.json >/dev/null
+          if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm|biology_h5_search' src models experiments states apparatus scoring observations; then exit 1; fi
+      - name: Run complete Node regression suite
+        run: |
+          set -euo pipefail
+          for f in tests/*.test.js; do echo "== $f =="; node "$f"; done
+      - name: Start Chromium
+        run: |
+          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
+          for i in {1..80}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then break; fi; sleep .2; done
+          curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json
+      - name: Exercise reconstructed geometry in real Chromium
+        run: |
+          cat >/tmp/measurement-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();
+          const target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!AntLabCore&&!!AntLabIntegrity"))break;await sleep(100);}
+          const report=await evalv(`(async()=>{
+            const clone=x=>JSON.parse(JSON.stringify(x));const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();};
+            const geometry=await j('./reference/poissonnier2026_open_arena_measurement_geometry_v1.json');
+            const policy=await j('./reference/poissonnier2026_open_arena_measurement_policy_v1.json');
+            const appNominal=await j('./apparatus/poissonnier2026_open_arena.json');
+            const short0=await j('./experiments/open_arena_short_control.json'),long0=await j('./experiments/open_arena_long_control.json');
+            const model=await j('./models/lasius_niger_locomotion_h3_v1.json'),state=await j('./states/naive_outbound_v1.json'),obs0=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');
+            model.reorientation_gate.effect.max_hazard_reduction_fraction=0;
+            const stream=policy.geometry_sampler.rng_stream_name;
+            const poolFor=c=>geometry.rows.filter(r=>r.colony!==c).sort((a,b)=>a.ant_id-b.ant_id);
+            const pick=(pool,seed)=>{const rr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,stream)),u=rr.next(),i=Math.min(pool.length-1,Math.floor(u*pool.length));return pool[i];};
+            const apply=(exp0,row)=>{const exp=clone(exp0),app=clone(appNominal),obs=clone(obs0);exp.model=model.id;app.world.width=row.arena_width_mm;app.world.height=row.arena_height_mm;const rect=app.geometry.primitives.find(p=>p.type==='rect');rect.x=0;rect.y=0;rect.width=row.arena_width_mm;rect.height=row.arena_height_mm;app.entry_points.default={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};app.entry_points.center={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};exp.protocol.entry_state.position_jitter_mm=0;obs.metric_definitions.central_zone_fraction.center_y_mm=row.entry_reference_y_mm;obs.metric_definitions.central_zone_fraction.half_width_mm=10;return{experiment:exp,model:clone(model),apparatus:app,state:clone(state),observation:obs,scoring:clone(scoring)};};
+            const folds=[];for(const held of geometry.summary.colonies){const pool=poolFor(held);if(pool.some(r=>r.colony===held))throw new Error('heldout leak');const samples=[];for(const seed of [1,42,424242,990000,1490000]){const a=pick(pool,seed),b=pick(pool,seed);if(a.ant_id!==b.ant_id)throw new Error('geometry nondeterminism');samples.push(a.ant_id);}folds.push({heldout:held,pool_n:pool.length,samples});}
+            const pool=poolFor(0),row=pick(pool,990000),bs=apply(short0,row),bl=apply(long0,row);if(JSON.stringify(bs.apparatus.world)!==JSON.stringify(bl.apparatus.world))throw new Error('short-long geometry mismatch');
+            const sim=new AntLabIntegrity.Simulation(bs,990000),a=sim.ants[0];if(Math.abs(a.x-row.first_track_x_mm)>1e-12||Math.abs(a.y-row.first_track_y_mm)>1e-12)throw new Error('sampled first-track start mismatch');const start={x:a.x,y:a.y};const s=sim.runUntilComplete(.4,AntLabIntegrity.FIXED_DT);if(sim.apparatus.world.width!==row.arena_width_mm||sim.apparatus.world.height!==row.arena_height_mm)throw new Error('sampled bounds mismatch');
+            if(appNominal.world.width!==297||appNominal.world.height!==210||appNominal.entry_points.center.x!==148.5||appNominal.entry_points.center.y!==105||short0.protocol.entry_state.position_jitter_mm!==.5)throw new Error('canonical nominal geometry changed');
+            return{status:'passed',policy_id:policy.id,geometry_id:geometry.id,folds,sampled:{ant_id:row.ant_id,colony:row.colony,width:row.arena_width_mm,height:row.arena_height_mm,start,zone_center:row.entry_reference_y_mm},simulated_time_s:sim.time,observed_frame_count:s.observed_metrics.frame_count,canonical_nominal:{width:appNominal.world.width,height:appNominal.world.height,entry:appNominal.entry_points.center,position_jitter_mm:short0.protocol.entry_state.position_jitter_mm}};
+          })()`);
+          const y=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(exceptions.length||consoleErrors.length||y.length)throw new Error(`browser firewall failure exceptions=${exceptions.length} console=${consoleErrors.length} ymaze=${y.length}`);
+          report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/measurement-browser-report.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          NODE
+          node /tmp/measurement-browser.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h5-measurement-adapter-qualification
+          path: |
+            /tmp/measurement-browser-report.json
+            /tmp/chrome-version.json
+            /tmp/chrome.log
+          retention-days: 14
