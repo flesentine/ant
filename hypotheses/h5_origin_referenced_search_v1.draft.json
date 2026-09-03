@@ -1,17 +1,18 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_post_H4_failure_before_mechanism_freeze",
-  "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. The July 2026 Bonavita et al. Lasius niger search-behaviour paper was also considered. This is outcome-aware mechanism design, not preregistration, and this draft is not yet frozen for implementation or parameter search.",
+  "status": "draft_post_H4_failure_after_stress_audit_before_mechanism_freeze",
+  "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
+  "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
   "scope": "open-arena DCM-control locomotion context only",
   "mechanism_class": "history_modulated_origin_referenced_area_restricted_search",
-  "working_claim": "Shorter recent constrained travel leaves a stronger area-restricted search tendency around the arena-entry point. At major reorientation events, this tendency biases turns back toward the entry point as the ant moves away from it. Longer constrained travel weakens that search tendency, allowing more direct outward dispersal. H5 changes spatially contingent turn direction, not speed, global angular-noise magnitude, reorientation-event hazard, entry heading, or any arena-edge/centerline attraction.",
+  "working_claim": "Shorter recent constrained travel leaves a stronger area-restricted search tendency relative to the ant's trial origin. At ordinary major reorientation events, that tendency increases the probability of drawing a new direction from an origin-oriented circular distribution. Longer constrained travel weakens that search component and permits more direct outward dispersal. H5 does not directly change speed, global angular-noise magnitude, reorientation-event hazard, pause behavior, entry heading, or arena-edge/centerline attraction.",
   "why_H5_is_substantively_different": {
-    "H2": "H2 changed the magnitude of spatially homogeneous continuous angular diffusion. H5 instead adds position- and heading-dependent directional information relative to the ant's own entry point.",
-    "H3": "H3 changed the frequency/timing of spatially homogeneous reorientation events while keeping conditional turn direction unbiased. H5 keeps baseline event timing unchanged and changes conditional turn direction as a function of current geometry relative to the entry point.",
-    "H4": "H4 changed moving speed only and left trajectory steering unchanged. H5 leaves moving speed unchanged and changes where reorientations point.",
-    "H1": "H1 is a treatment-specific measured entry-state explanation. H5 does not assign treatment-specific entry heading, speed, or position; it acts dynamically after entry from the same locomotor rules using current position relative to the realized entry point."
+    "H2": "H2 changed the magnitude of spatially homogeneous continuous angular diffusion. H5 adds spatially contingent directional information relative to a trial origin.",
+    "H3": "H3 changed the timing/frequency of reorientation events while leaving conditional turn direction unbiased. H5 keeps the H3-null event timing law and changes only the conditional directional distribution at those events.",
+    "H4": "H4 changed moving speed only and left trajectory steering unchanged. H5 leaves moving speed unchanged and changes the distribution from which a post-reorientation direction is selected.",
+    "H1": "H1 is an entry-state explanation. H5 may use a shared measured or reconstructed trial origin as geometry, but may not assign treatment-specific entry heading, speed, position, or geometry distributions. Any measurement reconstruction must be frozen separately and applied identically to H5-null and H5-context."
   },
   "outcome_aware_design_rationale": {
     "poissonnier_control_pattern": {
@@ -22,7 +23,7 @@
       "straightness_path_length_effect": "significant; short-path ants were less linear",
       "moving_speed_path_length_effect": "not statistically significant in the publication; short-path mean about 23.5 mm/s and long-path mean about 26 mm/s",
       "central_zone_path_length_effect": "not significant in the publication",
-      "interpretation": "The strongest published signal is geometric: short-path ants wander much farther and less linearly before reaching an edge. A modest speed contrast exists but speed-only H4 did not generalize."
+      "interpretation": "The strongest published signal is geometric: short-path ants wander farther and less linearly before reaching an edge. Speed-only H4 helped timing in some folds but did not generalize or solve spatial geometry."
     },
     "frozen_internal_cv_history": {
       "H2": "failed its frozen held-out promotion guard",
@@ -37,126 +38,184 @@
         "median_relative_improvement_vs_own_null": 0.0,
         "null_anchor_selected_heldout_colonies": [20, 21]
       },
-      "cross_family_fold_best_descriptive_only": {
-        "0": "H4",
-        "7": "H2",
-        "16": "H3",
-        "20": "H2",
-        "21": "H2",
-        "27": "H4-null"
-      },
-      "interpretation": "No spatially homogeneous one-primitive history effect generalized across colonies. H4 reduced time-to-exit error in some folds but did not robustly improve beeline or exit geometry, while H2/H3 sometimes helped geometry without surviving their own held-out guards."
-    },
-    "H4_component_audit_descriptive_only": {
-      "definition": "Mean squared standardized held-out component distance across the six H4 LOCO folds; used only to identify residual structure for H5 design, never as an H5 fitting weight or pass/fail rule.",
-      "H4_null": {
-        "short_time_to_exit": 1.2114,
-        "long_time_to_exit": 0.4035,
-        "short_middle_zone": 0.2380,
-        "long_middle_zone": 1.7484,
-        "short_beeline": 0.2434,
-        "long_beeline": 0.3967,
-        "short_exit_edge": 0.9587,
-        "long_exit_edge": 0.5463
-      },
-      "H4_context": {
-        "short_time_to_exit": 0.7435,
-        "long_time_to_exit": 0.3308,
-        "short_middle_zone": 0.2106,
-        "long_middle_zone": 1.6616,
-        "short_beeline": 0.2773,
-        "long_beeline": 0.4913,
-        "short_exit_edge": 0.9544,
-        "long_exit_edge": 0.5516
-      },
-      "interpretation": "Speed gain helped timing but did not solve spatial geometry. The H5 design therefore targets a spatial feedback missing from H2-H4 rather than adding more speed gain or stronger generic persistence."
+      "interpretation": "No spatially homogeneous one-primitive history effect generalized across colonies. H5 therefore tests spatial feedback rather than a stronger version of H2, H3, or H4."
     }
   },
   "external_representation_support": {
     "Bonavita_et_al_2026": {
       "paper": "Discovering search behaviour in black garden ant trajectories",
       "status": "peer-reviewed PLOS ONE, 2026",
-      "relevance": "In Lasius niger released into an open arena, movement parameters were not spatially homogeneous: segment length and reorientation angles depended on heading relative to the starting point, and simulations of those dependencies produced area-restricted search around the start.",
-      "important_scope_limit": "Those ants were passively displaced/released in a different experimental context. The paper supports origin-referenced search as a biologically plausible representation, not the specific claim that 20 cm versus 100 cm runway travel modulates its strength in the Poissonnier assay."
+      "relevance": "In Lasius niger released into an open arena, segment-level movement statistics depended on heading relative to the starting point, and simulations of those dependencies generated area-restricted search around the start.",
+      "important_scope_limit": "Those ants were passively transported/released in a different context. The paper supports origin-referenced search as a plausible representation, not the specific claim that 200 versus 1000 mm prior constrained walking modulates its strength in the Poissonnier assay.",
+      "parameter_limit": "The paper does not provide an independently validated single radial-scale parameter that can simply be imported as r_search_mm for H5."
     },
     "Poissonnier_et_al_2026": {
-      "relevance": "The paper itself concluded that longer prior travel produced more linear subsequent walking while trail-following accuracy was unchanged, and noted that Lasius niger can discriminate travel distances in this range.",
-      "scope_limit": "This motivates a locomotion/search mechanism only; it does not establish H5."
+      "relevance": "Longer prior travel produced more linear subsequent walking while trail-following accuracy was unchanged, and Lasius niger can discriminate travel distances in this range.",
+      "scope_limit": "This motivates a locomotion/search hypothesis but does not establish H5."
     }
   },
-  "allowed_inputs": [
+  "measurement_reconstruction_dependency": {
+    "status": "must_be_resolved_before_H5_mechanism_freeze_or_estimator_policy",
+    "newly_recovered_source_fields": [
+      "Xstart",
+      "Ystart",
+      "Xlast",
+      "Ylast",
+      "Xmin_Arena",
+      "Xmax_Arena",
+      "Ymin_Arena",
+      "Ymax_Arena"
+    ],
+    "published_beeline_definition_verified": "Beeline equals Euclidean distance from measured first tracked position (Xstart,Ystart) to measured final position (Xlast,Ylast) for all 51 DCM-control rows to floating-point tolerance.",
+    "measured_start_offset_from_per_video_midpoint_mm": {
+      "median": 6.650050324710339,
+      "q90": 8.608222021557879,
+      "max": 20.965055941690846
+    },
+    "current_simulator_mismatch": "The current assay simulation uses nominal 297 x 210 mm A4 geometry and approximately 0.5 mm entry-position jitter around the geometric center. The published Beeline uses measured first-track coordinates and per-video tracked arena bounds, which vary from those nominal assumptions.",
+    "treatment_position_audit": {
+      "short_mean_radial_offset_mm": 5.83340572073735,
+      "long_mean_radial_offset_mm": 7.039533041129251,
+      "short_minus_long_mm": -1.206127320391901,
+      "cohen_d": -0.39437187673596885,
+      "descriptive_permutation_p": 0.17389130543472828,
+      "interpretation": "Measured start positions should not be ignored, but the available table does not provide compelling evidence for a treatment-specific start-position mechanism."
+    },
+    "allowed_resolution_classes_for_next_policy_review": [
+      "Condition simulations on measured row-level or row-derived normalized Xstart/Ystart and per-video bounds, with a leakage-safe LOCO mapping defined before fitting.",
+      "Construct a shared training-fold-only empirical measurement-geometry model and use it identically for H5-null and H5-context."
+    ],
+    "forbidden_resolution": "Do not create separate short-versus-long entry-position or arena-geometry distributions merely because they improve H5 fit."
+  },
+  "allowed_biological_inputs": [
     "recent_constrained_travel_mm",
     "current_position_mm",
-    "current_heading_rad",
-    "realized_arena_entry_position_mm"
+    "current_heading_rad"
+  ],
+  "allowed_shared_measurement_or_geometry_inputs_subject_to_separate_freeze": [
+    "trial_origin_or_first_tracked_position_mm",
+    "trial_or_shared_empirical_arena_bounds"
   ],
   "forbidden_inputs": [
     "Path_length treatment label",
     "short/long condition id",
-    "reference metric values",
+    "reference metric values as direct model inputs",
     "colony identity as a biological control input",
     "pheromone presence or central-trail identity in the DCM H5 fit",
     "distance to arena edge",
     "identity of the eventual exit edge",
     "arena centerline attraction",
     "Y-maze outcome or Y-maze-derived statistics",
-    "future trajectory information"
+    "future trajectory information",
+    "treatment-specific measured-entry distributions"
   ],
   "candidate_mechanism": {
-    "entry_origin": "O is the ant's realized arena-entry position for that trial; H5 does not substitute the geometric arena center if the realized entry position differs.",
-    "history_search_drive": "D(L) = exp(-L / lambda_search_mm). This draft uses the opposite history sign from H2-H4: shorter recent constrained travel gives larger search drive. The exact functional form is provisional until mechanism freeze.",
-    "radial_gate": "R(r) = r / (r + r_search_mm), where r = ||x - O||. This prevents a singular or strong steering instruction at the entry point and increases origin-referenced search feedback only after the ant has moved away from O.",
-    "turn_bias_strength": "w = rho_search * D(L) * R(r), constrained to [0,1].",
-    "reorientation_effect": "At a baseline major reorientation event, let e = wrap(phi_to_origin - theta_current). The H5 conditional mean turn is shifted partway toward the entry point by w*e; stochastic turn dispersion around that mean remains a shared baseline parameter. This is a draft mathematical form, not yet frozen.",
-    "event_timing": "H5 does not directly change the baseline reorientation-event hazard or consume baseline event-threshold draws differently between matched null/context trials.",
-    "speed": "H5 has no direct moving-speed effect in v1 draft.",
-    "pause": "H5 has no direct pause-hazard or pause-duration effect in v1 draft.",
-    "entry_state": "H5 does not directly alter initial heading, initial speed, or entry position."
+    "origin": "O is a trial origin supplied by the separately frozen measurement/input reconstruction. H5 itself may not choose O differently by treatment. The biological rule is relative to O, not to a privileged arena center or edge.",
+    "history_search_drive": "Provisional D(L) = exp(-L/lambda_search_mm), so shorter recent constrained travel gives larger search drive. Because only L=200 and L=1000 mm are observed in this assay, this functional form and raw lambda remain provisional and must not be treated as identified merely because a search selects a value.",
+    "radial_gate": "Provisional R(r) = r/(r+r_search_mm), where r = ||x-O||. Stress tests show baseline reorientation events span radii over which this gate is active, but r_search_mm remains provisional and potentially confounded with rho_search and lambda_search_mm.",
+    "mixture_weight": "Provisional w = rho_search * D(L) * R(r), constrained to [0,1].",
+    "reorientation_effect": {
+      "type": "mixture_of_circular_reorientation_distributions",
+      "baseline_component": "Use the ordinary H3-null post-reorientation directional law and existing H3 turn-angle RNG stream.",
+      "search_component": "Draw a direction symmetrically around the bearing from current position to O using a dedicated H5 search-angle stream. For the parsimonious v1 candidate, the pre-freeze default is to reuse the same concentration/dispersion parameter as the baseline reorientation family rather than introduce a separate search concentration.",
+      "mixture_rule": "At each baseline major reorientation event, draw a dedicated H5 choice variate u. If u < w use the search component; otherwise use the already-drawn baseline component.",
+      "event_timing": "The event time is generated entirely by the H3-null continuous-time event process. H5 does not alter event hazard or threshold integration.",
+      "antipodal_rule": "When the origin is exactly behind the ant, H5 remains a symmetric mixture distribution and does not choose an arbitrary deterministic left-versus-right mean turn.",
+      "origin_rule": "At r=0, set w=0. Any inert search-angle draw must not influence the selected baseline trajectory."
+    },
+    "rng_candidate": {
+      "baseline_event_stream": "existing H3 event-threshold stream, unchanged",
+      "baseline_turn_stream": "existing H3 turn-angle stream, unchanged",
+      "search_choice_stream": "biology_h5_search_choice:<ant_id>",
+      "search_angle_stream": "biology_h5_search_angle:<ant_id>",
+      "cadence_rule": "If this formulation is frozen, H5-null and H5-context should consume the dedicated H5 choice/search streams with matched cadence so model differences cannot be caused by unrelated RNG shifting. The existing H3 streams must remain untouched by H5 dedicated draws."
+    },
+    "speed": "No direct moving-speed effect in H5-v1 draft.",
+    "pause": "No direct pause-hazard or pause-duration effect in H5-v1 draft.",
+    "entry_state": "No direct alteration of initial heading, initial speed, or initial position by H5 biology."
   },
-  "candidate_baseline_family": {
-    "preferred_representation": "Reuse the already audited continuous-time run-and-reorientation machinery from the H3 implementation as a locomotion substrate, but remove the H3 history-dependent event-hazard gate. H5's history effect is solely the spatially contingent conditional-turn bias.",
-    "reason": "The Bonavita representation support is stated in terms of straight segments and reorientation events, and reusing audited event timing avoids introducing a second unvalidated event engine.",
-    "warning": "Reusing H3's event machinery does not mean rescuing H3-v1. The H3 biological claim—history-dependent reorientation hazard—remains failed and must remain disabled in H5."
-  },
-  "draft_structural_predictions": [
-    "For matched baseline parameters, short-history ants should show a larger probability that reorientation events reduce radial displacement away from the entry point than long-history ants.",
-    "The treatment effect should depend on current heading and radial position relative to the entry point, not merely elapsed time.",
-    "Short-history ants should accumulate more path length and take longer to reach an arena edge primarily through origin-referenced wandering/search, without a required reduction in instantaneous moving speed.",
-    "Long-history ants should disperse outward more directly because the origin-referenced search bias is weaker.",
-    "Because the reference point is the entry point and the rule is rotationally symmetric, H5 predicts no intrinsic left/right/top/bottom exit preference.",
-    "H5 predicts no direct attraction to the DCM centerline; any central-zone occupancy difference must emerge indirectly from trajectories around the entry point.",
-    "With rho_search=0, H5-context reduces exactly to its H5-null locomotion family for matched random streams.",
-    "As recent_constrained_travel_mm becomes very large, the proposed draft D(L) tends toward zero and the H5 history effect disappears."
+  "rejected_pre_freeze_formulations": [
+    {
+      "name": "signed_error_mean_shift",
+      "old_form": "mean turn shifted by w*wrap(phi_to_origin-theta)",
+      "reason": "Real-Chromium stress testing exposed a circular branch-cut discontinuity at the antipodal configuration; infinitesimal heading perturbations can flip a large commanded turn from one side to the other.",
+      "status": "rejected_do_not_implement"
+    },
+    {
+      "name": "circular_vector_mean_blend",
+      "reason": "The vector resultant becomes degenerate for antipodal directions at a 50/50 blend and the selected mean direction jumps by approximately pi across that point.",
+      "status": "rejected_do_not_implement"
+    }
   ],
+  "candidate_baseline_family": {
+    "preferred_representation": "Reuse the already audited continuous-time run-and-reorientation machinery from H3 as a locomotion substrate with the H3 history-dependent hazard gate disabled. H5's history effect is solely the conditional directional mixture at baseline event times.",
+    "reason": "This reuses audited sub-step event timing and separates H5's new biological claim from the failed H3 history-hazard claim.",
+    "warning": "Reusing H3 event machinery is not a rescue of H3-v1. H3's history-dependent reorientation hazard remains failed and must stay disabled."
+  },
+  "stress_tested_invariants_for_candidate_mixture": [
+    "Rotation of both origin and trajectory frame leaves the directional mixture unchanged up to the same rotation.",
+    "Reflection around the outward axis produces a reflected distribution rather than an arbitrary preferred turn side.",
+    "Representing an antipodal origin bearing as +pi versus -pi does not create a material distribution discontinuity.",
+    "w=0 gives the exact baseline distribution.",
+    "r=0 gives w=0 and no origin singularity.",
+    "Translating an off-center synthetic origin translates the search reference; the rule does not remain tied to arena center.",
+    "Dedicated H5 choice/search RNG streams do not perturb the existing H3 turn-angle stream.",
+    "No H5 runtime implementation was used to obtain these stress results."
+  ],
+  "draft_structural_predictions": [
+    "For matched baseline parameters and geometry, short-history ants should have a larger probability than long-history ants that a major reorientation is drawn from the origin-oriented component.",
+    "The treatment effect should depend jointly on current radial position relative to O and recent constrained travel, not merely on elapsed time.",
+    "Short-history ants should accumulate more path length and take longer to reach an arena edge primarily through origin-referenced search, without requiring a direct reduction in instantaneous moving speed.",
+    "Long-history ants should disperse outward more directly because the origin-oriented mixture component is weaker.",
+    "The origin-oriented component is rotationally symmetric around O and therefore predicts no intrinsic left/right/top/bottom exit preference in a symmetric arena.",
+    "H5 predicts no direct attraction to the DCM centerline; central-zone differences must emerge indirectly from geometry and trajectories.",
+    "With rho_search=0, H5-context must reduce exactly to H5-null for the same shared measurement geometry and matched baseline random streams.",
+    "If the provisional exponential D(L) is retained, the effect tends toward zero as recent_constrained_travel_mm becomes very large."
+  ],
+  "identifiability_warnings": {
+    "history_levels": "The development assay supplies only two history distances, 200 and 1000 mm. It cannot richly identify the shape of an arbitrary history-response curve.",
+    "stress_result": "Across deliberately broad engineering-only lambda values, the implied short-to-long mixture-weight ratio ranged from about 2.23 to 24.53 without changing the qualitative mechanism.",
+    "radial_scale": "Baseline H3-null reorientation events occur over a broad radial range, so a radial gate is mechanically meaningful, but rho_search, lambda_search_mm, and r_search_mm can trade off.",
+    "reporting_if_ever_fit": [
+      "Effective mixture weight at L=200 and L=1000 for representative radii",
+      "Predicted number/proportion of origin-oriented reorientations under each observed history",
+      "Ridge or equivalence sets if raw parameters are broad",
+      "Boundary-hit and near-equivalent candidate diagnostics"
+    ],
+    "claim_rule": "Do not report a unique biological lambda_search_mm or r_search_mm unless the frozen estimator supplies strong identifiability evidence beyond merely selecting one candidate."
+  },
   "raw_trajectory_discriminators_if_recovered": [
-    "turn angle conditional on heading relative to the arena-entry point",
-    "probability that a reorientation points back toward the entry point as a function of radial distance",
-    "free-path length conditional on heading toward versus away from the entry point",
-    "radial displacement from entry as a function of time",
-    "number and timing of returns toward the entry neighborhood",
+    "post-reorientation heading conditional on bearing to the trial origin",
+    "probability that a reorientation is origin-oriented as a function of radial distance",
+    "free-path length conditional on heading toward versus away from the trial origin",
+    "radial displacement from origin as a function of time",
+    "number and timing of returns toward the origin neighborhood",
     "short-versus-long differences in those origin-referenced quantities",
-    "moving speed conditioned on radial heading, retained as diagnostic rather than a fitting target under the current AnimalTA firewall"
+    "moving speed conditioned on radial heading, diagnostic only under the current movement-classifier firewall"
   ],
   "negative_controls": [
     "No history-dependent change to global angular_sigma_rad_sqrt_s.",
     "No history-dependent change to reorientation-event hazard.",
     "No direct history-dependent moving-speed multiplier.",
-    "No treatment-specific entry heading, entry speed, or entry position.",
+    "No treatment-specific entry heading, entry speed, entry position, or arena-bound distribution.",
     "No centerline, pheromone, exit-edge, or arena-boundary targeting.",
     "No colony-specific biological parameter.",
     "No Y-maze access for development fitting, ranking, stopping, or model selection."
   ],
   "pre_freeze_questions": [
-    "Should H5 keep the search drive constant over the short arena traversal, or should it relax with time after entry? The draft currently prefers constant drive to avoid repeating the unproven exponential-decay assumption used by H2-H4.",
-    "Should H5 modulate only conditional turn direction, or also the free-path length conditional on heading relative to entry, as reported by Bonavita et al.? The draft starts with turn direction only for parsimony.",
-    "Should the radial scale r_search_mm be estimated or fixed from apparatus geometry before fitting? This must be decided before any estimator policy is frozen.",
-    "What H5-null nuisance family and parameter bounds are justified independently of the observed H5 outcome? These are deliberately not specified in this draft."
+    "Measurement first: should H5/null condition on measured Xstart/Ystart and per-video bounds, or should a shared training-fold-only empirical measurement-geometry model generate them? This must be frozen separately before H5 fitting.",
+    "Should search drive D remain constant during the short arena traversal, or decay with time after entry? Current draft preference remains constant because H2-H4 already tested unvalidated exponential temporal decay assumptions.",
+    "Should H5-v1 alter only the conditional reorientation-direction mixture, or also orientation-dependent free-path length as reported in the external Lasius representation? Current draft preference is direction only for parsimony until contradicted by reachability testing.",
+    "Should the radial gate be retained, simplified, or fixed from an independently justified rule? The external paper does not supply a directly transferable r_search_mm.",
+    "If D(L)=exp(-L/lambda_search_mm) is retained, should lambda be estimated at all or should H5 be parameterized directly by constrained effective weights at the two observed history distances? This is an identifiability decision, not a tuning decision.",
+    "What H5-null nuisance family and bounds are justified independently of H5 outcomes? They remain deliberately unspecified."
   ],
   "firewall": {
     "mechanism_not_frozen": true,
     "implementation_allowed_before_freeze": false,
     "parameter_search_allowed": false,
     "reference_outcomes_may_not_be_used_to_tune_this_draft_into_a_passing_model": true,
+    "measurement_reconstruction_must_precede_H5_estimator_policy": true,
     "canonical_model_unchanged": true,
     "ymaze_access": false
   }
