@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "id": "H5_temporal_drive_choice_audit_v1",
+  "status": "temporal_profile_frozen_constant_before_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-03",
+  "scope": "H5 open-arena DCM-control temporal profile only",
+  "scientific_role": "mechanism-definition decision; not parameter fitting, ranking, or promotion evidence",
+  "decision": {
+    "selected_temporal_profile": "constant_over_observed_arena_traversal",
+    "definition": "For a fixed recent_constrained_travel_mm and current geometry, H5's history search drive does not decay as a function of elapsed observed arena time. No tau_search_s parameter exists in H5-v1.",
+    "history_dependence_still_allowed": "The magnitude may still depend on recent constrained travel L through a separately frozen history parameterization; this decision does not freeze D(L).",
+    "time_zero_not_used_by_H5_v1": true,
+    "reopen_to_rescue_fit_forbidden": true
+  },
+  "measurement_basis": {
+    "policy": "reference/poissonnier2026_open_arena_measurement_policy_v1.json",
+    "policy_git_blob_sha": "fd2718cf9351b655340eacd868adc536301a83a4",
+    "biological_origin_report": "reports/h5_biological_origin_choice_audit_v1.json",
+    "biological_origin_report_git_blob_sha": "2378fa54ad4174141f213ed44be3c283706975de",
+    "measurement_time_origin": "The frozen measurement policy starts simulated observation at first_track_x_mm/first_track_y_mm.",
+    "biological_origin": "The H5 biological origin is the central physical entry-hole/trail-crossing reference.",
+    "unobserved_interval": "The center-hole-to-first-track interval is not reconstructed and has no elapsed-time field in the frozen geometry reference.",
+    "consequence": "Any decay beginning at physical arena entry would require an unobserved pre-track delay delta that is not identified by the current measurement reconstruction."
+  },
+  "shadow_audit": {
+    "workflow_run": 33815627966,
+    "head_sha": "9f3db75c856037dd102e804fef3e6a5b7e443b0b",
+    "artifact_id": 9916419906,
+    "artifact_zip_sha256": "a3bbfde3d3568e6e58eec4905cd1173ea5d59732c4644f5ff22cc91fa1073a0e",
+    "H5_runtime_used": false,
+    "H5_fit_or_search_used": false,
+    "H5_outcomes_used": false,
+    "node": {
+      "simulations": 1200,
+      "first_turns": 1177,
+      "fraction_no_reorientation_before_exit_or_timeout": 0.019166666666666665,
+      "first_reorientation_time_from_first_track_s": {
+        "min": 0.0006019317586279072,
+        "q10": 0.15454027401759599,
+        "q25": 0.42299701617849994,
+        "median": 1.0819629213847548,
+        "q75": 2.0908474397881154,
+        "q90": 3.3704097741376104,
+        "max": 6.596074334114529,
+        "mean": 1.463929153853991
+      },
+      "exit_or_timeout_time_s": {
+        "median": 7.2899999999999325,
+        "q90": 12.143999999999835,
+        "max": 28.11999999999949
+      },
+      "first_track_offset_from_central_origin_mm": {
+        "median": 6.650050324710311,
+        "q90": 8.608222021557852,
+        "max": 20.965055941690853
+      }
+    },
+    "chromium": {
+      "simulations": 120,
+      "first_turns": 117,
+      "first_turn_time_s": {
+        "q10": 0.15123658632144876,
+        "median": 1.2184180958692064,
+        "q90": 2.7462892445171
+      },
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0
+    }
+  },
+  "rejected_alternative": {
+    "name": "exponential_temporal_decay",
+    "generic_form": "drive(t) = drive0 * exp(-(t + delta_pretrack)/tau_search_s)",
+    "reason": [
+      "delta_pretrack, the elapsed time from physical entry to first tracked observation, is not measured or reconstructed.",
+      "For exponential decay, delta_pretrack is exactly multiplicatively confounded with drive amplitude through exp(-delta_pretrack/tau_search_s).",
+      "The first major reorientation commonly occurs within the same order of time as plausible sub-second-to-second pre-track delays, so the ambiguity affects the first H5-eligible event rather than only a late tail.",
+      "Fast-to-moderate tau values are materially sensitive to the unknown delay; very slow tau values approach a constant profile while adding a weakly identified parameter."
+    ],
+    "diagnostic_sensitivity_not_fit": {
+      "note": "The delay and tau values below were a broad engineering sensitivity grid only, not empirical estimates or candidate search values.",
+      "unknown_delay_0_5_s": {
+        "tau_0_5_s_reduction_pct": 63.212055882855765,
+        "tau_1_s_reduction_pct": 39.346934028736655,
+        "tau_2_s_reduction_pct": 22.119921692859513,
+        "tau_5_s_reduction_pct": 9.51625819640405,
+        "tau_10_s_reduction_pct": 4.877057549928598,
+        "tau_20_s_reduction_pct": 2.4690087971667385,
+        "tau_40_s_reduction_pct": 1.2422199506118559
+      },
+      "unknown_delay_1_s": {
+        "tau_1_s_reduction_pct": 63.212055882855765,
+        "tau_2_s_reduction_pct": 39.346934028736655,
+        "tau_5_s_reduction_pct": 18.12692469220182,
+        "tau_10_s_reduction_pct": 9.51625819640405,
+        "tau_20_s_reduction_pct": 4.877057549928598,
+        "tau_40_s_reduction_pct": 2.4690087971667385
+      }
+    }
+  },
+  "structural_reasoning": {
+    "exponential_confounding_identity": "exp(-(t+delta)/tau) = exp(-delta/tau) * exp(-t/tau), so unknown delta is inseparable from amplitude without independent timing information.",
+    "parsimony": "A constant temporal profile removes tau_search_s and the unobserved time-zero nuisance while preserving the core H5 claim: history modulates origin-referenced reorientation direction.",
+    "falsifiability": "H5-v1 therefore makes a cleaner claim. Any observed within-trial weakening of origin-oriented turning would count against this v1 rather than being absorbed by a fitted temporal decay.",
+    "independence_from_prior_H2_H3_H4_failures": "This decision is based on measurement identifiability and mechanism parsimony, not on selecting whichever temporal profile improves known H5 outcomes."
+  },
+  "firewall": {
+    "H5_mechanism_fully_frozen": false,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_allowed": false,
+    "temporal_profile_frozen_constant": true,
+    "tau_search_parameter_forbidden_in_H5_v1": true,
+    "temporal_profile_may_not_be_reopened_to_rescue_fit": true,
+    "ymaze_access": false,
+    "canonical_model_unchanged": true
+  },
+  "next_step": "Resolve whether H5-v1 changes only conditional reorientation direction or also orientation-dependent free-path length."
+}
