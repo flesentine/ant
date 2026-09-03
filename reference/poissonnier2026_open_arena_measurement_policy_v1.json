@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "id": "poissonnier2026_open_arena_measurement_policy_v1",
+  "status": "frozen_measurement_input_policy_before_H5_mechanism_freeze_or_estimator_implementation",
+  "freeze_date": "2026-09-03",
+  "scope": "Poissonnier 2026 experiment 1 DCM-control development estimation and matched cross-family re-evaluation only",
+  "scientific_role": "measurement_and_input_reconstruction_not_biological_mechanism",
+  "honesty_note": "The Poissonnier 2026 outcomes and prior H2/H3/H4 development results were already known when this measurement policy was frozen. The policy is based on newly audited raw coordinate and arena-bound fields from the pinned final-record supplement, not on choosing geometry values to improve an H5 result. No H5 runtime implementation or H5 parameter search had occurred when this policy was frozen.",
+  "source": {
+    "manifest": "reference/poissonnier2026_source_manifest.json",
+    "published_dataset_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+    "geometry_reference": "reference/poissonnier2026_open_arena_measurement_geometry_v1.json",
+    "geometry_reference_git_blob_sha": "af0ec6fbacf83b915dd78cb3a822609c126dc1e7",
+    "derivation_script": "tools/derive-poissonnier2026-measurement-geometry.py",
+    "derivation_script_git_blob_sha": "f9c1a9433158ca77e78ad350437fd6b21ed6a483",
+    "derivation_audit_workflow_run": 33784717751,
+    "derivation_status": "passed_and_exact_reference_materialized"
+  },
+  "reconstructed_geometry_schema": {
+    "row_count": 51,
+    "colonies": [0, 7, 16, 20, 21, 27],
+    "row_fields_allowed": [
+      "ant_id",
+      "colony",
+      "arena_width_mm",
+      "arena_height_mm",
+      "entry_reference_x_mm",
+      "entry_reference_y_mm",
+      "first_track_x_mm",
+      "first_track_y_mm"
+    ],
+    "treatment_label_present": false,
+    "outcome_fields_present": false,
+    "source_field_firewall": {
+      "allowed_for_derivation": [
+        "ant_ID",
+        "Colony",
+        "Pheromone",
+        "Xmin_Arena",
+        "Xmax_Arena",
+        "Ymin_Arena",
+        "Ymax_Arena",
+        "Y_Line",
+        "Xstart",
+        "Ystart"
+      ],
+      "forbidden_from_geometry_reference": [
+        "Path_length",
+        "Xlast",
+        "Ylast",
+        "Beeline",
+        "Straightness",
+        "Total_Frames",
+        "Proportion_Frames_MiddleZone",
+        "Average_Speed",
+        "Average_Speed_Moving",
+        "Traveled_Dist",
+        "Traveled_Dist_Moving"
+      ]
+    }
+  },
+  "coordinate_semantics": {
+    "arena_frame": "Each source row is translated to a local tracked-arena frame with x=0 at Xmin_Arena and y=0 at Ymin_Arena.",
+    "arena_width_mm": "Xmax_Arena - Xmin_Arena",
+    "arena_height_mm": "Ymax_Arena - Ymin_Arena",
+    "first_track_position": "Xstart/Ystart in the local tracked-arena frame. This is the first observed ant position and the start point used by the published Beeline measurement.",
+    "entry_reference": "The assay's central entry-hole/trail-crossing reference, represented as x=arena_width/2 and y=Y_Line-Ymin_Arena. In the 51 reconstructed DCM-control rows Y_Line is exactly the vertical midpoint.",
+    "critical_separation": "The measurement policy does not assert that first_track_position is the ant's remembered biological origin. H5 must separately freeze which permitted geometry reference its biology uses before H5 implementation.",
+    "middle_zone": "The article-defined central zone is 10 mm on each side of the central trail. For a sampled row its center_y is entry_reference_y_mm and its half-width is fixed at 10 mm."
+  },
+  "why_nominal_geometry_is_not_used_for_future_development_estimation": {
+    "nominal_apparatus_mm": [297, 210],
+    "reconstructed_median_arena_width_mm": 289.11290318,
+    "reconstructed_median_arena_height_mm": 202.419354858,
+    "reconstructed_first_track_radius_from_entry_median_mm": 6.650050324710311,
+    "reconstructed_first_track_radius_from_entry_q90_mm": 8.608222021557852,
+    "reconstructed_first_track_radius_from_entry_max_mm": 20.965055941690853,
+    "previous_assumed_entry_position_jitter_mm": 0.5,
+    "interpretation": "The measured observation geometry differs materially from nominal A4 plus 0.5 mm center jitter, and prior no-H5 Chromium sensitivity tests showed that geometry alone can move the same observables used for development estimation."
+  },
+  "loco_geometry_pool": {
+    "fold_definition": "Same six colony folds used by H2/H3/H4 development estimation.",
+    "training_pool_rule": "For held-out colony c, the geometry pool contains every reconstructed DCM-control geometry row whose colony is not c.",
+    "heldout_geometry_excluded": true,
+    "path_length_stratification": false,
+    "treatment_specific_geometry_pool_forbidden": true,
+    "colony_role": "Colony identity is used only to exclude the held-out fold from the empirical geometry pool. It is not a biological model input and does not select colony-specific parameters.",
+    "pooled_descriptive_rule": "A post-LOCO descriptive pooled run may use all 51 geometry rows, but it cannot alter any held-out decision or H5 mechanism choice."
+  },
+  "geometry_sampler": {
+    "type": "uniform_empirical_discrete",
+    "row_order": "ascending ant_id after applying the fold pool filter",
+    "rng_stream_name": "poissonnier2026_measurement_geometry_v1",
+    "rng_role": "estimator_input_rng_not_biology_rng",
+    "selection_algorithm": "Instantiate the existing deterministic RNG from streamSeed(trial_seed, rng_stream_name), consume exactly one uniform variate u, and select rows[min(n-1, floor(u*n))].",
+    "one_geometry_draw_per_simulated_trial": true,
+    "replacement": true,
+    "candidate_independent": true,
+    "path_length_independent": true,
+    "common_random_numbers": {
+      "same_trial_seed_gives_same_geometry_for_short_and_long": true,
+      "same_trial_seed_gives_same_geometry_for_null_and_context": true,
+      "same_trial_seed_gives_same_geometry_for_matched_H2_H3_H4_re_evaluation": true
+    },
+    "biology_rng_firewall": "Geometry sampling must use its dedicated estimator/input stream and must not consume, shift, replace, or depend on any biological RNG stream."
+  },
+  "simulation_application": {
+    "when": "Apply sampled measurement geometry to a cloned development-estimation bundle before constructing Simulation.",
+    "apparatus_world_width": "sampled arena_width_mm",
+    "apparatus_world_height": "sampled arena_height_mm",
+    "arena_rectangle_width": "sampled arena_width_mm",
+    "arena_rectangle_height": "sampled arena_height_mm",
+    "observation_start_position": "sampled first_track_x_mm, first_track_y_mm",
+    "entry_point_for_simulation_initialization": "sampled first_track_x_mm, first_track_y_mm",
+    "position_jitter_mm": 0,
+    "heading_policy": "Unchanged by this measurement policy. Existing shared entry-heading assumptions or separately frozen nuisance treatment remain responsible for heading.",
+    "middle_zone_center_y_mm": "sampled entry_reference_y_mm",
+    "middle_zone_half_width_mm": 10,
+    "exit_edge_geometry": "Classify first border contact against the sampled width and height.",
+    "beeline_geometry": "Compute simulated Beeline from the actual simulated first observed position to the final observed position, matching the source Xstart/Ystart-to-Xlast/Ylast definition.",
+    "time_origin": "The simulated observation begins at the reconstructed first-track position, preserving the Total_Frames/25 measurement window rather than adding an unobserved center-hole-to-first-track interval."
+  },
+  "model_comparison_rule": {
+    "H5_null_and_context": "Must use identical fold geometry pools and identical trial-seed geometry draws.",
+    "matched_H2_H3_H4": "Any future cross-family comparison used for an H5 decision must re-evaluate the frozen comparator candidates under this same measurement geometry policy, with identical held-out rows, training-derived scorer scales, trial counts, evaluation seeds, and geometry draws wherever architectures permit.",
+    "historical_reports": "Existing H2/H3/H4 reports are preserved as historical results under their original nominal geometry assumptions and must not be relabeled as reconstructed-geometry results.",
+    "no_comparator_refit_from_H5_outcomes": true
+  },
+  "fit_target_and_scoring_firewall": {
+    "fit_observables_unchanged": [
+      "time_to_exit_s",
+      "middle_zone_fraction",
+      "beeline_mm",
+      "exit_edge"
+    ],
+    "geometry_reconstruction_does_not_add_a_fit_metric": true,
+    "geometry_values_cannot_be_tuned_by_candidate_loss": true,
+    "moving_classifier_dependent_metrics_remain_excluded": true,
+    "heldout_continuous_scales_remain_training_only": true
+  },
+  "implementation_qualification_required": {
+    "before_H5_runtime_or_estimator_use": true,
+    "checks": [
+      "Exact geometry-reference Git blob matches the frozen policy.",
+      "Exact derivation-script Git blob matches the frozen policy.",
+      "Source XLSX SHA256 matches the frozen policy.",
+      "Geometry reference has exactly 51 rows and six expected colonies.",
+      "Geometry rows contain exactly the allowed row fields and no treatment/outcome fields.",
+      "Each LOCO pool excludes every held-out-colony geometry row and includes all geometry rows from the five training colonies.",
+      "The same trial seed selects the same geometry row for short and long simulations.",
+      "The same trial seed selects the same geometry row for null and context simulations.",
+      "Matched comparator evaluation uses the same geometry row sequence.",
+      "Geometry RNG leaves all biological RNG stream states unchanged before biological execution.",
+      "Sampled width, height, first-track position, central-zone center, and zero position jitter are applied before Simulation construction.",
+      "Simulated Beeline starts at the sampled first-track position.",
+      "Exit-edge classification uses sampled boundaries.",
+      "Canonical nominal apparatus and historical experiment files remain unchanged.",
+      "No Y-maze file, outcome, statistic, or simulation is accessed."
+    ]
+  },
+  "forbidden_changes_after_freeze": [
+    "No treatment-specific geometry distributions.",
+    "No inclusion of Path_length in the geometry reference or sampler.",
+    "No use of held-out-colony geometry in LOCO simulation generation.",
+    "No geometry candidate, fitted geometry parameter, or loss-based geometry selection.",
+    "No adding outcome fields to the geometry artifact.",
+    "No changing the geometry RNG stream, row ordering, or sampling rule after seeing H5 results.",
+    "No changing the 10 mm middle-zone half-width after seeing H5 results.",
+    "No automatic change to canonical apparatus, observation, experiment, or model files."
+  ],
+  "failure_and_bug_rule": {
+    "scientific_failure": "If H5 later fails under this frozen measurement policy, geometry may not be retuned to rescue H5. A different measurement policy would require genuinely new measurement evidence and a separately versioned analysis.",
+    "implementation_bug": "A demonstrated implementation defect invalidates affected runs. Fix the defect, document it, regression-test it, and rerun the frozen procedure unchanged. Poor model performance alone is not an implementation bug."
+  },
+  "firewall": {
+    "H5_mechanism_still_unfrozen": true,
+    "H5_runtime_implementation_allowed_by_this_file": false,
+    "H5_parameter_search_allowed": false,
+    "canonical_model_unchanged": true,
+    "canonical_apparatus_unchanged": true,
+    "ymaze_access": false
+  }
+}
