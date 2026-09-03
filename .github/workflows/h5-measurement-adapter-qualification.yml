@@ -12,12 +12,40 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Confirm H5 remains unimplemented and policy parses
+      - name: Confirm final measurement records and H5 firewall
         run: |
           set -euo pipefail
           python3 -m json.tool reference/poissonnier2026_open_arena_measurement_policy_v1.json >/dev/null
           python3 -m json.tool reference/poissonnier2026_open_arena_measurement_geometry_v1.json >/dev/null
+          python3 -m json.tool reports/poissonnier2026_open_arena_measurement_reconstruction_v1.json >/dev/null
           python3 -m json.tool hypotheses/h5_origin_referenced_search_v1.draft.json >/dev/null
+          python3 - <<'PY'
+          import json
+          draft=json.load(open('hypotheses/h5_origin_referenced_search_v1.draft.json'))
+          report=json.load(open('reports/poissonnier2026_open_arena_measurement_reconstruction_v1.json'))
+          policy=json.load(open('reference/poissonnier2026_open_arena_measurement_policy_v1.json'))
+          geometry=json.load(open('reference/poissonnier2026_open_arena_measurement_geometry_v1.json'))
+          assert draft['schema_version']==3
+          assert draft['measurement_reconstruction_dependency']['status']=='resolved_frozen_and_qualified_before_H5_mechanism_freeze'
+          assert draft['firewall']['mechanism_not_frozen'] is True
+          assert draft['firewall']['implementation_allowed_before_freeze'] is False
+          assert draft['firewall']['parameter_search_allowed'] is False
+          assert draft['firewall']['ymaze_access'] is False
+          assert draft['firewall']['measurement_reconstruction_policy_frozen_and_qualified'] is True
+          assert draft['firewall']['H5_biological_origin_still_unfrozen'] is True
+          assert report['scientific_state']['measurement_policy_frozen'] is True
+          assert report['scientific_state']['measurement_adapter_qualified'] is True
+          assert report['scientific_state']['H5_mechanism_frozen'] is False
+          assert report['scientific_state']['H5_runtime_implemented'] is False
+          assert report['scientific_state']['H5_parameter_search_performed'] is False
+          assert report['qualification_history'][1]['result']=='invalidated_for_H5_development_firewall'
+          assert report['qualification_history'][2]['result']=='accepted_pass'
+          assert policy['firewall']['H5_mechanism_still_unfrozen'] is True
+          assert policy['firewall']['H5_parameter_search_allowed'] is False
+          assert policy['firewall']['ymaze_access'] is False
+          assert len(geometry['rows'])==51
+          print('Final measurement/H5 records PASS')
+          PY
           if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm|biology_h5_search' src models experiments states apparatus scoring observations; then exit 1; fi
       - name: Run Y-maze-free Node regression set
         run: |
