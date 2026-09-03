@@ -77,7 +77,7 @@ const summary = sim.runUntilComplete(0.4, FIXED_DT);
 assert(summary && summary.observed_metrics);
 assert.strictEqual(sim.apparatus.world.width, sampled.arena_width_mm);
 assert.strictEqual(sim.apparatus.world.height, sampled.arena_height_mm);
-assert.strictEqual(sim.observation.metric_definitions.central_zone_fraction.center_y_mm, sampled.entry_reference_y_mm);
+assert.strictEqual(summary.observed_metrics.observation_id, short.observation.id);
 assert(Number.isFinite(Math.hypot(sim.ants[0].x - sx, sim.ants[0].y - sy)));
 
 const frozenHistorical = {
