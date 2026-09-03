@@ -5,99 +5,79 @@ on:
 permissions:
   contents: read
 jobs:
-  measurement_geometry:
+  measured_start_state:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
       - name: Confirm draft-only state
         run: |
           set -euo pipefail
-          test "$(git hash-object src/h3.js)" = "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1"
           if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm' src models experiments states apparatus scoring observations; then exit 1; fi
       - name: Fetch pinned final-record supplement
         run: |
           mkdir -p /tmp/h5-source
           ./tools/fetch-poissonnier2026-reference.sh /tmp/h5-source >/tmp/fetch-reference.log
           test "$(sha256sum /tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx | awk '{print $1}')" = "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318"
-      - name: Audit coordinate and Beeline definitions without model fitting
+      - name: Inspect published analysis-code references to start and Beeline
         run: |
           python3 - <<'PY'
-          import json, math, re, importlib.util, pathlib
-          root=pathlib.Path('.').resolve()
-          spec=importlib.util.spec_from_file_location('r',root/'tools/reconstruct-poissonnier2026.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-          xlsx='/tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx'
-          ss=m.sheets(xlsx); raw=ss['Exp 1']; headers=raw[0]; rows=m.records(raw)
-          interesting=[h for h in headers if re.search(r'(x|y|first|last|arena|bee|start|end|border|frame)',h,re.I)]
-          controls=[r for r in rows if r.get('Pheromone')=='n']
-          def num(r,k):
-              try:return float(r[k])
-              except:return None
-          def stats(xs):
-              xs=sorted(x for x in xs if x is not None and math.isfinite(x))
-              if not xs:return None
-              q=lambda p: xs[round((len(xs)-1)*p)]
-              return {'n':len(xs),'min':xs[0],'q10':q(.1),'median':q(.5),'q90':q(.9),'max':xs[-1]}
-          report={'status':'passed','headers':headers,'interesting_headers':interesting,'control_rows':len(controls)}
-          numeric={}
-          for h in interesting:
-              s=stats([num(r,h) for r in controls]);
-              if s:numeric[h]=s
-          report['numeric_ranges']=numeric
-          # Try all plausible first/start XY pairs and compare their Euclidean endpoint distance to published Beeline.
-          candidates=[]
-          lower={h.lower():h for h in headers}
-          pairs=[]
-          for xname in headers:
-              lx=xname.lower()
-              if not lx.startswith('x'):continue
-              for yname in headers:
-                  ly=yname.lower()
-                  if not ly.startswith('y'):continue
-                  sx=re.sub(r'^x','',lx); sy=re.sub(r'^y','',ly)
-                  if sx==sy and any(t in lx for t in ['first','start','initial']):pairs.append((xname,yname))
-          last_pairs=[]
-          for xname in headers:
-              lx=xname.lower()
-              if not lx.startswith('x'):continue
-              for yname in headers:
-                  ly=yname.lower();sx=re.sub(r'^x','',lx);sy=re.sub(r'^y','',ly)
-                  if sy==sx and any(t in lx for t in ['last','end','final']):last_pairs.append((xname,yname))
-          for xp,yp in pairs:
-              for xl,yl in last_pairs:
-                  errs=[]; offsets=[]
-                  for r in controls:
-                      vals=[num(r,k) for k in [xp,yp,xl,yl,'Beeline','Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena']]
-                      if any(v is None for v in vals):continue
-                      x0,y0,x1,y1,b,xmn,xmx,ymn,ymx=vals
-                      errs.append(abs(math.hypot(x1-x0,y1-y0)-b))
-                      offsets.append(math.hypot(x0-(xmn+xmx)/2,y0-(ymn+ymx)/2))
-                  if errs:candidates.append({'start':[xp,yp],'end':[xl,yl],'n':len(errs),'beeline_max_abs_error':max(errs),'beeline_mean_abs_error':sum(errs)/len(errs),'start_offset_from_arena_midpoint_mm':stats(offsets)})
-          report['coordinate_pair_tests']=sorted(candidates,key=lambda z:z['beeline_max_abs_error'])[:10]
-          # Center-to-final distance sanity using per-row arena bounds.
-          center_err=[]; center_to_final=[]; beelines=[]; impossible=[]
-          if all(k in headers for k in ['Xlast','Ylast','Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena','Beeline']):
-              for r in controls:
-                  vals=[num(r,k) for k in ['Xlast','Ylast','Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena','Beeline']]
-                  if any(v is None for v in vals):continue
-                  xl,yl,xmn,xmx,ymn,ymx,b=vals;cx=(xmn+xmx)/2;cy=(ymn+ymx)/2;d=math.hypot(xl-cx,yl-cy)
-                  center_to_final.append(d);beelines.append(b);center_err.append(abs(d-b))
-                  mincenter=min((xmx-xmn)/2,(ymx-ymn)/2)
-                  if b+1e-9<mincenter: impossible.append({'ant_id':r.get('ant_ID'),'beeline':b,'minimum_center_to_border':mincenter,'center_to_final':d})
-          report['center_to_final_mm']=stats(center_to_final);report['beeline_mm']=stats(beelines);report['center_beeline_abs_error_mm']=stats(center_err);report['beeline_below_center_to_nearest_border_count']=len(impossible);report['examples_beeline_below_center_border']=impossible[:12]
-          # Bounds variability and implied center/border distances.
-          for key in ['Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena']:
-              if key in headers: report.setdefault('arena_bounds',{})[key]=stats([num(r,key) for r in controls])
-          pathlib.Path('/tmp/h5-measurement-geometry.json').write_text(json.dumps(report,indent=2)+'\n')
-          print(json.dumps(report,indent=2))
+          from pathlib import Path
+          p=Path('/tmp/h5-source/40_2026_1106_MOESM1_ESM.rmd')
+          lines=p.read_text(errors='replace').splitlines()
+          hits=[]
+          for i,line in enumerate(lines):
+              if any(k.lower() in line.lower() for k in ['xstart','ystart','beeline','straightness']):
+                  lo=max(0,i-2);hi=min(len(lines),i+3)
+                  hits.append({'line':i+1,'context':lines[lo:hi]})
+          import json
+          Path('/tmp/h5-rmd-start-beeline.json').write_text(json.dumps(hits,indent=2)+'\n')
+          print(json.dumps(hits,indent=2))
+          PY
+      - name: Quantify measured start-state differences by treatment and colony
+        run: |
+          python3 - <<'PY'
+          import json, math, statistics, random, importlib.util, pathlib
+          root=pathlib.Path('.').resolve();spec=importlib.util.spec_from_file_location('r',root/'tools/reconstruct-poissonnier2026.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          rows=m.records(m.sheets('/tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx')['Exp 1']);rows=[r for r in rows if r['Pheromone']=='n']
+          def f(r,k):return float(r[k])
+          dat=[]
+          for r in rows:
+              cx=(f(r,'Xmin_Arena')+f(r,'Xmax_Arena'))/2;cy=(f(r,'Ymin_Arena')+f(r,'Ymax_Arena'))/2
+              dx=f(r,'Xstart')-cx;dy=f(r,'Ystart')-cy
+              dat.append({'ant':int(float(r['ant_ID'])),'colony':int(float(r['Colony'])),'path':r['Path_length'],'dx':dx,'dy':dy,'r':math.hypot(dx,dy),'xnorm':(f(r,'Xstart')-f(r,'Xmin_Arena'))/(f(r,'Xmax_Arena')-f(r,'Xmin_Arena')),'ynorm':(f(r,'Ystart')-f(r,'Ymin_Arena'))/(f(r,'Ymax_Arena')-f(r,'Ymin_Arena'))})
+          def mean(xs):return sum(xs)/len(xs)
+          def sd(xs):
+              if len(xs)<2:return 0
+              mu=mean(xs);return math.sqrt(sum((x-mu)**2 for x in xs)/(len(xs)-1))
+          def summarize(sub):
+              out={'n':len(sub)}
+              for k in ['dx','dy','r','xnorm','ynorm']:
+                  xs=[x[k] for x in sub];out[k]={'mean':mean(xs),'sd':sd(xs),'min':min(xs),'max':max(xs)}
+              return out
+          s=[x for x in dat if x['path']=='s'];l=[x for x in dat if x['path']=='l']
+          diffs={k:mean([x[k] for x in s])-mean([x[k] for x in l]) for k in ['dx','dy','r','xnorm','ynorm']}
+          pooled={}
+          for k in ['dx','dy','r','xnorm','ynorm']:
+              sp=math.sqrt(((len(s)-1)*sd([x[k] for x in s])**2+(len(l)-1)*sd([x[k] for x in l])**2)/(len(s)+len(l)-2));pooled[k]=diffs[k]/sp if sp else 0
+          colonies=sorted({x['colony'] for x in dat});loco={}
+          for c in colonies:
+              ss=[x for x in s if x['colony']!=c];ll=[x for x in l if x['colony']!=c]
+              loco[str(c)]={k:mean([x[k] for x in ss])-mean([x[k] for x in ll]) for k in ['dx','dy','r','xnorm','ynorm']}
+          # Deterministic permutation diagnostics for mean differences. Descriptive only, not a gate.
+          rng=random.Random(20260903); vals={k:[x[k] for x in dat] for k in ['dx','dy','r','xnorm','ynorm']};nS=len(s);perm={}
+          for k in vals:
+              obs=abs(diffs[k]);arr=vals[k][:];ge=0;N=20000
+              for _ in range(N):
+                  rng.shuffle(arr);d=abs(mean(arr[:nS])-mean(arr[nS:]));ge+=d>=obs-1e-15
+              perm[k]=(ge+1)/(N+1)
+          out={'status':'passed','coordinate_role':'measured first tracked position, not assumed physical hole center','groups':{'short':summarize(s),'long':summarize(l)},'short_minus_long':diffs,'standardized_difference_cohen_d':pooled,'permutation_p_descriptive_only':perm,'leave_one_colony_out_short_minus_long':loco,'raw_measured_start_available':True,'entry_heading_available_from_this_table':False,'entry_speed_available_from_this_table':False}
+          pathlib.Path('/tmp/h5-start-state-audit.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out,indent=2))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: h5-measurement-geometry-audit
+          name: h5-measured-start-state-audit
           path: |
-            /tmp/h5-measurement-geometry.json
+            /tmp/h5-start-state-audit.json
+            /tmp/h5-rmd-start-beeline.json
             /tmp/fetch-reference.log
-            /tmp/h5-source/SHA256SUMS
           retention-days: 14
