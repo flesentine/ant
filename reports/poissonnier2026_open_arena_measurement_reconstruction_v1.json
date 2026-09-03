@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "id": "poissonnier2026_open_arena_measurement_reconstruction_v1",
+  "status": "frozen_policy_adapter_qualified_before_H5_mechanism_freeze_or_parameter_search",
+  "date": "2026-09-03",
+  "scientific_role": "measurement_and_input_reconstruction_not_H5_biology",
+  "scope": "Poissonnier 2026 experiment 1 DCM-control development estimation geometry",
+  "scientific_state": {
+    "measurement_policy_frozen": true,
+    "measurement_adapter_implemented": true,
+    "measurement_adapter_qualified": true,
+    "H5_mechanism_frozen": false,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_performed": false,
+    "canonical_model_changed": false,
+    "canonical_apparatus_changed": false
+  },
+  "frozen_inputs": {
+    "source_xlsx_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+    "geometry_reference": {
+      "path": "reference/poissonnier2026_open_arena_measurement_geometry_v1.json",
+      "git_blob_sha": "af0ec6fbacf83b915dd78cb3a822609c126dc1e7",
+      "rows": 51,
+      "colonies": [0, 7, 16, 20, 21, 27]
+    },
+    "measurement_policy": {
+      "path": "reference/poissonnier2026_open_arena_measurement_policy_v1.json",
+      "git_blob_sha": "fd2718cf9351b655340eacd868adc536301a83a4",
+      "freeze_commit": "c149a9ea31b704848e00d8e3f5f41a37c6ef87ae"
+    },
+    "derivation_script": {
+      "path": "tools/derive-poissonnier2026-measurement-geometry.py",
+      "git_blob_sha": "f9c1a9433158ca77e78ad350437fd6b21ed6a483"
+    }
+  },
+  "reconstruction_audit": {
+    "workflow_run": 33784717751,
+    "artifact_id": 9904962218,
+    "artifact_zip_sha256": "6889017cb5324ec0d535157d5b631ef246b5ca9e79ec68e1548c1fdc06570a3c",
+    "result": "passed_and_exact_geometry_reference_materialized",
+    "findings": {
+      "Y_Line_equals_vertical_midpoint_for_all_51_rows": true,
+      "median_tracked_arena_width_mm": 289.11290318,
+      "median_tracked_arena_height_mm": 202.419354858,
+      "median_first_track_radius_from_entry_mm": 6.650050324710311,
+      "q90_first_track_radius_from_entry_mm": 8.608222021557852,
+      "max_first_track_radius_from_entry_mm": 20.965055941690853
+    }
+  },
+  "adapter": {
+    "path": "tools/poissonnier2026-measurement-geometry.js",
+    "git_blob_sha": "fde2eae58e230880b24efa7c07ba32fde95bcaea",
+    "implementation_commit": "061fcefa3fd3f813181832ccd8fc92c8cb7574eb",
+    "test_path": "tests/measurement-geometry-policy.test.js",
+    "test_git_blob_sha": "5174394e53f48cc77d245633c5261de5a71b1bc1",
+    "functions_qualified": [
+      "frozen policy/geometry/derivation Git-blob verification",
+      "exact geometry row schema validation",
+      "LOCO training-only geometry pool construction",
+      "deterministic uniform empirical geometry sampling",
+      "dedicated estimator/input RNG stream",
+      "sampled tracked width and height application",
+      "sampled first-track position application",
+      "zero positional jitter application",
+      "sampled central-zone center with fixed 10 mm half-width",
+      "development-target ant-id alignment"
+    ]
+  },
+  "qualification_history": [
+    {
+      "workflow_run": 33785240565,
+      "result": "failed_before_Chromium",
+      "interpretation": "An invalid test introspection attempted to read sim.observation, which is not a public Simulation property. The frozen policy and adapter checks preceding that assertion passed. The test was corrected without changing the policy or adapter."
+    },
+    {
+      "workflow_run": 33785331807,
+      "result": "invalidated_for_H5_development_firewall",
+      "artifact_id": 9905187516,
+      "reason": "The generic complete test-suite command unintentionally executed the existing neutral-y-maze.test.js. No Y-maze information was used for fitting, tuning, ranking, or H5 design, but the H5 development firewall forbids Y-maze access at all, so this otherwise successful qualification run is not accepted as evidence."
+    },
+    {
+      "workflow_run": 33785498079,
+      "job_id": 100749141715,
+      "head_sha": "e6731fb3ee9eaa8cba3912351afc941a9aed7ba5",
+      "result": "accepted_pass",
+      "artifact_id": 9905246759,
+      "artifact_zip_sha256": "3dc560540c2fafc5719161a0c49f3fc264e119e96ed13e9dea5c0de6d3dec53c",
+      "node_regression_set": "19 explicitly enumerated Y-maze-free tests",
+      "measurement_geometry_policy_test": "passed",
+      "Chromium": {
+        "status": "passed",
+        "browser_exceptions": 0,
+        "console_errors": 0,
+        "ymaze_requests": 0,
+        "fold_pool_sizes": {
+          "0": 42,
+          "7": 41,
+          "16": 44,
+          "20": 38,
+          "21": 45,
+          "27": 45
+        },
+        "deterministic_sample_seeds_checked": [1, 42, 424242, 990000, 1490000],
+        "representative_seed_990000_heldout_0": {
+          "sampled_geometry_ant_id": 149,
+          "sampled_geometry_colony": 20,
+          "arena_width_mm": 290.92741938,
+          "arena_height_mm": 204.23387094499998,
+          "first_track_x_mm": 143.394555288801,
+          "first_track_y_mm": 110.06452389815401,
+          "middle_zone_center_y_mm": 102.1169354725
+        },
+        "canonical_nominal_resources_unchanged": {
+          "arena_width_mm": 297,
+          "arena_height_mm": 210,
+          "entry_x_mm": 148.5,
+          "entry_y_mm": 105,
+          "position_jitter_mm": 0.5
+        }
+      }
+    }
+  ],
+  "accepted_policy_invariants": {
+    "heldout_colony_geometry_used_for_LOCO_simulation_generation": false,
+    "geometry_pool_stratified_by_path_length": false,
+    "treatment_specific_geometry_distribution": false,
+    "geometry_fit_parameters": 0,
+    "geometry_candidate_selection_by_loss": false,
+    "same_trial_seed_same_geometry_short_long": true,
+    "same_trial_seed_same_geometry_null_context": true,
+    "matched_comparators_must_use_same_geometry_draws": true,
+    "geometry_rng_is_biology_rng": false,
+    "canonical_nominal_files_are_modified": false
+  },
+  "measurement_vs_biology_boundary": {
+    "first_track_position": "Observation-start geometry. It anchors the simulated measurement window and published-style Beeline start.",
+    "central_entry_reference": "Assay geometry derived from the central hole/trail crossing.",
+    "H5_origin_choice": "Not decided by this measurement policy. H5 must separately freeze whether its biological search reference is the central entry reference or another scientifically justified permitted origin before H5 implementation."
+  },
+  "next_scientific_step": "Return to the unfrozen H5 mechanism draft and resolve its remaining biological choices using this measurement policy as fixed infrastructure. No H5 parameter search is authorized by this report."
+}
