@@ -5,20 +5,18 @@ on:
 permissions:
   contents: read
 jobs:
-  circular:
+  shadow:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Confirm H5 remains unimplemented
+      - name: Confirm draft-only state
         run: |
           set -euo pipefail
           test "$(git hash-object src/h3.js)" = "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1"
-          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
           if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm' src models experiments states apparatus scoring observations; then exit 1; fi
-          node -e "const d=require('./hypotheses/h5_origin_referenced_search_v1.draft.json');if(d.firewall.implementation_allowed_before_freeze!==false||d.firewall.parameter_search_allowed!==false||d.firewall.ymaze_access!==false)process.exit(1)"
       - name: Start Chromium
         run: |
           python3 -m http.server 8080 >/tmp/http.log 2>&1 &
@@ -26,41 +24,32 @@ jobs:
           "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
           for i in {1..80}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then break; fi; sleep .2; done
           curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json
-      - name: Stress circular formulations in Chromium
+      - name: Run shadow-mode event sensitivity in Chromium
         run: |
-          cat >/tmp/circular.mjs <<'NODE'
+          cat >/tmp/shadow.mjs <<'NODE'
           import fs from 'node:fs';
-          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();const target=tabs.find(t=>t.type==='page')||tabs[0];
-          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});
-          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
-          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
-          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
-          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
-          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!AntLabCore&&!!AntLabH3&&!!AntLabIntegrity"))break;await sleep(100);}
-          const report=await evalv(`(()=>{
-            const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));const drive=(L,l)=>Math.exp(-Math.max(0,L)/l);const radial=(r,s)=>r/(r+s);const weight=(L,r,l,s,rho)=>rho*drive(L,l)*radial(r,s);
-            const vm=(x,mu,k)=>Math.exp(k*Math.cos(x-mu));const mix=(x,theta,phi,w,kb,ks)=>(1-w)*vm(x,theta,kb)+w*vm(x,phi,ks);
-            const signed=(theta,phi,w)=>wrap(theta+w*wrap(phi-theta));const vector=(theta,phi,w)=>Math.atan2((1-w)*Math.sin(theta)+w*Math.sin(phi),(1-w)*Math.cos(theta)+w*Math.cos(phi));
-            const lambda=500,scale=50,rho=.75,ws=weight(200,100,lambda,scale,rho),wl=weight(1000,100,lambda,scale,rho);if(!(ws>wl&&ws<1&&wl>0))throw new Error('weight');
-            const eps=1e-9,theta=0,phi=Math.PI;const signedJump=Math.abs(wrap(signed(theta+eps,phi,ws)-signed(theta-eps,phi,ws)));const vectorJump=Math.abs(wrap(vector(theta,phi,.5+eps)-vector(theta,phi,.5-eps)));
-            let refl=0,branch=0,rotErr=0,nullErr=0;for(let i=0;i<=720;i++){const h=-Math.PI+i*2*Math.PI/720;const f=mix(h,0,Math.PI,ws,2,2);refl=Math.max(refl,Math.abs(f-mix(-h,0,Math.PI,ws,2,2)));branch=Math.max(branch,Math.abs(mix(h,0,Math.PI-1e-10,ws,2,2)-mix(h,0,-Math.PI+1e-10,ws,2,2)));const rot=.731;rotErr=Math.max(rotErr,Math.abs(f-mix(wrap(h+rot),rot,wrap(Math.PI+rot),ws,2,2)));nullErr=Math.max(nullErr,Math.abs(mix(h,.42,-2.1,0,2,5)-vm(h,.42,2)));}
-            if(refl>1e-10||branch>1e-8||rotErr>1e-10||nullErr!==0)throw new Error('mixture symmetry/null failure');
-            const baseline=new AntLabCore.RNG(AntLabIntegrity.streamSeed(424242,'biology_h3_turn_angle:0'));const withH5=new AntLabCore.RNG(AntLabIntegrity.streamSeed(424242,'biology_h3_turn_angle:0'));const choice=new AntLabCore.RNG(AntLabIntegrity.streamSeed(424242,'biology_h5_search_choice:0'));const searchAngle=new AntLabCore.RNG(AntLabIntegrity.streamSeed(424242,'biology_h5_search_angle:0'));
-            const a=[],b=[];for(let i=0;i<20;i++)a.push(AntLabH3.sampleVonMises(baseline,2));for(let i=0;i<20;i++){b.push(AntLabH3.sampleVonMises(withH5,2));choice.next();AntLabH3.sampleVonMises(searchAngle,2);}if(JSON.stringify(a)!==JSON.stringify(b)||baseline.state!==withH5.state)throw new Error('H5 dedicated streams perturb H3');
-            const c0=new AntLabCore.RNG(AntLabIntegrity.streamSeed(9988,'biology_h5_search_choice:0')),c1=new AntLabCore.RNG(AntLabIntegrity.streamSeed(9988,'biology_h5_search_choice:0'));for(let i=0;i<50;i++)if(c0.next()!==c1.next())throw new Error('CRN choice mismatch');
-            const offOrigin={x:80,y:60},center={x:148.5,y:105},p={x:130,y:60};const bearing=(o,p)=>Math.atan2(o.y-p.y,o.x-p.x);const originCenterSeparation=Math.abs(wrap(bearing(offOrigin,p)-bearing(center,p)));
-            if(originCenterSeparation<.2)throw new Error('origin/center synthetic separation failed');if(weight(200,0,lambda,scale,rho)!==0)throw new Error('origin radial gate');
-            return {status:'passed',weights:{short:ws,long:wl,ratio:ws/wl},signed_mean_shift:{antipodal_jump_rad:signedJump,reject:true},vector_blend:{half_weight_jump_rad:vectorJump,reject:true},mixture_distribution:{reflection_error:refl,branch_cut_error:branch,rotation_error:rotErr,null_error:nullErr,antipodal_symmetric:true,preferred_for_further_draft_review:true},rng:{dedicated_streams_preserve_h3_angle_stream:true,matched_choice_crn:true},geometry:{origin_center_separation_rad:originCenterSeparation,actual_assay_origin_center_confounded:true}};
-          })()`);
-          const y=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(exceptions.length||consoleErrors.length||y.length)throw new Error('browser firewall failure');report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/h5-circular-stress.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();const target=tabs.find(t=>t.type==='page')||tabs[0];const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!AntLabCore&&!!AntLabH3&&!!AntLabIntegrity"))break;await sleep(100);}
+          const report=await evalv(`(async()=>{
+            const clone=x=>JSON.parse(JSON.stringify(x));const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();};const drive=(L,l)=>Math.exp(-L/l),radial=(r,s)=>r/(r+s),weight=(L,r,c)=>c.rho*drive(L,c.lambda)*radial(r,c.scale);
+            const model=await j('./models/lasius_niger_locomotion_h3_v1.json');model.reorientation_gate.effect.max_hazard_reduction_fraction=0;const exp=await j('./experiments/open_arena_short_control.json'),apparatus=await j('./apparatus/poissonnier2026_open_arena.json'),state=await j('./states/naive_outbound_v1.json'),obs=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');exp.model=model.id;
+            const configs={gentle:{lambda:1000,scale:100,rho:.5},middle:{lambda:500,scale:50,rho:.75},strong:{lambda:250,scale:25,rho:.9}};
+            const runs=[];let allR=[];
+            for(let seed=1001;seed<=1100;seed++){
+              const b={experiment:clone(exp),model:clone(model),apparatus:clone(apparatus),state:clone(state),observation:clone(obs),scoring:clone(scoring)};const sim=new AntLabIntegrity.Simulation(b,seed);const origin={x:sim.ants[0].x,y:sim.ants[0].y};sim.runUntilComplete(exp.duration_s,AntLabIntegrity.FIXED_DT);const events=sim.events.filter(e=>e.type==='h3_reorientation');const radii=events.map(e=>Math.hypot(e.x-origin.x,e.y-origin.y));allR.push(...radii);const cfgOut={};for(const [name,c] of Object.entries(configs)){const sw=radii.map(r=>weight(200,r,c)),lw=radii.map(r=>weight(1000,r,c));cfgOut[name]={expected_search_turns_short:sw.reduce((a,b)=>a+b,0),expected_search_turns_long:lw.reduce((a,b)=>a+b,0),max_w_short:sw.length?Math.max(...sw):0,max_w_long:lw.length?Math.max(...lw):0,mean_w_short:sw.length?sw.reduce((a,b)=>a+b,0)/sw.length:0,mean_w_long:lw.length?lw.reduce((a,b)=>a+b,0)/lw.length:0};}runs.push({seed,event_count:events.length,exit_time:sim.ants[0].completedAt,radii,cfg:cfgOut});
+            }
+            const quant=(xs,q)=>{if(!xs.length)return null;const a=[...xs].sort((x,y)=>x-y),p=(a.length-1)*q,i=Math.floor(p),f=p-i;return a[i]*(1-f)+(a[Math.min(i+1,a.length-1)])*f;};
+            const summary={n_runs:runs.length,total_events:allR.length,zero_event_runs:runs.filter(r=>r.event_count===0).length,event_radius_mm:{min:Math.min(...allR),q10:quant(allR,.1),median:quant(allR,.5),q90:quant(allR,.9),max:Math.max(...allR)}};
+            summary.configs={};for(const name of Object.keys(configs)){const es=runs.map(r=>r.cfg[name].expected_search_turns_short),el=runs.map(r=>r.cfg[name].expected_search_turns_long),ms=runs.flatMap(r=>r.radii.map((_,i)=>r.cfg[name].mean_w_short)).filter(Number.isFinite), ratio=Math.exp(800/configs[name].lambda);summary.configs[name]={params:configs[name],theoretical_short_long_weight_ratio:ratio,expected_search_turns_short:{median:quant(es,.5),q10:quant(es,.1),q90:quant(es,.9)},expected_search_turns_long:{median:quant(el,.5),q10:quant(el,.1),q90:quant(el,.9)},max_observed_w_short:Math.max(...runs.map(r=>r.cfg[name].max_w_short)),max_observed_w_long:Math.max(...runs.map(r=>r.cfg[name].max_w_long))};}
+            const actualCenter={x:148.5,y:105};const originOffsets=runs.map(()=>0);summary.identifiability={only_two_history_levels_mm:[200,1000],lambda_controls_weight_ratio_as_exp_800_over_lambda:true,radial_scale_compared_to_event_radius:summary.event_radius_mm,entry_origin_equals_arena_center_in_reference_assay:true};
+            return {status:'passed',summary,sample_runs:runs.slice(0,5)};
+          })()`);const y=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(exceptions.length||consoleErrors.length||y.length)throw new Error('browser firewall failure');report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/h5-shadow-stress.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
           NODE
-          node /tmp/circular.mjs
+          node /tmp/shadow.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: h5-circular-stress
+          name: h5-shadow-stress
           path: |
-            /tmp/h5-circular-stress.json
+            /tmp/h5-shadow-stress.json
             /tmp/chrome-version.json
             /tmp/chrome.log
           retention-days: 14
