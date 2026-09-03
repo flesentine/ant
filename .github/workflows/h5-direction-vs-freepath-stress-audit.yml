@@ -112,6 +112,28 @@ jobs:
           const out={status:'passed',scientific_role:'engineering_reachability_only_no_fit_no_H5_persistent_runtime',simulations_per_variant:600,variants:variants.map(v=>({...v,toward_to_away_freepath_ratio:v.freepathBeta?Math.exp(2*v.freepathBeta):1})),diagnostic_r_search_mm:50,external_reference_freepath_ratio_approx:Math.exp(2*.387),metric_vector_order:['mean_time_to_exit_s','mean_middle_zone_fraction','mean_beeline_mm','p_left','p_right','p_top','p_bottom','p_timeout'],vectors,standardized_effect_vectors:effects,effect_cosine_similarity:similarities,combined_additivity:additivity,search_component_usage:Object.fromEntries(Object.entries(searchUse).map(([k,[a,n]])=>[k,{search_turns:a,total_turns:n,fraction:n?a/n:0}])),interpretation_guard:'No variant was ranked against reference outcomes. Strengths were broad engineering diagnostics only.'};
           fs.writeFileSync('/tmp/h5-direction-freepath-node.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
           NODE
+      - name: Node isotropic-heading robustness matrix
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const geom=require('./tools/poissonnier2026-measurement-geometry.js');
+          const {Simulation,FIXED_DT,streamSeed}=require('./src/integrity.js');
+          const core=require('./src/sim-core.js');
+          const {loadBundle}=require('./tools/load-bundle.js');
+          const {geometry}=geom.loadFrozenMeasurementGeometry(process.cwd());
+          function edge(ex,w,h){if(!ex)return'timeout';const d={left:Math.abs(ex.x),right:Math.abs(ex.x-w),top:Math.abs(ex.y),bottom:Math.abs(ex.y-h)};return Object.keys(d).sort((a,b)=>d[a]-d[b])[0];}
+          const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+          const vec=rows=>{const ep={left:0,right:0,top:0,bottom:0,timeout:0};rows.forEach(r=>ep[r.exit]++);const n=rows.length;return [mean(rows.map(r=>r.time)),mean(rows.map(r=>r.zone)),mean(rows.map(r=>r.beeline)),ep.left/n,ep.right/n,ep.top/n,ep.bottom/n,ep.timeout/n];};
+          const cos=(a,b)=>{const da=Math.hypot(...a),db=Math.hypot(...b);return da&&db?a.reduce((s,x,i)=>s+x*b[i],0)/(da*db):null;};
+          const std=(v,b)=>{const scales=[Math.max(1,b[0]),Math.max(.05,b[1]),Math.max(10,b[2]),.25,.25,.25,.25,.1];return v.map((x,i)=>(x-b[i])/scales[i]);};
+          const bundle=loadBundle('open_arena_short_control.json',{modelId:'lasius_niger_locomotion_h3_v1'});bundle.model.reorientation_gate.effect.max_hazard_reduction_fraction=0;
+          const variants=[{id:'baseline',directionW:0,freepathBeta:0},{id:'direction',directionW:.4,freepathBeta:0},{id:'freepath',directionW:0,freepathBeta:.387},{id:'combined',directionW:.4,freepathBeta:.387}],rows=Object.fromEntries(variants.map(v=>[v.id,[]]));
+          for(let fi=0;fi<geom.EXPECTED_COLONIES.length;fi++){const held=geom.EXPECTED_COLONIES[fi],pool=geom.geometryPool(geometry.rows,held);for(let i=0;i<100;i++){const seed=990000+fi*10000+i,row=geom.sampleGeometry(pool,seed).row,hr=new core.RNG(streamSeed(seed,'h5_diag_shared_entry_heading')),heading=hr.next()*2*Math.PI-Math.PI;for(const v of variants){const b=geom.applyGeometry(bundle,row);b.observation.record_trajectories=false;const sim=new Simulation(b,seed);sim.ants[0].heading=heading;sim.__h5diag={directionW:v.directionW,freepathBeta:v.freepathBeta,rSearchMm:50,originX:row.entry_reference_x_mm,originY:row.entry_reference_y_mm};const sx=sim.ants[0].x,sy=sim.ants[0].y,s=sim.runUntilComplete(b.experiment.duration_s,FIXED_DT),o=s.observed_metrics.ants[0],ex=o.exit_coordinate_mm;rows[v.id].push({time:o.time_to_arena_edge_s??b.experiment.duration_s,zone:o.central_zone_fraction??0,beeline:ex?Math.hypot(ex.x-sx,ex.y-sy):0,exit:edge(ex,sim.apparatus.world.width,sim.apparatus.world.height)});}}}
+          const vectors=Object.fromEntries(Object.entries(rows).map(([k,v])=>[k,vec(v)])),b=vectors.baseline,effects={direction:std(vectors.direction,b),freepath:std(vectors.freepath,b),combined:std(vectors.combined,b)},sum=effects.direction.map((x,i)=>x+effects.freepath[i]);
+          const out={status:'passed',simulations_per_variant:600,entry_heading:'shared deterministic uniform [-pi,pi) per trial',metric_vector_order:['mean_time_to_exit_s','mean_middle_zone_fraction','mean_beeline_mm','p_left','p_right','p_top','p_bottom','p_timeout'],vectors,effects,direction_vs_freepath_cosine:cos(effects.direction,effects.freepath),combined_vs_sum_cosine:cos(effects.combined,sum)};
+          fs.writeFileSync('/tmp/h5-direction-freepath-isotropic-node.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
+          NODE
       - name: Start Chromium with temporary diagnostic hook
         run: |
           set -euo pipefail
