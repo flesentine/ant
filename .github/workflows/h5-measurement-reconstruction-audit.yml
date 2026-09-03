@@ -36,17 +36,18 @@ jobs:
       - name: Materialize exact audited reference on branch
         run: |
           set -euo pipefail
+          target=reference/poissonnier2026_open_arena_measurement_geometry_v1.json
           mkdir -p reference
-          cp /tmp/geometry.json reference/poissonnier2026_open_arena_measurement_geometry_v1.json
-          if git diff --quiet -- reference/poissonnier2026_open_arena_measurement_geometry_v1.json; then
+          cp /tmp/geometry.json "$target"
+          if ! git status --porcelain --untracked-files=all -- "$target" | grep -q .; then
             echo 'Derived reference already matches branch.'
             exit 0
           fi
           changed=$(git status --porcelain --untracked-files=all | awk '{print $2}')
-          test "$changed" = "reference/poissonnier2026_open_arena_measurement_geometry_v1.json"
+          test "$changed" = "$target"
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add reference/poissonnier2026_open_arena_measurement_geometry_v1.json
+          git add "$target"
           git commit -m 'Freeze reconstructed open-arena geometry reference'
           git push origin HEAD:h5-origin-referenced-search-v1
       - uses: actions/upload-artifact@v4
