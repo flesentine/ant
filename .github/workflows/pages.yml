@@ -1,41 +1,177 @@
 name: Test and deploy ANTLAB
 on:
   push:
-    branches: [h4-transient-locomotor-activation-v1]
+    branches: [main]
+  workflow_dispatch:
 permissions:
-  contents: write
-  actions: read
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
 jobs:
-  commit_h4_audit:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
-      - name: Install exact successful deep-audit candidate
+          node-version: '22'
+      - name: Run reference tests
+        run: ./tests/run-tests.sh
+      - name: Run frozen H2 mechanism reachability
+        run: |
+          mkdir -p /tmp/antlab-h2
+          node tools/run-h2-mechanism.js --trials 400 --seed 928491 --out /tmp/antlab-h2/h2-mechanism-results.json
+      - name: Upload H2 mechanism report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-mechanism-reachability
+          path: /tmp/antlab-h2/h2-mechanism-results.json
+          retention-days: 7
+      - name: Run frozen H3 mechanism reachability
+        run: |
+          mkdir -p /tmp/antlab-h3
+          node tools/run-h3-mechanism.js --trials 400 --seed 928491 --out /tmp/antlab-h3/h3-mechanism-results.json
+      - name: Upload H3 mechanism report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h3-mechanism-reachability
+          path: /tmp/antlab-h3/h3-mechanism-results.json
+          retention-days: 7
+      - name: Run frozen H4 mechanism reachability
+        run: |
+          mkdir -p /tmp/antlab-h4
+          node tools/run-h4-mechanism.js --trials 400 --seed 928491 --out /tmp/antlab-h4/h4-mechanism-results.json
+      - name: Upload H4 mechanism report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h4-mechanism-reachability
+          path: /tmp/antlab-h4/h4-mechanism-results.json
+          retention-days: 7
+      - name: Probe final-version reference supplements
+        id: reference_probe
+        continue-on-error: true
+        run: ./tools/fetch-poissonnier2026-reference.sh /tmp/antlab-reference
+      - name: Verify pinned control-effect screening target
+        if: always()
+        run: |
+          xlsx=/tmp/antlab-reference/40_2026_1106_MOESM2_ESM.xlsx
+          if [ -f "$xlsx" ]; then
+            python3 tools/derive-poissonnier2026-control-effects.py \
+              "$xlsx" \
+              /tmp/antlab-reference/control-effects-regenerated.json >/tmp/control-effects.log
+            cmp reference/poissonnier2026_control_effects.json /tmp/antlab-reference/control-effects-regenerated.json
+            echo "Pinned control-effect target reproduced exactly from downloaded XLSX."
+          else
+            echo "::warning::Springer reference probe unavailable; live supplement regeneration gate was not run."
+          fi
+      - name: Verify H2 estimation target from Springer XLSX
+        if: always()
+        run: |
+          xlsx=/tmp/antlab-reference/40_2026_1106_MOESM2_ESM.xlsx
+          if [ -f "$xlsx" ]; then
+            python3 tools/derive-h2-estimation-targets.py "$xlsx" /tmp/antlab-reference/h2-estimation-targets-regenerated.json >/tmp/h2-targets.log
+            python3 - <<'PY'
+          import json
+          a=json.load(open('reference/poissonnier2026_h2_estimation_targets.json'))
+          b=json.load(open('/tmp/antlab-reference/h2-estimation-targets-regenerated.json'))
+          assert a==b, 'Pinned H2 estimation target differs from XLSX regeneration'
+          print('Pinned threshold-independent estimation target reproduced from downloaded XLSX.')
+          PY
+          else
+            echo "::warning::Springer reference probe unavailable; estimation-target regeneration gate was not run."
+          fi
+      - name: Run H2 LOCO estimator smoke test
+        run: |
+          mkdir -p /tmp/antlab-h2-estimation
+          node tools/run-h2-estimation.js --mode loco --candidates 8 --trials 4 --seed 981000 --out /tmp/antlab-h2-estimation/loco-smoke.json >/tmp/h2-estimation-smoke.log
+          echo "Low-resolution estimator smoke only; not a parameter estimate." > /tmp/antlab-h2-estimation/README.txt
+      - name: Upload H2 estimator smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h2-estimator-smoke
+          path: /tmp/antlab-h2-estimation
+          retention-days: 7
+      - name: Run H3 LOCO estimator smoke test
+        run: |
+          mkdir -p /tmp/antlab-h3-estimation
+          node tools/run-h3-estimation.js --mode loco --candidates 8 --trials 4 --seed 982000 --out /tmp/antlab-h3-estimation/loco-smoke.json >/tmp/h3-estimation-smoke.log
+          echo "Low-resolution H3 LOCO execution-path smoke only; not a parameter estimate or model-selection result." > /tmp/antlab-h3-estimation/README.txt
+      - name: Upload H3 estimator smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h3-estimator-smoke
+          path: /tmp/antlab-h3-estimation
+          retention-days: 7
+      - name: Run frozen H4 estimator qualification
+        run: |
+          mkdir -p /tmp/antlab-h4-estimation
+          node tools/run-h4-estimation.js --mode qualification --trials 3 --out /tmp/antlab-h4-estimation/qualification.json >/tmp/h4-estimator-qualification.log
+      - name: Run H4 LOCO estimator smoke test
+        run: |
+          node tools/run-h4-estimation.js --mode smoke --candidates 8 --trials 4 --eval-trials 8 --seed 990000 --out /tmp/antlab-h4-estimation/loco-smoke.json >/tmp/h4-estimation-smoke.log
+          echo "H4 qualification plus low-resolution LOCO execution-path smoke only; no high-resolution H4 search, parameter estimate, promotion decision, or model-selection evidence." > /tmp/antlab-h4-estimation/README.txt
+      - name: Upload H4 estimator qualification and smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h4-estimator-qualification-and-smoke
+          path: /tmp/antlab-h4-estimation
+          retention-days: 7
+      - name: Upload reference probe
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: poissonnier2026-reference-probe
+          path: /tmp/antlab-reference
+          retention-days: 1
+          if-no-files-found: ignore
+  deploy:
+    needs: test
+    environment:
+      name: github-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check whether GitHub Pages is enabled
+        id: pages
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
-          mkdir -p /tmp/h4-success
-          curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/9874077142/zip" -o /tmp/h4-success.zip
-          unzip -q /tmp/h4-success.zip -d /tmp/h4-success
-          est=$(find /tmp/h4-success -path '*/tools/run-h4-estimation.js' -type f | head -1)
-          tst=$(find /tmp/h4-success -path '*/tests/h4-estimation.test.js' -type f | head -1)
-          test -n "$est" -a -n "$tst"
-          test "$(sha256sum "$est" | awk '{print $1}')" = "b33b3a02cde8c00985c997dc4ecb4003415d6506542e5c27171b099fcfc97c9c"
-          test "$(sha256sum "$tst" | awk '{print $1}')" = "6afd098d9f4371dfae33f58f8beb6b6c8d62a5004c04adff2422fbdee6231e1d"
-          cp "$est" tools/run-h4-estimation.js
-          cp "$tst" tests/h4-estimation.test.js
-          test "$(git hash-object tools/run-h4-estimation.js)" = "d417c62a4ef4f97c338a1da2f1ff10f49e18c175"
-          test "$(git hash-object tests/h4-estimation.test.js)" = "00c196cd3a8f341ae955f227ba66542ece22c6cd"
-          test "$(git hash-object hypotheses/h4_parameter_estimation_v1.json)" = "a889007f988628a8e61139f4349c23714cc1dd68"
-      - name: Commit exact tested bytes
-        shell: bash
+          status=$(curl -sS -o /tmp/pages.json -w "%{http_code}" -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages")
+          if [ "$status" = "200" ]; then echo "enabled=true" >> "$GITHUB_OUTPUT"; else echo "enabled=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Pages setup notice
+        if: steps.pages.outputs.enabled != 'true'
+        run: echo "Enable GitHub Actions under Settings → Pages." >> "$GITHUB_STEP_SUMMARY"
+      - name: Checkout
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/configure-pages@v5
+      - name: Assemble static site
+        if: steps.pages.outputs.enabled == 'true'
         run: |
-          git config user.name 'flesentine'
-          git config user.email 'chrisgmcc@gmail.com'
-          git add tools/run-h4-estimation.js tests/h4-estimation.test.js
-          git commit -m 'Harden H4 estimator after deep audit'
-          git push origin HEAD:h4-transient-locomotor-activation-v1
+          mkdir -p _site/src _site/experiments _site/models _site/apparatus _site/states _site/observations _site/scoring _site/reference _site/hypotheses
+          cp index.html _site/index.html
+          cp src/app.js src/sim-core.js src/measurement.js src/h3.js src/integrity.js src/style.css _site/src/
+          cp experiments/*.json _site/experiments/
+          cp models/*.json _site/models/
+          cp apparatus/*.json _site/apparatus/
+          cp states/*.json _site/states/
+          cp observations/*.json _site/observations/
+          cp scoring/*.json _site/scoring/
+          cp reference/*.json _site/reference/
+          cp hypotheses/*.json _site/hypotheses/
+          touch _site/.nojekyll
+      - name: Upload Pages artifact
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/deploy-pages@v4
