@@ -1,7 +1,7 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_post_H4_failure_after_stress_audit_before_mechanism_freeze",
+  "status": "draft_post_measurement_reconstruction_qualified_before_mechanism_freeze",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
   "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
@@ -36,7 +36,10 @@
         "wins_vs_own_null": 2,
         "folds": 6,
         "median_relative_improvement_vs_own_null": 0.0,
-        "null_anchor_selected_heldout_colonies": [20, 21]
+        "null_anchor_selected_heldout_colonies": [
+          20,
+          21
+        ]
       },
       "interpretation": "No spatially homogeneous one-primitive history effect generalized across colonies. H5 therefore tests spatial feedback rather than a stronger version of H2, H3, or H4."
     }
@@ -55,7 +58,7 @@
     }
   },
   "measurement_reconstruction_dependency": {
-    "status": "must_be_resolved_before_H5_mechanism_freeze_or_estimator_policy",
+    "status": "resolved_frozen_and_qualified_before_H5_mechanism_freeze",
     "newly_recovered_source_fields": [
       "Xstart",
       "Ystart",
@@ -81,20 +84,20 @@
       "descriptive_permutation_p": 0.17389130543472828,
       "interpretation": "Measured start positions should not be ignored, but the available table does not provide compelling evidence for a treatment-specific start-position mechanism."
     },
-    "allowed_resolution_classes_for_next_policy_review": [
-      "Condition simulations on measured row-level or row-derived normalized Xstart/Ystart and per-video bounds, with a leakage-safe LOCO mapping defined before fitting.",
-      "Construct a shared training-fold-only empirical measurement-geometry model and use it identically for H5-null and H5-context."
-    ],
-    "forbidden_resolution": "Do not create separate short-versus-long entry-position or arena-geometry distributions merely because they improve H5 fit."
+    "forbidden_resolution": "Do not create separate short-versus-long entry-position or arena-geometry distributions merely because they improve H5 fit.",
+    "frozen_policy": "reference/poissonnier2026_open_arena_measurement_policy_v1.json",
+    "frozen_policy_git_blob_sha": "fd2718cf9351b655340eacd868adc536301a83a4",
+    "geometry_reference": "reference/poissonnier2026_open_arena_measurement_geometry_v1.json",
+    "geometry_reference_git_blob_sha": "af0ec6fbacf83b915dd78cb3a822609c126dc1e7",
+    "qualification_report": "reports/poissonnier2026_open_arena_measurement_reconstruction_v1.json",
+    "adapter": "tools/poissonnier2026-measurement-geometry.js",
+    "selected_resolution": "For each LOCO fold, sample complete empirical geometry rows uniformly with replacement from the five training colonies only, pooled across path lengths, using the dedicated poissonnier2026_measurement_geometry_v1 input RNG stream. Apply the same geometry draws to short/long, null/context, and matched comparator re-evaluations.",
+    "measurement_vs_biology_boundary": "first_track_position defines the observation start and Beeline start. The central entry reference represents the physical hole/trail crossing. This measurement policy does not decide which is the biological H5 search origin."
   },
   "allowed_biological_inputs": [
     "recent_constrained_travel_mm",
     "current_position_mm",
     "current_heading_rad"
-  ],
-  "allowed_shared_measurement_or_geometry_inputs_subject_to_separate_freeze": [
-    "trial_origin_or_first_tracked_position_mm",
-    "trial_or_shared_empirical_arena_bounds"
   ],
   "forbidden_inputs": [
     "Path_length treatment label",
@@ -110,7 +113,7 @@
     "treatment-specific measured-entry distributions"
   ],
   "candidate_mechanism": {
-    "origin": "O is a trial origin supplied by the separately frozen measurement/input reconstruction. H5 itself may not choose O differently by treatment. The biological rule is relative to O, not to a privileged arena center or edge.",
+    "origin": "O must be selected at H5 mechanism freeze from geometry references permitted by the frozen measurement policy. The policy supplies both the central physical entry reference and the first tracked observation position, but H5 biology may not silently equate them. Whichever origin is frozen must be applied identically across treatments and may not depend on outcomes.",
     "history_search_drive": "Provisional D(L) = exp(-L/lambda_search_mm), so shorter recent constrained travel gives larger search drive. Because only L=200 and L=1000 mm are observed in this assay, this functional form and raw lambda remain provisional and must not be treated as identified merely because a search selects a value.",
     "radial_gate": "Provisional R(r) = r/(r+r_search_mm), where r = ||x-O||. Stress tests show baseline reorientation events span radii over which this gate is active, but r_search_mm remains provisional and potentially confounded with rho_search and lambda_search_mm.",
     "mixture_weight": "Provisional w = rho_search * D(L) * R(r), constrained to [0,1].",
@@ -203,7 +206,7 @@
     "No Y-maze access for development fitting, ranking, stopping, or model selection."
   ],
   "pre_freeze_questions": [
-    "Measurement first: should H5/null condition on measured Xstart/Ystart and per-video bounds, or should a shared training-fold-only empirical measurement-geometry model generate them? This must be frozen separately before H5 fitting.",
+    "Which frozen measurement reference should define the biological H5 origin O: the central physical entry-hole/trail-crossing reference or the first tracked observation position? The current measurement policy deliberately does not decide this biological question.",
     "Should search drive D remain constant during the short arena traversal, or decay with time after entry? Current draft preference remains constant because H2-H4 already tested unvalidated exponential temporal decay assumptions.",
     "Should H5-v1 alter only the conditional reorientation-direction mixture, or also orientation-dependent free-path length as reported in the external Lasius representation? Current draft preference is direction only for parsimony until contradicted by reachability testing.",
     "Should the radial gate be retained, simplified, or fixed from an independently justified rule? The external paper does not supply a directly transferable r_search_mm.",
@@ -217,6 +220,12 @@
     "reference_outcomes_may_not_be_used_to_tune_this_draft_into_a_passing_model": true,
     "measurement_reconstruction_must_precede_H5_estimator_policy": true,
     "canonical_model_unchanged": true,
-    "ymaze_access": false
-  }
+    "ymaze_access": false,
+    "measurement_reconstruction_policy_frozen_and_qualified": true,
+    "H5_biological_origin_still_unfrozen": true
+  },
+  "allowed_shared_measurement_or_geometry_inputs_under_frozen_policy": [
+    "trial_origin_or_first_tracked_position_mm",
+    "trial_or_shared_empirical_arena_bounds"
+  ]
 }
