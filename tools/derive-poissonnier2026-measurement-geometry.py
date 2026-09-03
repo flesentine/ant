@@ -92,16 +92,12 @@ def main():
         if not (-1e-9 <= centerline_y <= height + 1e-9):
             raise SystemExit(f'centerline outside tracked arena bounds for ant {r["ant_ID"]}')
 
-        x_frac = first_x / width
-        y_frac = first_y / height
-        midpoint_error = yline - (ymin + ymax) / 2.0
-
         widths.append(width)
         heights.append(height)
         offsets.append(radius)
-        x_fracs.append(x_frac)
-        y_fracs.append(y_frac)
-        midpoint_errors.append(abs(midpoint_error))
+        x_fracs.append(first_x / width)
+        y_fracs.append(first_y / height)
+        midpoint_errors.append(abs(yline - (ymin + ymax) / 2.0))
 
         out_rows.append({
             'ant_id': int(float(r['ant_ID'])),
@@ -111,13 +107,7 @@ def main():
             'entry_reference_x_mm': entry_x,
             'entry_reference_y_mm': entry_y,
             'first_track_x_mm': first_x,
-            'first_track_y_mm': first_y,
-            'first_track_x_fraction': x_frac,
-            'first_track_y_fraction': y_frac,
-            'first_track_dx_from_entry_mm': dx,
-            'first_track_dy_from_entry_mm': dy,
-            'first_track_radius_from_entry_mm': radius,
-            'middle_zone_center_y_mm': centerline_y
+            'first_track_y_mm': first_y
         })
 
     out_rows.sort(key=lambda x: x['ant_id'])
@@ -152,7 +142,7 @@ def main():
             'entry_reference_x_mm': 'arena_width_mm / 2; article-defined central entry-hole x reference, not a measured ant coordinate',
             'entry_reference_y_mm': 'Y_Line - Ymin_Arena; article-defined central trail/entry-line reference',
             'first_track_position': 'Xstart/Ystart translated into the local tracked-arena frame; this defines the published observation start and Beeline start, not automatically the ant biological memory origin',
-            'middle_zone': '1 cm on each side of the central trail; half-width 10 mm is article-defined and stored in the separate frozen policy rather than duplicated per row'
+            'middle_zone': '1 cm on each side of the central trail; half-width 10 mm is article-defined and frozen in the separate measurement policy'
         },
         'summary': {
             'rows': len(out_rows),
