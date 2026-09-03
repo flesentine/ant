@@ -1,0 +1,299 @@
+{
+  "schema_version": 1,
+  "id": "H4_parameter_estimation_v1",
+  "status": "development_estimation_policy_frozen_before_estimator_implementation_or_parameter_search",
+  "freeze_date": "2026-09-02",
+  "honesty_note": "The Poissonnier 2026 open-arena outcomes, the descriptive short-versus-long moving-speed contrast, and the failures of H2-v1 and H3-v1 were known before H4 and before this estimation policy. This procedure is internal development model comparison, not independent validation or a blind preregistration.",
+  "model_candidate": "lasius_niger_locomotion_h4_v1",
+  "mechanism_freeze": "h4_transient_locomotor_activation_v1.json",
+  "reference_dataset": "poissonnier2026_open_arena",
+  "reference_target_file": "reference/poissonnier2026_h2_estimation_targets.json",
+  "reference_target_git_blob_sha": "07e2b8cf2dddbfcb152f0bd6d3031d473e0901b3",
+  "reference_source_xlsx_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+  "scope": "DCM-control 20 cm versus 100 cm open-arena approach only",
+  "mechanism": {
+    "initialization": "A0 = 1 - exp(-L / lambda_activation_mm), where L = recent_constrained_travel_mm.",
+    "decay": "A(t) = A0 * exp(-t / tau_activation_s).",
+    "effect": "While moving, v_H4(t) = v_baseline(t) * (1 + rho_speed * A(t)).",
+    "only_direct_effect": "moving speed",
+    "forbidden_direct_effects": [
+      "angular diffusion",
+      "heading drift",
+      "reorientation-event hazard",
+      "turn-angle distribution",
+      "pause hazard",
+      "pause duration",
+      "entry heading",
+      "entry position",
+      "boundary behavior",
+      "centerline or edge attraction",
+      "observation behavior"
+    ]
+  },
+  "estimated_parameters": {
+    "base_speed_mm_s": {
+      "role": "shared_baseline_locomotion_nuisance",
+      "bounds": [12.0, 36.0],
+      "scale": "linear",
+      "provenance": "Canonical H4 demonstration baseline is 24 mm/s; bounds are fixed at +/-50% of 24 and are not derived from the observed short-versus-long moving-speed contrast.",
+      "sharing_rule": "One value shared across both treatments and across H4-null/H4-context within the model family."
+    },
+    "angular_sigma_rad_sqrt_s": {
+      "role": "shared_baseline_heading_diffusion_nuisance",
+      "bounds": [0.35, 2.4],
+      "scale": "log",
+      "provenance": "Lower bound is one-half of the canonical H4 demonstration value 0.7; upper bound retains the prior H2 development range. Bounds are frozen without using H4 estimation outcomes.",
+      "sharing_rule": "One value shared across both treatments and across H4-null/H4-context within the model family."
+    },
+    "entry_orientation_retention_q": {
+      "role": "shared_apparatus_transition_nuisance",
+      "bounds": [0.0, 1.0],
+      "scale": "linear",
+      "rule": "Same q in 20 cm and 100 cm conditions; it may not depend on treatment."
+    },
+    "lambda_activation_mm": {
+      "role": "H4",
+      "bounds": [100.0, 3000.0],
+      "scale": "log"
+    },
+    "tau_activation_s": {
+      "role": "H4",
+      "bounds": [0.5, 40.0],
+      "scale": "log"
+    },
+    "rho_speed": {
+      "role": "H4",
+      "bounds": [0.0, 0.95],
+      "scale": "linear",
+      "nested_null_value": 0.0
+    }
+  },
+  "fixed_parameters": [
+    "speed_sd_mm_s",
+    "speed_reversion_rate_s",
+    "speed_noise_sigma_sqrt_s",
+    "pause_rate_s",
+    "pause_min_s",
+    "pause_max_s",
+    "entry_position_distribution",
+    "observation_fps",
+    "observation/tracking model"
+  ],
+  "treatment_sharing_rules": [
+    "No treatment-specific baseline speed.",
+    "No treatment-specific angular diffusion.",
+    "No treatment-specific q.",
+    "No treatment-specific entry-heading distribution.",
+    "No treatment-specific entry-speed distribution.",
+    "The short-versus-long effect may arise only from recent_constrained_travel_mm through the frozen H4 activation mechanism."
+  ],
+  "entry_transition_model": {
+    "type": "shared_orientation_retention_mixture",
+    "definition": "With probability q preserve the protocol-sampled post-transition heading; otherwise draw heading uniformly on [-pi, pi).",
+    "rng_stream": "h2_estimation_entry_transition_v1",
+    "rng_reason": "Reuse the existing H2/H3 entry-transition stream for matched common-random-number compatibility; H4 itself adds no RNG stream.",
+    "H1_boundary": "Treatment-specific entry-heading or entry-speed distributions are forbidden because they would evaluate an H1-style apparatus-entry explanation rather than H4."
+  },
+  "fit_observables": [
+    {
+      "name": "time_to_exit_s",
+      "source_column": "Total_Frames / 25",
+      "threshold_independent": true
+    },
+    {
+      "name": "middle_zone_fraction",
+      "source_column": "Proportion_Frames_MiddleZone",
+      "threshold_independent": true
+    },
+    {
+      "name": "beeline_mm",
+      "source_column": "Beeline",
+      "threshold_independent": true
+    },
+    {
+      "name": "exit_edge",
+      "source_columns": [
+        "Xlast",
+        "Ylast",
+        "Xmin_Arena",
+        "Xmax_Arena",
+        "Ymin_Arena",
+        "Ymax_Arena"
+      ],
+      "threshold_independent": true
+    }
+  ],
+  "forbidden_fit_observables": [
+    "Average_Speed_Moving",
+    "Traveled_Dist_Moving",
+    "Straightness",
+    "Prop_time_moving",
+    "any reconstructed movement-state quantity dependent on the unrecovered AnimalTA movement classifier",
+    "Y-maze decision/correct or any Y-maze-derived statistic"
+  ],
+  "moving_speed_firewall": {
+    "fit_target": false,
+    "role": "diagnostic_only_until_AnimalTA_movement_classifier_is_recovered",
+    "anti_leakage_rule": "Observed moving-speed values may not set parameter bounds, objective weights, candidate ranking, stopping rules, or post-hoc search refinement."
+  },
+  "objective": {
+    "compatibility_rule": "Use the corrected audited H2/H3 scorer without H4-specific reweighting so held-out losses remain comparable.",
+    "continuous_distance": "19-quantile Wasserstein-1 divided by pooled training-colony SD.",
+    "categorical_distance": "2 * Hellinger distance for a normalized five-category exit distribution.",
+    "exit_categories": [
+      "left",
+      "right",
+      "top",
+      "bottom",
+      "timeout"
+    ],
+    "aggregation": "Equal-weight mean squared component distance across 4 metrics x 2 path treatments.",
+    "heldout_scaling": "For each LOCO fold, compute continuous metric SDs from the five training colonies once and freeze them for all held-out model evaluations.",
+    "common_random_numbers": true,
+    "forbidden_changes_after_freeze": [
+      "metric addition or removal",
+      "metric reweighting",
+      "alternative normalization",
+      "dropping timeout mass",
+      "held-out-derived scaling"
+    ]
+  },
+  "numerical_invariants": {
+    "physics_dt_s": 0.02,
+    "activation_decay": "exact exponential",
+    "activation_displacement": "exact exponential activation integral over each physics step",
+    "boundary_timing": "For H4, time_to_exit_s must use the exact partial-step boundary-time solution from the integrated H4 travel law; the deprecated full-step-average multiplier approximation is forbidden.",
+    "rng_rule": "H4 adds no random draws and must not change baseline RNG consumption order."
+  },
+  "cross_validation": {
+    "type": "leave_one_colony_out",
+    "colonies": 6,
+    "nested_models": {
+      "H4_null": "Estimate base_speed_mm_s, angular_sigma_rad_sqrt_s, and q with rho_speed fixed exactly to 0.",
+      "H4_context": "Estimate base_speed_mm_s, angular_sigma_rad_sqrt_s, q, lambda_activation_mm, tau_activation_s, and rho_speed."
+    },
+    "comparison": "Fit both models on five colonies and score on the sixth with a separate evaluation seed stream and frozen training-derived metric scales.",
+    "primary_promotion_guard": "H4-context must improve held-out loss over H4-null in at least 5 of 6 folds and have strictly positive median relative held-out improvement.",
+    "relative_improvement_definition": "(loss_null - loss_H4) / max(1e-12, loss_null)",
+    "H2_comparison_guard": "To call H4-v1 development-preferred over H2-v1, H4-context must beat the matched re-evaluated H2-v1 fold candidate in at least 4 of 6 folds and have strictly positive median relative improvement versus H2-v1.",
+    "H3_comparison_guard": "To call H4-v1 development-preferred over H3-v1, H4-context must beat the matched re-evaluated H3-v1 fold candidate in at least 4 of 6 folds and have strictly positive median relative improvement versus H3-v1.",
+    "interpretation_rule": "The H4-null guard determines whether the H4 context mechanism survives its own internal test. H2/H3 guards are secondary cross-family development rankings and do not rescue a failed H4-null guard."
+  },
+  "search_protocol": {
+    "method": "deterministic Halton low-discrepancy search",
+    "high_resolution_budget": {
+      "H4_null_candidates_per_fold": 500,
+      "H4_context_candidates_per_fold_total": 500,
+      "training_trials_per_condition_per_candidate": 60,
+      "heldout_evaluation_trials_per_condition": 120,
+      "folds": 6
+    },
+    "root_seed": 990000,
+    "fold_fit_seed": "990000 + fold_index * 10000",
+    "fold_evaluation_seed": "1490000 + fold_index * 10000",
+    "halton_mapping": [
+      {
+        "prime": 2,
+        "parameter": "base_speed_mm_s"
+      },
+      {
+        "prime": 3,
+        "parameter": "angular_sigma_rad_sqrt_s"
+      },
+      {
+        "prime": 5,
+        "parameter": "entry_orientation_retention_q"
+      },
+      {
+        "prime": 7,
+        "parameter": "lambda_activation_mm"
+      },
+      {
+        "prime": 11,
+        "parameter": "tau_activation_s"
+      },
+      {
+        "prime": 13,
+        "parameter": "rho_speed"
+      }
+    ],
+    "halton_indexing": "Halton index starts at 1.",
+    "nested_null_anchor": {
+      "required": true,
+      "rule": "Fit the 500-candidate H4-null search first. The H4-context candidate set then contains 499 six-dimensional Halton candidates plus one exact null-equivalent anchor that copies the fold-selected H4-null nuisance parameters and sets rho_speed=0. lambda_activation_mm and tau_activation_s on that anchor are inert bookkeeping values and may not affect the trajectory.",
+      "purpose": "Guarantee exact nesting without giving H4-context more than 500 total candidates."
+    },
+    "search_firewall": [
+      "No local optimizer.",
+      "No adaptive second-stage search.",
+      "No hand-injected favorable context candidate other than the required null-equivalent anchor.",
+      "No bound widening or narrowing after inspecting H4 results.",
+      "No candidate-budget increase after inspecting H4 results.",
+      "No alternative seeds after inspecting H4 results.",
+      "No objective modification after inspecting H4 results."
+    ],
+    "smoke_test_rule": "A low-resolution run may verify execution only. Its outcomes are not evidence and may not alter any frozen search choice."
+  },
+  "synthetic_estimator_qualification": {
+    "required_before_high_resolution_reference_search": true,
+    "reference_outcomes_accessed": false,
+    "purpose": "Verify estimator wiring without using Poissonnier outcomes for tuning.",
+    "required_checks": [
+      "rho_speed=0 context/null equivalence for matched seeds",
+      "selected H4-null nuisance candidate can be inserted as the exact H4-context null anchor",
+      "candidate-to-model parameter wiring is correct",
+      "short/long recent_constrained_travel_mm is the only H4 context input",
+      "five-category exit scoring including timeout is normalized",
+      "training-fold SDs, not held-out SDs, are used for held-out continuous scaling",
+      "H4 exact boundary timing is used for time_to_exit_s",
+      "H4 adds no RNG stream and preserves baseline RNG consumption",
+      "Y-maze is inaccessible"
+    ],
+    "anti_tuning_rule": "Synthetic qualification may detect implementation defects only; it may not be used to change biological parameter bounds, objective weights, search budget, or promotion thresholds."
+  },
+  "identifiability": {
+    "report_effective_quantities": [
+      "A200 = 1 - exp(-200/lambda_activation_mm)",
+      "A1000 = 1 - exp(-1000/lambda_activation_mm)",
+      "S200 = 1 + rho_speed*A200",
+      "S1000 = 1 + rho_speed*A1000",
+      "delta_S0 = rho_speed*(A1000-A200)",
+      "activation_half_life_s = tau_activation_s*ln(2)"
+    ],
+    "optional_idealized_quantity": "rho_speed*A0*tau_activation_s may be reported only if explicitly labeled an idealized infinite-horizon multiplier-area, not realized displacement or realized speed gain.",
+    "ridge_rule": "If lambda_activation_mm, tau_activation_s, and rho_speed form a broad ridge while effective quantities are stable, report the ridge/effective quantities rather than a false unique point estimate.",
+    "boundary_warning": "A parameter repeatedly selected within 1% of a frozen search boundary is not considered identified."
+  },
+  "structural_negative_controls": [
+    "No H4-dependent angular diffusion.",
+    "No H4-dependent heading random draws or heading drift.",
+    "No H4-dependent reorientation hazard or conditional turn-angle law.",
+    "No H4-dependent pause hazard or duration.",
+    "No treatment-specific entry heading, entry position, or entry speed.",
+    "No treatment-specific baseline speed or angular diffusion.",
+    "No direct centerline attraction, edge attraction, or exit targeting.",
+    "No H4-dependent observation behavior."
+  ],
+  "post_fit_diagnostics_only": [
+    "moving speed",
+    "moving distance",
+    "straightness",
+    "early-versus-late moving-speed contrast",
+    "effective H4 speed multiplier through time"
+  ],
+  "post_fit_rule": "Diagnostics may be inspected only after candidate selection and held-out scoring are complete and may not retroactively affect parameter choice or pass/fail status.",
+  "pooled_fit_rule": "A pooled all-six-colony H4 fit may be run only after the complete LOCO result is frozen. It is descriptive parameter summarization only and cannot alter the LOCO decision, mechanism, bounds, objective, or promotion guard.",
+  "failure_rule": [
+    "Do not widen or narrow H4 parameter ranges in response to failure.",
+    "Do not change nuisance parameters in response to failure.",
+    "Do not add moving speed or another forbidden observable to the objective.",
+    "Do not change objective weights.",
+    "Do not change the required number of winning folds.",
+    "Do not rerun with favorable seeds.",
+    "Do not tune the same H4-v1 mechanism harder using the observed failure.",
+    "A subsequent hypothesis must be substantively different or justified by genuinely new evidence."
+  ],
+  "implementation_error_rule": "If a genuine implementation error is found, declare the affected execution invalid, document and regression-test the defect, and rerun the entire frozen high-resolution procedure unchanged. A poor scientific result is not an implementation error.",
+  "holdout_rule": "The Y-maze remains completely inaccessible to fitting, candidate ranking, stopping rules, search refinement, and model selection.",
+  "canonical_model_rule": "H4 estimation tools may write reports only. Even if all internal guards pass, H4 becomes at most a development-preferred candidate; no canonical ant model file may be modified automatically."
+}
