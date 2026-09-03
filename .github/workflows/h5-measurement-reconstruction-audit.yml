@@ -3,7 +3,7 @@ on:
   push:
     branches: [h5-origin-referenced-search-v1]
 permissions:
-  contents: read
+  contents: write
 jobs:
   reconstruct:
     runs-on: ubuntu-latest
@@ -25,11 +25,30 @@ jobs:
           d=json.load(open('/tmp/geometry.json'))
           assert d['summary']['rows']==51
           assert len(d['summary']['colonies'])==6
+          assert d['summary']['max_abs_Y_Line_minus_vertical_midpoint_mm']==0
           assert all(r['arena_width_mm']>0 and r['arena_height_mm']>0 for r in d['rows'])
           assert all(0<=r['first_track_x_mm']<=r['arena_width_mm'] for r in d['rows'])
           assert all(0<=r['first_track_y_mm']<=r['arena_height_mm'] for r in d['rows'])
+          forbidden={'path_length','Xlast','Ylast','Beeline','Straightness','Total_Frames','Proportion_Frames_MiddleZone','Average_Speed','Average_Speed_Moving','Traveled_Dist','Traveled_Dist_Moving'}
+          assert all(not forbidden.intersection(r.keys()) for r in d['rows'])
           print(json.dumps(d['summary'],indent=2))
           PY
+      - name: Materialize exact audited reference on branch
+        run: |
+          set -euo pipefail
+          mkdir -p reference
+          cp /tmp/geometry.json reference/poissonnier2026_open_arena_measurement_geometry_v1.json
+          if git diff --quiet -- reference/poissonnier2026_open_arena_measurement_geometry_v1.json; then
+            echo 'Derived reference already matches branch.'
+            exit 0
+          fi
+          changed=$(git status --porcelain --untracked-files=all | awk '{print $2}')
+          test "$changed" = "reference/poissonnier2026_open_arena_measurement_geometry_v1.json"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reference/poissonnier2026_open_arena_measurement_geometry_v1.json
+          git commit -m 'Freeze reconstructed open-arena geometry reference'
+          git push origin HEAD:h5-origin-referenced-search-v1
       - uses: actions/upload-artifact@v4
         with:
           name: h5-measurement-reconstruction-audit
