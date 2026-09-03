@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "H5_biological_origin_choice_audit_v1",
+  "status": "biological_origin_frozen_before_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-03",
+  "scope": "H5 open-arena DCM-control biological origin only",
+  "scientific_role": "mechanism-definition decision; not parameter fitting, ranking, or promotion evidence",
+  "decision": {
+    "selected_origin": "central_physical_entry_reference",
+    "geometry_fields": [
+      "entry_reference_x_mm",
+      "entry_reference_y_mm"
+    ],
+    "definition": "Per-video central physical hole/trail-crossing reference from the frozen measurement reconstruction. In the reconstructed DCM-control geometry this is arena_width_mm/2 and Y_Line-Ymin_Arena.",
+    "first_track_position_role": "Observation initialization and published Beeline start only; explicitly not the H5 biological search origin.",
+    "treatment_specific_origin_forbidden": true,
+    "outcome_dependent_origin_forbidden": true
+  },
+  "protocol_basis": {
+    "Poissonnier_2026": {
+      "doi": "10.1007/s00040-026-01106-9",
+      "evidence": "Experiment 1 ants traversed the runway, climbed a toothpick through a hole onto the centre of the A4 platform, and were video tracked on the arena until first border contact.",
+      "interpretation": "The central hole is the physical arena-entry/start reference. Xstart/Ystart are later measurement coordinates, not the physical release location."
+    },
+    "Bonavita_2026": {
+      "doi": "10.1371/journal.pone.0327957",
+      "evidence": "Origin-referenced search was discovered by analyzing Lasius niger movement relative to the ant's starting point.",
+      "scope_limit": "This supports a start-referenced representation but does not justify replacing the physical start in Poissonnier's assay with a later tracking coordinate."
+    }
+  },
+  "measurement_basis": {
+    "policy": "reference/poissonnier2026_open_arena_measurement_policy_v1.json",
+    "policy_git_blob_sha": "fd2718cf9351b655340eacd868adc536301a83a4",
+    "geometry_reference": "reference/poissonnier2026_open_arena_measurement_geometry_v1.json",
+    "geometry_git_blob_sha": "af0ec6fbacf83b915dd78cb3a822609c126dc1e7",
+    "distinction": "first_track_position is an observation-start coordinate; entry_reference is the reconstructed physical hole/trail crossing.",
+    "robustness_reason": "A biological origin should not change merely because tracking initialization or first-detected frame changes."
+  },
+  "shadow_audit": {
+    "workflow_run": 33812905868,
+    "head_sha": "724dec0b7006a22801232f7fc7743629e6647238",
+    "artifact_id": 9915468583,
+    "artifact_zip_sha256": "101484d95538aa31abfea15ffc2f3e3cf62a573f703d76a2e8281c13bb30d22f",
+    "H5_runtime_used": false,
+    "H5_outcomes_used": false,
+    "parameter_search_used": false,
+    "node": {
+      "simulations": 600,
+      "h3_null_reorientation_events": 3094,
+      "measured_origin_offset_mm": {
+        "median": 6.650050324710311,
+        "q90": 8.381066298727914,
+        "max": 20.965055941690853
+      },
+      "first_event_bearing_difference_deg": {
+        "median": 8.366424123502538,
+        "q90": 83.34808257155139,
+        "max": 177.95730882520303
+      },
+      "all_event_bearing_difference_deg": {
+        "median": 2.9323565222804233,
+        "q90": 15.359061946281686,
+        "max": 177.95730882520303
+      },
+      "fraction_all_events_bearing_difference_gt_5_deg": 0.3015513897866839,
+      "fraction_all_events_bearing_difference_gt_15_deg": 0.10116354234001293,
+      "fraction_first_events_bearing_difference_gt_15_deg": 0.3441226575809199,
+      "initial_radial_gate_consequence": {
+        "first_track_origin": "R(0)=0 by construction at observation start.",
+        "central_origin": {
+          "r_search_20_mm_median_R": 0.24953237399871958,
+          "r_search_50_mm_median_R": 0.11738825096523543,
+          "r_search_100_mm_median_R": 0.06235393517830836
+        },
+        "interpretation": "These engineering scales are diagnostic only; they demonstrate that origin choice is mechanically consequential and were not used to select or tune an H5 parameter."
+      }
+    },
+    "Chromium": {
+      "simulations": 60,
+      "h3_null_reorientation_events": 305,
+      "median_all_event_bearing_difference_deg": 3.0776410907444536,
+      "median_first_event_bearing_difference_deg": 5.37856518974423,
+      "fraction_all_events_bearing_difference_gt_15_deg": 0.1180327868852459,
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0
+    }
+  },
+  "rejected_origin": {
+    "name": "first_tracked_observation_position",
+    "reason": [
+      "It is defined by the observation/tracking process rather than the physical arena-entry event.",
+      "It would force r=0 at the first observed frame even though the ant has already moved away from the central hole.",
+      "Changing the first detected frame could change the biological origin without changing the ant's actual physical start.",
+      "It remains essential as the simulated observation start and published-style Beeline start under the frozen measurement policy."
+    ]
+  },
+  "caveat": {
+    "unobserved_entry_to_first_track_segment": "The simulator begins observation at Xstart/Ystart and does not replay the short unobserved segment from the central hole to the first tracked point. H5 therefore begins the observed simulation with a remembered origin at the central entry reference and a current position already displaced from it.",
+    "temporal_decay_implication": "If a later H5 draft introduces time-decay of search drive, the definition of biological time zero and any unobserved pre-tracking delay must be resolved before that decay law can be frozen. This origin decision does not authorize assuming such a delay.",
+    "current_constant_drive_compatibility": "The current draft preference for constant search drive over the observed arena traversal does not require estimating the unobserved delay."
+  },
+  "firewall": {
+    "H5_mechanism_fully_frozen": false,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_allowed": false,
+    "origin_choice_may_not_be_reopened_to_rescue_fit": true,
+    "ymaze_access": false,
+    "canonical_model_unchanged": true
+  },
+  "next_step": "Resolve the remaining H5 biological choices: constant versus decaying drive, direction-only versus free-path modulation, radial-gate form, history parameterization, and null nuisance family."
+}
