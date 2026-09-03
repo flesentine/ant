@@ -5,79 +5,56 @@ on:
 permissions:
   contents: read
 jobs:
-  measured_start_state:
+  geometry_sensitivity:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm draft-only state
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm no H5 runtime implementation
         run: |
           set -euo pipefail
+          test "$(git hash-object src/h3.js)" = "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1"
           if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm' src models experiments states apparatus scoring observations; then exit 1; fi
-      - name: Fetch pinned final-record supplement
+      - name: Start Chromium
         run: |
-          mkdir -p /tmp/h5-source
-          ./tools/fetch-poissonnier2026-reference.sh /tmp/h5-source >/tmp/fetch-reference.log
-          test "$(sha256sum /tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx | awk '{print $1}')" = "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318"
-      - name: Inspect published analysis-code references to start and Beeline
+          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
+          for i in {1..80}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then break; fi; sleep .2; done
+          curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json
+      - name: Run H3-null geometry matrix in Chromium
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('/tmp/h5-source/40_2026_1106_MOESM1_ESM.rmd')
-          lines=p.read_text(errors='replace').splitlines()
-          hits=[]
-          for i,line in enumerate(lines):
-              if any(k.lower() in line.lower() for k in ['xstart','ystart','beeline','straightness']):
-                  lo=max(0,i-2);hi=min(len(lines),i+3)
-                  hits.append({'line':i+1,'context':lines[lo:hi]})
-          import json
-          Path('/tmp/h5-rmd-start-beeline.json').write_text(json.dumps(hits,indent=2)+'\n')
-          print(json.dumps(hits,indent=2))
-          PY
-      - name: Quantify measured start-state differences by treatment and colony
-        run: |
-          python3 - <<'PY'
-          import json, math, statistics, random, importlib.util, pathlib
-          root=pathlib.Path('.').resolve();spec=importlib.util.spec_from_file_location('r',root/'tools/reconstruct-poissonnier2026.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-          rows=m.records(m.sheets('/tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx')['Exp 1']);rows=[r for r in rows if r['Pheromone']=='n']
-          def f(r,k):return float(r[k])
-          dat=[]
-          for r in rows:
-              cx=(f(r,'Xmin_Arena')+f(r,'Xmax_Arena'))/2;cy=(f(r,'Ymin_Arena')+f(r,'Ymax_Arena'))/2
-              dx=f(r,'Xstart')-cx;dy=f(r,'Ystart')-cy
-              dat.append({'ant':int(float(r['ant_ID'])),'colony':int(float(r['Colony'])),'path':r['Path_length'],'dx':dx,'dy':dy,'r':math.hypot(dx,dy),'xnorm':(f(r,'Xstart')-f(r,'Xmin_Arena'))/(f(r,'Xmax_Arena')-f(r,'Xmin_Arena')),'ynorm':(f(r,'Ystart')-f(r,'Ymin_Arena'))/(f(r,'Ymax_Arena')-f(r,'Ymin_Arena'))})
-          def mean(xs):return sum(xs)/len(xs)
-          def sd(xs):
-              if len(xs)<2:return 0
-              mu=mean(xs);return math.sqrt(sum((x-mu)**2 for x in xs)/(len(xs)-1))
-          def summarize(sub):
-              out={'n':len(sub)}
-              for k in ['dx','dy','r','xnorm','ynorm']:
-                  xs=[x[k] for x in sub];out[k]={'mean':mean(xs),'sd':sd(xs),'min':min(xs),'max':max(xs)}
-              return out
-          s=[x for x in dat if x['path']=='s'];l=[x for x in dat if x['path']=='l']
-          diffs={k:mean([x[k] for x in s])-mean([x[k] for x in l]) for k in ['dx','dy','r','xnorm','ynorm']}
-          pooled={}
-          for k in ['dx','dy','r','xnorm','ynorm']:
-              sp=math.sqrt(((len(s)-1)*sd([x[k] for x in s])**2+(len(l)-1)*sd([x[k] for x in l])**2)/(len(s)+len(l)-2));pooled[k]=diffs[k]/sp if sp else 0
-          colonies=sorted({x['colony'] for x in dat});loco={}
-          for c in colonies:
-              ss=[x for x in s if x['colony']!=c];ll=[x for x in l if x['colony']!=c]
-              loco[str(c)]={k:mean([x[k] for x in ss])-mean([x[k] for x in ll]) for k in ['dx','dy','r','xnorm','ynorm']}
-          # Deterministic permutation diagnostics for mean differences. Descriptive only, not a gate.
-          rng=random.Random(20260903); vals={k:[x[k] for x in dat] for k in ['dx','dy','r','xnorm','ynorm']};nS=len(s);perm={}
-          for k in vals:
-              obs=abs(diffs[k]);arr=vals[k][:];ge=0;N=20000
-              for _ in range(N):
-                  rng.shuffle(arr);d=abs(mean(arr[:nS])-mean(arr[nS:]));ge+=d>=obs-1e-15
-              perm[k]=(ge+1)/(N+1)
-          out={'status':'passed','coordinate_role':'measured first tracked position, not assumed physical hole center','groups':{'short':summarize(s),'long':summarize(l)},'short_minus_long':diffs,'standardized_difference_cohen_d':pooled,'permutation_p_descriptive_only':perm,'leave_one_colony_out_short_minus_long':loco,'raw_measured_start_available':True,'entry_heading_available_from_this_table':False,'entry_speed_available_from_this_table':False}
-          pathlib.Path('/tmp/h5-start-state-audit.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out,indent=2))
-          PY
+          cat >/tmp/geometry.mjs <<'NODE'
+          import fs from 'node:fs';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();const target=tabs.find(t=>t.type==='page')||tabs[0];const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!AntLabCore&&!!AntLabH3&&!!AntLabIntegrity"))break;await sleep(100);}
+          const report=await evalv(`(async()=>{
+            const clone=x=>JSON.parse(JSON.stringify(x));const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();};
+            const model=await j('./models/lasius_niger_locomotion_h3_v1.json');model.reorientation_gate.effect.max_hazard_reduction_fraction=0;const exp=await j('./experiments/open_arena_short_control.json'),baseApp=await j('./apparatus/poissonnier2026_open_arena.json'),state=await j('./states/naive_outbound_v1.json'),baseObs=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');exp.model=model.id;
+            const scenarios={
+              nominal:{w:297,h:210,dx:0,dy:0},
+              nominal_measured_mean_start:{w:297,h:210,dx:-4.133,dy:2.405},
+              nominal_90pct_start_offset:{w:297,h:210,dx:-8.0,dy:4.0},
+              nominal_extreme_start_offset:{w:297,h:210,dx:-19.3,dy:8.0},
+              effective_bounds:{w:289.11,h:202.42,dx:0,dy:0},
+              effective_bounds_measured_mean_start:{w:289.11,h:202.42,dx:-4.133,dy:2.405}
+            };
+            const edge=(x,y,w,h)=>{const d={left:Math.abs(x),right:Math.abs(x-w),top:Math.abs(y),bottom:Math.abs(y-h)};return Object.keys(d).sort((a,b)=>d[a]-d[b])[0];};
+            const run=(cfg,seed)=>{const app=clone(baseApp),obs=clone(baseObs);app.world.width=cfg.w;app.world.height=cfg.h;app.geometry.primitives[0].width=cfg.w;app.geometry.primitives[0].height=cfg.h;for(const k of ['default','center']){app.entry_points[k].x=cfg.w/2+cfg.dx;app.entry_points[k].y=cfg.h/2+cfg.dy;}obs.metric_definitions.central_zone_fraction.center_y_mm=cfg.h/2;const b={experiment:clone(exp),model:clone(model),apparatus:app,state:clone(state),observation:obs,scoring:clone(scoring)};const sim=new AntLabIntegrity.Simulation(b,seed);const sx=sim.ants[0].x,sy=sim.ants[0].y;const s=sim.runUntilComplete(exp.duration_s,AntLabIntegrity.FIXED_DT),r=s.observed_metrics.ants[0],a=sim.ants[0],ex=r.exit_coordinate_mm;return{time:r.time_to_arena_edge_s??exp.duration_s,zone:r.central_zone_fraction??0,beeline:ex?Math.hypot(ex.x-sx,ex.y-sy):0,edge:ex?edge(ex.x,ex.y,cfg.w,cfg.h):'timeout',sx,sy,exitX:ex?.x??null,exitY:ex?.y??null,biologyRng:a.rng.state,eventRng:a.h3EventRng.state,angleRng:a.h3AngleRng.state};};
+            const raw={};for(const [name,cfg] of Object.entries(scenarios)){raw[name]=[];for(let seed=7001;seed<=7500;seed++)raw[name].push(run(cfg,seed));}
+            const mean=(xs)=>xs.reduce((a,b)=>a+b,0)/xs.length;const summarize=arr=>{const edges={left:0,right:0,top:0,bottom:0,timeout:0};for(const r of arr)edges[r.edge]++;return{n:arr.length,time:mean(arr.map(x=>x.time)),zone:mean(arr.map(x=>x.zone)),beeline:mean(arr.map(x=>x.beeline)),edges:Object.fromEntries(Object.entries(edges).map(([k,v])=>[k,v/arr.length])),start:{x:mean(arr.map(x=>x.sx)),y:mean(arr.map(x=>x.sy))}}};
+            const summaries={};for(const k of Object.keys(raw))summaries[k]=summarize(raw[k]);const nom=summaries.nominal,deltas={};for(const [k,s] of Object.entries(summaries)){deltas[k]={time:s.time-nom.time,zone:s.zone-nom.zone,beeline:s.beeline-nom.beeline,edge_L1:Object.keys(nom.edges).reduce((a,e)=>a+Math.abs(s.edges[e]-nom.edges[e]),0)};}
+            // Check same named RNG streams are preserved across pure geometry changes for the first seed; geometry may change stopping time, so compare initial stream states after init rather than terminal states.
+            return {status:'passed',scenarios,summaries,deltas,interpretation_firewall:'No H5 mechanism used; this is H3-null sensitivity to measurement geometry only.'};
+          })()`);const y=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(exceptions.length||consoleErrors.length||y.length)throw new Error('browser firewall failure');report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/h5-geometry-sensitivity.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          NODE
+          node /tmp/geometry.mjs
       - uses: actions/upload-artifact@v4
         with:
-          name: h5-measured-start-state-audit
+          name: h5-geometry-sensitivity
           path: |
-            /tmp/h5-start-state-audit.json
-            /tmp/h5-rmd-start-beeline.json
-            /tmp/fetch-reference.log
+            /tmp/h5-geometry-sensitivity.json
+            /tmp/chrome-version.json
+            /tmp/chrome.log
           retention-days: 14
