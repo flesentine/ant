@@ -1,7 +1,7 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_origin_frozen_remaining_mechanism_questions_open_before_full_mechanism_freeze",
+  "status": "draft_origin_and_temporal_profile_frozen_remaining_mechanism_questions_open_before_full_mechanism_freeze",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
   "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
@@ -114,7 +114,7 @@
   ],
   "candidate_mechanism": {
     "origin": "Frozen O = the central physical entry-hole/trail-crossing reference supplied by the measurement geometry row (entry_reference_x_mm, entry_reference_y_mm). The simulated ant still begins observation at first_track_x_mm/first_track_y_mm. First-track position is not the biological H5 origin and may not be substituted after seeing model performance.",
-    "history_search_drive": "Provisional D(L) = exp(-L/lambda_search_mm), so shorter recent constrained travel gives larger search drive. Because only L=200 and L=1000 mm are observed in this assay, this functional form and raw lambda remain provisional and must not be treated as identified merely because a search selects a value.",
+    "history_search_drive": "Temporal profile frozen constant during the observed arena traversal. The history-response magnitude D(L) remains provisional: current candidate D(L)=exp(-L/lambda_search_mm), so shorter recent constrained travel gives larger search drive, but its functional form and parameterization are not yet frozen. There is no tau_search_s and no elapsed-time decay in H5-v1.",
     "radial_gate": "Provisional R(r) = r/(r+r_search_mm), where r = ||x-O||. Stress tests show baseline reorientation events span radii over which this gate is active, but r_search_mm remains provisional and potentially confounded with rho_search and lambda_search_mm.",
     "mixture_weight": "Provisional w = rho_search * D(L) * R(r), constrained to [0,1].",
     "reorientation_effect": {
@@ -206,7 +206,6 @@
     "No Y-maze access for development fitting, ranking, stopping, or model selection."
   ],
   "pre_freeze_questions": [
-    "Should search drive D remain constant during the short arena traversal, or decay with time after entry? Current draft preference remains constant because H2-H4 already tested unvalidated exponential temporal decay assumptions.",
     "Should H5-v1 alter only the conditional reorientation-direction mixture, or also orientation-dependent free-path length as reported in the external Lasius representation? Current draft preference is direction only for parsimony until contradicted by reachability testing.",
     "Should the radial gate be retained, simplified, or fixed from an independently justified rule? The external paper does not supply a directly transferable r_search_mm.",
     "If D(L)=exp(-L/lambda_search_mm) is retained, should lambda be estimated at all or should H5 be parameterized directly by constrained effective weights at the two observed history distances? This is an identifiability decision, not a tuning decision.",
@@ -223,7 +222,11 @@
     "measurement_reconstruction_policy_frozen_and_qualified": true,
     "H5_biological_origin_still_unfrozen": false,
     "H5_biological_origin_frozen_to_central_physical_entry_reference": true,
-    "H5_biological_origin_may_not_be_reopened_to_rescue_fit": true
+    "H5_biological_origin_may_not_be_reopened_to_rescue_fit": true,
+    "H5_temporal_profile_still_unfrozen": false,
+    "H5_temporal_profile_frozen_constant": true,
+    "H5_tau_search_parameter_forbidden": true,
+    "H5_temporal_profile_may_not_be_reopened_to_rescue_fit": true
   },
   "allowed_shared_measurement_or_geometry_inputs_under_frozen_policy": [
     "central_physical_entry_reference_mm (frozen H5 biological origin)",
@@ -245,5 +248,15 @@
     "treatment_specific_origin_forbidden": true,
     "outcome_dependent_origin_forbidden": true,
     "caveat": "The observed simulation starts at the first tracked position, already displaced from the central origin. The short unobserved center-hole-to-first-track segment is not replayed. If a later H5 formulation introduces temporal decay, biological time zero and any unobserved delay must be resolved before freezing that decay law."
+  },
+  "temporal_drive_decision": {
+    "status": "frozen_before_H5_runtime_implementation_or_parameter_search",
+    "selected_profile": "constant_over_observed_arena_traversal",
+    "decision_report": "reports/h5_temporal_drive_choice_audit_v1.json",
+    "decision_report_git_blob_sha": "0ec424889ee4c9745af30f70cca7c8b7152bb490",
+    "rule": "For fixed recent_constrained_travel_mm L, the H5 history search drive does not decay with elapsed observed arena time. H5-v1 has no tau_search_s parameter.",
+    "reason": "The biological origin is the central physical entry point but observation begins later at first_track_position. The elapsed center-hole-to-first-track interval is unobserved. A temporal decay would therefore introduce an unidentified pre-track time offset exactly confounded with decay amplitude; very slow decay approaches the constant model while adding a weakly identified parameter.",
+    "history_response_still_unfrozen": true,
+    "may_not_be_reopened_to_rescue_fit": true
   }
 }
