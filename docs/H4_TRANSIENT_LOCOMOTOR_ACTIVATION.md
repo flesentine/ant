@@ -116,6 +116,77 @@ All frozen qualitative reachability checks passed: the long-history condition ha
 
 This result answers only **can this mechanism produce the intended structural signature without contaminating the other processes?** It does not answer whether H4 explains the data better than a matched null or H2/H3.
 
+## Frozen estimation policy
+
+The separate H4 estimator policy is `hypotheses/h4_parameter_estimation_v1.json`. It was frozen and audited before estimator implementation or H4 parameter search. The estimator pins its exact Git blob SHA:
+
+```text
+a889007f988628a8e61139f4349c23714cc1dd68
+```
+
+If that policy file changes by even one byte, `tools/run-h4-estimation.js` refuses to run.
+
+The frozen estimator uses:
+
+- shared nuisance base speed in `[12, 36]` mm/s;
+- shared angular diffusion in `[0.35, 2.4]` rad/sqrt(s), log scale;
+- shared entry-orientation retention `q` in `[0, 1]`;
+- H4 `lambda_activation` in `[100, 3000]` mm, log scale;
+- H4 `tau_activation` in `[0.5, 40]` s, log scale;
+- H4 `rho_speed` in `[0, 0.95]`;
+- deterministic Halton coordinates with primes `2,3,5,7,11,13` assigned in that order;
+- the audited corrected H2/H3 score implementation without H4-specific reweighting;
+- six leave-one-colony-out folds;
+- an H4-null fit with `rho_speed = 0` and independently fitted shared nuisance parameters;
+- an H4-context fit with 499 Halton candidates plus one exact fitted-null anchor in the frozen 500-candidate high-resolution search;
+- common random numbers and the pre-existing `h2_estimation_entry_transition_v1` entry-transition stream;
+- exact H4 boundary timing for `time_to_exit_s`;
+- matched held-out re-evaluation of the frozen H2-v1 and H3-v1 fold candidates.
+
+The frozen high-resolution budget is exactly 500 candidates per model family per fold, 60 training trials per condition per candidate, 120 held-out evaluation trials per condition, six folds, root seed `990000`, and `dt = 0.02 s`. High-resolution mode rejects attempts to override those values.
+
+## Estimator implementation and qualification
+
+`tools/run-h4-estimation.js` is implemented with three deliberately separate execution classes:
+
+1. `qualification` — synthetic/reference-free implementation qualification only;
+2. `smoke` — low-resolution reference-data execution-path smoke only, explicitly not evidence;
+3. `highres` — the only mode allowed to evaluate the frozen H4 promotion guard.
+
+High-resolution mode is hard-gated: it first runs a passing synthetic qualification **before loading the Poissonnier reference target in that process**, then checks that the frozen candidate/trial/seed/dt values have not been overridden, and only then may load the reference target.
+
+The reference-free qualification checks:
+
+- exact frozen policy blob identity;
+- paired nuisance Halton coordinates;
+- exact H4-null/context equivalence at `rho_speed = 0`;
+- insertion of the selected null candidate as the exact context anchor;
+- candidate-to-model parameter wiring;
+- 200/1000 mm recent constrained travel as the only H4 context input;
+- normalized five-category exit scoring including timeout;
+- reuse of the audited H3 scoring API;
+- exact H4 partial-step boundary timing;
+- unchanged baseline biology RNG cadence;
+- no colony identity in H4 biology;
+- no Y-maze access.
+
+The exact null anchor reports `lambda_activation_mm = null` and `tau_activation_s = null`, because those values have no inferential meaning when `rho_speed = 0`. Its fixed `rho_speed = 0` is also not falsely reported as a fitted parameter hitting a search boundary.
+
+GitHub Actions run `33701361416` on estimator/test commit `65b0e462f2a7874a3a4c9f097b1d9ff45dc5d10a` passed:
+
+- exact frozen policy-blob verification;
+- the complete H0–H4 test suite;
+- the new H4 estimator tests;
+- reference-free estimator qualification;
+- low-resolution six-fold estimator smoke;
+- rejection of a deliberately invalid `--mode highres --candidates 499` override.
+
+The qualification reported `reference_outcomes_accessed = false`, `ymaze_accessed = false`, and `scientific_evidence = false`. The low-resolution smoke explicitly reported `scientific_evidence = false` and `promotion_evaluated = false`. Its numerical fold results are not interpreted scientifically.
+
+Review artifact `9873626596` has ZIP SHA-256 `ad18e8d7e4ce40acad73ec05c174cbcc937fc1a44e4b169cef86e419f255d59a`.
+
+**No H4 high-resolution parameter search has been run.**
+
 ## Measurement firewall
 
 The existing threshold-independent H2/H3 estimation targets remain the only allowed development-fit targets:
@@ -133,8 +204,11 @@ Moving speed remains a **diagnostic only** until the AnimalTA movement classifie
 2. Implement H4 with engineering-only values — complete.
 3. Add the complete frozen mechanism/invariance tests — complete.
 4. Run reachability and Chromium/code review — complete.
-5. **Freeze a separate H4 estimation policy before any H4 parameter search.**
-6. Only then, if estimation is authorized, compare H4-context against a matched H4-null baseline with shared nuisance parameters and common random numbers under leave-one-colony-out evaluation.
+5. **Freeze and audit the separate H4 estimation policy** — complete.
+6. Implement the estimator against the exact frozen policy blob — complete.
+7. Run the reference-free synthetic estimator qualification — complete.
+8. Run low-resolution execution-path smoke only — complete; not evidence.
+9. Run the frozen 500 × 60 × 6 high-resolution LOCO search only if explicitly authorized as the next scientific execution.
 
 ## Current scientific status
 
@@ -143,7 +217,7 @@ H0  -> inadequate
 H1  -> unresolved; entry-state evidence missing
 H2  -> not promoted
 H3  -> not promoted
-H4  -> implemented; mechanism + Chromium reachability verified; not fitted; not searched; not promoted
+H4  -> mechanism implemented; estimator implemented + qualified; not high-resolution searched; not fitted/promoted
 ```
 
 The canonical ant remains unchanged.
