@@ -1,0 +1,60 @@
+name: H5 draft measurement resolution
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update draft dependency bookkeeping only
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('hypotheses/h5_origin_referenced_search_v1.draft.json')
+          d=json.loads(p.read_text())
+          assert d['id']=='H5_origin_referenced_search_v1'
+          assert d['firewall']['mechanism_not_frozen'] is True
+          assert d['firewall']['parameter_search_allowed'] is False
+          dep=d['measurement_reconstruction_dependency']
+          if dep.get('status')=='resolved_frozen_and_qualified_before_H5_mechanism_freeze':
+              print('Draft dependency already resolved; no change.')
+          else:
+              assert dep['status']=='must_be_resolved_before_H5_mechanism_freeze_or_estimator_policy'
+              d['schema_version']=3
+              d['status']='draft_post_measurement_reconstruction_qualified_before_mechanism_freeze'
+              dep['status']='resolved_frozen_and_qualified_before_H5_mechanism_freeze'
+              dep['frozen_policy']='reference/poissonnier2026_open_arena_measurement_policy_v1.json'
+              dep['frozen_policy_git_blob_sha']='fd2718cf9351b655340eacd868adc536301a83a4'
+              dep['geometry_reference']='reference/poissonnier2026_open_arena_measurement_geometry_v1.json'
+              dep['geometry_reference_git_blob_sha']='af0ec6fbacf83b915dd78cb3a822609c126dc1e7'
+              dep['qualification_report']='reports/poissonnier2026_open_arena_measurement_reconstruction_v1.json'
+              dep['adapter']='tools/poissonnier2026-measurement-geometry.js'
+              dep['selected_resolution']='For each LOCO fold, sample complete empirical geometry rows uniformly with replacement from the five training colonies only, pooled across path lengths, using the dedicated poissonnier2026_measurement_geometry_v1 input RNG stream. Apply the same geometry draws to short/long, null/context, and matched comparator re-evaluations.'
+              dep['measurement_vs_biology_boundary']='first_track_position defines the observation start and Beeline start. The central entry reference represents the physical hole/trail crossing. This measurement policy does not decide which is the biological H5 search origin.'
+              dep.pop('allowed_resolution_classes_for_next_policy_review',None)
+              old='allowed_shared_measurement_or_geometry_inputs_subject_to_separate_freeze'
+              if old in d:
+                  d['allowed_shared_measurement_or_geometry_inputs_under_frozen_policy']=d.pop(old)
+              d['candidate_mechanism']['origin']='O must be selected at H5 mechanism freeze from geometry references permitted by the frozen measurement policy. The policy supplies both the central physical entry reference and the first tracked observation position, but H5 biology may not silently equate them. Whichever origin is frozen must be applied identically across treatments and may not depend on outcomes.'
+              qs=d['pre_freeze_questions']
+              expected='Measurement first: should H5/null condition on measured Xstart/Ystart and per-video bounds, or should a shared training-fold-only empirical measurement-geometry model generate them? This must be frozen separately before H5 fitting.'
+              assert expected in qs
+              qs.remove(expected)
+              qs.insert(0,'Which frozen measurement reference should define the biological H5 origin O: the central physical entry-hole/trail-crossing reference or the first tracked observation position? The current measurement policy deliberately does not decide this biological question.')
+              d['firewall']['measurement_reconstruction_must_precede_H5_estimator_policy']=True
+              d['firewall']['measurement_reconstruction_policy_frozen_and_qualified']=True
+              d['firewall']['H5_biological_origin_still_unfrozen']=True
+              p.write_text(json.dumps(d,indent=2)+'\n')
+          PY
+          python3 -m json.tool hypotheses/h5_origin_referenced_search_v1.draft.json >/dev/null
+          if git diff --quiet -- hypotheses/h5_origin_referenced_search_v1.draft.json; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add hypotheses/h5_origin_referenced_search_v1.draft.json
+          git commit -m 'Resolve H5 measurement dependency after qualification'
+          git push origin HEAD:h5-origin-referenced-search-v1
