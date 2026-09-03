@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "id": "H5_draft_stress_audit_v1",
+  "status": "pre_freeze_design_audit_completed_no_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-03",
+  "scope": "Stress-test the H5 draft mechanism, the inherited H3 event substrate, circular turn formulations, measurement geometry, measured start-state confounding, and qualitative parameter sensitivity before any H5 mechanism freeze or implementation.",
+  "scientific_status": {
+    "H5_mechanism_frozen": false,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_performed": false,
+    "H5_reference_fit_performed": false,
+    "canonical_model_changed": false,
+    "ymaze_accessed": false
+  },
+  "starting_draft": {
+    "path": "hypotheses/h5_origin_referenced_search_v1.draft.json",
+    "initial_git_blob_sha": "4e08102a67c581f1c3b483f0f41ca676149f46d2",
+    "initial_commit": "de6b2e0525785d4e9ea536aee6322635760e5c74"
+  },
+  "frozen_substrate_blobs_checked": {
+    "src/h3.js": "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1",
+    "src/integrity.js": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+    "src/sim-core.js": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "src/measurement.js": "8845726e02360655c605851662256bc729277b21",
+    "models/lasius_niger_locomotion_h3_v1.json": "fe33c31facfcabb7ddeb9a7bedf71ac248ad8e84"
+  },
+  "stress_runs": [
+    {
+      "purpose": "Draft equations plus inherited H3-null event-substrate checks in real Chromium",
+      "workflow_run": 33779500637,
+      "job": 100729393472,
+      "artifact": 9902961422,
+      "artifact_zip_sha256": "fe504d781b7820c5dbed7ab32e7b47446352749feeacdbd8f6b91370dff47183",
+      "result": "passed_with_design_defect_exposed"
+    },
+    {
+      "purpose": "Circular-formulation comparison in real Chromium",
+      "workflow_run": 33779703730,
+      "job": 100730071283,
+      "artifact": 9903046378,
+      "artifact_zip_sha256": "bb442031ee8311dda80aafec72ac5d8655e3da872b3f0c1cb8a5d8ad7451125f",
+      "result": "passed_with_formulation_selection_information"
+    },
+    {
+      "purpose": "Shadow-mode sensitivity of draft history/radial weighting on actual H3-null turn-event locations without changing trajectories",
+      "workflow_run": 33779856059,
+      "job": 100730582387,
+      "artifact": 9903103212,
+      "artifact_zip_sha256": "a30a43b6ae527146e85ba5aa818247cd836612a5219ad2bb904fd93e34ade6f2",
+      "result": "passed_with_identifiability_warning"
+    },
+    {
+      "purpose": "Pinned final-record XLSX measurement-geometry reconstruction",
+      "workflow_run": 33780165405,
+      "job": 100731606307,
+      "artifact": 9903229856,
+      "artifact_zip_sha256": "a6d94e164cc2192e18e24dd48c2ed8c62b0f38391cd46742ced364e3dfd64be1",
+      "result": "passed_with_measurement_model_mismatch_found"
+    },
+    {
+      "purpose": "Measured Xstart/Ystart short-versus-long confounding audit",
+      "workflow_run": 33780295393,
+      "job": 100732030142,
+      "artifact": 9903278245,
+      "artifact_zip_sha256": "12195a5ba392eaf51bc6bce830b5d9949d4c1f6e8cac385fab497257ec91ec86",
+      "result": "passed_no_compelling_treatment_specific_start_position_effect"
+    },
+    {
+      "purpose": "H3-null Chromium sensitivity to start offsets and effective tracked arena dimensions, with no H5 mechanism",
+      "workflow_run": 33780501067,
+      "job": 100732706983,
+      "artifact": 9903366028,
+      "artifact_zip_sha256": "94158c8dc3dbf9204b7d5babdc314d20c94fd59005e9dbc0240d7ad5f06b453f",
+      "result": "passed_geometry_materially_affects_fit_observables"
+    }
+  ],
+  "code_and_runtime_validation": {
+    "full_existing_test_suite_passed": true,
+    "H5_runtime_symbols_absent_from_scientific_runtime": true,
+    "H3_null_short_long_matched_seed_equivalence_passed": true,
+    "H3_event_positions_and_times_valid": true,
+    "H3_dedicated_event_and_angle_streams_usable_as_substrate": true,
+    "browser_exceptions": 0,
+    "browser_console_errors": 0,
+    "ymaze_requests": 0
+  },
+  "rejected_turn_formulations": {
+    "signed_error_mean_shift": {
+      "draft_form": "new_heading = wrap(theta + w*wrap(phi_origin-theta) + noise)",
+      "rejected": true,
+      "reason": "At the antipodal configuration, infinitesimal heading perturbations choose opposite sides of the circular branch cut.",
+      "observed_branch_jump_rad": 2.1058725335,
+      "additional_warning": "Extreme draft settings approached an almost 180-degree commanded U-turn."
+    },
+    "circular_vector_mean_blend": {
+      "rejected": true,
+      "reason": "When baseline and origin directions are antipodal, the weighted resultant collapses at a 50/50 mixture and the mean direction jumps by approximately pi across that point.",
+      "observed_half_weight_jump_rad": 3.1415925924
+    }
+  },
+  "preferred_turn_representation_for_further_draft_review": {
+    "type": "mixture_of_circular_reorientation_distributions",
+    "concept": "At each baseline major reorientation event, use a history/radius-dependent mixture weight w between the ordinary baseline turn distribution and a search-component distribution centered on the bearing from current position to the trial's origin.",
+    "tested_density_example": "(1-w)*VM(new_heading | baseline_direction,kappa) + w*VM(new_heading | bearing_to_origin,kappa)",
+    "same_kappa_in_pre_freeze_stress": true,
+    "properties_verified_in_Chromium": {
+      "rotation_symmetry": true,
+      "reflection_symmetry_at_antipode": true,
+      "continuous_across_plus_minus_pi_representation": true,
+      "exact_distributional_null_at_w_zero": true,
+      "origin_gate_zero_at_r_zero": true,
+      "off_center_origin_translates_with_origin": true
+    },
+    "rng_candidate": {
+      "baseline_turn_stream": "retain existing H3 turn-angle stream",
+      "search_choice_stream": "biology_h5_search_choice:<ant_id>",
+      "search_angle_stream": "biology_h5_search_angle:<ant_id>",
+      "stress_result": "Dedicated H5 streams did not perturb the existing H3 angle stream; matched search-choice CRN was deterministic."
+    },
+    "not_yet_frozen": true
+  },
+  "draft_history_and_radial_weight_sensitivity": {
+    "provisional_form": "w = rho * exp(-L/lambda) * r/(r+r_scale)",
+    "reference_history_levels_mm": [200, 1000],
+    "H3_null_shadow_trials": 100,
+    "H3_null_shadow_turn_events": 549,
+    "turn_event_radius_mm": {
+      "min": 0.2448675328,
+      "q10": 22.2165469062,
+      "median": 81.4821212401,
+      "q90": 139.3112971116,
+      "max": 168.9130856095
+    },
+    "engineering_scenarios_not_fit": {
+      "gentle": {
+        "lambda_mm": 1000,
+        "r_scale_mm": 100,
+        "rho": 0.5,
+        "theoretical_short_long_weight_ratio": 2.2255409285,
+        "median_expected_search_turns_short": 0.7585307542,
+        "median_expected_search_turns_long": 0.3408298380
+      },
+      "middle": {
+        "lambda_mm": 500,
+        "r_scale_mm": 50,
+        "rho": 0.75,
+        "theoretical_short_long_weight_ratio": 4.9530324244,
+        "median_expected_search_turns_short": 1.2836688035,
+        "median_expected_search_turns_long": 0.2591682617
+      },
+      "strong": {
+        "lambda_mm": 250,
+        "r_scale_mm": 25,
+        "rho": 0.9,
+        "theoretical_short_long_weight_ratio": 24.5325301971,
+        "median_expected_search_turns_short": 1.3023972821,
+        "median_expected_search_turns_long": 0.0530885837
+      }
+    },
+    "interpretation": "The radial gate is active over actual baseline event radii rather than trivially saturated, but lambda is extremely influential when only two history distances are observed. Raw lambda, rho, and radial scale must not be treated as automatically identifiable from this assay."
+  },
+  "measurement_geometry_findings": {
+    "source_xlsx_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+    "Xstart_Ystart_present": true,
+    "published_beeline_reconstruction": {
+      "definition": "sqrt((Xlast-Xstart)^2 + (Ylast-Ystart)^2)",
+      "rows_checked": 51,
+      "maximum_absolute_error_mm": 2.842170943040401e-14,
+      "mean_absolute_error_mm": 5.2942399919380015e-15
+    },
+    "measured_start_offset_from_per_video_arena_midpoint_mm": {
+      "min": 1.1098986703,
+      "q10": 2.1537187222,
+      "median": 6.6500503247,
+      "q90": 8.6082220216,
+      "max": 20.9650559417
+    },
+    "current_simulator_assumption": "Nominal 297x210 mm A4 arena, geometric-center entry, and 0.5 mm entry-position jitter.",
+    "tracked_bounds_typical": {
+      "width_mm_approximately": 289.11,
+      "height_mm_approximately": 202.42
+    },
+    "conclusion": "The published measurement geometry used for Beeline is not faithfully represented by a geometric-center plus 0.5 mm jitter assumption. This is a measurement/input reconstruction issue that must be resolved before an H5 estimator is frozen."
+  },
+  "measured_start_treatment_audit": {
+    "short_n": 25,
+    "long_n": 26,
+    "short_mean_radial_offset_mm": 5.8334057207,
+    "long_mean_radial_offset_mm": 7.0395330411,
+    "short_minus_long_radial_offset_mm": -1.2061273204,
+    "cohen_d_radial_offset": -0.3943718767,
+    "descriptive_permutation_p_radial_offset": 0.1738913054,
+    "leave_one_colony_out_radial_difference_sign_stable": true,
+    "conclusion": "Measured start position should not be ignored, but the current table does not provide compelling evidence for a treatment-specific entry-position mechanism. Treatment-specific H5 entry-position biology remains forbidden."
+  },
+  "geometry_sensitivity_no_H5": {
+    "model": "H3 event substrate with history gate disabled",
+    "trials_per_scenario": 500,
+    "nominal": {
+      "time_to_exit_s": 8.82664,
+      "middle_zone_fraction": 0.3812981533,
+      "beeline_mm": 143.9093890239
+    },
+    "nominal_plus_measured_mean_start_offset_delta": {
+      "time_to_exit_s": 0.11672,
+      "middle_zone_fraction": -0.0095090393,
+      "beeline_mm": 1.2528701578,
+      "exit_distribution_L1": 0.028
+    },
+    "nominal_plus_90pct_start_offset_delta": {
+      "time_to_exit_s": 0.2652,
+      "middle_zone_fraction": -0.0222408166,
+      "beeline_mm": 2.5171199878,
+      "exit_distribution_L1": 0.052
+    },
+    "nominal_plus_extreme_start_offset_delta": {
+      "time_to_exit_s": 0.67024,
+      "middle_zone_fraction": -0.0769431162,
+      "beeline_mm": 5.6136384826,
+      "exit_distribution_L1": 0.132
+    },
+    "typical_effective_bounds_centered_delta": {
+      "time_to_exit_s": -0.35768,
+      "middle_zone_fraction": 0.0123051042,
+      "beeline_mm": -4.0695004937,
+      "exit_distribution_L1": 0.04
+    },
+    "typical_effective_bounds_plus_measured_mean_start_delta": {
+      "time_to_exit_s": -0.15256,
+      "middle_zone_fraction": -0.0005697351,
+      "beeline_mm": -2.5884053506,
+      "exit_distribution_L1": 0.008
+    },
+    "conclusion": "Pure measurement/input geometry changes materially affect the same observables used for development estimation, even without H5. H5 biological evaluation should not proceed while this known measurement mismatch remains unresolved."
+  },
+  "pre_freeze_decisions_for_next_review": [
+    "Reject the signed-error mean-shift and circular-vector-mean formulations.",
+    "Continue H5 draft review using a mixture of circular reorientation distributions as the leading formulation, without freezing it yet.",
+    "Freeze a separate measurement/input reconstruction policy before any H5 estimator policy or reference search.",
+    "Decide whether simulation should condition on measured row-level Xstart/Ystart and per-video arena bounds or sample them from a training-fold-only shared empirical geometry model; whichever choice is made must apply identically to H5-null and H5-context and must not encode treatment labels.",
+    "Do not claim lambda_search, r_search, or rho_search are identified merely because a fit selects them. With only L=200 and L=1000 in this assay, effective search weights at the observed histories and representative radii should be primary reporting quantities.",
+    "Decide before freeze whether search drive remains constant after entry or decays, and whether H5 v1 changes only conditional reorientation direction or also orientation-dependent free-path length."
+  ]
+}
