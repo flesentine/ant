@@ -1,0 +1,157 @@
+name: H4 post-result audit
+on:
+  push:
+    branches: [h4-transient-locomotor-activation-v1]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify immutable scientific inputs and report bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/h4_parameter_estimation_v1.json)" = "a889007f988628a8e61139f4349c23714cc1dd68"
+          test "$(git hash-object tools/run-h4-estimation.js)" = "d417c62a4ef4f97c338a1da2f1ff10f49e18c175"
+          test "$(git hash-object reports/h4_parameter_estimation_500x60_v1.json)" = "8619b96bb3a02e78b905320ac96585bec08b2918"
+          test "$(sha256sum reports/h4_parameter_estimation_500x60_v1.json | awk '{print $1}')" = "05f76e18d6ecdff9f038f4244227ede7a73cc323ca9857ac1d6dbbff1dd2e310"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object src/measurement.js)" = "8845726e02360655c605851662256bc729277b21"
+          test "$(git hash-object models/lasius_niger_locomotion_h4_v1.json)" = "4f14e9f9b5eaab4cc89f28cbd033a8fd26a8f944"
+      - name: Independently recompute frozen result decision
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, math, statistics, hashlib, pathlib
+          root=pathlib.Path('.')
+          r=json.loads((root/'reports/h4_parameter_estimation_500x60_v1.json').read_text())
+          target=json.loads((root/'reference/poissonnier2026_h2_estimation_targets.json').read_text())
+          assert r['execution']['repo_commit']=='cb63d00e030b87016890f169f2852699ee6f8d6b'
+          assert r['policy_git_blob_sha']=='a889007f988628a8e61139f4349c23714cc1dd68'
+          assert r['search']['H4_null_candidates_per_fold']==500
+          assert r['search']['H4_context_candidates_per_fold_total']==500
+          assert r['search']['context_halton_candidates_per_fold']==499
+          assert r['search']['exact_null_anchor_per_fold']==1
+          assert r['search']['training_trials_per_condition_per_candidate']==60
+          assert r['search']['evaluation_trials_per_condition']==120
+          assert r['search']['folds']==6
+          assert r['search']['root_seed']==990000
+          assert abs(r['search']['physics_dt_s']-0.02)<1e-15
+          assert r['moving_speed_used_for_fit'] is False
+          assert r['ymaze_accessed'] is False
+          colonies=sorted({x['colony'] for x in target['rows']})
+          assert colonies==[0,7,16,20,21,27]
+          def sd(xs):
+              if len(xs)<2:return 1.0
+              m=sum(xs)/len(xs)
+              v=sum((x-m)**2 for x in xs)/(len(xs)-1)
+              z=math.sqrt(v)
+              return z if z else 1.0
+          relN=[]; rel2=[]; rel3=[]; anchors=[]; detail=[]
+          for fi,(held,f) in enumerate(zip(colonies,r['folds'])):
+              assert f['held_out_colony']==held
+              train=[x for x in target['rows'] if x['colony']!=held]
+              test=[x for x in target['rows'] if x['colony']==held]
+              assert f['train_n']==len(train) and f['test_n']==len(test)
+              assert f['fit_seed']==990000+fi*10000
+              assert f['evaluation_seed']==1490000+fi*10000
+              assert f['evaluation_trials_per_condition']==120
+              expected={'time':sd([x['time_to_exit_s'] for x in train]),'zone':sd([x['middle_zone_fraction'] for x in train]),'beeline':sd([x['beeline_mm'] for x in train])}
+              for k,v in expected.items(): assert math.isclose(v,f['heldout_metric_scales_from_training'][k],rel_tol=0,abs_tol=1e-12),(held,k,v,f['heldout_metric_scales_from_training'][k])
+              n=f['H4_null']['heldout_loss']; c=f['H4_context']['heldout_loss']
+              h2=f['H2_v1_frozen_candidate']['reevaluated_heldout_loss_matched_crn']
+              h3=f['H3_v1_frozen_candidate']['reevaluated_heldout_loss_matched_crn']
+              a=(n-c)/max(1e-12,n); b=(h2-c)/max(1e-12,h2); d=(h3-c)/max(1e-12,h3)
+              assert math.isclose(a,f['heldout_relative_improvement_vs_H4_null'],rel_tol=0,abs_tol=1e-15)
+              assert math.isclose(b,f['heldout_relative_improvement_vs_H2_v1'],rel_tol=0,abs_tol=1e-15)
+              assert math.isclose(d,f['heldout_relative_improvement_vs_H3_v1'],rel_tol=0,abs_tol=1e-15)
+              relN.append(a); rel2.append(b); rel3.append(d)
+              if f['H4_context']['fit']['source']=='exact_null_anchor': anchors.append(held)
+              detail.append({'colony':held,'vs_null':a,'vs_h2':b,'vs_h3':d,'source':f['H4_context']['fit']['source']})
+          summary={
+            'wins_vs_null':sum(x>0 for x in relN),'median_vs_null':statistics.median(relN),
+            'wins_vs_h2':sum(x>0 for x in rel2),'median_vs_h2':statistics.median(rel2),
+            'wins_vs_h3':sum(x>0 for x in rel3),'median_vs_h3':statistics.median(rel3),
+            'null_anchor_folds':anchors
+          }
+          assert summary['wins_vs_null']==2 and summary['median_vs_null']==0
+          assert summary['wins_vs_h2']==2 and math.isclose(summary['median_vs_h2'],-0.03428269360116726,abs_tol=1e-15)
+          assert summary['wins_vs_h3']==3 and math.isclose(summary['median_vs_h3'],0.030460805659674114,abs_tol=1e-15)
+          assert anchors==[20,21]
+          cv=r['internal_cv']
+          assert cv['H4_wins_vs_H4_null']==summary['wins_vs_null'] and cv['median_relative_improvement_vs_H4_null']==summary['median_vs_null']
+          assert cv['H4_wins_vs_H2_v1']==summary['wins_vs_h2'] and math.isclose(cv['median_relative_improvement_vs_H2_v1'],summary['median_vs_h2'],abs_tol=1e-15)
+          assert cv['H4_wins_vs_H3_v1']==summary['wins_vs_h3'] and math.isclose(cv['median_relative_improvement_vs_H3_v1'],summary['median_vs_h3'],abs_tol=1e-15)
+          assert cv['H4_promotion_guard_passed'] is False and cv['H2_comparison_guard_passed'] is False and cv['H3_comparison_guard_passed'] is False
+          out={'status':'passed','report_sha256':hashlib.sha256((root/'reports/h4_parameter_estimation_500x60_v1.json').read_bytes()).hexdigest(),'folds':detail,'summary':summary,'training_scale_recomputation':'independent_sample_sd_from_target_training_rows'}
+          pathlib.Path('/tmp/h4-postresult-independent-audit.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+      - name: Build Node result-specific parity reference
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const report=require('./reports/h4_parameter_estimation_500x60_v1.json');
+          const {Simulation,streamSeed,FIXED_DT}=require('./src/integrity.js');
+          const core=require('./src/sim-core.js');
+          const {loadBundle,readJson}=require('./tools/load-bundle.js');
+          const base=readJson('./models/lasius_niger_locomotion_h4_v1.json');
+          const ENTRY='h2_estimation_entry_transition_v1';
+          function clone(v){return JSON.parse(JSON.stringify(v));}
+          function internalCandidate(c){return {base_speed_mm_s:c.base_speed_mm_s,angular_sigma_rad_sqrt_s:c.angular_sigma_rad_sqrt_s,q:c.q,lambda_activation_mm:c.lambda_activation_mm??500,tau_activation_s:c.tau_activation_s??5,rho_speed:c.rho_speed??0};}
+          function configured(c){const m=clone(base);m.movement.base_speed_mm_s=c.base_speed_mm_s;m.movement.angular_sigma_rad_sqrt_s=c.angular_sigma_rad_sqrt_s;m.locomotor_activation.initialization.history_distance_scale_mm=c.lambda_activation_mm;m.locomotor_activation.decay.activation_tau_s=c.tau_activation_s;m.locomotor_activation.effect.max_speed_gain_fraction=c.rho_speed;return m;}
+          function edge(ex,w,h){if(!ex)return'timeout';const d={left:Math.abs(ex.x),right:Math.abs(ex.x-w),top:Math.abs(ex.y),bottom:Math.abs(ex.y-h)};return Object.keys(d).sort((a,b)=>d[a]-d[b])[0];}
+          function one(c,seed,pl,exp){const model=configured(c),b=loadBundle(exp,{modelId:model.id});b.model=clone(model);b.observation.record_trajectories=false;const sim=new Simulation(b,seed),rr=new core.RNG(streamSeed(seed,ENTRY));if(rr.next()>c.q)sim.ants[0].heading=rr.next()*2*Math.PI-Math.PI;const sx=sim.ants[0].x,sy=sim.ants[0].y,s=sim.runUntilComplete(b.experiment.duration_s,FIXED_DT),r=s.observed_metrics.ants[0],a=sim.ants[0],ex=r.exit_coordinate_mm;return{path_length:pl,time_to_exit_s:r.time_to_arena_edge_s??b.experiment.duration_s,middle_zone_fraction:r.central_zone_fraction??0,beeline_mm:ex?Math.hypot(ex.x-sx,ex.y-sy):0,exit_edge:edge(ex,sim.apparatus.world.width,sim.apparatus.world.height),A0:a.locomotorActivationInitial,A:a.locomotorActivation,completedAt:a.completedAt,distanceTravelled:a.distanceTravelled,heading:a.heading,speedFactor:a.speedFactor,biologyRngState:a.rng.state,modelHash:sim.layerHashes.model_hash,x:a.x,y:a.y,startX:sx,startY:sy};}
+          const selected=[0,27,20], offsets=[0,119], out=[];
+          for(const colony of selected){const f=report.folds.find(x=>x.held_out_colony===colony);for(const kind of ['H4_null','H4_context']){const c=internalCandidate(f[kind].fit.candidate);for(const off of offsets){const seed=f.evaluation_seed+off;out.push({colony,kind,source:f[kind].fit.source,seed,candidate:c,runs:[one(c,seed,'s','open_arena_short_control.json'),one(c,seed,'l','open_arena_long_control.json')]});}}}
+          fs.writeFileSync('/tmp/h4-node-result-parity.json',JSON.stringify({report_sha256:'05f76e18d6ecdff9f038f4244227ede7a73cc323ca9857ac1d6dbbff1dd2e310,cases:out},null,2));
+          NODE
+      - name: Run actual selected candidates in Chromium and compare to Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/h4-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/h4-chrome.log 2>&1 &
+          for i in {1..80}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then break; fi; sleep .2; done
+          curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json
+          cat > /tmp/h4-postresult-parity.mjs <<'NODE'
+          import fs from 'node:fs';
+          const expected=JSON.parse(fs.readFileSync('/tmp/h4-node-result-parity.json','utf8'));
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();const target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'browser eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});for(let i=0;i<80;i++){if(await evalv("document.readyState==='complete' && !!globalThis.AntLabIntegrity && !!globalThis.AntLabCore"))break;await sleep(100);}
+          const browser=await evalv(`(async()=>{const cases=${JSON.stringify(expected.cases.map(({colony,kind,source,seed,candidate})=>({colony,kind,source,seed,candidate})))};const clone=x=>JSON.parse(JSON.stringify(x));async function j(p){const r=await fetch(p);if(!r.ok)throw new Error(p+' '+r.status);return r.json();}const base=await j('./models/lasius_niger_locomotion_h4_v1.json');async function bundle(exp,model){const e=await j('./experiments/'+exp);e.model=model.id;const [apparatus,state,observation,scoring]=await Promise.all([j('./apparatus/'+e.apparatus+'.json'),j('./states/'+e.state+'.json'),j('./observations/'+e.observation+'.json'),j('./scoring/'+e.scoring+'.json')]);return{experiment:e,model:clone(model),apparatus,state,observation,scoring};}function configured(c){const m=clone(base);m.movement.base_speed_mm_s=c.base_speed_mm_s;m.movement.angular_sigma_rad_sqrt_s=c.angular_sigma_rad_sqrt_s;m.locomotor_activation.initialization.history_distance_scale_mm=c.lambda_activation_mm;m.locomotor_activation.decay.activation_tau_s=c.tau_activation_s;m.locomotor_activation.effect.max_speed_gain_fraction=c.rho_speed;return m;}function edge(ex,w,h){if(!ex)return'timeout';const d={left:Math.abs(ex.x),right:Math.abs(ex.x-w),top:Math.abs(ex.y),bottom:Math.abs(ex.y-h)};return Object.keys(d).sort((a,b)=>d[a]-d[b])[0];}async function one(c,seed,pl,exp){const model=configured(c),b=await bundle(exp,model);b.observation.record_trajectories=false;const sim=new AntLabIntegrity.Simulation(b,seed),rr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,'h2_estimation_entry_transition_v1'));if(rr.next()>c.q)sim.ants[0].heading=rr.next()*2*Math.PI-Math.PI;const sx=sim.ants[0].x,sy=sim.ants[0].y,s=sim.runUntilComplete(b.experiment.duration_s,AntLabIntegrity.FIXED_DT),r=s.observed_metrics.ants[0],a=sim.ants[0],ex=r.exit_coordinate_mm;return{path_length:pl,time_to_exit_s:r.time_to_arena_edge_s??b.experiment.duration_s,middle_zone_fraction:r.central_zone_fraction??0,beeline_mm:ex?Math.hypot(ex.x-sx,ex.y-sy):0,exit_edge:edge(ex,sim.apparatus.world.width,sim.apparatus.world.height),A0:a.locomotorActivationInitial,A:a.locomotorActivation,completedAt:a.completedAt,distanceTravelled:a.distanceTravelled,heading:a.heading,speedFactor:a.speedFactor,biologyRngState:a.rng.state,modelHash:sim.layerHashes.model_hash,x:a.x,y:a.y,startX:sx,startY:sy};}const out=[];for(const c of cases)out.push({...c,runs:[await one(c.candidate,c.seed,'s','open_arena_short_control.json'),await one(c.candidate,c.seed,'l','open_arena_long_control.json')]});return out;})()`);
+          function cmp(a,b,path='root'){if(typeof a==='number'||typeof b==='number'){if(a==null||b==null){if(a!==b)throw new Error(path+': '+a+' != '+b);return;}const scale=Math.max(1,Math.abs(a),Math.abs(b));if(Math.abs(a-b)>2e-11*scale)throw new Error(path+`: ${a} != ${b}`);return;}if(Array.isArray(a)){if(!Array.isArray(b)||a.length!==b.length)throw new Error(path+' array mismatch');a.forEach((v,i)=>cmp(v,b[i],path+'['+i+']'));return;}if(a&&typeof a==='object'){for(const k of Object.keys(a))cmp(a[k],b?.[k],path+'.'+k);return;}if(a!==b)throw new Error(path+`: ${a} != ${b}`);}
+          cmp(expected.cases,browser,'cases');
+          for(const off of [0,119]){const n=browser.find(x=>x.colony===20&&x.kind==='H4_null'&&x.seed===1520000+off);const a=browser.find(x=>x.colony===20&&x.kind==='H4_context'&&x.seed===1520000+off);cmp(n.runs,a.runs,`null_anchor_exact_seed_${1520000+off}`);}
+          if(exceptions.length)throw new Error('Browser exceptions '+JSON.stringify(exceptions));if(consoleErrors.length)throw new Error('Browser console errors '+JSON.stringify(consoleErrors));const yreq=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(yreq.length)throw new Error('Y-maze network access '+JSON.stringify(yreq));
+          const report={status:'passed',node_browser_cases:browser.length,simulations_compared:browser.length*2,selected_folds:[0,27,20],evaluation_seed_offsets:[0,119],null_anchor_exact_equivalence:true,exceptions:0,console_errors:0,ymaze_requests:0,report_sha256:expected.report_sha256};fs.writeFileSync('/tmp/h4-postresult-chromium-parity.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          NODE
+          node /tmp/h4-postresult-parity.mjs
+      - name: Upload post-result verification artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: h4-postresult-audit
+          path: |
+            /tmp/h4-postresult-independent-audit.json
+            /tmp/h4-node-result-parity.json
+            /tmp/h4-postresult-chromium-parity.json
+            /tmp/chrome-version.json
+            /tmp/h4-chrome.log
+            /tmp/h4-http.log
+          retention-days: 14
