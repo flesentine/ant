@@ -1,0 +1,63 @@
+name: H4 frozen 500x60 LOCO
+on:
+  push:
+    branches: [h4-transient-locomotor-activation-v1]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  highres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout exact audited scientific head
+        uses: actions/checkout@v4
+        with:
+          ref: cb63d00e030b87016890f169f2852699ee6f8d6b
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen inputs and full suite
+        run: |
+          test "$(git rev-parse HEAD)" = "cb63d00e030b87016890f169f2852699ee6f8d6b"
+          test "$(git hash-object hypotheses/h4_parameter_estimation_v1.json)" = "a889007f988628a8e61139f4349c23714cc1dd68"
+          test "$(git hash-object tools/run-h4-estimation.js)" = "d417c62a4ef4f97c338a1da2f1ff10f49e18c175"
+          ./tests/run-tests.sh
+      - name: Run frozen H4 high-resolution LOCO search
+        shell: bash
+        run: |
+          mkdir -p /tmp/h4-highres
+          set -o pipefail
+          /usr/bin/time -v node tools/run-h4-estimation.js \
+            --mode highres \
+            --out /tmp/h4-highres/h4_parameter_estimation_500x60_v1.json \
+            > /tmp/h4-highres/h4-highres.log 2> /tmp/h4-highres/time.log
+      - name: Verify and summarize result
+        run: |
+          python3 - <<'PY'
+          import json, hashlib, pathlib
+          p=pathlib.Path('/tmp/h4-highres/h4_parameter_estimation_500x60_v1.json')
+          r=json.loads(p.read_text())
+          assert r['scientific_evidence'] is True
+          assert r['policy_git_blob_sha']=='a889007f988628a8e61139f4349c23714cc1dd68'
+          assert r['execution']['repo_commit']=='cb63d00e030b87016890f169f2852699ee6f8d6b'
+          assert r['search']['candidate_count_per_model_per_fold']==500
+          assert r['search']['training_trials_per_condition_per_candidate']==60
+          assert r['search']['heldout_evaluation_trials_per_condition']==120
+          assert r['search']['folds']==6
+          assert r['search']['seed0']==990000
+          assert abs(r['search']['dt_s']-0.02)<1e-12
+          sha=hashlib.sha256(p.read_bytes()).hexdigest()
+          print('REPORT_SHA256='+sha)
+          print(json.dumps(r['loco_result']['internal_cv'], indent=2))
+          pathlib.Path('/tmp/h4-highres/report.sha256').write_text(sha+'  '+p.name+'\n')
+          pathlib.Path('/tmp/h4-highres/internal_cv.json').write_text(json.dumps(r['loco_result']['internal_cv'],indent=2)+'\n')
+          PY
+      - name: Upload frozen H4 high-resolution result
+        uses: actions/upload-artifact@v4
+        with:
+          name: h4-500x60-loco-result
+          path: /tmp/h4-highres
+          retention-days: 30
