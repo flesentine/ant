@@ -1,0 +1,17 @@
+name: H4 estimator implementation review
+on:
+  push:
+    branches: [h4-transient-locomotor-activation-v1]
+permissions:
+  contents: read
+jobs:
+  verify-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          echo "H4 deep audit execution trigger active"
+          git rev-parse HEAD
