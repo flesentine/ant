@@ -15,15 +15,20 @@ jobs:
       - name: Validate preconditions
         run: |
           set -euo pipefail
-          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "57016903a32069876bdf88157ba1c659fa637c5c"\n          test "$(git hash-object reports/h5_temporal_drive_choice_audit_v1.json)" = "0ec424889ee4c9745af30f70cca7c8b7152bb490"
+          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "57016903a32069876bdf88157ba1c659fa637c5c"
+          test "$(git hash-object reports/h5_temporal_drive_choice_audit_v1.json)" = "0ec424889ee4c9745af30f70cca7c8b7152bb490"
           test "$(git hash-object reports/h5_biological_origin_choice_audit_v1.json)" = "2378fa54ad4174141f213ed44be3c283706975de"
           test "$(git hash-object reference/poissonnier2026_open_arena_measurement_policy_v1.json)" = "fd2718cf9351b655340eacd868adc536301a83a4"
           node <<'NODE'
           const fs=require('fs');
           const d=JSON.parse(fs.readFileSync('hypotheses/h5_origin_referenced_search_v1.draft.json','utf8'));
-          const o=JSON.parse(fs.readFileSync('reports/h5_biological_origin_choice_audit_v1.json','utf8'));\n          const t=JSON.parse(fs.readFileSync('reports/h5_temporal_drive_choice_audit_v1.json','utf8'));
+          const o=JSON.parse(fs.readFileSync('reports/h5_biological_origin_choice_audit_v1.json','utf8'));
+          const t=JSON.parse(fs.readFileSync('reports/h5_temporal_drive_choice_audit_v1.json','utf8'));
           const p=JSON.parse(fs.readFileSync('reference/poissonnier2026_open_arena_measurement_policy_v1.json','utf8'));
-          if(d.firewall.mechanism_not_frozen!==true||d.firewall.parameter_search_allowed!==false) throw new Error('H5 freeze/search firewall mismatch');\n          if(d.temporal_drive_decision.selected_profile!=='constant_over_observed_arena_traversal') throw new Error('temporal profile not frozen constant');\n          if(d.firewall.H5_temporal_profile_frozen_constant!==true||d.firewall.H5_tau_search_parameter_forbidden!==true) throw new Error('temporal firewall mismatch');\n          if(t.decision.selected_temporal_profile!=='constant_over_observed_arena_traversal'||t.firewall.tau_search_parameter_forbidden_in_H5_v1!==true) throw new Error('temporal report mismatch');
+          if(d.firewall.mechanism_not_frozen!==true||d.firewall.parameter_search_allowed!==false) throw new Error('H5 freeze/search firewall mismatch');
+          if(d.temporal_drive_decision.selected_profile!=='constant_over_observed_arena_traversal') throw new Error('temporal profile not frozen constant');
+          if(d.firewall.H5_temporal_profile_frozen_constant!==true||d.firewall.H5_tau_search_parameter_forbidden!==true) throw new Error('temporal firewall mismatch');
+          if(t.decision.selected_temporal_profile!=='constant_over_observed_arena_traversal'||t.firewall.tau_search_parameter_forbidden_in_H5_v1!==true) throw new Error('temporal report mismatch');
           if(d.biological_origin_decision.selected_origin!=='central_physical_entry_reference') throw new Error('origin not central physical entry');
           if(o.firewall.H5_runtime_implemented!==false||o.firewall.H5_parameter_search_allowed!==false) throw new Error('origin report runtime/search mismatch');
           if(p.simulation_application.time_origin.indexOf('first-track position')<0) throw new Error('measurement time origin changed');
