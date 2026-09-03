@@ -5,7 +5,7 @@ on:
 permissions:
   contents: read
 jobs:
-  shadow:
+  measurement_geometry:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,39 +17,87 @@ jobs:
           set -euo pipefail
           test "$(git hash-object src/h3.js)" = "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1"
           if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm' src models experiments states apparatus scoring observations; then exit 1; fi
-      - name: Start Chromium
+      - name: Fetch pinned final-record supplement
         run: |
-          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
-          for i in {1..80}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then break; fi; sleep .2; done
-          curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json
-      - name: Run shadow-mode event sensitivity in Chromium
+          mkdir -p /tmp/h5-source
+          ./tools/fetch-poissonnier2026-reference.sh /tmp/h5-source >/tmp/fetch-reference.log
+          test "$(sha256sum /tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx | awk '{print $1}')" = "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318"
+      - name: Audit coordinate and Beeline definitions without model fitting
         run: |
-          cat >/tmp/shadow.mjs <<'NODE'
-          import fs from 'node:fs';
-          const sleep=ms=>new Promise(r=>setTimeout(r,ms));const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();const target=tabs.find(t=>t.type==='page')||tabs[0];const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!AntLabCore&&!!AntLabH3&&!!AntLabIntegrity"))break;await sleep(100);}
-          const report=await evalv(`(async()=>{
-            const clone=x=>JSON.parse(JSON.stringify(x));const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();};const drive=(L,l)=>Math.exp(-L/l),radial=(r,s)=>r/(r+s),weight=(L,r,c)=>c.rho*drive(L,c.lambda)*radial(r,c.scale);
-            const model=await j('./models/lasius_niger_locomotion_h3_v1.json');model.reorientation_gate.effect.max_hazard_reduction_fraction=0;const exp=await j('./experiments/open_arena_short_control.json'),apparatus=await j('./apparatus/poissonnier2026_open_arena.json'),state=await j('./states/naive_outbound_v1.json'),obs=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');exp.model=model.id;
-            const configs={gentle:{lambda:1000,scale:100,rho:.5},middle:{lambda:500,scale:50,rho:.75},strong:{lambda:250,scale:25,rho:.9}};
-            const runs=[];let allR=[];
-            for(let seed=1001;seed<=1100;seed++){
-              const b={experiment:clone(exp),model:clone(model),apparatus:clone(apparatus),state:clone(state),observation:clone(obs),scoring:clone(scoring)};const sim=new AntLabIntegrity.Simulation(b,seed);const origin={x:sim.ants[0].x,y:sim.ants[0].y};sim.runUntilComplete(exp.duration_s,AntLabIntegrity.FIXED_DT);const events=sim.events.filter(e=>e.type==='h3_reorientation');const radii=events.map(e=>Math.hypot(e.x-origin.x,e.y-origin.y));allR.push(...radii);const cfgOut={};for(const [name,c] of Object.entries(configs)){const sw=radii.map(r=>weight(200,r,c)),lw=radii.map(r=>weight(1000,r,c));cfgOut[name]={expected_search_turns_short:sw.reduce((a,b)=>a+b,0),expected_search_turns_long:lw.reduce((a,b)=>a+b,0),max_w_short:sw.length?Math.max(...sw):0,max_w_long:lw.length?Math.max(...lw):0,mean_w_short:sw.length?sw.reduce((a,b)=>a+b,0)/sw.length:0,mean_w_long:lw.length?lw.reduce((a,b)=>a+b,0)/lw.length:0};}runs.push({seed,event_count:events.length,exit_time:sim.ants[0].completedAt,radii,cfg:cfgOut});
-            }
-            const quant=(xs,q)=>{if(!xs.length)return null;const a=[...xs].sort((x,y)=>x-y),p=(a.length-1)*q,i=Math.floor(p),f=p-i;return a[i]*(1-f)+(a[Math.min(i+1,a.length-1)])*f;};
-            const summary={n_runs:runs.length,total_events:allR.length,zero_event_runs:runs.filter(r=>r.event_count===0).length,event_radius_mm:{min:Math.min(...allR),q10:quant(allR,.1),median:quant(allR,.5),q90:quant(allR,.9),max:Math.max(...allR)}};
-            summary.configs={};for(const name of Object.keys(configs)){const es=runs.map(r=>r.cfg[name].expected_search_turns_short),el=runs.map(r=>r.cfg[name].expected_search_turns_long),ms=runs.flatMap(r=>r.radii.map((_,i)=>r.cfg[name].mean_w_short)).filter(Number.isFinite), ratio=Math.exp(800/configs[name].lambda);summary.configs[name]={params:configs[name],theoretical_short_long_weight_ratio:ratio,expected_search_turns_short:{median:quant(es,.5),q10:quant(es,.1),q90:quant(es,.9)},expected_search_turns_long:{median:quant(el,.5),q10:quant(el,.1),q90:quant(el,.9)},max_observed_w_short:Math.max(...runs.map(r=>r.cfg[name].max_w_short)),max_observed_w_long:Math.max(...runs.map(r=>r.cfg[name].max_w_long))};}
-            const actualCenter={x:148.5,y:105};const originOffsets=runs.map(()=>0);summary.identifiability={only_two_history_levels_mm:[200,1000],lambda_controls_weight_ratio_as_exp_800_over_lambda:true,radial_scale_compared_to_event_radius:summary.event_radius_mm,entry_origin_equals_arena_center_in_reference_assay:true};
-            return {status:'passed',summary,sample_runs:runs.slice(0,5)};
-          })()`);const y=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(exceptions.length||consoleErrors.length||y.length)throw new Error('browser firewall failure');report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/h5-shadow-stress.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
-          NODE
-          node /tmp/shadow.mjs
+          python3 - <<'PY'
+          import json, math, re, importlib.util, pathlib
+          root=pathlib.Path('.').resolve()
+          spec=importlib.util.spec_from_file_location('r',root/'tools/reconstruct-poissonnier2026.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          xlsx='/tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx'
+          ss=m.sheets(xlsx); raw=ss['Exp 1']; headers=raw[0]; rows=m.records(raw)
+          interesting=[h for h in headers if re.search(r'(x|y|first|last|arena|bee|start|end|border|frame)',h,re.I)]
+          controls=[r for r in rows if r.get('Pheromone')=='n']
+          def num(r,k):
+              try:return float(r[k])
+              except:return None
+          def stats(xs):
+              xs=sorted(x for x in xs if x is not None and math.isfinite(x))
+              if not xs:return None
+              q=lambda p: xs[round((len(xs)-1)*p)]
+              return {'n':len(xs),'min':xs[0],'q10':q(.1),'median':q(.5),'q90':q(.9),'max':xs[-1]}
+          report={'status':'passed','headers':headers,'interesting_headers':interesting,'control_rows':len(controls)}
+          numeric={}
+          for h in interesting:
+              s=stats([num(r,h) for r in controls]);
+              if s:numeric[h]=s
+          report['numeric_ranges']=numeric
+          # Try all plausible first/start XY pairs and compare their Euclidean endpoint distance to published Beeline.
+          candidates=[]
+          lower={h.lower():h for h in headers}
+          pairs=[]
+          for xname in headers:
+              lx=xname.lower()
+              if not lx.startswith('x'):continue
+              for yname in headers:
+                  ly=yname.lower()
+                  if not ly.startswith('y'):continue
+                  sx=re.sub(r'^x','',lx); sy=re.sub(r'^y','',ly)
+                  if sx==sy and any(t in lx for t in ['first','start','initial']):pairs.append((xname,yname))
+          last_pairs=[]
+          for xname in headers:
+              lx=xname.lower()
+              if not lx.startswith('x'):continue
+              for yname in headers:
+                  ly=yname.lower();sx=re.sub(r'^x','',lx);sy=re.sub(r'^y','',ly)
+                  if sy==sx and any(t in lx for t in ['last','end','final']):last_pairs.append((xname,yname))
+          for xp,yp in pairs:
+              for xl,yl in last_pairs:
+                  errs=[]; offsets=[]
+                  for r in controls:
+                      vals=[num(r,k) for k in [xp,yp,xl,yl,'Beeline','Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena']]
+                      if any(v is None for v in vals):continue
+                      x0,y0,x1,y1,b,xmn,xmx,ymn,ymx=vals
+                      errs.append(abs(math.hypot(x1-x0,y1-y0)-b))
+                      offsets.append(math.hypot(x0-(xmn+xmx)/2,y0-(ymn+ymx)/2))
+                  if errs:candidates.append({'start':[xp,yp],'end':[xl,yl],'n':len(errs),'beeline_max_abs_error':max(errs),'beeline_mean_abs_error':sum(errs)/len(errs),'start_offset_from_arena_midpoint_mm':stats(offsets)})
+          report['coordinate_pair_tests']=sorted(candidates,key=lambda z:z['beeline_max_abs_error'])[:10]
+          # Center-to-final distance sanity using per-row arena bounds.
+          center_err=[]; center_to_final=[]; beelines=[]; impossible=[]
+          if all(k in headers for k in ['Xlast','Ylast','Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena','Beeline']):
+              for r in controls:
+                  vals=[num(r,k) for k in ['Xlast','Ylast','Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena','Beeline']]
+                  if any(v is None for v in vals):continue
+                  xl,yl,xmn,xmx,ymn,ymx,b=vals;cx=(xmn+xmx)/2;cy=(ymn+ymx)/2;d=math.hypot(xl-cx,yl-cy)
+                  center_to_final.append(d);beelines.append(b);center_err.append(abs(d-b))
+                  mincenter=min((xmx-xmn)/2,(ymx-ymn)/2)
+                  if b+1e-9<mincenter: impossible.append({'ant_id':r.get('ant_ID'),'beeline':b,'minimum_center_to_border':mincenter,'center_to_final':d})
+          report['center_to_final_mm']=stats(center_to_final);report['beeline_mm']=stats(beelines);report['center_beeline_abs_error_mm']=stats(center_err);report['beeline_below_center_to_nearest_border_count']=len(impossible);report['examples_beeline_below_center_border']=impossible[:12]
+          # Bounds variability and implied center/border distances.
+          for key in ['Xmin_Arena','Xmax_Arena','Ymin_Arena','Ymax_Arena']:
+              if key in headers: report.setdefault('arena_bounds',{})[key]=stats([num(r,key) for r in controls])
+          pathlib.Path('/tmp/h5-measurement-geometry.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,indent=2))
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: h5-shadow-stress
+          name: h5-measurement-geometry-audit
           path: |
-            /tmp/h5-shadow-stress.json
-            /tmp/chrome-version.json
-            /tmp/chrome.log
+            /tmp/h5-measurement-geometry.json
+            /tmp/fetch-reference.log
+            /tmp/h5-source/SHA256SUMS
           retention-days: 14
