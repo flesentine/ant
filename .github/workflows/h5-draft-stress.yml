@@ -1,60 +1,43 @@
-name: H5 draft stress test
+name: H5 draft final validation
 on:
   push:
     branches: [h5-origin-referenced-search-v1]
 permissions:
   contents: read
 jobs:
-  geometry_sensitivity:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Confirm no H5 runtime implementation
+      - name: Parse and validate final draft records
+        shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/h3.js)" = "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1"
-          if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm' src models experiments states apparatus scoring observations; then exit 1; fi
-      - name: Start Chromium
-        run: |
-          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
-          for i in {1..80}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then break; fi; sleep .2; done
-          curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json
-      - name: Run H3-null geometry matrix in Chromium
-        run: |
-          cat >/tmp/geometry.mjs <<'NODE'
-          import fs from 'node:fs';
-          const sleep=ms=>new Promise(r=>setTimeout(r,ms));const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();const target=tabs.find(t=>t.type==='page')||tabs[0];const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!AntLabCore&&!!AntLabH3&&!!AntLabIntegrity"))break;await sleep(100);}
-          const report=await evalv(`(async()=>{
-            const clone=x=>JSON.parse(JSON.stringify(x));const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();};
-            const model=await j('./models/lasius_niger_locomotion_h3_v1.json');model.reorientation_gate.effect.max_hazard_reduction_fraction=0;const exp=await j('./experiments/open_arena_short_control.json'),baseApp=await j('./apparatus/poissonnier2026_open_arena.json'),state=await j('./states/naive_outbound_v1.json'),baseObs=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');exp.model=model.id;
-            const scenarios={
-              nominal:{w:297,h:210,dx:0,dy:0},
-              nominal_measured_mean_start:{w:297,h:210,dx:-4.133,dy:2.405},
-              nominal_90pct_start_offset:{w:297,h:210,dx:-8.0,dy:4.0},
-              nominal_extreme_start_offset:{w:297,h:210,dx:-19.3,dy:8.0},
-              effective_bounds:{w:289.11,h:202.42,dx:0,dy:0},
-              effective_bounds_measured_mean_start:{w:289.11,h:202.42,dx:-4.133,dy:2.405}
-            };
-            const edge=(x,y,w,h)=>{const d={left:Math.abs(x),right:Math.abs(x-w),top:Math.abs(y),bottom:Math.abs(y-h)};return Object.keys(d).sort((a,b)=>d[a]-d[b])[0];};
-            const run=(cfg,seed)=>{const app=clone(baseApp),obs=clone(baseObs);app.world.width=cfg.w;app.world.height=cfg.h;app.geometry.primitives[0].width=cfg.w;app.geometry.primitives[0].height=cfg.h;for(const k of ['default','center']){app.entry_points[k].x=cfg.w/2+cfg.dx;app.entry_points[k].y=cfg.h/2+cfg.dy;}obs.metric_definitions.central_zone_fraction.center_y_mm=cfg.h/2;const b={experiment:clone(exp),model:clone(model),apparatus:app,state:clone(state),observation:obs,scoring:clone(scoring)};const sim=new AntLabIntegrity.Simulation(b,seed);const sx=sim.ants[0].x,sy=sim.ants[0].y;const s=sim.runUntilComplete(exp.duration_s,AntLabIntegrity.FIXED_DT),r=s.observed_metrics.ants[0],a=sim.ants[0],ex=r.exit_coordinate_mm;return{time:r.time_to_arena_edge_s??exp.duration_s,zone:r.central_zone_fraction??0,beeline:ex?Math.hypot(ex.x-sx,ex.y-sy):0,edge:ex?edge(ex.x,ex.y,cfg.w,cfg.h):'timeout',sx,sy,exitX:ex?.x??null,exitY:ex?.y??null,biologyRng:a.rng.state,eventRng:a.h3EventRng.state,angleRng:a.h3AngleRng.state};};
-            const raw={};for(const [name,cfg] of Object.entries(scenarios)){raw[name]=[];for(let seed=7001;seed<=7500;seed++)raw[name].push(run(cfg,seed));}
-            const mean=(xs)=>xs.reduce((a,b)=>a+b,0)/xs.length;const summarize=arr=>{const edges={left:0,right:0,top:0,bottom:0,timeout:0};for(const r of arr)edges[r.edge]++;return{n:arr.length,time:mean(arr.map(x=>x.time)),zone:mean(arr.map(x=>x.zone)),beeline:mean(arr.map(x=>x.beeline)),edges:Object.fromEntries(Object.entries(edges).map(([k,v])=>[k,v/arr.length])),start:{x:mean(arr.map(x=>x.sx)),y:mean(arr.map(x=>x.sy))}}};
-            const summaries={};for(const k of Object.keys(raw))summaries[k]=summarize(raw[k]);const nom=summaries.nominal,deltas={};for(const [k,s] of Object.entries(summaries)){deltas[k]={time:s.time-nom.time,zone:s.zone-nom.zone,beeline:s.beeline-nom.beeline,edge_L1:Object.keys(nom.edges).reduce((a,e)=>a+Math.abs(s.edges[e]-nom.edges[e]),0)};}
-            // Check same named RNG streams are preserved across pure geometry changes for the first seed; geometry may change stopping time, so compare initial stream states after init rather than terminal states.
-            return {status:'passed',scenarios,summaries,deltas,interpretation_firewall:'No H5 mechanism used; this is H3-null sensitivity to measurement geometry only.'};
-          })()`);const y=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(exceptions.length||consoleErrors.length||y.length)throw new Error('browser firewall failure');report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/h5-geometry-sensitivity.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('hypotheses/h5_origin_referenced_search_v1.draft.json','utf8'));
+          const a=JSON.parse(fs.readFileSync('reports/h5_draft_stress_audit_v1.json','utf8'));
+          if(d.schema_version!==2) throw new Error('Unexpected H5 draft schema');
+          if(d.status!=='draft_post_H4_failure_after_stress_audit_before_mechanism_freeze') throw new Error('Unexpected H5 draft status');
+          if(d.stress_audit!=='reports/h5_draft_stress_audit_v1.json') throw new Error('Stress audit link mismatch');
+          if(d.candidate_mechanism?.reorientation_effect?.type!=='mixture_of_circular_reorientation_distributions') throw new Error('Surviving circular formulation not recorded');
+          const rejected=new Set((d.rejected_pre_freeze_formulations||[]).map(x=>x.name));
+          if(!rejected.has('signed_error_mean_shift')||!rejected.has('circular_vector_mean_blend')) throw new Error('Rejected formulations missing');
+          if(d.firewall?.mechanism_not_frozen!==true||d.firewall?.implementation_allowed_before_freeze!==false||d.firewall?.parameter_search_allowed!==false||d.firewall?.measurement_reconstruction_must_precede_H5_estimator_policy!==true||d.firewall?.ymaze_access!==false) throw new Error('H5 firewall mismatch');
+          if(a.status!=='pre_freeze_design_audit_completed_no_H5_runtime_implementation_or_parameter_search') throw new Error('Unexpected audit status');
+          if(a.scientific_status?.H5_mechanism_frozen!==false||a.scientific_status?.H5_runtime_implemented!==false||a.scientific_status?.H5_parameter_search_performed!==false||a.scientific_status?.ymaze_accessed!==false) throw new Error('Audit scientific status mismatch');
+          if(a.rejected_turn_formulations?.signed_error_mean_shift?.rejected!==true||a.rejected_turn_formulations?.circular_vector_mean_blend?.rejected!==true) throw new Error('Audit rejection mismatch');
+          if(a.preferred_turn_representation_for_further_draft_review?.type!=='mixture_of_circular_reorientation_distributions') throw new Error('Audit preferred formulation mismatch');
+          if(a.measurement_geometry_findings?.Xstart_Ystart_present!==true) throw new Error('Measurement finding missing');
+          console.log(JSON.stringify({status:'passed',draft_bytes:fs.statSync('hypotheses/h5_origin_referenced_search_v1.draft.json').size,audit_bytes:fs.statSync('reports/h5_draft_stress_audit_v1.json').size,draft_status:d.status,audit_status:a.status,mechanism_frozen:d.firewall.mechanism_not_frozen===false,runtime_implemented:a.scientific_status.H5_runtime_implemented,parameter_search:a.scientific_status.H5_parameter_search_performed,ymaze:a.scientific_status.ymaze_accessed},null,2));
           NODE
-          node /tmp/geometry.mjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: h5-geometry-sensitivity
-          path: |
-            /tmp/h5-geometry-sensitivity.json
-            /tmp/chrome-version.json
-            /tmp/chrome.log
-          retention-days: 14
+          if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm' src models experiments states apparatus scoring observations; then
+            echo 'H5 runtime implementation found before freeze' >&2
+            exit 1
+          fi
+          test "$(git hash-object src/h3.js)" = "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
