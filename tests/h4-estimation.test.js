@@ -6,6 +6,12 @@ const root=path.resolve(__dirname,'..');
 const pinned=h4.assertExactPolicyBlob(root),policy=pinned.policy;
 assert.strictEqual(pinned.sha,h4.POLICY_GIT_BLOB_SHA,'estimator must pin the exact frozen H4 policy Git blob');
 h4.assertPolicySemantics(policy);
+const runtimePins=h4.assertFrozenRuntimeBlobs(root),referencePins=h4.assertFrozenReferenceComparatorBlobs(root);
+assert.strictEqual(runtimePins['models/lasius_niger_locomotion_h4_v1.json'],'4f14e9f9b5eaab4cc89f28cbd033a8fd26a8f944');
+assert.strictEqual(referencePins['reports/h3_parameter_estimation_500x60_v1.json'],'1d5c1b88ca9b425e927d761bc3ff1e5bad5bd5f3');
+assert.throws(()=>h4.assertSafeReportOutput(root,path.join(root,'models','lasius_niger_locomotion_v1.json')),/reports\//);
+assert.throws(()=>h4.assertSafeReportOutput(root,path.join(root,'hypotheses','h4_parameter_estimation_v1.json')),/reports\//);
+assert.strictEqual(h4.assertSafeReportOutput(root,'/tmp/h4-safe-report.json'),'/tmp/h4-safe-report.json');
 
 // Deterministic Halton mapping and exact nuisance-coordinate pairing.
 for(const i of [0,10,498]){

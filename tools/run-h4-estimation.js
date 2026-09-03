@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const childProcess = require('child_process');
 const { Simulation, streamSeed, FIXED_DT } = require('../src/integrity.js');
 const core = require('../src/sim-core.js');
 const h2est = require('./run-h2-estimation.js');
@@ -25,6 +26,31 @@ const HALTON = Object.freeze([
   [11, 'tau_activation_s'],
   [13, 'rho_speed']
 ]);
+
+const FROZEN_RUNTIME_BLOBS = Object.freeze({
+  'src/integrity.js': 'f23c68a6955832b70eeb3bd3e6893d71a3759018',
+  'src/sim-core.js': '24777aac3577d442893e4779d70aee4e27761fe8',
+  'src/measurement.js': '8845726e02360655c605851662256bc729277b21',
+  'src/h3.js': '9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1',
+  'tools/load-bundle.js': '235067f10ed85eeeaebcfe6fef0963940d516b6b',
+  'tools/run-h2-estimation.js': '0fb069b3772c30f5769b4d1be285be7f67f3efe3',
+  'tools/run-h3-estimation.js': '9b27812fcb869489d4979e26e8085cb8d2bf6fc1',
+  'models/lasius_niger_locomotion_h4_v1.json': '4f14e9f9b5eaab4cc89f28cbd033a8fd26a8f944',
+  'experiments/open_arena_short_control.json': '2a75bcff9e88dc8617911886f8381315d5c05638',
+  'experiments/open_arena_long_control.json': 'f38632b4fad43f0282b85e345416a1c6f1593725',
+  'states/naive_outbound_v1.json': 'd3db29a83eed68bc28f771c147dd33966764d535',
+  'apparatus/poissonnier2026_open_arena.json': '1f6461ffa392656a7cf807413ad2120636d99ee9',
+  'observations/poissonnier2026_tracking_25fps.json': '8720b5ee34165d167a7ff7a5a363449ffabef2ad',
+  'scoring/open_arena_first_border_v1.json': '7e6ee59c223a9da1763d6b54ef3a2e3938c8bee0'
+});
+const FROZEN_REFERENCE_COMPARATOR_BLOBS = Object.freeze({
+  'reference/calibration_manifest.json': '29044577af38dced5cccb83c687117ee878fd66c',
+  'reference/poissonnier2026_source_manifest.json': '545c108f0da20cbebbe8e95c62e43fc5443d9f18',
+  'models/lasius_niger_locomotion_h2_v1.json': '3d12970e782b5fd1dc54727f4d8df044c11801db',
+  'models/lasius_niger_locomotion_h3_v1.json': 'fe33c31facfcabb7ddeb9a7bedf71ac248ad8e84',
+  'reports/h2_parameter_estimation_500x60_v1.json': '342f7a5af7c1ed71a8bdb7ff14becf38d24daa88',
+  'reports/h3_parameter_estimation_500x60_v1.json': '1d5c1b88ca9b425e927d761bc3ff1e5bad5bd5f3'
+});
 
 function clone(v) {
   return JSON.parse(JSON.stringify(v));
@@ -69,6 +95,60 @@ function assertExactPolicyBlob(root) {
     );
   }
   return { file, sha, policy: readJson(file) };
+}
+
+function assertBlobSet(root, blobs, label) {
+  const verified = {};
+  for (const [rel, expected] of Object.entries(blobs)) {
+    const file = path.resolve(root, rel);
+    const actual = gitBlobShaFile(file);
+    if (actual !== expected) {
+      throw new Error(`${label} blob mismatch for ${rel}: expected ${expected}, got ${actual}.`);
+    }
+    verified[rel] = actual;
+  }
+  return verified;
+}
+
+function assertFrozenRuntimeBlobs(root) {
+  return assertBlobSet(root, FROZEN_RUNTIME_BLOBS, 'Frozen H4 runtime input');
+}
+
+function assertFrozenReferenceComparatorBlobs(root) {
+  return assertBlobSet(root, FROZEN_REFERENCE_COMPARATOR_BLOBS, 'Frozen H4 reference/comparator input');
+}
+
+function currentRepoCommit(root) {
+  try {
+    return childProcess.execFileSync('git', ['rev-parse', 'HEAD'], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim();
+  } catch (_) {
+    return process.env.GITHUB_SHA || null;
+  }
+}
+
+function assertSafeReportOutput(root, out) {
+  const resolved = path.resolve(out);
+  if (path.extname(resolved).toLowerCase() !== '.json') {
+    throw new Error('H4 estimation output must be a JSON report.');
+  }
+  if (fs.existsSync(resolved) && fs.lstatSync(resolved).isSymbolicLink()) {
+    throw new Error('H4 estimation refuses to write through a symbolic-link output path.');
+  }
+  const rel = path.relative(root, resolved);
+  const insideRepo = rel === '' || (!rel.startsWith('..' + path.sep) && rel !== '..' && !path.isAbsolute(rel));
+  if (insideRepo) {
+    const reportsRoot = path.resolve(root, 'reports');
+    const reportRel = path.relative(reportsRoot, resolved);
+    const insideReports = reportRel !== '' && !reportRel.startsWith('..' + path.sep) && reportRel !== '..' && !path.isAbsolute(reportRel);
+    if (!insideReports) {
+      throw new Error('H4 estimation may write inside the repository only under reports/.');
+    }
+  }
+  return resolved;
 }
 
 function halton(index, base) {
@@ -517,6 +597,8 @@ function validateReferenceInputs({
 }
 
 function loadReferenceInputs(root, policy) {
+  const frozenRuntimeBlobs = assertFrozenRuntimeBlobs(root);
+  const frozenReferenceComparatorBlobs = assertFrozenReferenceComparatorBlobs(root);
   const targetPath = path.resolve(root, policy.reference_target_file);
   const target = readJson(targetPath);
   const cal = readJson(path.resolve(root, 'reference', 'calibration_manifest.json'));
@@ -547,6 +629,8 @@ function loadReferenceInputs(root, policy) {
     h2Report,
     h3Report,
     targetPath,
+    frozenRuntimeBlobs,
+    frozenReferenceComparatorBlobs,
     colonies: v.colonies
   };
 }
@@ -628,20 +712,26 @@ function runLoco({ policy, inputs, count, trials, evalTrials, seed0, evidence })
       heldout_metric_scales_from_training: scales,
       H4_null: {
         fit: ns.best,
-        heldout_loss: nEval.loss
+        training_top_candidates: ns.top,
+        heldout_loss: nEval.loss,
+        heldout_components: nEval.components
       },
       H4_context: {
         fit: cs.best,
+        training_top_candidates: cs.top,
         heldout_loss: cEval.loss,
+        heldout_components: cEval.components,
         null_anchor_train_loss: cs.anchor.loss
       },
       H2_v1_frozen_candidate: {
         candidate: h2c,
-        reevaluated_heldout_loss_matched_crn: h2Eval.loss
+        reevaluated_heldout_loss_matched_crn: h2Eval.loss,
+        heldout_components: h2Eval.components
       },
       H3_v1_frozen_candidate: {
         candidate: h3c,
-        reevaluated_heldout_loss_matched_crn: h3Eval.loss
+        reevaluated_heldout_loss_matched_crn: h3Eval.loss,
+        heldout_components: h3Eval.components
       },
       heldout_relative_improvement_vs_H4_null: vsNull,
       heldout_relative_improvement_vs_H2_v1: vsH2,
@@ -679,8 +769,24 @@ function runLoco({ policy, inputs, count, trials, evalTrials, seed0, evidence })
   const h2Pass = wins2 >= 4 && med2 > 0;
   const h3Pass = wins3 >= 4 && med3 > 0;
 
-  return {
+  const boundaryHitCounts = {};
+  const nullAnchorSelectedFolds = [];
+  for (const f of folds) {
+    const fit = f.H4_context.fit;
+    if (fit.source === 'exact_null_anchor') nullAnchorSelectedFolds.push(f.held_out_colony);
+    for (const key of fit.near_search_bounds || []) {
+      boundaryHitCounts[key] = (boundaryHitCounts[key] || 0) + 1;
+    }
+  }
+
+    return {
     folds,
+    identifiability: {
+      boundary_hit_counts_across_selected_H4_context_folds: boundaryHitCounts,
+      null_anchor_selected_folds: nullAnchorSelectedFolds,
+      top_training_candidates_retained_per_model_per_fold: 12,
+      ridge_assessment: 'Not automated because the frozen policy defines no numeric ridge tolerance; top training candidates and effective quantities are retained for post-selection identifiability review.'
+    },
     internal_cv: {
       H4_wins_vs_H4_null: winsN,
       total_folds: folds.length,
@@ -767,6 +873,7 @@ function deterministicBoundaryQualification() {
 
 function qualify({ root, policy, trials = 3 }) {
   assertPolicySemantics(policy);
+  const runtimeBlobs = assertFrozenRuntimeBlobs(root);
 
   const base = readJson(path.resolve(root, 'models', 'lasius_niger_locomotion_h4_v1.json'));
   const short = loadBundle('open_arena_short_control.json', { modelId: base.id });
@@ -823,10 +930,26 @@ function qualify({ root, policy, trials = 3 }) {
     );
   })();
 
-  checks.training_scale_api_is_audited_h3 =
+  checks.scorer_identity_is_audited_h3 =
     h3est.score === score &&
     h3est.scoreScales === scoreScales &&
     h3est.edgeProbs === edgeProbs;
+
+  const syntheticTrainForScale = [
+    { time_to_exit_s: 1, middle_zone_fraction: 0.1, beeline_mm: 10 },
+    { time_to_exit_s: 3, middle_zone_fraction: 0.3, beeline_mm: 30 },
+    { time_to_exit_s: 5, middle_zone_fraction: 0.5, beeline_mm: 50 }
+  ];
+  const syntheticHeldoutForScale = [
+    { time_to_exit_s: 10, middle_zone_fraction: 0.2, beeline_mm: 100 },
+    { time_to_exit_s: 30, middle_zone_fraction: 0.8, beeline_mm: 300 },
+    { time_to_exit_s: 50, middle_zone_fraction: 0.9, beeline_mm: 500 }
+  ];
+  const trainingScales = scoreScales(syntheticTrainForScale);
+  const heldoutScales = scoreScales(syntheticHeldoutForScale);
+  checks.training_fold_scaling_semantics =
+    !near(trainingScales.time, heldoutScales.time) &&
+    !near(trainingScales.beeline, heldoutScales.beeline);
 
   checks.colony_identity_not_model_input =
     !JSON.stringify(base).toLowerCase().includes('colony');
@@ -844,6 +967,7 @@ function qualify({ root, policy, trials = 3 }) {
     reference_outcomes_accessed: false,
     ymaze_accessed: false,
     scientific_evidence: false,
+    frozen_runtime_blobs_verified: runtimeBlobs,
     trials_per_condition: trials,
     checks,
     boundary_check: boundary
@@ -866,9 +990,11 @@ function highResolutionPreflight({ root, policy }) {
 }
 
 function writeReport(report, out) {
-  fs.writeFileSync(out, JSON.stringify(report, null, 2) + '\n');
+  const root = path.resolve(__dirname, '..');
+  const safeOut = assertSafeReportOutput(root, out);
+  fs.writeFileSync(safeOut, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
-  console.log(`Saved ${out}`);
+  console.log(`Saved ${safeOut}`);
 }
 
 function h2ReportSummary(r) {
@@ -905,7 +1031,7 @@ function main() {
     }
     return writeReport(
       q,
-      path.resolve(process.cwd(), arg('out', 'h4-estimator-qualification.json'))
+      path.resolve(process.cwd(), arg('out', path.join('reports', 'h4_estimator_qualification_v1.json')))
     );
   }
 
@@ -973,6 +1099,12 @@ function main() {
     entry_transition_rng_stream: ENTRY_STREAM,
     source_xlsx_sha256: inputs.target.source_xlsx_sha256,
     reference_target_git_blob_sha: gitBlobShaFile(inputs.targetPath),
+    execution: {
+      repo_commit: currentRepoCommit(root),
+      node_version: process.version,
+      frozen_runtime_blobs: inputs.frozenRuntimeBlobs,
+      frozen_reference_comparator_blobs: inputs.frozenReferenceComparatorBlobs
+    },
     search: {
       method: policy.search_protocol.method,
       H4_null_candidates_per_fold: count,
@@ -1010,7 +1142,7 @@ function main() {
     report,
     path.resolve(
       process.cwd(),
-      arg('out', evidence ? 'h4-estimation-500x60-v1.json' : 'h4-estimation-smoke.json')
+      arg('out', evidence ? path.join('reports', 'h4_parameter_estimation_500x60_v1.json') : path.join('reports', 'h4_estimation_smoke_v1.json'))
     )
   );
 }
@@ -1021,9 +1153,15 @@ module.exports = {
   POLICY_GIT_BLOB_SHA,
   ENTRY_STREAM,
   HALTON,
+  FROZEN_RUNTIME_BLOBS,
+  FROZEN_REFERENCE_COMPARATOR_BLOBS,
   gitBlobShaBuffer,
   gitBlobShaFile,
   assertExactPolicyBlob,
+  assertFrozenRuntimeBlobs,
+  assertFrozenReferenceComparatorBlobs,
+  assertSafeReportOutput,
+  currentRepoCommit,
   assertPolicySemantics,
   halton,
   mapVal,
