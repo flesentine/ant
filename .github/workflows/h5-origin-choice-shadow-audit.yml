@@ -9,6 +9,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validate frozen biological-origin decision
+        run: |
+          set -euo pipefail
+          python3 -m json.tool hypotheses/h5_origin_referenced_search_v1.draft.json >/dev/null
+          python3 -m json.tool reports/h5_biological_origin_choice_audit_v1.json >/dev/null
+          test "$(git hash-object reports/h5_biological_origin_choice_audit_v1.json)" = "2378fa54ad4174141f213ed44be3c283706975de"
+          node <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('hypotheses/h5_origin_referenced_search_v1.draft.json','utf8'));
+          const r=JSON.parse(fs.readFileSync('reports/h5_biological_origin_choice_audit_v1.json','utf8'));
+          if(d.biological_origin_decision.selected_origin!=='central_physical_entry_reference') throw new Error('origin not frozen to central physical entry');
+          if(d.biological_origin_decision.first_track_position_role.indexOf('not the H5 biological origin')<0) throw new Error('first-track role not separated');
+          if(d.firewall.H5_biological_origin_still_unfrozen!==false) throw new Error('origin still marked unfrozen');
+          if(d.firewall.H5_biological_origin_frozen_to_central_physical_entry_reference!==true) throw new Error('central-origin freeze flag missing');
+          if(d.firewall.parameter_search_allowed!==false) throw new Error('parameter search unexpectedly allowed');
+          if(d.firewall.mechanism_not_frozen!==true) throw new Error('full H5 mechanism should remain unfrozen');
+          if(d.firewall.ymaze_access!==false||r.firewall.ymaze_access!==false) throw new Error('Y-maze firewall failed');
+          if(r.decision.selected_origin!=='central_physical_entry_reference') throw new Error('report decision mismatch');
+          if(r.firewall.H5_runtime_implemented!==false||r.firewall.H5_parameter_search_allowed!==false) throw new Error('runtime/search state mismatch');
+          NODE
+          if grep -R -n -E 'biology_h5_search|rho_search|lambda_search_mm|r_search_mm' src models experiments states apparatus scoring observations; then
+            echo 'H5 runtime biology unexpectedly present' >&2
+            exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
