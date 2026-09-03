@@ -15,7 +15,8 @@ jobs:
       - name: Validate clean H5 preconditions
         run: |
           set -euo pipefail
-          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "57016903a32069876bdf88157ba1c659fa637c5c"
+          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "c5b8906197e86b567d6d56049718c9673ba8b1e2"
+          test "$(git hash-object reports/h5_effect_scope_choice_audit_v1.json)" = "d56f1ab242125773905b922e0686e0cceb22bb7e"
           test "$(git hash-object reports/h5_temporal_drive_choice_audit_v1.json)" = "0ec424889ee4c9745af30f70cca7c8b7152bb490"
           test "$(git hash-object reports/h5_biological_origin_choice_audit_v1.json)" = "2378fa54ad4174141f213ed44be3c283706975de"
           node <<'NODE'
@@ -25,6 +26,10 @@ jobs:
           if(d.biological_origin_decision.selected_origin!=='central_physical_entry_reference') throw new Error('origin mismatch');
           if(d.temporal_drive_decision.selected_profile!=='constant_over_observed_arena_traversal') throw new Error('temporal mismatch');
           if(d.firewall.ymaze_access!==false) throw new Error('Y-maze firewall mismatch');
+          if(d.effect_scope_decision.selected_scope!=='conditional_reorientation_direction_only') throw new Error('effect scope not frozen direction-only');
+          if(d.firewall.H5_effect_scope_frozen_direction_only!==true||d.firewall.H5_orientation_dependent_freepath_forbidden_in_v1!==true||d.firewall.H5_reorientation_hazard_effect_forbidden_in_v1!==true) throw new Error('effect-scope firewall mismatch');
+          const er=JSON.parse(fs.readFileSync('reports/h5_effect_scope_choice_audit_v1.json','utf8'));
+          if(er.decision.selected_effect_scope!=='conditional_reorientation_direction_only'||er.firewall.H5_orientation_dependent_freepath_forbidden_in_v1!==true) throw new Error('effect-scope report mismatch');
           NODE
           if grep -R -n -E 'biology_h5_search|rho_search|lambda_search_mm|r_search_mm|tau_search' src models experiments states apparatus scoring observations; then
             echo 'Persistent H5 runtime unexpectedly present' >&2
@@ -63,7 +68,10 @@ jobs:
           );
           s=s.replace(
             "ant.heading = core.normalizeAngle(ant.heading + angle);",
-            "const baselineHeading = core.normalizeAngle(ant.heading + angle);\n      ant.heading = baselineHeading;\n      let h5DiagSearchUsed = false;\n      if (sim.__h5diag) {\n        const choice = ant.h5DiagChoiceRng.next();\n        const searchAngle = sampleVonMises(ant.h5DiagAngleRng, cfg.kappa);\n        const dx = Number(sim.__h5diag.originX) - ant.x;\n        const dy = Number(sim.__h5diag.originY) - ant.y;\n        const r = Math.hypot(dx, dy);\n        const rs = Math.max(1e-12, Number(sim.__h5diag.rSearchMm) || 50);\n        const radial = r > 0 ? r / (r + rs) : 0;\n        const w = Math.max(0, Math.min(1, (Number(sim.__h5diag.directionW) || 0) * radial));\n        if (choice < w && r > 0) {\n          const bearing = Math.atan2(dy, dx);\n          ant.heading = core.normalizeAngle(bearing + searchAngle);\n          h5DiagSearchUsed = true;\n        }\n      }"
+            "const baselineHeading = core.normalizeAngle(ant.heading + angle);\n      ant.heading = baselineHeading;\n      let h5DiagSearchUsed = false;\n      if (sim.__h5diag) {\n        const choice = ant.h5DiagChoiceRng.next();\n        const searchAngle = sampleVonMises(ant.h5DiagAngleRng, cfg.kappa);\n        const dx = Number(sim.__h5diag.originX) - ant.x;\n        const dy = Number(sim.__h5diag.originY) - ant.y;\n        const r = Math.hypot(dx, dy);\n        const rs = Math.max(1e-12, Number(sim.__h5diag.rSearchMm) || 50);\n        const radial = r > 0 ? r / (r + rs) : 0;\n        const w = Math.max(0, Math.min(1, (Number(sim.__h5diag.directionW) || 0) * radial));\n        if (choice < w && r > 0) {
+          const bearing = Math.atan2(dy, dx);
+          ant.heading = core.normalizeAngle(bearing + searchAngle);
+          h5DiagSearchUsed = true;\n        }\n      }"
           );
           s=s.replace(
             "sim.events.push({ time: sim.time + elapsed, type: 'h3_reorientation', ant: ant.id, sequence: ant.h3TurnCount, angle_rad: angle, x: ant.x, y: ant.y });",
