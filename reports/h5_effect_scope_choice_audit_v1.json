@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "id": "H5_effect_scope_choice_audit_v1",
+  "status": "effect_scope_frozen_direction_only_before_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-03",
+  "scope": "H5 open-arena DCM-control effect primitive only",
+  "scientific_role": "mechanism-definition decision; not parameter fitting, ranking, or promotion evidence",
+  "decision": {
+    "selected_effect_scope": "conditional_reorientation_direction_only",
+    "rule": "H5-v1 may alter only the conditional post-reorientation direction distribution at ordinary H3-null reorientation event times.",
+    "event_timing_rule": "H5-v1 may not alter the baseline mean free path, reorientation hazard, event threshold process, or event timing.",
+    "baseline_mean_free_path_role": "A shared baseline mean_free_path_mm may remain a nuisance parameter of the H3-null locomotion substrate, but H5 biology may not make it depend on recent history, origin-relative heading, radial position, or treatment.",
+    "freepath_modulation_in_H5_v1": false,
+    "reopen_to_rescue_fit_forbidden": true
+  },
+  "external_evidence": {
+    "Bonavita_et_al_2026": {
+      "doi": "10.1371/journal.pone.0327957",
+      "finding": "In origin-referenced analyses of Lasius niger, both turning-angle distributions and mean free-path distributions depended on heading relative to the starting point; free paths were shorter when moving away from the start than when moving toward it.",
+      "importance": "This is genuine biological support for an orientation-dependent free-path mechanism class.",
+      "scope_limit": "Those data come from a different release/search experiment. The effect magnitude is not an independently validated H5 parameter for the Poissonnier assay.",
+      "decision_interpretation": "The free-path finding is deferred, not rejected as biology. It is excluded from H5-v1 because the current Poissonnier development targets cannot separately identify it from the direction-steering primitive."
+    }
+  },
+  "simulator_mapping": {
+    "H3_null_relation": "In the audited H3 continuous-time substrate, hazard = speed / mean_free_path_mm. Therefore an orientation-dependent free-path rule is mathematically an orientation-dependent reorientation-hazard rule.",
+    "consequence": "Adding free-path modulation would give H5 two coupled effect axes: conditional direction and event timing.",
+    "distinction_from_failed_H3": "This would not be identical to failed H3-v1 because the hazard would depend on origin-relative heading rather than only travel history, but it would reopen the event-timing mechanism axis that H5 was designed to keep separate."
+  },
+  "stress_audit": {
+    "workflow_run": 33816360839,
+    "head_sha": "64bf57ffc1142bb3d76903aa42ff984ca0fa1d7a",
+    "artifact_id": 9916668926,
+    "artifact_zip_sha256": "4705faa9dec02741395ade4840c012b169647ae7cbaa2a0107b9ff36f8b7a2c2",
+    "persistent_H5_runtime_used": false,
+    "parameter_fit_or_reference_outcome_ranking_used": false,
+    "ymaze_access": false,
+    "diagnostic_implementation": "A temporary working-tree-only H3 hook was installed inside the CI runner, exercised, then restored before artifact upload. git diff --exit-code and H3/RNG/firewall regressions proved the audited runtime was restored exactly.",
+    "fixed_heading_matrix": {
+      "simulations_per_variant": 600,
+      "diagnostic_r_search_mm": 50,
+      "direction_strengths": [
+        0.2,
+        0.4,
+        0.6
+      ],
+      "freepath_beta_strengths": [
+        0.1935,
+        0.387,
+        0.58
+      ],
+      "external_magnitude_diagnostic_toward_to_away_freepath_ratio": 2.168422619990648,
+      "effect_cosine_similarity_direction_vs_freepath": {
+        "low": 0.7698899165118699,
+        "mid": 0.8457809327454388,
+        "high": 0.840146204091172
+      },
+      "combined_vs_additive_sum_cosine": {
+        "low": 0.9784731410056332,
+        "mid": 0.9753047395999013,
+        "high": 0.9007383405970407
+      },
+      "mid_example": {
+        "baseline": {
+          "mean_time_to_exit_s": 8.333800000000002,
+          "mean_middle_zone_fraction": 0.367980045631458,
+          "mean_beeline_mm": 140.92160967728105
+        },
+        "direction_only": {
+          "mean_time_to_exit_s": 13.751933333333334,
+          "mean_middle_zone_fraction": 0.3298284563017366,
+          "mean_beeline_mm": 134.6466711753443
+        },
+        "freepath_only": {
+          "mean_time_to_exit_s": 9.22213333333334,
+          "mean_middle_zone_fraction": 0.31945650002808357,
+          "mean_beeline_mm": 137.94969822566406
+        },
+        "combined": {
+          "mean_time_to_exit_s": 18.586733333333342,
+          "mean_middle_zone_fraction": 0.2790526003681896,
+          "mean_beeline_mm": 129.9941655600745
+        }
+      }
+    },
+    "isotropic_heading_robustness": {
+      "simulations_per_variant": 600,
+      "entry_heading": "shared deterministic uniform [-pi,pi) per trial",
+      "direction_strength": 0.4,
+      "freepath_beta": 0.387,
+      "direction_vs_freepath_effect_cosine": 0.7432258124597957,
+      "combined_vs_additive_sum_cosine": 0.9952652136455491,
+      "baseline": {
+        "mean_time_to_exit_s": 7.751133333333329,
+        "mean_middle_zone_fraction": 0.1897535825335007,
+        "mean_beeline_mm": 133.21572930328176
+      },
+      "direction_only": {
+        "mean_time_to_exit_s": 12.48413333333334,
+        "mean_middle_zone_fraction": 0.19224266346516342,
+        "mean_beeline_mm": 131.20532268812778
+      },
+      "freepath_only": {
+        "mean_time_to_exit_s": 8.63286666666667,
+        "mean_middle_zone_fraction": 0.1907966130061198,
+        "mean_beeline_mm": 131.53480889186008
+      },
+      "combined": {
+        "mean_time_to_exit_s": 17.405600000000007,
+        "mean_middle_zone_fraction": 0.19587567953728532,
+        "mean_beeline_mm": 126.4497572223148
+      }
+    },
+    "chromium_mirror": {
+      "simulations_per_variant": 60,
+      "variants": [
+        "baseline",
+        "direction_only_mid",
+        "freepath_only_external_magnitude",
+        "combined_mid"
+      ],
+      "baseline": {
+        "mean_time_to_exit_s": 8.367333333333333,
+        "mean_middle_zone_fraction": 0.41732295499458394,
+        "mean_beeline_mm": 140.98892463084283
+      },
+      "direction_only": {
+        "mean_time_to_exit_s": 15.407333333333334,
+        "mean_middle_zone_fraction": 0.35053757202709035,
+        "mean_beeline_mm": 139.0869475710189
+      },
+      "freepath_only": {
+        "mean_time_to_exit_s": 9.217999999999998,
+        "mean_middle_zone_fraction": 0.35283695067202003,
+        "mean_beeline_mm": 137.81147090829893
+      },
+      "combined": {
+        "mean_time_to_exit_s": 20.08933333333333,
+        "mean_middle_zone_fraction": 0.2900564360427242,
+        "mean_beeline_mm": 132.92122767518362
+      },
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0
+    }
+  },
+  "identifiability_reasoning": {
+    "aggregate_target_limit": "The frozen development objective contains time_to_exit_s, middle_zone_fraction, beeline_mm, and exit_edge only. It contains no origin-conditioned segment-length or event-hazard observable.",
+    "stress_result": "Direction-only and free-path-only perturbations move the aggregate observables in substantially aligned directions over multiple strengths and under isotropic entry headings.",
+    "combined_result": "At low/mid engineering strengths the combined perturbation is almost collinear with the sum of the two individual perturbations, showing that a two-axis model can trade one primitive against the other while producing similar aggregate movement.",
+    "parameter_cost": "Allowing free-path modulation would require at least one additional effect magnitude or a separately frozen external law while also changing event timing.",
+    "claim_rule": "The current aggregate data cannot justify attributing a fitted H5 improvement separately to directional choice and free-path anisotropy."
+  },
+  "parsimony_and_falsifiability": {
+    "direction_only_reachability": "Engineering-only tests show that changing conditional direction alone has substantial reachability on exit timing and trajectory geometry, so free-path modulation is not required merely to make H5 capable of moving the development observables.",
+    "narrower_claim": "H5-v1 tests one new biological primitive: history-modulated origin-referenced directional choice at otherwise baseline reorientation events.",
+    "future_discriminator": "Orientation-dependent free-path modulation should be reconsidered only with raw/segmented trajectory evidence, a separately justified transferable external law, or a new hypothesis version whose evaluation can directly distinguish event timing from turn direction."
+  },
+  "deferred_mechanism": {
+    "name": "origin_orientation_dependent_free_path",
+    "status": "biologically_plausible_but_excluded_from_H5_v1",
+    "may_be_considered_in": [
+      "H5-v2",
+      "H6",
+      "separate raw-trajectory validation study"
+    ],
+    "must_not_be_added_after_H5_v1_fit_failure": true
+  },
+  "firewall": {
+    "H5_mechanism_fully_frozen": false,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_allowed": false,
+    "effect_scope_frozen_direction_only": true,
+    "H5_orientation_dependent_freepath_forbidden_in_v1": true,
+    "H5_reorientation_hazard_effect_forbidden_in_v1": true,
+    "effect_scope_may_not_be_reopened_to_rescue_fit": true,
+    "ymaze_access": false,
+    "canonical_model_unchanged": true
+  },
+  "next_step": "Resolve the radial-gate form and whether its scale is fixed, simplified away, or estimated."
+}
