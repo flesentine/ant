@@ -1,7 +1,7 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_post_measurement_reconstruction_qualified_before_mechanism_freeze",
+  "status": "draft_origin_frozen_remaining_mechanism_questions_open_before_full_mechanism_freeze",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
   "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
@@ -35,7 +35,7 @@
       "H4": {
         "wins_vs_own_null": 2,
         "folds": 6,
-        "median_relative_improvement_vs_own_null": 0.0,
+        "median_relative_improvement_vs_own_null": 0,
         "null_anchor_selected_heldout_colonies": [
           20,
           21
@@ -113,7 +113,7 @@
     "treatment-specific measured-entry distributions"
   ],
   "candidate_mechanism": {
-    "origin": "O must be selected at H5 mechanism freeze from geometry references permitted by the frozen measurement policy. The policy supplies both the central physical entry reference and the first tracked observation position, but H5 biology may not silently equate them. Whichever origin is frozen must be applied identically across treatments and may not depend on outcomes.",
+    "origin": "Frozen O = the central physical entry-hole/trail-crossing reference supplied by the measurement geometry row (entry_reference_x_mm, entry_reference_y_mm). The simulated ant still begins observation at first_track_x_mm/first_track_y_mm. First-track position is not the biological H5 origin and may not be substituted after seeing model performance.",
     "history_search_drive": "Provisional D(L) = exp(-L/lambda_search_mm), so shorter recent constrained travel gives larger search drive. Because only L=200 and L=1000 mm are observed in this assay, this functional form and raw lambda remain provisional and must not be treated as identified merely because a search selects a value.",
     "radial_gate": "Provisional R(r) = r/(r+r_search_mm), where r = ||x-O||. Stress tests show baseline reorientation events span radii over which this gate is active, but r_search_mm remains provisional and potentially confounded with rho_search and lambda_search_mm.",
     "mixture_weight": "Provisional w = rho_search * D(L) * R(r), constrained to [0,1].",
@@ -206,7 +206,6 @@
     "No Y-maze access for development fitting, ranking, stopping, or model selection."
   ],
   "pre_freeze_questions": [
-    "Which frozen measurement reference should define the biological H5 origin O: the central physical entry-hole/trail-crossing reference or the first tracked observation position? The current measurement policy deliberately does not decide this biological question.",
     "Should search drive D remain constant during the short arena traversal, or decay with time after entry? Current draft preference remains constant because H2-H4 already tested unvalidated exponential temporal decay assumptions.",
     "Should H5-v1 alter only the conditional reorientation-direction mixture, or also orientation-dependent free-path length as reported in the external Lasius representation? Current draft preference is direction only for parsimony until contradicted by reachability testing.",
     "Should the radial gate be retained, simplified, or fixed from an independently justified rule? The external paper does not supply a directly transferable r_search_mm.",
@@ -222,10 +221,29 @@
     "canonical_model_unchanged": true,
     "ymaze_access": false,
     "measurement_reconstruction_policy_frozen_and_qualified": true,
-    "H5_biological_origin_still_unfrozen": true
+    "H5_biological_origin_still_unfrozen": false,
+    "H5_biological_origin_frozen_to_central_physical_entry_reference": true,
+    "H5_biological_origin_may_not_be_reopened_to_rescue_fit": true
   },
   "allowed_shared_measurement_or_geometry_inputs_under_frozen_policy": [
-    "trial_origin_or_first_tracked_position_mm",
+    "central_physical_entry_reference_mm (frozen H5 biological origin)",
+    "first_tracked_position_mm (observation initialization and Beeline start only; not H5 biological origin)",
     "trial_or_shared_empirical_arena_bounds"
-  ]
+  ],
+  "biological_origin_decision": {
+    "status": "frozen_before_H5_runtime_implementation_or_parameter_search",
+    "selected_origin": "central_physical_entry_reference",
+    "geometry_fields": [
+      "entry_reference_x_mm",
+      "entry_reference_y_mm"
+    ],
+    "decision_report": "reports/h5_biological_origin_choice_audit_v1.json",
+    "decision_report_git_blob_sha": "2378fa54ad4174141f213ed44be3c283706975de",
+    "protocol_reason": "The ant physically emerges through the central hole onto the arena. The first tracked coordinate is a later observation coordinate and remains the measurement/Beeline start only.",
+    "representation_reason": "Origin-referenced search should be tied to the physical trial start, not to an observer-dependent first-detected frame.",
+    "first_track_position_role": "observation initialization and published-style Beeline start only; forbidden as the H5 biological origin",
+    "treatment_specific_origin_forbidden": true,
+    "outcome_dependent_origin_forbidden": true,
+    "caveat": "The observed simulation starts at the first tracked position, already displaced from the central origin. The short unobserved center-hole-to-first-track segment is not replayed. If a later H5 formulation introduces temporal decay, biological time zero and any unobserved delay must be resolved before freezing that decay law."
+  }
 }
