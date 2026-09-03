@@ -82,6 +82,7 @@
     "observation_fps",
     "observation/tracking model"
   ],
+  "fixed_parameter_rule": "Every model, protocol, state, apparatus, scoring, and observation parameter not explicitly listed under estimated_parameters remains fixed at its frozen H4-v1 value or assay definition. The estimator may not silently introduce additional nuisance parameters.",
   "treatment_sharing_rules": [
     "No treatment-specific baseline speed.",
     "No treatment-specific angular diffusion.",
@@ -175,6 +176,7 @@
       "H4_null": "Estimate base_speed_mm_s, angular_sigma_rad_sqrt_s, and q with rho_speed fixed exactly to 0.",
       "H4_context": "Estimate base_speed_mm_s, angular_sigma_rad_sqrt_s, q, lambda_activation_mm, tau_activation_s, and rho_speed."
     },
+    "null_inert_parameter_rule": "lambda_activation_mm and tau_activation_s have no inferential meaning under H4-null because rho_speed=0 makes the activation multiplier identically 1; they may not be reported as null estimates.",
     "comparison": "Fit both models independently on the same five colonies and score on the sixth with a separate evaluation seed stream and frozen training-derived metric scales.",
     "matched_H4_evaluation_rule": "Within each held-out fold, selected H4-null and H4-context candidates must be evaluated on identical held-out reference rows using identical evaluation trial counts, identical named-stream seeds including the shared entry-transition stream, and the same training-derived metric scales.",
     "primary_promotion_guard": "H4-context must improve held-out loss over H4-null in at least 5 of 6 folds and have strictly positive median relative held-out improvement.",
@@ -300,10 +302,11 @@
     "Do not change objective weights.",
     "Do not change the required number of winning folds.",
     "Do not rerun with favorable seeds.",
+    "Do not average fold-specific H4 parameters or use a pooled refit to rescue a failed LOCO guard.",
     "Do not tune the same H4-v1 mechanism harder using the observed failure.",
     "A subsequent hypothesis must be substantively different or justified by genuinely new evidence."
   ],
   "implementation_error_rule": "If a genuine implementation error is found, declare the affected execution invalid, document and regression-test the defect, and rerun the entire frozen high-resolution procedure unchanged. A poor scientific result is not an implementation error.",
-  "holdout_rule": "The Y-maze remains completely inaccessible to fitting, candidate ranking, stopping rules, search refinement, and model selection.",
-  "canonical_model_rule": "H4 estimation tools may write reports only. Even if all internal guards pass, H4 becomes at most a development-preferred candidate; no canonical ant model file may be modified automatically."
+  "holdout_rule": "The Y-maze may not be loaded, queried, simulated against reference outcomes, used for fitting, candidate ranking, stopping rules, search refinement, model selection, or choosing among H4 variants.",
+  "canonical_model_rule": "H4 estimation tools may write reports only. Even if all internal guards pass, H4 becomes at most a development-preferred candidate. Any canonical promotion requires a separate explicit scientific decision; no canonical ant model file may be modified automatically."
 }
