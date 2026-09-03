@@ -1,0 +1,40 @@
+name: H5 measurement reconstruction audit
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: read
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned final-record supplement
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/h5-source
+          ./tools/fetch-poissonnier2026-reference.sh /tmp/h5-source >/tmp/fetch-reference.log
+          test "$(sha256sum /tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx | awk '{print $1}')" = "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318"
+      - name: Derive and validate geometry-only reference
+        run: |
+          set -euo pipefail
+          python3 tools/derive-poissonnier2026-measurement-geometry.py /tmp/h5-source/40_2026_1106_MOESM2_ESM.xlsx /tmp/geometry.json >/tmp/geometry.stdout
+          python3 -m json.tool /tmp/geometry.json >/dev/null
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/geometry.json'))
+          assert d['summary']['rows']==51
+          assert len(d['summary']['colonies'])==6
+          assert all(r['arena_width_mm']>0 and r['arena_height_mm']>0 for r in d['rows'])
+          assert all(0<=r['first_track_x_mm']<=r['arena_width_mm'] for r in d['rows'])
+          assert all(0<=r['first_track_y_mm']<=r['arena_height_mm'] for r in d['rows'])
+          print(json.dumps(d['summary'],indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h5-measurement-reconstruction-audit
+          path: |
+            /tmp/geometry.json
+            /tmp/geometry.stdout
+            /tmp/fetch-reference.log
+          retention-days: 14
