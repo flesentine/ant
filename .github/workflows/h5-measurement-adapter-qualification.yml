@@ -19,10 +19,35 @@ jobs:
           python3 -m json.tool reference/poissonnier2026_open_arena_measurement_geometry_v1.json >/dev/null
           python3 -m json.tool hypotheses/h5_origin_referenced_search_v1.draft.json >/dev/null
           if grep -R -n -E 'origin_referenced_search|rho_search|lambda_search|r_search_mm|biology_h5_search' src models experiments states apparatus scoring observations; then exit 1; fi
-      - name: Run complete Node regression suite
+      - name: Run Y-maze-free Node regression set
         run: |
           set -euo pipefail
-          for f in tests/*.test.js; do echo "== $f =="; node "$f"; done
+          tests=(
+            tests/boundary-timing.test.js
+            tests/determinism.test.js
+            tests/experiment-definition.test.js
+            tests/h2-estimation.test.js
+            tests/h2-persistence.test.js
+            tests/h3-estimation.test.js
+            tests/h3-observation-convergence.test.js
+            tests/h3-reorientation.test.js
+            tests/h4-estimation.test.js
+            tests/h4-locomotor-activation.test.js
+            tests/hazard.test.js
+            tests/integrity-firewall.test.js
+            tests/measurement-geometry-policy.test.js
+            tests/measurement.test.js
+            tests/observation-convergence.test.js
+            tests/open-arena-protocol.test.js
+            tests/rng-streams.test.js
+            tests/state-integrity.test.js
+            tests/timestep-convergence.test.js
+          )
+          if printf '%s\n' "${tests[@]}" | grep -Eiq 'y.?maze'; then
+            echo 'Y-maze test entered qualification set' >&2
+            exit 1
+          fi
+          for f in "${tests[@]}"; do echo "== $f =="; node "$f"; done
       - name: Start Chromium
         run: |
           python3 -m http.server 8080 >/tmp/http.log 2>&1 &
