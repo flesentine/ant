@@ -56,11 +56,15 @@
 - 2/6 held-out wins versus its own null; failed promotion and H2/H3 comparison guards
 - moving speed remained diagnostic-only; Y-maze remained locked
 
-### v0.3.2f — next locomotion mechanism
+### v0.3.2f — H5 transient entry-heading restoration — mechanism frozen
 - H1 remains blocked pending measured arena-entry heading/speed evidence
+- H5 adds deterministic restoring drift toward each ant's own realized post-transition entry heading
+- H5 leaves angular-noise amplitude, speed, pauses, and the shared entry-state distribution unchanged
+- centerline/edge/fixed-apparatus steering targets are explicitly forbidden
+- engineering reachability values are frozen before implementation; no parameter sweep during reachability
+- no H5 estimator or reference-data search until a separate estimation policy is frozen
 - do not retune H2, H3, or H4 against the same outcomes
-- any H5 mechanism must be substantively different, pre-registered before implementation/search, and preserve the locked Y-maze
-- canonical locomotion remains unchanged until a candidate passes its frozen held-out guard
+- canonical locomotion remains unchanged; Y-maze remains locked
 
 ## v0.3.3 — externally painted trail response
 - local egocentric chemical sensors
