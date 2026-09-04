@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "id": "H5_search_dispersion_choice_audit_v1",
+  "status": "search_dispersion_frozen_to_shared_baseline_H3_concentration_before_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-04",
+  "scope": "H5 open-arena DCM-control origin-search directional dispersion only",
+  "scientific_role": "mechanism-definition and identifiability decision; not parameter fitting, ranking, or promotion evidence",
+  "decision": {
+    "selected_rule": "reuse_baseline_H3_turn_concentration_exactly",
+    "definition": "At an H5 origin-search draw, sample the angular deviation around the bearing to the frozen origin from the same von Mises concentration kappa_turn used by the ordinary H3-null post-reorientation component for that candidate.",
+    "nuisance_coupling": "If a later frozen H5 estimator varies the shared baseline H3 turn_concentration nuisance, the baseline and origin-search components must use exactly the same candidate value.",
+    "separate_search_kappa_present": false,
+    "treatment_specific_search_dispersion_forbidden": true,
+    "history_specific_search_dispersion_forbidden": true,
+    "radial_specific_search_dispersion_forbidden": true,
+    "reopen_to_rescue_fit_forbidden": true
+  },
+  "external_evidence": {
+    "Bonavita_et_al_2026": {
+      "paper": "Discovering search behaviour in black garden ant trajectories",
+      "doi": "10.1371/journal.pone.0327957",
+      "evidence": "Lasius niger reorientation-angle distributions depended on orientation relative to the starting point, supporting an origin-referenced directional-search representation.",
+      "scope_limit": "The paper reconstructed directional distributions non-parametrically in a different release/search assay and does not provide an independently validated single search-specific von Mises concentration transferable to the Poissonnier DCM assay.",
+      "implication": "The external evidence supports the representation class, not a new kappa_search parameter."
+    }
+  },
+  "audited_substrate": {
+    "h3_runtime": "src/h3.js",
+    "h3_runtime_git_blob_sha": "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1",
+    "h3_model": "models/lasius_niger_locomotion_h3_v1.json",
+    "h3_model_git_blob_sha": "fe33c31facfcabb7ddeb9a7bedf71ac248ad8e84",
+    "model_default_turn_concentration": 2,
+    "frozen_H3_estimator_nominal_turn_concentration_bounds": [
+      0,
+      20
+    ],
+    "baseline_turn_rng_stream": "biology_h3_turn_angle:<ant_id>",
+    "H5_search_angle_rng_stream": "biology_h5_search_angle:<ant_id>"
+  },
+  "identifiability_reasoning": {
+    "circular_moment_identity": "For a von Mises search component centered on the origin bearing, its first circular moment toward the origin is A1(kappa). The first-moment origin pull is therefore proportional to alpha_history * R * A1(kappa).",
+    "consequence": "A free search-specific concentration can trade directly against alpha_search_200 and alpha_search_1000 while moving the aggregate trajectory observables in nearly the same direction.",
+    "aggregate_target_limit": "The frozen development targets are aggregate exit time, middle-zone fraction, Beeline, and exit-edge distribution. They contain no direct post-reorientation angular-distribution statistic that independently identifies a second concentration.",
+    "parsimony": "The baseline H3 turn-concentration nuisance is already required by the locomotion substrate. Sharing it adds no H5-specific parameter while retaining a well-defined origin-centered circular search component."
+  },
+  "stress_audit": {
+    "authoritative_workflow_run": 33893540738,
+    "authoritative_head_sha": "b947b3258eb0b98f29a5991147c277ffccf99f72",
+    "authoritative_artifact_id": 9944813732,
+    "authoritative_artifact_zip_sha256": "f75435f2c6ba4ca1ea654885080e255fb92257bdb146399801902285d34b8c7a",
+    "persistent_H5_runtime_used": false,
+    "parameter_fit_or_reference_outcome_ranking_used": false,
+    "ymaze_access": false,
+    "temporary_hook_contract": "The H5 diagnostic hook existed only in the CI working tree. The job restored src/h3.js, proved git diff --exit-code, and reran H3/RNG/firewall regressions before artifact upload.",
+    "von_mises_numerics": {
+      "practical_points_tested": [
+        0,
+        0.25,
+        0.5,
+        1,
+        2,
+        4,
+        8,
+        20
+      ],
+      "practical_points_all_finite_and_convergent": true,
+      "sampled_first_moment_examples": {
+        "kappa_0_5": 0.24247041198385727,
+        "kappa_1": 0.44242286745592646,
+        "kappa_2": 0.7003303323692042,
+        "kappa_4": 0.8621479860594395,
+        "kappa_8": 0.9348850917151057,
+        "kappa_20": 0.974565190398257
+      },
+      "symmetry": {
+        "pi_representation_max_modulo_error": 4.440892098500626e-16,
+        "rotation_max_error": 5.551115123125783e-16
+      },
+      "tiny_positive_convergence_seam": {
+        "observed_failures": [
+          {
+            "kappa": 1e-8,
+            "error": "H3 von Mises sampler failed to converge."
+          },
+          {
+            "kappa": 1.1e-8,
+            "error": "H3 von Mises sampler failed to converge."
+          }
+        ],
+        "stress_points_below_uniform_branch_that_passed": [
+          0,
+          1e-12,
+          5e-9
+        ],
+        "interpretation": "This is a numerical seam at the current <1e-8 uniform-approximation branch boundary inside the nominal [0,20] H3 nuisance interval. It does not affect the current default kappa=2 or the practical diagnostic grid. Frozen H3 runtime was not modified in this H5 design step.",
+        "estimator_requirement": "The later H5 estimator policy must avoid arbitrary tiny-positive candidate values at or immediately above this seam unless H3 is separately versioned/hardened; exact safe nuisance bounds or discrete handling must be frozen before search."
+      }
+    },
+    "node_engineering_matrix": {
+      "simulations_per_variant_per_condition": 300,
+      "entry_heading": "shared deterministic uniform [-pi,pi) per trial",
+      "engineering_history_amplitudes_reference": {
+        "alpha_search_200": 0.6,
+        "alpha_search_1000": 0.3
+      },
+      "exact_null_mismatches": 0,
+      "equal_strength_common_search_short_long_mismatches": 0,
+      "H3_event_prefix": {
+        "comparisons": 38538,
+        "time_mismatches": 0,
+        "baseline_angle_mismatches": 0
+      },
+      "fixed_amplitude_effect_confounding_vs_shared_kappa_2": {
+        "kappa_0_5": {
+          "cosine": 0.9664835310717801,
+          "scalar_fit_r2": 0.9286385055686791,
+          "history_contrast_cosine": 0.9773619819151443
+        },
+        "kappa_1": {
+          "cosine": 0.9745095521570667,
+          "scalar_fit_r2": 0.9454851678601701,
+          "history_contrast_cosine": 0.991751106556959
+        },
+        "kappa_4": {
+          "cosine": 0.9885884045068594,
+          "scalar_fit_r2": 0.9748938333041168,
+          "history_contrast_cosine": 0.9491600051014275
+        },
+        "kappa_8": {
+          "cosine": 0.9913219068220718,
+          "scalar_fit_r2": 0.9807912064621532,
+          "history_contrast_cosine": 0.9778329512981818
+        },
+        "kappa_20": {
+          "cosine": 0.9873633439288638,
+          "scalar_fit_r2": 0.9717927395351377,
+          "history_contrast_cosine": 0.9850678001947318
+        }
+      },
+      "first_moment_matched_amplitude_examples": {
+        "kappa_1": {
+          "alpha_search_200": 0.9497660051746354,
+          "alpha_search_1000": 0.4748830025873177
+        },
+        "kappa_4": {
+          "alpha_search_200": 0.48738523573208525,
+          "alpha_search_1000": 0.24369261786604263
+        },
+        "kappa_8": {
+          "alpha_search_200": 0.44946507666588453,
+          "alpha_search_1000": 0.22473253833294227
+        },
+        "kappa_20": {
+          "alpha_search_200": 0.4311647938603349,
+          "alpha_search_1000": 0.21558239693016745
+        }
+      },
+      "interpretation": "Across the practical concentration range, changing search kappa mostly changes the magnitude of the same aggregate H5 effect and can be substantially compensated by endpoint amplitudes. A separate search-specific concentration is therefore weakly identified by the available aggregate targets."
+    },
+    "chromium_mirror": {
+      "simulations_per_variant_per_condition": 48,
+      "concentrations_tested": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "exact_null_mismatches": 0,
+      "equal_strength_common_search_short_long_mismatches": 0,
+      "H3_event_prefix": {
+        "comparisons": 2350,
+        "time_mismatches": 0,
+        "baseline_angle_mismatches": 0
+      },
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0
+    }
+  },
+  "degeneracies_and_guards": {
+    "kappa_zero": {
+      "fact": "At kappa=0 the von Mises distribution is uniform, so an origin-centered search draw has no directional preference despite a positive mixture-selection probability.",
+      "consequence": "At this boundary the H5 directional amplitudes are behaviorally non-identifiable as an origin-steering mechanism.",
+      "estimator_requirement": "A later estimator policy must report/guard a selected kappa near the uniform boundary and must not count a behaviorally degenerate solution as evidence for origin-referenced history modulation."
+    },
+    "tiny_positive_sampler_seam": "The later estimator must explicitly avoid or separately harden the observed machine-scale seam near the 1e-8 branch threshold."
+  },
+  "rejected_alternative": {
+    "name": "separate_H5_search_concentration",
+    "status": "rejected_for_H5_v1",
+    "reason": [
+      "No independent external search-specific concentration is available for this assay.",
+      "The available aggregate development targets do not directly measure post-reorientation angular dispersion.",
+      "Search concentration trades strongly with alpha_search_200/alpha_search_1000 through both circular-moment structure and trajectory-level effects.",
+      "It would add a weakly identified biological parameter and another numerical parameter surface without testing a distinct required H5 claim."
+    ],
+    "may_be_reconsidered_only_with": [
+      "raw or segmented post-reorientation angle data that directly discriminate dispersion",
+      "an independently justified transferable search-angle distribution",
+      "a separately versioned future hypothesis"
+    ],
+    "must_not_be_added_after_H5_v1_fit_failure": true
+  },
+  "implementation_contract": {
+    "search_direction_center": "bearing from current position to the frozen central physical origin",
+    "search_direction_concentration": "exactly the candidate's shared baseline H3 turn_concentration",
+    "baseline_component_concentration": "the same shared baseline H3 turn_concentration",
+    "separate_search_concentration_field": "forbidden",
+    "search_angle_rng": "dedicated biology_h5_search_angle:<ant_id> stream",
+    "baseline_turn_rng": "existing biology_h3_turn_angle:<ant_id> stream unchanged",
+    "event_timing": "existing H3-null continuous-time event process unchanged",
+    "exact_null": "alpha_search_200=alpha_search_1000=0 reduces exactly to H3-null regardless of the shared concentration",
+    "common_search_submodel": "alpha_search_200=alpha_search_1000>0 uses the same shared concentration in both histories and cannot support a history-modulation claim"
+  },
+  "firewall": {
+    "H5_biological_mechanism_fully_frozen": true,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_allowed": false,
+    "search_dispersion_frozen_to_shared_baseline_H3_concentration": true,
+    "separate_H5_search_concentration_forbidden": true,
+    "search_dispersion_may_not_be_reopened_to_rescue_fit": true,
+    "tiny_positive_H3_kappa_seam_must_be_handled_by_frozen_estimator_policy_or_separate_H3_hardening": true,
+    "kappa_zero_degeneracy_must_be_reported_or_guarded_by_frozen_estimator_policy": true,
+    "ymaze_access": false,
+    "canonical_model_unchanged": true
+  },
+  "next_step": "Freeze the H5 estimator nuisance family, candidate-coordinate mapping, common-search comparator, candidate budget, LOCO scoring, promotion guards, and tiny-kappa handling before any persistent H5 runtime implementation or parameter search."
+}
