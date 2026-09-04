@@ -252,7 +252,17 @@ function h3CandidateFromFold(fold){
 }
 function h4CandidateFromFold(fold){
   const c=fold?.H4_context?.fit?.candidate;if(!c)throw new Error('Missing H4 fold candidate.');
-  return clone(c);
+  const out=clone(c);
+  if(out.null_equivalent_anchor===true||(out.rho_speed===0&&out.lambda_activation_mm==null&&out.tau_activation_s==null)){
+    // Historical H4 reports intentionally serialize the exact-null anchor's
+    // lambda/tau as null because they are not estimates. Rehydrate the same
+    // inert runtime placeholders used by the frozen H4 nullAnchor() function.
+    out.lambda_activation_mm=500;
+    out.tau_activation_s=5;
+    out.rho_speed=0;
+    out._rehydrated_exact_null_anchor=true;
+  }
+  return out;
 }
 function median(xs){return h3est.score?quantile([...xs].sort((a,b)=>a-b),.5):NaN;}
 function quantile(sorted,p){if(!sorted.length)return NaN;const x=(sorted.length-1)*p,lo=Math.floor(x),hi=Math.ceil(x);return lo===hi?sorted[lo]:sorted[lo]+(sorted[hi]-sorted[lo])*(x-lo);}
