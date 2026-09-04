@@ -1,7 +1,7 @@
 {
-  "schema_version": 7,
+  "schema_version": 8,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_origin_temporal_effect_scope_and_radial_gate_frozen_remaining_history_and_nuisance_questions_open_before_full_mechanism_freeze",
+  "status": "draft_origin_temporal_effect_scope_radial_gate_and_history_response_frozen_search_direction_and_estimator_policy_open_before_full_mechanism_freeze",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
   "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
@@ -95,7 +95,7 @@
     "measurement_vs_biology_boundary": "first_track_position defines the observation start and Beeline start. The central entry reference represents the physical hole/trail crossing. This measurement policy does not decide which is the biological H5 search origin."
   },
   "allowed_biological_inputs": [
-    "recent_constrained_travel_mm",
+    "recent_constrained_travel_mm (H5-v1 supported only at exact values 200 or 1000 mm)",
     "current_position_mm",
     "current_heading_rad"
   ],
@@ -114,9 +114,9 @@
   ],
   "candidate_mechanism": {
     "origin": "Frozen O = the central physical entry-hole/trail-crossing reference supplied by the measurement geometry row (entry_reference_x_mm, entry_reference_y_mm). The simulated ant still begins observation at first_track_x_mm/first_track_y_mm. First-track position is not the biological H5 origin and may not be substituted after seeing model performance.",
-    "history_search_drive": "Temporal profile frozen constant during the observed arena traversal. The history-response magnitude D(L) remains provisional: current candidate D(L)=exp(-L/lambda_search_mm), so shorter recent constrained travel gives larger search drive, but its functional form and parameterization are not yet frozen. There is no tau_search_s and no elapsed-time decay in H5-v1.",
+    "history_search_drive": "Frozen only at the two observed support points. Define alpha_history(200)=alpha_search_200 and alpha_history(1000)=alpha_search_1000 with 0 <= alpha_search_1000 <= alpha_search_200 <= 1. H5-v1 is undefined for other recent_constrained_travel_mm values and must reject them rather than interpolate/extrapolate. There is no lambda_search_mm, separate rho_search, or temporal decay parameter.",
     "radial_gate": "Frozen R(X,O,arena): if r=||X-O|| is 0 then R=0; otherwise let d_edge be the positive distance from O to the sampled rectangular arena boundary along the ray through X and set R=clamp(r/d_edge,0,1). This gate is dimensionless and has no fitted radial scale.",
-    "mixture_weight": "Provisional w = rho_search * D(L) * R(X,O,arena), constrained to [0,1]. The temporal profile, biological origin, direction-only effect scope, and radial gate are frozen; D(L) and the effect/history amplitude parameterization remain unfrozen.",
+    "mixture_weight": "Frozen structural form w = alpha_history(L) * R(X,O,arena), constrained to [0,1], where alpha_history is defined only at L=200 or 1000 and R is the frozen parameter-free boundary-normalized linear radial gate.",
     "reorientation_effect": {
       "type": "mixture_of_circular_reorientation_distributions",
       "baseline_component": "Use the ordinary H3-null post-reorientation directional law and existing H3 turn-angle RNG stream.",
@@ -174,19 +174,20 @@
     "The origin-oriented component is rotationally symmetric around O and therefore predicts no intrinsic left/right/top/bottom exit preference in a symmetric arena.",
     "H5 predicts no direct attraction to the DCM centerline; central-zone differences must emerge indirectly from geometry and trajectories.",
     "With rho_search=0, H5-context must reduce exactly to H5-null for the same shared measurement geometry and matched baseline random streams.",
-    "If the provisional exponential D(L) is retained, the effect tends toward zero as recent_constrained_travel_mm becomes very large."
+    "H5-v1 makes no prediction for recent constrained travel distances other than exactly 200 mm and 1000 mm; such generalization requires a separately justified/versioned history-response law."
   ],
   "identifiability_warnings": {
-    "history_levels": "The development assay supplies only two history distances, 200 and 1000 mm. It cannot richly identify the shape of an arbitrary history-response curve.",
-    "stress_result": "Across deliberately broad engineering-only lambda values, the implied short-to-long mixture-weight ratio ranged from about 2.23 to 24.53 without changing the qualitative mechanism.",
+    "history_levels": "Resolved for H5-v1 by refusing to estimate a continuous curve shape. The assay supplies only L=200 and L=1000, so H5 reports directly identifiable effective search amplitudes at those support points.",
+    "stress_result": "Endpoint-matched direct, exponential, and reciprocal representations produced exact matched trajectories at L=200 and L=1000 while disagreeing at unobserved distances. A fitted lambda_search_mm would therefore be a nonlinear transformation of the endpoint ratio, not independently validated curve shape.",
     "radial_scale": "Resolved for H5-v1: no r_search_mm or radial-shape parameter will be estimated. The radial gate is frozen to the parameter-free boundary-normalized linear fraction r/d_edge.",
     "reporting_if_ever_fit": [
-      "Effective mixture weight at L=200 and L=1000 for representative radii",
+      "alpha_search_200 and alpha_search_1000",
+      "alpha_search_200 - alpha_search_1000",
+      "alpha_search_1000 / alpha_search_200 when alpha_search_200 > 0",
       "Predicted number/proportion of origin-oriented reorientations under each observed history",
-      "Ridge or equivalence sets if raw parameters are broad",
       "Boundary-hit and near-equivalent candidate diagnostics"
     ],
-    "claim_rule": "Do not report a unique biological lambda_search_mm or other history-shape constant unless the frozen estimator supplies strong identifiability evidence. H5-v1 has no radial-scale constant to estimate."
+    "claim_rule": "Do not report lambda_search_mm, a travel-distance half-life, interpolation, or extrapolation from H5-v1. A common-search solution alpha200≈alpha1000 is evidence, at most, for origin-referenced search and not for history modulation."
   },
   "raw_trajectory_discriminators_if_recovered": [
     "post-reorientation heading conditional on bearing to the trial origin",
@@ -206,10 +207,12 @@
     "No colony-specific biological parameter.",
     "No Y-maze access for development fitting, ranking, stopping, or model selection.",
     "No origin-relative or history-dependent modulation of mean free path or reorientation-event hazard in H5-v1.",
-    "No fitted or treatment-specific radial-search length scale; H5-v1 radial gating is fixed by sampled arena geometry."
+    "No fitted or treatment-specific radial-search length scale; H5-v1 radial gating is fixed by sampled arena geometry.",
+    "No lambda_search_mm, separate rho_search amplitude, or interpolation/extrapolation to unobserved travel distances in H5-v1.",
+    "A common origin-search effect alpha_search_200 = alpha_search_1000 does not by itself support the history-modulation claim."
   ],
   "pre_freeze_questions": [
-    "If D(L)=exp(-L/lambda_search_mm) is retained, should lambda be estimated at all or should H5 be parameterized directly by constrained effective weights at the two observed history distances? This is an identifiability decision, not a tuning decision.",
+    "Should the H5 origin-oriented search-direction component reuse the baseline H3 reorientation concentration/dispersion exactly, or is a separately justified search concentration required? The current draft default is reuse, but this has not yet been explicitly frozen.",
     "What H5-null nuisance family and bounds are justified independently of H5 outcomes? They remain deliberately unspecified."
   ],
   "firewall": {
@@ -237,7 +240,14 @@
     "H5_radial_gate_frozen_boundary_normalized_linear": true,
     "H5_r_search_parameter_forbidden": true,
     "H5_radial_shape_parameter_forbidden": true,
-    "H5_radial_gate_may_not_be_reopened_to_rescue_fit": true
+    "H5_radial_gate_may_not_be_reopened_to_rescue_fit": true,
+    "H5_history_response_still_unfrozen": false,
+    "H5_history_response_frozen_to_observed_level_effective_amplitudes": true,
+    "H5_lambda_search_parameter_forbidden": true,
+    "H5_separate_rho_search_parameter_forbidden": true,
+    "H5_unsupported_history_interpolation_or_extrapolation_forbidden": true,
+    "H5_history_response_may_not_be_reopened_to_rescue_fit": true,
+    "H5_common_origin_search_alone_not_sufficient_for_history_modulation_claim": true
   },
   "allowed_shared_measurement_or_geometry_inputs_under_frozen_policy": [
     "central_physical_entry_reference_mm (frozen H5 biological origin)",
@@ -289,6 +299,30 @@
     "units": "dimensionless",
     "r_search_parameter_present": false,
     "reason": "The provisional rational family r/(r+r_search_mm) behaved largely as an amplitude-rescaling degree of freedom over baseline event locations and aggregate observables. The boundary-normalized linear rule is continuous, symmetry/scale invariant, adapts to each sampled arena, reaches 0 at the physical origin and 1 at the boundary, and removes the weakly identified r_search_mm.",
+    "may_not_be_reopened_to_rescue_fit": true
+  },
+  "history_response_decision": {
+    "status": "frozen_before_H5_runtime_implementation_or_parameter_search",
+    "selected_representation": "observed_level_effective_search_amplitudes",
+    "decision_report": "reports/h5_history_response_choice_audit_v1.json",
+    "decision_report_git_blob_sha": "37d5e0a28f2ed75cc45297ca19d0ed66db45cad6",
+    "supported_recent_constrained_travel_mm": [
+      200,
+      1000
+    ],
+    "alpha_search_200_domain": [
+      0,
+      1
+    ],
+    "alpha_search_1000_domain": [
+      0,
+      1
+    ],
+    "monotonic_constraint": "0 <= alpha_search_1000 <= alpha_search_200 <= 1",
+    "rule": "For L=200 use alpha_search_200; for L=1000 use alpha_search_1000. Any other recent_constrained_travel_mm is outside H5-v1's scientific domain and must hard-fail rather than interpolate or extrapolate.",
+    "curve_claim": "H5-v1 makes no claim about the history-response shape between or outside the two observed distances.",
+    "lambda_search_parameter_present": false,
+    "separate_rho_search_parameter_present": false,
     "may_not_be_reopened_to_rescue_fit": true
   }
 }
