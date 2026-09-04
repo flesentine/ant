@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "id": "H5_runtime_estimator_implementation_audit_v1",
+  "status": "implemented_and_synthetic_qualified_reference_search_authorized_not_run",
+  "date": "2026-09-04",
+  "scientific_role": "implementation audit only; no H5 reference parameter search, biological fit, or promotion performed",
+  "implementation": {
+    "runtime": {
+      "src/h5.js": "d0a5c217bbf30b2cce73f265d7b313cd0972f2d0",
+      "src/h3.js": "982242d3d268137b0bcaa1cb1b46ab2b989e55b7",
+      "src/integrity.js": "ecf10427b6572ac5207a53c224109021f368b7a9",
+      "models/lasius_niger_locomotion_h5_v1.json": "1bc4c9156962794c3f13a57fd0dcec3d7ca835cd"
+    },
+    "estimator": {
+      "tools/run-h5-estimation.js": "9fa9f386e43afa1b858d9c16284e5623d03939ca",
+      "hypotheses/h5_parameter_estimation_v1.json": "d81e756c3643778c067ef1b1bb8f68521adb8141"
+    },
+    "qualification_runner": {
+      "tools/run-h5-synthetic-qualification.js": "821ea2f3ba3c800cf2a9bef6dc9b0b85cfc545a8"
+    },
+    "regressions": {
+      "tests/h5-origin-search.test.js": "3e03bcc77107f6d85f2b4d272b7f2b3c282ed516",
+      "tests/h5-estimator-contract.test.js": "9d167cb3c7a2a2b2b900a24dd9dada2a7299f787"
+    },
+    "browser_entry": {
+      "index.html": "a7f916936890f2120f1eb5dcd2f7e8510370fd25"
+    }
+  },
+  "runtime_contract": {
+    "event_clock": "Existing H3 continuous-time run-and-reorientation event clock is retained with H3 history-dependent hazard reduction fixed to zero.",
+    "baseline_turn": "Existing H3 baseline turn angle is always drawn from the existing H3 turn-angle RNG stream.",
+    "H5_choice": "At every H3 event, H5 consumes one dedicated biology_h5_search_choice:<ant_id> variate.",
+    "H5_search_angle": "At every H3 event, H5 consumes one dedicated biology_h5_search_angle:<ant_id> draw using the exact shared H3 baseline kappa_turn.",
+    "selection_weight": "w = alpha_history(L) * boundary_normalized_linear_radial_gate",
+    "supported_history_mm": [
+      200,
+      1000
+    ],
+    "origin": "arena-center physical entry reference; observation still starts at reconstructed first-track position",
+    "temporal_profile": "constant across observed traversal",
+    "effect_scope": "conditional direction only; no H5 speed, pause, hazard, free-path, or entry-state effect"
+  },
+  "estimator_contract": {
+    "nested_models": [
+      "H5_null",
+      "H5_common_search",
+      "H5_history"
+    ],
+    "candidate_counts_per_fold": {
+      "H5_null": 500,
+      "H5_common_search": "499 Halton + exact null anchor",
+      "H5_history": "498 Halton + exact common anchor + exact null anchor"
+    },
+    "trials": {
+      "training_per_condition_per_candidate": 60,
+      "heldout_evaluation_per_condition": 120
+    },
+    "folds": [
+      0,
+      7,
+      16,
+      20,
+      21,
+      27
+    ],
+    "geometry": "All H5 and historical H2/H3/H4 matched reevaluations use geometry-aware wrappers with held-out-colony geometry excluded and short/long paired by trial seed.",
+    "scorer": "Frozen H3/H4-compatible 19-quantile W1/training-SD continuous scorer plus 2*Hellinger five-category exit scorer.",
+    "reference_search_gate": "tools/run-h5-estimation.js refuses LOCO until reports/h5_synthetic_qualification_v1.json exists, passes its firewall fields, and matches the exact qualified implementation blobs."
+  },
+  "qualification": {
+    "report": "reports/h5_synthetic_qualification_v1.json",
+    "report_git_blob_sha": "c142c6979b9bb2602508f1f8214de2de03469032",
+    "authoritative_run": 33926523758,
+    "artifact_id": 9956986090,
+    "artifact_zip_sha256": "6f951e8d5593578faf70fd295788247c0031d86843dba34189d2d986c4816c81",
+    "reference_outcomes_used": false,
+    "ymaze_accessed": false,
+    "node": {
+      "event_prefix_comparisons": 264,
+      "active_search_selections": 113,
+      "all_required_contract_checks_passed": true
+    },
+    "chromium": {
+      "anchor_pairs": 18,
+      "anchor_mismatches": 0,
+      "common_neutral_mismatches": 0,
+      "heldout_geometry_leaks": 0,
+      "event_prefix_comparisons": 142,
+      "active_search_selections": 70,
+      "cadence_mismatches": 0,
+      "unsupported_L600_rejected": true,
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0
+    }
+  },
+  "resolved_implementation_findings": [
+    {
+      "finding": "Frozen policy prose used biology_h3_reorientation_event:<ant_id> while the existing audited H3 runtime stream is biology_h3_turn_event:<ant_id>.",
+      "classification": "policy transcription defect",
+      "resolution": "Corrected label only; existing H3 runtime stream and sequence unchanged."
+    },
+    {
+      "finding": "Historical H4 exact-null report candidates store lambda/tau as null because they were not estimated, but runtime replay requires valid inert values.",
+      "classification": "estimator comparator replay implementation bug",
+      "resolution": "Geometry-aware H4 replay rehydrates exactly the frozen H4 runner's null-anchor placeholders lambda=500, tau=5, rho=0; regression-gated."
+    },
+    {
+      "finding": "A qualification test compared a floating-point Halton value to 20/3 using strict equality.",
+      "classification": "test harness defect",
+      "resolution": "Tolerance assertion only; implementation and policy unchanged."
+    }
+  ],
+  "authorization": {
+    "synthetic_qualification_complete": true,
+    "reference_parameter_search_authorized": true,
+    "reference_parameter_search_run": false,
+    "canonical_promotion": false,
+    "next_step": "Run the frozen high-resolution 500 x 60 x 6 LOCO reference search only as a separate explicit execution."
+  },
+  "firewall": {
+    "reference_parameter_search_run": false,
+    "Y_maze_access": false,
+    "reference_outcomes_used_during_qualification": false,
+    "biological_mechanism_unchanged": true,
+    "estimator_policy_only_documented_stream_label_correction": true,
+    "canonical_model_unchanged": true
+  }
+}
