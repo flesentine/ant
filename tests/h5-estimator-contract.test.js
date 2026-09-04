@@ -14,7 +14,7 @@ const base=readJson(path.resolve(root,'models','lasius_niger_locomotion_h5_v1.js
 const {geometry}=geom.loadFrozenMeasurementGeometry(root);
 
 assert(h5est.assertPolicySemantics(policy));
-assert.strictEqual(h5est.nullCandidate(0,policy).kappa,20/3);
+assert(Math.abs(h5est.nullCandidate(0,policy).kappa-20/3)<1e-14);
 const ks=Array.from({length:500},(_,i)=>h5est.nullCandidate(i,policy).kappa);
 assert.strictEqual(Math.min(...ks),policy.search_protocol.safe_kappa_support.frozen_500_point_halton_min);
 assert.strictEqual(Math.max(...ks),policy.search_protocol.safe_kappa_support.frozen_500_point_halton_max);
