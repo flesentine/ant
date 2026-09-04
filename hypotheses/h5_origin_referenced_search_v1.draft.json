@@ -1,5 +1,5 @@
 {
-  "schema_version": 10,
+  "schema_version": 11,
   "id": "H5_origin_referenced_search_v1",
   "status": "mechanism_frozen_estimator_policy_pending_before_runtime_implementation_or_parameter_search",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The biological mechanism is now frozen after pre-implementation stress audits, but the estimator policy remains unfrozen; H5 runtime implementation and parameter search remain forbidden until that policy is frozen.",
@@ -133,10 +133,10 @@
       "baseline_turn_stream": "existing H3 turn-angle stream, unchanged",
       "search_choice_stream": "biology_h5_search_choice:<ant_id>",
       "search_angle_stream": "biology_h5_search_angle:<ant_id>",
-      "cadence_rule": "If this formulation is frozen, H5-null and H5-context should consume the dedicated H5 choice/search streams with matched cadence so model differences cannot be caused by unrelated RNG shifting. The existing H3 streams must remain untouched by H5 dedicated draws."
+      "cadence_rule": "Frozen cadence contract for H5-v1 implementation: H5-null, equal-strength common-search, and history-modulated context evaluations consume the dedicated H5 choice/search streams with matched event cadence so differences cannot arise from unrelated RNG shifting. Existing H3 event-threshold and turn-angle streams remain untouched by H5 dedicated draws."
     },
-    "speed": "No direct moving-speed effect in H5-v1 draft.",
-    "pause": "No direct pause-hazard or pause-duration effect in H5-v1 draft.",
+    "speed": "Frozen absent: no direct moving-speed effect in H5-v1.",
+    "pause": "Frozen absent: no direct pause-hazard or pause-duration effect in H5-v1.",
     "entry_state": "No direct alteration of initial heading, initial speed, or initial position by H5 biology."
   },
   "rejected_pre_freeze_formulations": [
@@ -218,9 +218,7 @@
     "A common origin-search effect alpha_search_200 = alpha_search_1000 does not by itself support the history-modulation claim.",
     "No H5-specific, history-specific, treatment-specific, radial-specific, or separately fitted search-direction concentration; search dispersion exactly shares baseline H3 kappa_turn."
   ],
-  "pre_freeze_questions": [
-    "What H5-null nuisance family and bounds are justified independently of H5 outcomes? They remain deliberately unspecified."
-  ],
+  "pre_freeze_questions": [],
   "firewall": {
     "mechanism_not_frozen": false,
     "implementation_allowed_before_freeze": false,
@@ -295,8 +293,9 @@
     "decision_report_git_blob_sha": "0ec424889ee4c9745af30f70cca7c8b7152bb490",
     "rule": "For fixed recent_constrained_travel_mm L, the H5 history search drive does not decay with elapsed observed arena time. H5-v1 has no tau_search_s parameter.",
     "reason": "The biological origin is the central physical entry point but observation begins later at first_track_position. The elapsed center-hole-to-first-track interval is unobserved. A temporal decay would therefore introduce an unidentified pre-track time offset exactly confounded with decay amplitude; very slow decay approaches the constant model while adding a weakly identified parameter.",
-    "history_response_still_unfrozen": true,
-    "may_not_be_reopened_to_rescue_fit": true
+    "history_response_still_unfrozen": false,
+    "may_not_be_reopened_to_rescue_fit": true,
+    "history_response_now_frozen_under": "history_response_decision"
   },
   "effect_scope_decision": {
     "status": "frozen_before_H5_runtime_implementation_or_parameter_search",
@@ -360,5 +359,15 @@
     "kappa_zero_guard": "At kappa_turn=0 both directional laws are uniform, so positive alpha values do not create origin steering; the estimator policy must not count this behaviorally degenerate boundary as support for H5 history modulation.",
     "tiny_positive_sampler_seam": "The current frozen H3 sampler failed in stress at kappa=1e-8 and 1.1e-8 near its uniform-approximation branch threshold. The estimator policy must avoid that tiny-positive seam or require a separately versioned H3 hardening before search.",
     "may_not_be_reopened_to_rescue_fit": true
+  },
+  "remaining_estimator_policy_questions": [
+    "What H5-null/shared-substrate nuisance family and bounds are justified independently of H5 outcomes, including exact handling of the kappa=0 behavioral degeneracy and the tiny-positive H3 sampler seam?"
+  ],
+  "current_stage": {
+    "biological_mechanism": "fully_frozen",
+    "persistent_H5_runtime": "absent",
+    "estimator_policy": "unfrozen",
+    "parameter_search": "forbidden",
+    "next_authorized_scientific_task": "freeze_estimator_policy_before_persistent_H5_runtime_implementation_or_parameter_search"
   }
 }
