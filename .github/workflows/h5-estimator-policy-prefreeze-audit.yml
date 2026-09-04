@@ -60,7 +60,7 @@ jobs:
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync('hypotheses/h5_parameter_estimation_v1.json','utf8'));
           const halton=(index,base)=>{let f=1,r=0,i=index;while(i>0){f/=base;r+=f*(i%base);i=Math.floor(i/base);}return r;};
-          const logmap=(u,lo,hi)=>Math.exp(Math.log(lo)+u*(Math.log(hi)-Math.log(lo));
+          const logmap=(u,lo,hi)=>Math.exp(Math.log(lo)+u*(Math.log(hi)-Math.log(lo)));
           const linear=(u,lo,hi)=>lo+u*(hi-lo);
           const nulls=[],commons=[],hist=[];
           for(let i=1;i<=500;i++){
