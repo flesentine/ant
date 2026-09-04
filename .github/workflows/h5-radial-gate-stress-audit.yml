@@ -1,11 +1,11 @@
-name: H5 radial-gate stress audit
+name: H5 radial-gate final validation
 on:
   push:
     branches: [h5-origin-referenced-search-v1]
 permissions:
   contents: read
 jobs:
-  audit:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,288 +13,39 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Validate clean frozen preconditions
+      - name: Validate exact frozen radial decision
         run: |
           set -euo pipefail
-          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "c5b8906197e86b567d6d56049718c9673ba8b1e2"
+          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "530927adbdc33c9cd464197921223be9aa38375d"
+          test "$(git hash-object reports/h5_radial_gate_choice_audit_v1.json)" = "66f0d0204979a17ade267b41c387ed872679115a"
           test "$(git hash-object reports/h5_effect_scope_choice_audit_v1.json)" = "d56f1ab242125773905b922e0686e0cceb22bb7e"
           test "$(git hash-object reports/h5_temporal_drive_choice_audit_v1.json)" = "0ec424889ee4c9745af30f70cca7c8b7152bb490"
           test "$(git hash-object reports/h5_biological_origin_choice_audit_v1.json)" = "2378fa54ad4174141f213ed44be3c283706975de"
           node <<'NODE'
           const fs=require('fs');
           const d=JSON.parse(fs.readFileSync('hypotheses/h5_origin_referenced_search_v1.draft.json','utf8'));
+          const r=JSON.parse(fs.readFileSync('reports/h5_radial_gate_choice_audit_v1.json','utf8'));
           if(d.firewall.mechanism_not_frozen!==true||d.firewall.parameter_search_allowed!==false) throw new Error('H5 freeze/search firewall mismatch');
-          if(d.biological_origin_decision.selected_origin!=='central_physical_entry_reference') throw new Error('origin mismatch');
-          if(d.temporal_drive_decision.selected_profile!=='constant_over_observed_arena_traversal') throw new Error('temporal mismatch');
-          if(d.effect_scope_decision.selected_scope!=='conditional_reorientation_direction_only') throw new Error('effect-scope mismatch');
-          if(d.firewall.ymaze_access!==false) throw new Error('Y-maze firewall mismatch');
+          if(d.radial_gate_decision.selected_gate!=='boundary_normalized_linear') throw new Error('draft radial gate mismatch');
+          if(d.firewall.H5_radial_gate_frozen_boundary_normalized_linear!==true) throw new Error('radial freeze missing');
+          if(d.firewall.H5_r_search_parameter_forbidden!==true||d.firewall.H5_radial_shape_parameter_forbidden!==true) throw new Error('radial parameter firewall missing');
+          if(r.decision.selected_gate!=='boundary_normalized_linear'||r.firewall.r_search_parameter_forbidden_in_H5_v1!==true) throw new Error('report radial decision mismatch');
+          if(d.firewall.ymaze_access!==false||r.firewall.ymaze_access!==false) throw new Error('Y-maze firewall mismatch');
+          if(d.effect_scope_decision.selected_scope!=='conditional_reorientation_direction_only') throw new Error('effect-scope drift');
+          if(d.temporal_drive_decision.selected_profile!=='constant_over_observed_arena_traversal') throw new Error('temporal drift');
+          if(d.biological_origin_decision.selected_origin!=='central_physical_entry_reference') throw new Error('origin drift');
           NODE
-          if grep -R -n -E 'h5Diag|biology_h5_search|rho_search|lambda_search_mm|r_search_mm|tau_search' src models experiments states apparatus scoring observations; then
+          if grep -R -n -E 'h5Diag|biology_h5_search|rho_search|lambda_search_mm|r_search_mm|tau_search|boundary_normalized_linear' src models experiments states apparatus scoring observations; then
             echo 'Persistent H5 runtime unexpectedly present' >&2
             exit 1
           fi
-          cp src/h3.js /tmp/h3-original.js
 
-      - name: Baseline Y-maze-free regressions
+      - name: Y-maze-free regression gate
         run: |
           set -euo pipefail
           for f in tests/boundary-timing.test.js tests/determinism.test.js tests/experiment-definition.test.js tests/h3-reorientation.test.js tests/integrity-firewall.test.js tests/measurement-geometry-policy.test.js tests/measurement.test.js tests/open-arena-protocol.test.js tests/rng-streams.test.js tests/state-integrity.test.js; do
             node "$f"
           done
-
-      - name: Baseline radial-event identifiability audit
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs');
-          const geom=require('./tools/poissonnier2026-measurement-geometry.js');
-          const {Simulation,FIXED_DT}=require('./src/integrity.js');
-          const {loadBundle}=require('./tools/load-bundle.js');
-          const {geometry}=geom.loadFrozenMeasurementGeometry(process.cwd());
-
-          function q(xs,p){const a=[...xs].sort((x,y)=>x-y);const z=(a.length-1)*p,lo=Math.floor(z),hi=Math.ceil(z),f=z-lo;return a[lo]*(1-f)+a[hi]*f;}
-          function summary(xs){return {n:xs.length,min:Math.min(...xs),q10:q(xs,.1),q25:q(xs,.25),median:q(xs,.5),q75:q(xs,.75),q90:q(xs,.9),max:Math.max(...xs),mean:xs.reduce((a,b)=>a+b,0)/xs.length};}
-          function cosine(a,b){const da=Math.hypot(...a),db=Math.hypot(...b);return da&&db?a.reduce((s,x,i)=>s+x*b[i],0)/(da*db):null;}
-          function fitScale(a,b){const den=a.reduce((s,x)=>s+x*x,0);const k=den?a.reduce((s,x,i)=>s+x*b[i],0)/den:0;const pred=a.map(x=>k*x);const sse=pred.reduce((s,x,i)=>s+(b[i]-x)**2,0);const mean=b.reduce((s,x)=>s+x,0)/b.length;const sst=b.reduce((s,x)=>s+(x-mean)**2,0);return {scale:k,r2:sst?1-sse/sst:null,rmse:Math.sqrt(sse/b.length)};}
-          function rayEdgeDistance(x,y,ox,oy,w,h){
-            const dx=x-ox,dy=y-oy,r=Math.hypot(dx,dy);
-            if(r===0)return 0;
-            const ux=dx/r,uy=dy/r,cands=[];
-            if(ux>0)cands.push((w-ox)/ux); else if(ux<0)cands.push((0-ox)/ux);
-            if(uy>0)cands.push((h-oy)/uy); else if(uy<0)cands.push((0-oy)/uy);
-            return Math.min(...cands.filter(t=>t>=0&&Number.isFinite(t)));
-          }
-
-          const bundle=loadBundle('open_arena_short_control.json',{modelId:'lasius_niger_locomotion_h3_v1'});
-          bundle.model.reorientation_gate.effect.max_hazard_reduction_fraction=0;
-          const events=[];
-          for(let fi=0;fi<geom.EXPECTED_COLONIES.length;fi++){
-            const held=geom.EXPECTED_COLONIES[fi],pool=geom.geometryPool(geometry.rows,held);
-            for(let i=0;i<100;i++){
-              const seed=990000+fi*10000+i,row=geom.sampleGeometry(pool,seed).row,b=geom.applyGeometry(bundle,row),sim=new Simulation(b,seed);
-              sim.runUntilComplete(b.experiment.duration_s,FIXED_DT);
-              for(const e of sim.events.filter(e=>e.type==='h3_reorientation')){
-                const r=Math.hypot(e.x-row.entry_reference_x_mm,e.y-row.entry_reference_y_mm);
-                const redge=rayEdgeDistance(e.x,e.y,row.entry_reference_x_mm,row.entry_reference_y_mm,row.arena_width_mm,row.arena_height_mm);
-                const u=redge>0?Math.max(0,Math.min(1,r/redge)):0;
-                events.push({r,u});
-              }
-            }
-          }
-          const rsVals=[5,10,20,50,100,200,500];
-          const gates={};
-          for(const rs of rsVals)gates['rational_'+rs]=events.map(e=>e.r===0?0:e.r/(e.r+rs));
-          gates.boundary_linear=events.map(e=>e.u);
-          gates.boundary_sqrt=events.map(e=>Math.sqrt(e.u));
-          gates.no_gate_except_origin=events.map(e=>e.r===0?0:1);
-
-          const ref=gates.rational_50, pairwise={};
-          for(const [name,v] of Object.entries(gates)){
-            pairwise[name]={cosine_vs_rational_50:cosine(ref,v),scalar_fit_from_rational_50_to_variant:fitScale(ref,v)};
-          }
-          const rationalPair={};
-          for(let i=0;i<rsVals.length;i++)for(let j=i+1;j<rsVals.length;j++){
-            const a='rational_'+rsVals[i],b='rational_'+rsVals[j];
-            rationalPair[a+'__'+b]={cosine:cosine(gates[a],gates[b]),fit_a_to_b:fitScale(gates[a],gates[b])};
-          }
-
-          // Mathematical edge/symmetry/extreme checks independent of trajectory outcomes.
-          function gRat(r,rs){return r===0?0:r/(r+rs);}
-          const invariants={
-            exact_center_zero:rsVals.every(rs=>gRat(0,rs)===0),
-            near_center_finite:rsVals.every(rs=>Number.isFinite(gRat(1e-12,rs))&&gRat(1e-12,rs)>0),
-            monotone_in_r:rsVals.every(rs=>[0,1e-9,.1,1,10,50,100,200].every((x,k,a)=>k===0||gRat(x,rs)>=gRat(a[k-1],rs))),
-            monotone_in_rs:[1,10,50,100].every(r=>rsVals.every((rs,k,a)=>k===0||gRat(r,rs)<=gRat(r,a[k-1]))),
-            no_gate_discontinuous_at_origin:"R(0)=0 but limit r->0+ = 1",
-            boundary_linear_continuous_at_origin:true,
-            boundary_linear_reaches_one_at_ray_boundary:true
-          };
-          // Translation/reflection and 90-degree rotation checks for boundary-linear gate.
-          const synthetic=[
-            {w:300,h:200,ox:150,oy:100,x:210,y:130},
-            {w:290,h:204,ox:145,oy:102,x:120,y:180},
-            {w:311,h:197,ox:155.5,oy:98.5,x:275,y:40}
-          ];
-          const sym=[];
-          for(const s of synthetic){
-            const r=Math.hypot(s.x-s.ox,s.y-s.oy),u=r/rayEdgeDistance(s.x,s.y,s.ox,s.oy,s.w,s.h);
-            const tx=37,ty=-19;
-            const rt=Math.hypot((s.x+tx)-(s.ox+tx),(s.y+ty)-(s.oy+ty))/rayEdgeDistance(s.x+tx,s.y+ty,s.ox+tx,s.oy+ty,s.w+2*tx,s.h+2*ty);
-            // reflection x -> w-x
-            const xr=s.w-s.x,oxr=s.w-s.ox;
-            const ur=Math.hypot(xr-oxr,s.y-s.oy)/rayEdgeDistance(xr,s.y,oxr,s.oy,s.w,s.h);
-            // 90deg: (x,y,w,h)->(h-y,x,h,w), origin likewise
-            const x90=s.h-s.y,y90=s.x,ox90=s.h-s.oy,oy90=s.ox;
-            const u90=Math.hypot(x90-ox90,y90-oy90)/rayEdgeDistance(x90,y90,ox90,oy90,s.h,s.w);
-            sym.push({u,translation_abs_err:Math.abs(u-rt),reflection_abs_err:Math.abs(u-ur),rotation90_abs_err:Math.abs(u-u90)});
-          }
-          const out={
-            status:'passed',
-            scientific_role:'radial_gate_identifiability_shadow_only_no_H5_runtime_no_fit',
-            simulations:600,
-            h3_null_events:events.length,
-            event_radius_mm:summary(events.map(e=>e.r)),
-            event_boundary_normalized_radius:summary(events.map(e=>e.u)),
-            gate_value_summaries:Object.fromEntries(Object.entries(gates).map(([k,v])=>[k,summary(v)])),
-            scalar_confounding_vs_rational_50:pairwise,
-            rational_pairwise_confounding:rationalPair,
-            invariants,
-            boundary_linear_symmetry_checks:sym,
-            interpretation_guard:'No gate was ranked against Poissonnier target outcomes.'
-          };
-          fs.writeFileSync('/tmp/h5-radial-events.json',JSON.stringify(out,null,2)+'\n');
-          console.log(JSON.stringify(out,null,2));
-          NODE
-
-      - name: Corrected coordinate-frame symmetry audit
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs');
-          function rayFrac(x,y,ox,oy,b){
-            const dx=x-ox,dy=y-oy,r=Math.hypot(dx,dy);if(r===0)return 0;
-            const ux=dx/r,uy=dy/r,c=[];
-            if(ux>0)c.push((b.xmax-ox)/ux); else if(ux<0)c.push((b.xmin-ox)/ux);
-            if(uy>0)c.push((b.ymax-oy)/uy); else if(uy<0)c.push((b.ymin-oy)/uy);
-            const redge=Math.min(...c.filter(t=>t>=0&&Number.isFinite(t)));
-            return Math.max(0,Math.min(1,r/redge));
-          }
-          const cases=[
-            {b:{xmin:-20,xmax:280,ymin:7,ymax:207},o:[130,107],p:[190,137]},
-            {b:{xmin:11,xmax:301,ymin:-40,ymax:164},o:[156,62],p:[131,140]},
-            {b:{xmin:-105,xmax:206,ymin:55,ymax:252},o:[50.5,153.5],p:[170,95]},
-            {b:{xmin:0,xmax:289.1,ymin:0,ymax:202.4},o:[144.55,101.2],p:[144.550000001,101.2]}
-          ];
-          const rows=[];
-          for(const s of cases){
-            const u=rayFrac(s.p[0],s.p[1],s.o[0],s.o[1],s.b);
-            const dx=37.25,dy=-19.5;
-            const bt={xmin:s.b.xmin+dx,xmax:s.b.xmax+dx,ymin:s.b.ymin+dy,ymax:s.b.ymax+dy};
-            const ut=rayFrac(s.p[0]+dx,s.p[1]+dy,s.o[0]+dx,s.o[1]+dy,bt);
-            const xm=s.b.xmin+s.b.xmax;
-            const ur=rayFrac(xm-s.p[0],s.p[1],xm-s.o[0],s.o[1],s.b);
-            // 90-degree rotation followed by translation: x'=y-ymin, y'=xmax-x in [0,H]x[0,W]
-            const W=s.b.xmax-s.b.xmin,H=s.b.ymax-s.b.ymin;
-            const p90=[s.p[1]-s.b.ymin,s.b.xmax-s.p[0]],o90=[s.o[1]-s.b.ymin,s.b.xmax-s.o[0]],b90={xmin:0,xmax:H,ymin:0,ymax:W};
-            const u90=rayFrac(p90[0],p90[1],o90[0],o90[1],b90);
-            const sc=3.7,bs={xmin:s.b.xmin*sc,xmax:s.b.xmax*sc,ymin:s.b.ymin*sc,ymax:s.b.ymax*sc};
-            const us=rayFrac(s.p[0]*sc,s.p[1]*sc,s.o[0]*sc,s.o[1]*sc,bs);
-            rows.push({u,translation_err:Math.abs(u-ut),reflection_err:Math.abs(u-ur),rotation90_err:Math.abs(u-u90),scale_err:Math.abs(u-us)});
-          }
-          const maxErr=Math.max(...rows.flatMap(r=>[r.translation_err,r.reflection_err,r.rotation90_err,r.scale_err]));
-          const continuity=[];
-          const b={xmin:0,xmax:300,ymin:0,ymax:200},ox=150,oy=100;
-          for(const r of [0,1e-12,1e-9,1e-6,.001,.1,1,10,50,99.999,100]){
-            continuity.push({r,u:rayFrac(ox+r,oy,ox,oy,b)});
-          }
-          if(maxErr>1e-12)throw new Error('boundary-linear symmetry failure '+maxErr);
-          if(continuity[0].u!==0)throw new Error('center not zero');
-          for(let i=1;i<continuity.length;i++)if(!(continuity[i].u>=continuity[i-1].u))throw new Error('not monotone');
-          const out={status:'passed',rule:'R = current radial distance / distance from origin to rectangular boundary along the same ray',max_symmetry_abs_error:maxErr,cases:rows,near_origin_and_edge:continuity};
-          fs.writeFileSync('/tmp/h5-radial-symmetry.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
-          NODE
-
-      - name: Install temporary direction-only radial diagnostic hook
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs');
-          const p='src/h3.js';
-          let s=fs.readFileSync(p,'utf8');
-          const before=s;
-          s=s.replace(
-            "ant.h3AngleRng = new core.RNG(angleSeed);",
-            "ant.h3AngleRng = new core.RNG(angleSeed);\n    ant.h5DiagChoiceRng = new core.RNG(streamSeed(seed, 'biology_h5_search_choice:' + ant.id));\n    ant.h5DiagAngleRng = new core.RNG(streamSeed(seed, 'biology_h5_search_angle:' + ant.id));"
-          );
-          s=s.replace(
-            "ant.heading = core.normalizeAngle(ant.heading + angle);",
-            "const baselineHeading = core.normalizeAngle(ant.heading + angle);\n      ant.heading = baselineHeading;\n      let h5DiagSearchUsed = false;\n      if (sim.__h5diag) {\n        const choice = ant.h5DiagChoiceRng.next();\n        const searchAngle = sampleVonMises(ant.h5DiagAngleRng, cfg.kappa);\n        const dx = Number(sim.__h5diag.originX) - ant.x;\n        const dy = Number(sim.__h5diag.originY) - ant.y;\n        const r = Math.hypot(dx, dy);\n        let radial = 0;\n        if (r > 0) {\n          const kind = sim.__h5diag.gateKind || 'rational';\n          if (kind === 'none') radial = 1;\n          else if (kind === 'rational') { const rs=Math.max(1e-12,Number(sim.__h5diag.rSearchMm)||50); radial=r/(r+rs); }\n          else {\n            const ux=(-dx)/r, uy=(-dy)/r;\n            const ox=Number(sim.__h5diag.originX), oy=Number(sim.__h5diag.originY), W=Number(sim.__h5diag.worldW), H=Number(sim.__h5diag.worldH);\n            const c=[]; if(ux>0)c.push((W-ox)/ux); else if(ux<0)c.push((0-ox)/ux); if(uy>0)c.push((H-oy)/uy); else if(uy<0)c.push((0-oy)/uy);\n            const redge=Math.min(...c.filter(t=>t>=0&&Number.isFinite(t)));\n            const u=Math.max(0,Math.min(1,r/redge));\n            radial = kind === 'boundary_sqrt' ? Math.sqrt(u) : u;\n          }\n        }\n        const w = Math.max(0, Math.min(1, (Number(sim.__h5diag.directionW) || 0) * radial));\n        if (choice < w && r > 0) {\n          const bearing = Math.atan2(dy, dx);\n          ant.heading = core.normalizeAngle(bearing + searchAngle);\n          h5DiagSearchUsed = true;\n        }\n      }"
-          );
-          s=s.replace(
-            "sim.events.push({ time: sim.time + elapsed, type: 'h3_reorientation', ant: ant.id, sequence: ant.h3TurnCount, angle_rad: angle, x: ant.x, y: ant.y });",
-            "sim.events.push({ time: sim.time + elapsed, type: 'h3_reorientation', ant: ant.id, sequence: ant.h3TurnCount, angle_rad: angle, x: ant.x, y: ant.y, h5_diag_search_used: h5DiagSearchUsed });"
-          );
-          if(s===before) throw new Error('diagnostic patch did not change h3.js');
-          fs.writeFileSync(p,s);
-          NODE
-          node --check src/h3.js
-
-      - name: Node radial-gate engineering matrix
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs');
-          const geom=require('./tools/poissonnier2026-measurement-geometry.js');
-          const {Simulation,FIXED_DT,streamSeed}=require('./src/integrity.js');
-          const core=require('./src/sim-core.js');
-          const {loadBundle}=require('./tools/load-bundle.js');
-          const {geometry}=geom.loadFrozenMeasurementGeometry(process.cwd());
-          const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
-          function edge(ex,w,h){if(!ex)return'timeout';const d={left:Math.abs(ex.x),right:Math.abs(ex.x-w),top:Math.abs(ex.y),bottom:Math.abs(ex.y-h)};return Object.keys(d).sort((a,b)=>d[a]-d[b])[0];}
-          function vec(rows){const ep={left:0,right:0,top:0,bottom:0,timeout:0};rows.forEach(r=>ep[r.exit]++);const n=rows.length;return [mean(rows.map(r=>r.time)),mean(rows.map(r=>r.zone)),mean(rows.map(r=>r.beeline)),ep.left/n,ep.right/n,ep.top/n,ep.bottom/n,ep.timeout/n];}
-          const cos=(a,b)=>{const da=Math.hypot(...a),db=Math.hypot(...b);return da&&db?a.reduce((s,x,i)=>s+x*b[i],0)/(da*db):null;};
-          const fitScale=(a,b)=>{const den=a.reduce((s,x)=>s+x*x,0),k=den?a.reduce((s,x,i)=>s+x*b[i],0)/den:0,p=a.map(x=>k*x),sse=p.reduce((s,x,i)=>s+(b[i]-x)**2,0),m=b.reduce((s,x)=>s+x,0)/b.length,sst=b.reduce((s,x)=>s+(x-m)**2,0);return{scale:k,r2:sst?1-sse/sst:null,rmse:Math.sqrt(sse/b.length)};};
-          const std=(v,b)=>{const scales=[Math.max(1,b[0]),Math.max(.05,b[1]),Math.max(10,b[2]),.25,.25,.25,.25,.1];return v.map((x,i)=>(x-b[i])/scales[i]);};
-          const bundle=loadBundle('open_arena_short_control.json',{modelId:'lasius_niger_locomotion_h3_v1'});bundle.model.reorientation_gate.effect.max_hazard_reduction_fraction=0;
-          const variants=[
-            {id:'baseline',kind:'rational',rs:50,w:0},
-            {id:'null_none',kind:'none',w:0},
-            {id:'null_boundary_linear',kind:'boundary_linear',w:0},
-            {id:'rational_10',kind:'rational',rs:10,w:.4},
-            {id:'rational_20',kind:'rational',rs:20,w:.4},
-            {id:'rational_50',kind:'rational',rs:50,w:.4},
-            {id:'rational_100',kind:'rational',rs:100,w:.4},
-            {id:'rational_200',kind:'rational',rs:200,w:.4},
-            {id:'boundary_linear',kind:'boundary_linear',w:.4},
-            {id:'boundary_sqrt',kind:'boundary_sqrt',w:.4},
-            {id:'no_gate_except_origin',kind:'none',w:.4}
-          ];
-          const rows=Object.fromEntries(variants.map(v=>[v.id,[]])),uses=Object.fromEntries(variants.map(v=>[v.id,[0,0]]));
-          let nullExact=true;
-          for(let fi=0;fi<geom.EXPECTED_COLONIES.length;fi++){
-            const held=geom.EXPECTED_COLONIES[fi],pool=geom.geometryPool(geometry.rows,held);
-            for(let i=0;i<100;i++){
-              const seed=990000+fi*10000+i,row=geom.sampleGeometry(pool,seed).row,hr=new core.RNG(streamSeed(seed,'h5_diag_shared_entry_heading')),heading=hr.next()*2*Math.PI-Math.PI;
-              const trial={};
-              for(const v of variants){
-                const b=geom.applyGeometry(bundle,row);b.observation.record_trajectories=false;
-                const sim=new Simulation(b,seed);sim.ants[0].heading=heading;
-                sim.__h5diag={directionW:v.w,gateKind:v.kind,rSearchMm:v.rs,originX:row.entry_reference_x_mm,originY:row.entry_reference_y_mm,worldW:row.arena_width_mm,worldH:row.arena_height_mm};
-                const sx=sim.ants[0].x,sy=sim.ants[0].y,s=sim.runUntilComplete(b.experiment.duration_s,FIXED_DT),o=s.observed_metrics.ants[0],ex=o.exit_coordinate_mm;
-                const rec={time:o.time_to_arena_edge_s??b.experiment.duration_s,zone:o.central_zone_fraction??0,beeline:ex?Math.hypot(ex.x-sx,ex.y-sy):0,exit:edge(ex,sim.apparatus.world.width,sim.apparatus.world.height),x:sim.ants[0].x,y:sim.ants[0].y,heading:sim.ants[0].heading,turns:sim.ants[0].h3TurnCount};
-                rows[v.id].push(rec);trial[v.id]=rec;
-                const ev=sim.events.filter(e=>e.type==='h3_reorientation');uses[v.id][0]+=ev.filter(e=>e.h5_diag_search_used).length;uses[v.id][1]+=ev.length;
-              }
-              for(const k of ['null_none','null_boundary_linear']){
-                const a=trial.baseline,b=trial[k];
-                if(JSON.stringify(a)!==JSON.stringify(b))nullExact=false;
-              }
-            }
-          }
-          const vectors=Object.fromEntries(Object.entries(rows).map(([k,v])=>[k,vec(v)])),base=vectors.baseline,effects={};
-          for(const k of Object.keys(vectors))if(!k.startsWith('null_')&&k!=='baseline')effects[k]=std(vectors[k],base);
-          const ref=effects.rational_50,conf={};
-          for(const [k,v] of Object.entries(effects))conf[k]={cosine_vs_rational_50:cos(ref,v),scalar_fit_from_rational_50:fitScale(ref,v)};
-          const rationalConf={};
-          for(const a of ['rational_10','rational_20','rational_50','rational_100','rational_200'])for(const b of ['rational_10','rational_20','rational_50','rational_100','rational_200'])if(a<b)rationalConf[a+'__'+b]={cosine:cos(effects[a],effects[b]),scalar_fit:fitScale(effects[a],effects[b])};
-          const out={
-            status:'passed',
-            scientific_role:'engineering_reachability_only_no_fit_no_reference_outcome_ranking',
-            simulations_per_variant:600,
-            entry_heading:'shared deterministic uniform [-pi,pi) per trial',
-            fixed_direction_strength_diagnostic:0.4,
-            variants,
-            exact_null_equivalence_across_gate_forms:nullExact,
-            metric_vector_order:['mean_time_to_exit_s','mean_middle_zone_fraction','mean_beeline_mm','p_left','p_right','p_top','p_bottom','p_timeout'],
-            vectors,
-            standardized_effect_vectors:effects,
-            effect_shape_confounding_vs_rational_50:conf,
-            rational_pairwise_effect_confounding:rationalConf,
-            search_component_usage:Object.fromEntries(Object.entries(uses).map(([k,[a,n]])=>[k,{search_turns:a,total_turns:n,fraction:n?a/n:0}])),
-            interpretation_guard:'No gate form or scale was compared to Poissonnier target loss.'
-          };
-          fs.writeFileSync('/tmp/h5-radial-matrix.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
-          NODE
 
       - name: Start Chromium
         run: |
@@ -306,69 +57,58 @@ jobs:
           cat /tmp/chrome.log || true
           exit 1
 
-      - name: Chromium radial-gate mirror
+      - name: Chromium radial-rule and clean baseline validation
         run: |
-          set -euo pipefail
-          cat >/tmp/h5-radial-browser.mjs <<'NODE'
+          cat >/tmp/h5-radial-final.mjs <<'NODE'
           import fs from 'node:fs';
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0],ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0],ws=new WebSocket(target.webSocketDebuggerUrl);
+          await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});
           let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
           ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
           const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
           const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
           await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
-          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!AntLabIntegrity&&!!AntLabCore&&!!AntLabH3"))break;await sleep(100);}
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!AntLabIntegrity&&!!AntLabCore"))break;await sleep(100);}
           const report=await evalv(`(async()=>{
+            function radial(x,y,ox,oy,w,h){
+              const dx=x-ox,dy=y-oy,r=Math.hypot(dx,dy);if(r===0)return 0;
+              const ux=dx/r,uy=dy/r,c=[];if(ux>0)c.push((w-ox)/ux);else if(ux<0)c.push((0-ox)/ux);if(uy>0)c.push((h-oy)/uy);else if(uy<0)c.push((0-oy)/uy);
+              const de=Math.min(...c.filter(t=>t>=0&&Number.isFinite(t)));return Math.max(0,Math.min(1,r/de));
+            }
+            const checks={
+              center:radial(150,100,150,100,300,200),
+              near:radial(150.000001,100,150,100,300,200),
+              east_edge:radial(300,100,150,100,300,200),
+              north_edge:radial(150,0,150,100,300,200),
+              diagonal_inside:radial(210,130,150,100,300,200)
+            };
+            if(checks.center!==0||!(checks.near>0&&checks.near<1)||checks.east_edge!==1||checks.north_edge!==1||!(checks.diagonal_inside>0&&checks.diagonal_inside<1))throw new Error('radial rule check failed');
             const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();},clone=x=>JSON.parse(JSON.stringify(x));
             const geometry=await j('./reference/poissonnier2026_open_arena_measurement_geometry_v1.json'),policy=await j('./reference/poissonnier2026_open_arena_measurement_policy_v1.json');
             const app0=await j('./apparatus/poissonnier2026_open_arena.json'),exp0=await j('./experiments/open_arena_short_control.json'),model0=await j('./models/lasius_niger_locomotion_h3_v1.json'),state=await j('./states/naive_outbound_v1.json'),obs0=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');
             model0.reorientation_gate.effect.max_hazard_reduction_fraction=0;
-            const variants=[{id:'baseline',kind:'rational',rs:50,w:0},{id:'r20',kind:'rational',rs:20,w:.4},{id:'r50',kind:'rational',rs:50,w:.4},{id:'r100',kind:'rational',rs:100,w:.4},{id:'boundary',kind:'boundary_linear',w:.4},{id:'none',kind:'none',w:.4}],colonies=[0,7,16,20,21,27],rows=Object.fromEntries(variants.map(v=>[v.id,[]]));
-            const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
-            for(let fi=0;fi<colonies.length;fi++){
-              const held=colonies[fi],pool=geometry.rows.filter(r=>r.colony!==held).sort((a,b)=>a.ant_id-b.ant_id);
-              for(let i=0;i<10;i++){
-                const seed=990000+fi*10000+i,rr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,policy.geometry_sampler.rng_stream_name)),row=pool[Math.min(pool.length-1,Math.floor(rr.next()*pool.length))],hr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,'h5_diag_shared_entry_heading')),heading=hr.next()*2*Math.PI-Math.PI;
-                for(const v of variants){
-                  const exp=clone(exp0),app=clone(app0),obs=clone(obs0),model=clone(model0);exp.model=model.id;
-                  app.world.width=row.arena_width_mm;app.world.height=row.arena_height_mm;const rect=app.geometry.primitives.find(p=>p.type==='rect');rect.width=row.arena_width_mm;rect.height=row.arena_height_mm;
-                  app.entry_points.default={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};app.entry_points.center={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};exp.protocol.entry_state.position_jitter_mm=0;obs.metric_definitions.central_zone_fraction.center_y_mm=row.entry_reference_y_mm;obs.metric_definitions.central_zone_fraction.half_width_mm=10;
-                  const sim=new AntLabIntegrity.Simulation({experiment:exp,model,apparatus:app,state,observation:obs,scoring},seed);sim.ants[0].heading=heading;sim.__h5diag={directionW:v.w,gateKind:v.kind,rSearchMm:v.rs,originX:row.entry_reference_x_mm,originY:row.entry_reference_y_mm,worldW:row.arena_width_mm,worldH:row.arena_height_mm};
-                  const sx=sim.ants[0].x,sy=sim.ants[0].y,s=sim.runUntilComplete(exp.duration_s,AntLabIntegrity.FIXED_DT),o=s.observed_metrics.ants[0],ex=o.exit_coordinate_mm;
-                  rows[v.id].push({time:o.time_to_arena_edge_s??exp.duration_s,zone:o.central_zone_fraction??0,beeline:ex?Math.hypot(ex.x-sx,ex.y-sy):0});
-                }
-              }
+            const colonies=[0,7,16,20,21,27],folds={};
+            for(let fi=0;fi<colonies.length;fi++){const held=colonies[fi],pool=geometry.rows.filter(r=>r.colony!==held).sort((a,b)=>a.ant_id-b.ant_id);let n=0;
+              for(let i=0;i<2;i++){const seed=990000+fi*10000+i,rr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,policy.geometry_sampler.rng_stream_name)),row=pool[Math.min(pool.length-1,Math.floor(rr.next()*pool.length))];
+                const exp=clone(exp0),app=clone(app0),obs=clone(obs0),model=clone(model0);exp.model=model.id;app.world.width=row.arena_width_mm;app.world.height=row.arena_height_mm;const rect=app.geometry.primitives.find(p=>p.type==='rect');rect.width=row.arena_width_mm;rect.height=row.arena_height_mm;app.entry_points.default={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};app.entry_points.center={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};exp.protocol.entry_state.position_jitter_mm=0;obs.metric_definitions.central_zone_fraction.center_y_mm=row.entry_reference_y_mm;obs.metric_definitions.central_zone_fraction.half_width_mm=10;
+                const rv=radial(row.first_track_x_mm,row.first_track_y_mm,row.entry_reference_x_mm,row.entry_reference_y_mm,row.arena_width_mm,row.arena_height_mm);if(!(rv>=0&&rv<1&&Number.isFinite(rv)))throw new Error('sample radial invalid');
+                const sim=new AntLabIntegrity.Simulation({experiment:exp,model,apparatus:app,state,observation:obs,scoring},seed);sim.runUntilComplete(exp.duration_s,AntLabIntegrity.FIXED_DT);n++;
+              }folds[held]={pool_n:pool.length,simulations:n};
             }
-            const summary={};for(const [k,a] of Object.entries(rows))summary[k]={n:a.length,time:mean(a.map(x=>x.time)),zone:mean(a.map(x=>x.zone)),beeline:mean(a.map(x=>x.beeline))};
-            return{status:'passed',simulations_per_variant:60,summary};
+            return{status:'passed',radial_checks:checks,simulations:12,folds};
           })()`);
           const forbidden=requests.filter(u=>/neutral_y_maze|\/y_maze|\/y-maze/i.test(u));if(exceptions.length||consoleErrors.length||forbidden.length)throw new Error('browser firewall failure');
           report.browser={exceptions:0,console_errors:0,ymaze_requests:0};
-          fs.writeFileSync('/tmp/h5-radial-browser.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          fs.writeFileSync('/tmp/h5-radial-final.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
           NODE
-          node /tmp/h5-radial-browser.mjs
-
-      - name: Restore audited runtime and prove no diagnostic leak
-        run: |
-          set -euo pipefail
-          cp /tmp/h3-original.js src/h3.js
-          git diff --exit-code -- src/h3.js
-          node --check src/h3.js
-          for f in tests/h3-reorientation.test.js tests/rng-streams.test.js tests/integrity-firewall.test.js; do node "$f"; done
-          if grep -R -n 'h5Diag' src models experiments states apparatus scoring observations; then
-            echo 'temporary H5 diagnostic leaked into persistent runtime' >&2
-            exit 1
-          fi
+          node /tmp/h5-radial-final.mjs
 
       - uses: actions/upload-artifact@v4
         with:
-          name: h5-radial-gate-stress-audit
+          name: h5-radial-gate-final-validation
           path: |
-            /tmp/h5-radial-events.json
-            /tmp/h5-radial-symmetry.json
-            /tmp/h5-radial-matrix.json
-            /tmp/h5-radial-browser.json
+            /tmp/h5-radial-final.json
             /tmp/chrome-version.json
             /tmp/chrome.log
           retention-days: 14
