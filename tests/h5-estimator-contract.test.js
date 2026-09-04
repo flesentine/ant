@@ -68,7 +68,15 @@ const h4=readJson(path.resolve(root,'reports','h4_parameter_estimation_500x60_v1
 for(const heldout of h5est.COLONIES){
   assert(h5est.h2CandidateFromFold(h2.folds.find(f=>f.held_out_colony===heldout)));
   assert(h5est.h3CandidateFromFold(h3.folds.find(f=>f.held_out_colony===heldout)));
-  assert(h5est.h4CandidateFromFold(h4.folds.find(f=>f.held_out_colony===heldout)));
+  const h4Fold=h4.folds.find(f=>f.held_out_colony===heldout);
+  const h4c=h5est.h4CandidateFromFold(h4Fold);
+  assert(h4c);
+  if(h4Fold.H4_context.fit.candidate.null_equivalent_anchor===true){
+    assert.strictEqual(h4c.lambda_activation_mm,500);
+    assert.strictEqual(h4c.tau_activation_s,5);
+    assert.strictEqual(h4c.rho_speed,0);
+    assert.strictEqual(h4c._rehydrated_exact_null_anchor,true);
+  }
 }
 
 const synthetic=[
