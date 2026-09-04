@@ -1,7 +1,7 @@
 {
-  "schema_version": 8,
+  "schema_version": 9,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_origin_temporal_effect_scope_radial_gate_and_history_response_frozen_search_direction_and_estimator_policy_open_before_full_mechanism_freeze",
+  "status": "draft_origin_temporal_effect_scope_radial_gate_and_history_response_frozen_remaining_search_dispersion_and_estimator_questions_open_before_full_mechanism_freeze",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
   "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
@@ -173,8 +173,9 @@
     "Long-history ants should disperse outward more directly because the origin-oriented mixture component is weaker.",
     "The origin-oriented component is rotationally symmetric around O and therefore predicts no intrinsic left/right/top/bottom exit preference in a symmetric arena.",
     "H5 predicts no direct attraction to the DCM centerline; central-zone differences must emerge indirectly from geometry and trajectories.",
-    "With rho_search=0, H5-context must reduce exactly to H5-null for the same shared measurement geometry and matched baseline random streams.",
-    "H5-v1 makes no prediction for recent constrained travel distances other than exactly 200 mm and 1000 mm; such generalization requires a separately justified/versioned history-response law."
+    "With alpha_search_200=0 and alpha_search_1000=0, H5 reduces exactly to the H3-null locomotion substrate for the same shared measurement geometry and matched baseline random streams.",
+    "H5-v1 makes no prediction for recent constrained travel distances other than exactly 200 mm and 1000 mm; such generalization requires a separately justified/versioned history-response law.",
+    "If alpha_search_200=alpha_search_1000>0, H5 predicts common origin-referenced search but no recent-travel history modulation; this submodel cannot support the H5 history-modulation claim."
   ],
   "identifiability_warnings": {
     "history_levels": "Resolved for H5-v1 by refusing to estimate a continuous curve shape. The assay supplies only L=200 and L=1000, so H5 reports directly identifiable effective search amplitudes at those support points.",
@@ -187,7 +188,8 @@
       "Predicted number/proportion of origin-oriented reorientations under each observed history",
       "Boundary-hit and near-equivalent candidate diagnostics"
     ],
-    "claim_rule": "Do not report lambda_search_mm, a travel-distance half-life, interpolation, or extrapolation from H5-v1. A common-search solution alpha200≈alpha1000 is evidence, at most, for origin-referenced search and not for history modulation."
+    "claim_rule": "Do not report lambda_search_mm, a travel-distance half-life, interpolation, or extrapolation from H5-v1. A common-search solution alpha200≈alpha1000 is evidence, at most, for origin-referenced search and not for history modulation.",
+    "history_null_structure": "Because generic origin-referenced search is externally plausible, H5-v1 must distinguish a shared positive origin-search component from a true recent-travel modulation. The history-modulation null is alpha_search_200=alpha_search_1000, not only alpha_search_200=alpha_search_1000=0."
   },
   "raw_trajectory_discriminators_if_recovered": [
     "post-reorientation heading conditional on bearing to the trial origin",
@@ -247,7 +249,9 @@
     "H5_separate_rho_search_parameter_forbidden": true,
     "H5_unsupported_history_interpolation_or_extrapolation_forbidden": true,
     "H5_history_response_may_not_be_reopened_to_rescue_fit": true,
-    "H5_common_origin_search_alone_not_sufficient_for_history_modulation_claim": true
+    "H5_common_origin_search_alone_not_sufficient_for_history_modulation_claim": true,
+    "H5_history_modulation_claim_requires_beating_equal_strength_common_search": true,
+    "H5_exact_zero_search_null_alone_not_sufficient_for_history_claim": true
   },
   "allowed_shared_measurement_or_geometry_inputs_under_frozen_policy": [
     "central_physical_entry_reference_mm (frozen H5 biological origin)",
@@ -323,6 +327,12 @@
     "curve_claim": "H5-v1 makes no claim about the history-response shape between or outside the two observed distances.",
     "lambda_search_parameter_present": false,
     "separate_rho_search_parameter_present": false,
-    "may_not_be_reopened_to_rescue_fit": true
+    "may_not_be_reopened_to_rescue_fit": true,
+    "null_structure": {
+      "exact_locomotor_null": "alpha_search_200 = 0 and alpha_search_1000 = 0",
+      "history_modulation_null": "alpha_search_200 = alpha_search_1000, including positive common origin-search strength",
+      "history_modulated_alternative": "alpha_search_200 > alpha_search_1000 >= 0",
+      "claim_guard": "Evidence against the exact zero-search null alone is not sufficient to claim history modulation. A later frozen estimator must explicitly compare against or strictly guard against the equal-strength common-origin-search submodel."
+    }
   }
 }
