@@ -146,6 +146,54 @@ jobs:
           console.log(JSON.stringify(out,null,2));
           NODE
 
+      - name: Corrected coordinate-frame symmetry audit
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          function rayFrac(x,y,ox,oy,b){
+            const dx=x-ox,dy=y-oy,r=Math.hypot(dx,dy);if(r===0)return 0;
+            const ux=dx/r,uy=dy/r,c=[];
+            if(ux>0)c.push((b.xmax-ox)/ux); else if(ux<0)c.push((b.xmin-ox)/ux);
+            if(uy>0)c.push((b.ymax-oy)/uy); else if(uy<0)c.push((b.ymin-oy)/uy);
+            const redge=Math.min(...c.filter(t=>t>=0&&Number.isFinite(t)));
+            return Math.max(0,Math.min(1,r/redge));
+          }
+          const cases=[
+            {b:{xmin:-20,xmax:280,ymin:7,ymax:207},o:[130,107],p:[190,137]},
+            {b:{xmin:11,xmax:301,ymin:-40,ymax:164},o:[156,62],p:[131,140]},
+            {b:{xmin:-105,xmax:206,ymin:55,ymax:252},o:[50.5,153.5],p:[170,95]},
+            {b:{xmin:0,xmax:289.1,ymin:0,ymax:202.4},o:[144.55,101.2],p:[144.550000001,101.2]}
+          ];
+          const rows=[];
+          for(const s of cases){
+            const u=rayFrac(s.p[0],s.p[1],s.o[0],s.o[1],s.b);
+            const dx=37.25,dy=-19.5;
+            const bt={xmin:s.b.xmin+dx,xmax:s.b.xmax+dx,ymin:s.b.ymin+dy,ymax:s.b.ymax+dy};
+            const ut=rayFrac(s.p[0]+dx,s.p[1]+dy,s.o[0]+dx,s.o[1]+dy,bt);
+            const xm=s.b.xmin+s.b.xmax;
+            const ur=rayFrac(xm-s.p[0],s.p[1],xm-s.o[0],s.o[1],s.b);
+            // 90-degree rotation followed by translation: x'=y-ymin, y'=xmax-x in [0,H]x[0,W]
+            const W=s.b.xmax-s.b.xmin,H=s.b.ymax-s.b.ymin;
+            const p90=[s.p[1]-s.b.ymin,s.b.xmax-s.p[0]],o90=[s.o[1]-s.b.ymin,s.b.xmax-s.o[0]],b90={xmin:0,xmax:H,ymin:0,ymax:W};
+            const u90=rayFrac(p90[0],p90[1],o90[0],o90[1],b90);
+            const sc=3.7,bs={xmin:s.b.xmin*sc,xmax:s.b.xmax*sc,ymin:s.b.ymin*sc,ymax:s.b.ymax*sc};
+            const us=rayFrac(s.p[0]*sc,s.p[1]*sc,s.o[0]*sc,s.o[1]*sc,bs);
+            rows.push({u,translation_err:Math.abs(u-ut),reflection_err:Math.abs(u-ur),rotation90_err:Math.abs(u-u90),scale_err:Math.abs(u-us)});
+          }
+          const maxErr=Math.max(...rows.flatMap(r=>[r.translation_err,r.reflection_err,r.rotation90_err,r.scale_err]));
+          const continuity=[];
+          const b={xmin:0,xmax:300,ymin:0,ymax:200},ox=150,oy=100;
+          for(const r of [0,1e-12,1e-9,1e-6,.001,.1,1,10,50,99.999,100]){
+            continuity.push({r,u:rayFrac(ox+r,oy,ox,oy,b)});
+          }
+          if(maxErr>1e-12)throw new Error('boundary-linear symmetry failure '+maxErr);
+          if(continuity[0].u!==0)throw new Error('center not zero');
+          for(let i=1;i<continuity.length;i++)if(!(continuity[i].u>=continuity[i-1].u))throw new Error('not monotone');
+          const out={status:'passed',rule:'R = current radial distance / distance from origin to rectangular boundary along the same ray',max_symmetry_abs_error:maxErr,cases:rows,near_origin_and_edge:continuity};
+          fs.writeFileSync('/tmp/h5-radial-symmetry.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
+          NODE
+
       - name: Install temporary direction-only radial diagnostic hook
         run: |
           set -euo pipefail
@@ -318,6 +366,7 @@ jobs:
           name: h5-radial-gate-stress-audit
           path: |
             /tmp/h5-radial-events.json
+            /tmp/h5-radial-symmetry.json
             /tmp/h5-radial-matrix.json
             /tmp/h5-radial-browser.json
             /tmp/chrome-version.json
