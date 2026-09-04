@@ -1,0 +1,84 @@
+name: H5 history browser equivalence
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate preconditions
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "530927adbdc33c9cd464197921223be9aa38375d"
+          test "$(git hash-object reports/h5_radial_gate_choice_audit_v1.json)" = "66f0d0204979a17ade267b41c387ed872679115a"
+          cp src/h3.js /tmp/h3-original.js
+          if grep -R -n 'h5Diag' src models experiments states apparatus scoring observations; then exit 1; fi
+      - name: Install temporary history diagnostic hook
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),p='src/h3.js';let s=fs.readFileSync(p,'utf8'),before=s;
+          s=s.replace("ant.h3AngleRng = new core.RNG(angleSeed);","ant.h3AngleRng = new core.RNG(angleSeed);\n    ant.h5DiagChoiceRng = new core.RNG(streamSeed(seed, 'biology_h5_search_choice:' + ant.id));\n    ant.h5DiagAngleRng = new core.RNG(streamSeed(seed, 'biology_h5_search_angle:' + ant.id));");
+          s=s.replace("ant.heading = core.normalizeAngle(ant.heading + angle);","const baselineHeading = core.normalizeAngle(ant.heading + angle);\n      ant.heading = baselineHeading;\n      let h5DiagSearchUsed = false;\n      if (sim.__h5diag) {\n        const choice=ant.h5DiagChoiceRng.next(),searchAngle=sampleVonMises(ant.h5DiagAngleRng,cfg.kappa);\n        const dx=Number(sim.__h5diag.originX)-ant.x,dy=Number(sim.__h5diag.originY)-ant.y,r=Math.hypot(dx,dy);let radial=0;\n        if(r>0){const ux=(-dx)/r,uy=(-dy)/r,ox=Number(sim.__h5diag.originX),oy=Number(sim.__h5diag.originY),W=Number(sim.__h5diag.worldW),H=Number(sim.__h5diag.worldH),c=[];if(ux>0)c.push((W-ox)/ux);else if(ux<0)c.push((0-ox)/ux);if(uy>0)c.push((H-oy)/uy);else if(uy<0)c.push((0-oy)/uy);const de=Math.min(...c.filter(t=>t>=0&&Number.isFinite(t)));radial=Math.max(0,Math.min(1,r/de));}\n        const L=Number(sim.__h5diag.historyMm);let alpha=0;\n        if(sim.__h5diag.historyMode==='direct'){alpha=L===200?Number(sim.__h5diag.a200):L===1000?Number(sim.__h5diag.a1000):NaN;}\n        else if(sim.__h5diag.historyMode==='exponential')alpha=Number(sim.__h5diag.rho)*Math.exp(-L/Number(sim.__h5diag.lambdaMm));\n        else if(sim.__h5diag.historyMode==='reciprocal')alpha=Number(sim.__h5diag.rho)/(1+L/Number(sim.__h5diag.kMm));\n        if(!Number.isFinite(alpha))throw new Error('H5 diagnostic history undefined at L='+L);\n        const w=Math.max(0,Math.min(1,alpha*radial));if(choice<w&&r>0){ant.heading=core.normalizeAngle(Math.atan2(dy,dx)+searchAngle);h5DiagSearchUsed=true;}\n      }");
+          s=s.replace("sim.events.push({ time: sim.time + elapsed, type: 'h3_reorientation', ant: ant.id, sequence: ant.h3TurnCount, angle_rad: angle, x: ant.x, y: ant.y });","sim.events.push({ time: sim.time + elapsed, type: 'h3_reorientation', ant: ant.id, sequence: ant.h3TurnCount, angle_rad: angle, x: ant.x, y: ant.y, h5_diag_search_used: h5DiagSearchUsed });");
+          if(s===before)throw new Error('patch failed');fs.writeFileSync(p,s);
+          NODE
+          node --check src/h3.js
+      - name: Start Chromium
+        run: |
+          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
+          for i in {1..100}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then exit 0; fi; sleep .2; done
+          cat /tmp/chrome.log; exit 1
+      - name: Real Chromium endpoint-equivalence, null, and domain guard
+        run: |
+          cat >/tmp/h5-history-browser-equivalence.mjs <<'NODE'
+          import fs from 'node:fs';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms)),tabs=await(await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0],ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));}),evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!AntLabIntegrity&&!!AntLabCore&&!!AntLabH3"))break;await sleep(100);}
+          const report=await evalv(`(async()=>{
+            const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();},clone=x=>JSON.parse(JSON.stringify(x));
+            const geometry=await j('./reference/poissonnier2026_open_arena_measurement_geometry_v1.json'),policy=await j('./reference/poissonnier2026_open_arena_measurement_policy_v1.json'),app0=await j('./apparatus/poissonnier2026_open_arena.json'),expS=await j('./experiments/open_arena_short_control.json'),expL=await j('./experiments/open_arena_long_control.json'),model0=await j('./models/lasius_niger_locomotion_h3_v1.json'),state=await j('./states/naive_outbound_v1.json'),obs0=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');
+            model0.reorientation_gate.effect.max_hazard_reduction_fraction=0;const a200=.6,a1000=.3,lambda=800/Math.log(2),rhoE=a200*Math.exp(200/lambda),k=600,rhoR=.8;
+            const modes=[{id:'direct',historyMode:'direct',a200,a1000},{id:'exponential',historyMode:'exponential',rho:rhoE,lambdaMm:lambda},{id:'reciprocal',historyMode:'reciprocal',rho:rhoR,kMm:k}];
+            const colonies=[0,7,16,20,21,27];let comparisons=0,mismatches=0,maxDelta=0,eventTimingMismatches=0,searchPatternMismatches=0,nullComparisons=0,nullMismatches=0,domainGuard=false;
+            function prep(exp0,row){const exp=clone(exp0),app=clone(app0),obs=clone(obs0),model=clone(model0);exp.model=model.id;app.world.width=row.arena_width_mm;app.world.height=row.arena_height_mm;const rect=app.geometry.primitives.find(p=>p.type==='rect');rect.width=row.arena_width_mm;rect.height=row.arena_height_mm;app.entry_points.default={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};app.entry_points.center={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};exp.protocol.entry_state.position_jitter_mm=0;obs.metric_definitions.central_zone_fraction.center_y_mm=row.entry_reference_y_mm;obs.metric_definitions.central_zone_fraction.half_width_mm=10;return{experiment:exp,model,apparatus:app,state,observation:obs,scoring};}
+            function snap(sim){const o=sim.summary().observed_metrics.ants[0],ev=sim.events.filter(e=>e.type==='h3_reorientation');return{t:sim.ants[0].finishedAt??sim.time,x:sim.ants[0].x,y:sim.ants[0].y,h:sim.ants[0].heading,zone:o.central_zone_fraction??0,events:ev.map(e=>e.time),search:ev.map(e=>!!e.h5_diag_search_used)};}
+            for(let fi=0;fi<colonies.length;fi++){const held=colonies[fi],pool=geometry.rows.filter(r=>r.colony!==held).sort((a,b)=>a.ant_id-b.ant_id);for(let i=0;i<8;i++){const seed=990000+fi*10000+i,rr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,policy.geometry_sampler.rng_stream_name)),row=pool[Math.min(pool.length-1,Math.floor(rr.next()*pool.length))],hr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,'h5_diag_shared_entry_heading')),heading=hr.next()*2*Math.PI-Math.PI;
+              for(const [cond,exp0,L] of [['short',expS,200],['long',expL,1000]]){const snaps=[];for(const m of modes){const b=prep(exp0,row),sim=new AntLabIntegrity.Simulation(b,seed);sim.ants[0].heading=heading;sim.__h5diag={...m,historyMm:L,originX:row.entry_reference_x_mm,originY:row.entry_reference_y_mm,worldW:row.arena_width_mm,worldH:row.arena_height_mm};sim.runUntilComplete(b.experiment.duration_s,AntLabIntegrity.FIXED_DT);snaps.push(snap(sim));}const ref=snaps[0];for(const x of snaps.slice(1)){comparisons++;for(const k of ['t','x','y','h','zone'])maxDelta=Math.max(maxDelta,Math.abs(ref[k]-x[k]));if(JSON.stringify(ref.events)!==JSON.stringify(x.events))eventTimingMismatches++;if(JSON.stringify(ref.search)!==JSON.stringify(x.search))searchPatternMismatches++;if(JSON.stringify(ref)!==JSON.stringify(x))mismatches++;}
+                const b0=prep(exp0,row),base=new AntLabIntegrity.Simulation(b0,seed);base.ants[0].heading=heading;base.runUntilComplete(b0.experiment.duration_s,AntLabIntegrity.FIXED_DT);const s0=snap(base);
+                const bn=prep(exp0,row),nul=new AntLabIntegrity.Simulation(bn,seed);nul.ants[0].heading=heading;nul.__h5diag={historyMode:'direct',a200:0,a1000:0,historyMm:L,originX:row.entry_reference_x_mm,originY:row.entry_reference_y_mm,worldW:row.arena_width_mm,worldH:row.arena_height_mm};nul.runUntilComplete(bn.experiment.duration_s,AntLabIntegrity.FIXED_DT);nullComparisons++;if(JSON.stringify(s0)!==JSON.stringify(snap(nul)))nullMismatches++;
+              }
+            }}
+            try{const row=geometry.rows[0],b=prep(expS,row),sim=new AntLabIntegrity.Simulation(b,123);sim.__h5diag={historyMode:'direct',a200:.6,a1000:.3,historyMm:600,originX:row.entry_reference_x_mm,originY:row.entry_reference_y_mm,worldW:row.arena_width_mm,worldH:row.arena_height_mm};sim.runUntilComplete(b.experiment.duration_s,AntLabIntegrity.FIXED_DT);}catch(e){domainGuard=String(e&&e.message||e).includes('undefined at L=600');}
+            if(mismatches||eventTimingMismatches||searchPatternMismatches||nullMismatches||!domainGuard)throw new Error('equivalence/null/domain failure');
+            return{status:'passed',comparisons,mismatches,max_numeric_delta:maxDelta,event_timing_mismatches:eventTimingMismatches,search_pattern_mismatches:searchPatternMismatches,null_comparisons:nullComparisons,null_mismatches:nullMismatches,unsupported_L600_rejected:domainGuard};
+          })()`);
+          const forbidden=requests.filter(u=>/neutral_y_maze|\/y_maze|\/y-maze/i.test(u));if(exceptions.length||consoleErrors.length||forbidden.length)throw new Error('browser firewall failure');report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/h5-history-browser-equivalence.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          NODE
+          node /tmp/h5-history-browser-equivalence.mjs
+      - name: Restore runtime
+        run: |
+          cp /tmp/h3-original.js src/h3.js
+          git diff --exit-code -- src/h3.js
+          node tests/h3-reorientation.test.js
+          node tests/rng-streams.test.js
+          node tests/integrity-firewall.test.js
+          if grep -R -n 'h5Diag' src models experiments states apparatus scoring observations; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h5-history-browser-equivalence
+          path: |
+            /tmp/h5-history-browser-equivalence.json
+            /tmp/chrome-version.json
+            /tmp/chrome.log
+          retention-days: 14
