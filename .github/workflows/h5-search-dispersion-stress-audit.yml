@@ -99,8 +99,9 @@ jobs:
             frozen_H3_kappa_domain:[0,20],
             required_practical_diagnostic_points:[0,.25,.5,1,2,4,8,20],
             tiny_positive_numerical_seam_note:'The current H3 sampler has a machine-scale convergence seam near the <1e-8 uniform-approximation threshold. This audit records it rather than modifying frozen H3 runtime.',
-            out_of_domain_convergence_failures:failures,
-            interpretation_guard:'No biological target outcomes used; failures above kappa=20 are out-of-domain stress findings.'
+            tiny_positive_convergence_failures_within_declared_H3_bounds:failures.filter(x=>x.kappa<=20),
+            stress_failures_above_declared_H3_bounds:failures.filter(x=>x.kappa>20),
+            interpretation_guard:'No biological target outcomes used. Tiny-positive failures are a numerical seam inside the nominal [0,20] bound but far below the practical diagnostic grid; no frozen runtime is changed here.'
           };
           fs.writeFileSync('/tmp/h5-dispersion-vm.json',JSON.stringify(out,null,2)+'\n');
           console.log(JSON.stringify(out,null,2));
