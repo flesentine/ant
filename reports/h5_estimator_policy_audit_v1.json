@@ -6,7 +6,7 @@
   "scientific_role": "estimator-policy freeze audit; no H5 reference candidate ranking or parameter fitting performed",
   "policy": {
     "path": "hypotheses/h5_parameter_estimation_v1.json",
-    "git_blob_sha": "1322c259153d12877a7b78190cb9e2603acb8882",
+    "git_blob_sha": "d81e756c3643778c067ef1b1bb8f68521adb8141",
     "mechanism_draft_pre_policy_blob": "bb198c985d6fbf2dd9b006a23b429095c9a7ec82",
     "mechanism_draft_post_policy_blob": "c4f729f04cc737d7a2fa68f1a1e4059ca336da3e"
   },
@@ -139,5 +139,13 @@
     "Y_maze_access": false,
     "canonical_model_unchanged": true
   },
-  "next_step": "Implement the frozen H5 runtime and estimator exactly, then run the required synthetic/no-reference-loss qualification before any high-resolution reference search."
+  "next_step": "Implement the frozen H5 runtime and estimator exactly, then run the required synthetic/no-reference-loss qualification before any high-resolution reference search.",
+  "transcription_correction": {
+    "date": "2026-09-04",
+    "corrected_policy_blob": "d81e756c3643778c067ef1b1bb8f68521adb8141",
+    "correction": "baseline H3 event stream label corrected from non-existent biology_h3_reorientation_event:<ant_id> to the actual frozen biology_h3_turn_event:<ant_id> stream.",
+    "scientific_change": false,
+    "runtime_change": false,
+    "H5_reference_results_used": false
+  }
 }
