@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "H5_parameter_estimation_v1",
   "status": "development_estimation_policy_frozen_before_persistent_H5_runtime_implementation_or_parameter_search",
   "freeze_date": "2026-09-04",
@@ -210,7 +210,7 @@
     "comparator_rule": "Historical H2/H3/H4 fold candidates must also be re-evaluated under this same reconstructed per-trial geometry without refitting."
   },
   "rng_contract": {
-    "baseline_H3_event_stream": "existing biology_h3_reorientation_event:<ant_id> stream unchanged",
+    "baseline_H3_event_stream": "existing biology_h3_turn_event:<ant_id> stream unchanged",
     "baseline_H3_turn_stream": "existing biology_h3_turn_angle:<ant_id> stream unchanged",
     "H5_choice_stream": "biology_h5_search_choice:<ant_id>",
     "H5_search_angle_stream": "biology_h5_search_angle:<ant_id>",
@@ -416,5 +416,17 @@
     "persistent_H5_runtime_implementation": "allowed only to implement this frozen mechanism and this estimator contract",
     "reference_parameter_search": "still forbidden until persistent runtime and estimator pass the required synthetic qualification",
     "high_resolution_reference_search": "allowed only after a separate exact-head qualification record shows all required checks pass"
-  }
+  },
+  "transcription_corrections": [
+    {
+      "date": "2026-09-04",
+      "field": "rng_contract.baseline_H3_event_stream",
+      "before": "existing biology_h3_reorientation_event:<ant_id> stream unchanged",
+      "after": "existing biology_h3_turn_event:<ant_id> stream unchanged",
+      "reason": "The frozen semantic rule was to preserve the existing H3 event stream. Runtime inspection during implementation showed that the existing audited H3 stream name is biology_h3_turn_event:<ant_id>. The earlier policy label used a non-existent descriptive name.",
+      "scientific_change": false,
+      "runtime_change": false,
+      "reference_H5_results_used": false
+    }
+  ]
 }
