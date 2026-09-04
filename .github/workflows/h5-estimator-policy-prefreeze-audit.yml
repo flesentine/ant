@@ -1,0 +1,74 @@
+name: H5 estimator-policy pre-freeze audit
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit proposed search geometry without H5 outcomes
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const draft=JSON.parse(fs.readFileSync('hypotheses/h5_origin_referenced_search_v1.draft.json','utf8'));
+          const h3p=JSON.parse(fs.readFileSync('hypotheses/h3_parameter_estimation_v1.json','utf8'));
+          if(draft.firewall.mechanism_frozen!==true||draft.firewall.H5_estimator_policy_still_unfrozen!==true)throw new Error('unexpected H5 stage');
+          const halton=(index,base)=>{let f=1,r=0,i=index;while(i>0){f/=base;r+=f*(i%base);i=Math.floor(i/base);}return r;};
+          const logmap=(u,lo,hi)=>Math.exp(Math.log(lo)+u*(Math.log(hi)-Math.log(lo)));
+          const linear=(u,lo,hi)=>lo+u*(hi-lo);
+          const nulls=[],commons=[],contexts=[];
+          for(let i=1;i<=500;i++){
+            nulls.push({i,ell0:logmap(halton(i,2),5,150),kappa:linear(halton(i,3),0,20),q:halton(i,5)});
+            if(i<=499)commons.push({i,ell0:logmap(halton(i,2),5,150),kappa:linear(halton(i,3),0,20),q:halton(i,5),alpha:halton(i,7)});
+            if(i<=498){const a=halton(i,7),b=halton(i,11);contexts.push({i,ell0:logmap(halton(i,2),5,150),kappa:linear(halton(i,3),0,20),q:halton(i,5),alpha200:Math.max(a,b),alpha1000:Math.min(a,b),raw:[a,b]});}
+          }
+          const minKappa=Math.min(...nulls.map(x=>x.kappa)),maxKappa=Math.max(...nulls.map(x=>x.kappa));
+          if(!(minKappa>1e-6&&maxKappa<20))throw new Error('Halton kappa support unsafe '+minKappa+' '+maxKappa);
+          if(contexts.some(x=>x.alpha1000<0||x.alpha200>1||x.alpha1000>x.alpha200))throw new Error('monotone triangle failed');
+          for(let i=0;i<498;i++){
+            for(const k of ['ell0','kappa','q'])if(contexts[i][k]!==commons[i][k]||contexts[i][k]!==nulls[i][k])throw new Error('nuisance pairing failed '+i+' '+k);
+          }
+          const amin={a200:Math.min(...contexts.map(x=>x.alpha200)),a1000:Math.min(...contexts.map(x=>x.alpha1000))};
+          const amax={a200:Math.max(...contexts.map(x=>x.alpha200)),a1000:Math.max(...contexts.map(x=>x.alpha1000))};
+          const delta=contexts.map(x=>x.alpha200-x.alpha1000);
+          const dsum={min:Math.min(...delta),max:Math.max(...delta),mean:delta.reduce((a,b)=>a+b,0)/delta.length};
+          if(dsum.max<.8||amin.a1000>.05||amax.a200<.95)throw new Error('context triangle coverage unexpectedly narrow');
+          if(JSON.stringify(h3p.estimated_parameters.baseline_mean_free_path_mm.bounds)!=='[5,150]'||JSON.stringify(h3p.estimated_parameters.baseline_turn_concentration.bounds)!=='[0,20]'||JSON.stringify(h3p.estimated_parameters.entry_orientation_retention_q.bounds)!=='[0,1]')throw new Error('H3 nuisance provenance drift');
+          const out={status:'passed',null_halton:500,common_halton:499,history_halton:498,total_with_anchors:{null:500,common:500,history:500},kappa_support:{min:minKappa,max:maxKappa,seam_distance_ratio:minKappa/1.1e-8},alpha_triangle:{min:amin,max:amax,delta:dsum},nuisance_pairing_indices:498};
+          fs.writeFileSync('/tmp/h5-estimator-prefreeze.json',JSON.stringify(out,null,2)+'\n');
+          console.log(JSON.stringify(out,null,2));
+          NODE
+      - name: Measurement and comparator pin audit
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reference/poissonnier2026_open_arena_measurement_policy_v1.json)" = "fd2718cf9351b655340eacd868adc536301a83a4"
+          test "$(git hash-object reference/poissonnier2026_open_arena_measurement_geometry_v1.json)" = "af0ec6fbacf83b915dd78cb3a822609c126dc1e7"
+          test "$(git hash-object reference/poissonnier2026_h2_estimation_targets.json)" = "07e2b8cf2dddbfcb152f0bd6d3031d473e0901b3"
+          test "$(git hash-object reports/h2_parameter_estimation_500x60_v1.json)" = "342f7a5af7c1ed71a8bdb7ff14becf38d24daa88"
+          test "$(git hash-object reports/h3_parameter_estimation_500x60_v1.json)" = "1d5c1b88ca9b425e927d761bc3ff1e5bad5bd5f3"
+          test "$(git hash-object reports/h4_parameter_estimation_500x60_v1.json)" = "8619b96bb3a02e78b905320ac96585bec08b2918"
+          node <<'NODE'
+          const fs=require('fs');
+          const g=JSON.parse(fs.readFileSync('reference/poissonnier2026_open_arena_measurement_geometry_v1.json','utf8'));
+          const t=JSON.parse(fs.readFileSync('reference/poissonnier2026_h2_estimation_targets.json','utf8'));
+          const ids=new Set(g.rows.map(r=>r.ant_id)),targetIds=new Set(t.rows.filter(r=>r.Pheromone==='DCM'||r.pheromone==='DCM'||true).map(r=>r.ant_ID??r.ant_id));
+          if(g.rows.length!==51)throw new Error('geometry row count drift');
+          const cols=[...new Set(g.rows.map(r=>r.colony))].sort((a,b)=>a-b);
+          if(JSON.stringify(cols)!=='[0,7,16,20,21,27]')throw new Error('colony drift');
+          for(const p of ['reports/h2_parameter_estimation_500x60_v1.json','reports/h3_parameter_estimation_500x60_v1.json','reports/h4_parameter_estimation_500x60_v1.json']){
+            const j=JSON.parse(fs.readFileSync(p,'utf8'));if(!Array.isArray(j.folds)||j.folds.length!==6)throw new Error('comparator folds missing '+p);
+          }
+          console.log(JSON.stringify({status:'passed',geometry_rows:g.rows.length,colonies:cols,target_rows:t.rows.length}));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h5-estimator-policy-prefreeze-audit
+          path: /tmp/h5-estimator-prefreeze.json
+          retention-days: 14
