@@ -95,7 +95,9 @@ jobs:
               rotation_max_error:rotationMax
             },
             structural_identity:"For a von Mises search component centered on the origin bearing, its first circular moment toward the origin is A1(kappa). The origin-oriented first-moment contribution is therefore proportional to alpha_history * R * A1(kappa), creating an intrinsic amplitude-dispersion tradeoff when only aggregate trajectory summaries are fitted.",
-            frozen_H3_kappa_domain:[0,20],\n            out_of_domain_convergence_failures:failures,\n            interpretation_guard:'No biological target outcomes used; failures above kappa=20 are out-of-domain stress findings.'
+            frozen_H3_kappa_domain:[0,20],
+            out_of_domain_convergence_failures:failures,
+            interpretation_guard:'No biological target outcomes used; failures above kappa=20 are out-of-domain stress findings.'
           };
           fs.writeFileSync('/tmp/h5-dispersion-vm.json',JSON.stringify(out,null,2)+'\n');
           console.log(JSON.stringify(out,null,2));
