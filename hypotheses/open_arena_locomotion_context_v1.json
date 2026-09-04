@@ -1,5 +1,5 @@
 {
-  "schema_version": 6,
+  "schema_version": 7,
   "id": "open_arena_locomotion_context_v1",
   "reference_dataset": "poissonnier2026_open_arena",
   "scope": "DCM control treatments only",
@@ -9,10 +9,18 @@
     "use_ymaze_for_model_selection": false,
     "common_random_numbers": true,
     "development_estimation_is_not_external_validation": true,
-    "canonical_model_changes_require_explicit_promotion": true
+    "canonical_model_changes_require_explicit_promotion": true,
+    "development_estimation_requires_frozen_policy": true
   },
-  "primary_structural_metrics": ["total_distance_mm", "time_to_arena_edge_s", "path_straightness"],
-  "secondary_metrics": ["mean_moving_speed_mm_s", "central_zone_fraction"],
+  "primary_structural_metrics": [
+    "total_distance_mm",
+    "time_to_arena_edge_s",
+    "path_straightness"
+  ],
+  "secondary_metrics": [
+    "mean_moving_speed_mm_s",
+    "central_zone_fraction"
+  ],
   "hypotheses": [
     {
       "id": "H0_context_invariant",
@@ -25,7 +33,9 @@
       "id": "H1_entry_condition",
       "status": "blocked_by_missing_reference_input",
       "claim": "The short/long difference is explained by different measured arena-entry conditions without a persistent internal state.",
-      "requires": ["raw initial trajectory frames or measured entry heading/speed distributions"]
+      "requires": [
+        "raw initial trajectory frames or measured entry heading/speed distributions"
+      ]
     },
     {
       "id": "H2_persistent_directional_state",
@@ -62,13 +72,13 @@
     },
     {
       "id": "H4_transient_locomotor_activation",
-      "status": "implemented_mechanism_reachability_verified_not_searched",
+      "status": "implemented_and_high_resolution_internal_cv_failed_promotion",
       "model": "lasius_niger_locomotion_h4_v1",
       "freeze": "h4_transient_locomotor_activation_v1.json",
       "reachability_runner": "tools/run-h4-mechanism.js",
       "reachability_result": "reports/h4_mechanism_reachability_v1.json",
       "claim": "Recent sustained constrained walking transiently increases moving speed after arena entry while leaving heading noise, pause behavior, entry state, and boundary behavior unchanged.",
-      "selection_status": "not_evaluated",
+      "selection_status": "not_promoted",
       "motivation": "The descriptive moving-speed contrast has the H4-predicted sign in every leave-one-colony-out recalculation, while H2 and H3 show that directly increasing directional persistence is not a generalizing explanation. Moving speed remains diagnostic-only and is not an allowed fitting target until the AnimalTA movement classifier is recovered.",
       "reachability": {
         "trials_per_condition": 400,
@@ -86,13 +96,30 @@
         "ymaze_accessed": false
       },
       "invariance_tests": "Matched-seed tests verify unchanged biology RNG cadence, heading evolution, speed-noise realization, and pause behavior; zero history and rho_speed=0 recover the context-free trajectory to numerical tolerance.",
-      "distinction_from_H2_H3": "H4 changes displacement speed only. It may increase spatial straightness indirectly because angular diffusion is time-based, but it is forbidden from changing angular sigma, turn events, turn angles, or entry heading."
+      "distinction_from_H2_H3": "H4 changes displacement speed only. It may increase spatial straightness indirectly because angular diffusion is time-based, but it is forbidden from changing angular sigma, turn events, turn angles, or entry heading.",
+      "estimation_policy": "h4_parameter_estimation_v1.json",
+      "estimation_runner": "tools/run-h4-estimation.js",
+      "result": "reports/h4_parameter_estimation_500x60_v1.json",
+      "internal_cv": {
+        "heldout_wins_vs_H4_null": 2,
+        "folds": 6,
+        "median_relative_improvement_vs_H4_null": 0,
+        "heldout_wins_vs_H2_v1": 2,
+        "median_relative_improvement_vs_H2_v1": -0.03428269360116726,
+        "heldout_wins_vs_H3_v1": 3,
+        "median_relative_improvement_vs_H3_v1": 0.030460805659674114,
+        "null_anchor_selected_folds": [
+          20,
+          21
+        ]
+      },
+      "reason": "The frozen 500x60x6 LOCO search failed the primary H4-vs-H4-null promotion guard (2/6 wins; median relative improvement 0.0%) and both frozen comparator guards (2/6 vs H2-v1, median -3.43%; 3/6 vs H3-v1, median +3.05%, below the required 4/6 wins). Per the frozen failure rule, do not change bounds, seeds, nuisance parameters, metric weights, fold requirements, or tune the same H4 mechanism harder on these outcomes."
     }
   ],
   "screening_decision": {
     "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
     "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
-    "current_decision": "H2-v1 and H3-v1 are both not promoted. H1 remains unresolved because raw entry-state evidence is missing. H4-v1 is implemented and mechanically reachable under engineering-only parameters, but has not been fitted, searched, compared by held-out colony, or promoted. The next H4 step is to freeze an estimation policy before any parameter search.",
+    "current_decision": "H2-v1, H3-v1, and H4-v1 are all not promoted. H1 remains unresolved because raw entry-state evidence is missing. H4-v1 completed its frozen 500-candidate x 60-trial x 6-fold LOCO search and failed promotion: 2/6 held-out wins versus its own fitted null with median relative improvement 0.0%; 2/6 versus H2-v1 with median -3.43%; and 3/6 versus H3-v1 with median +3.05%, below the required 4/6 wins. Per the frozen H4 failure rule, the next hypothesis must be substantively different or justified by genuinely new evidence; the Y-maze remains locked.",
     "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
   }
 }

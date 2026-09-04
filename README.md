@@ -11,7 +11,7 @@ H0  -> screening-incompatible
 H1  -> unresolved; measured post-toothpick entry state is missing
 H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
-H4  -> implemented; mechanism reachability verified; not fitted or searched
+H4  -> implemented; frozen high-resolution LOCO failed promotion
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a genuinely different speed-side mechanism: recent constrained travel creates a transient locomotor activation state that increases moving speed while leaving heading noise, pauses, entry state, and boundary behavior unchanged.
@@ -31,9 +31,11 @@ Moving speed, moving distance, straightness, and proportion-time-moving remain d
 
 The 51 DCM-control rows are pinned in `reference/poissonnier2026_h2_estimation_targets.json` and regenerated from the final XLSX by `tools/derive-h2-estimation-targets.py`.
 
-## H2/H3 held-out status
+## H2/H3/H4 held-out status
 
 H2 and H3 have already undergone leave-one-colony-out development estimation. Neither passed its frozen promotion criteria. H3's corrected 500-candidate × 60-trial result is recorded in `reports/h3_parameter_estimation_500x60_v1.json`; it won only 1/6 held-out colonies versus its own null and 2/6 versus the matched corrected H2 candidates.
+
+H4 has also completed its frozen 500-candidate × 60-trial × 6-fold LOCO search. It won 2/6 held-out colonies versus its own fitted null with median relative improvement 0.0%, 2/6 versus H2-v1 with median −3.43%, and 3/6 versus H3-v1 with median +3.05%. H4 therefore failed every frozen promotion/comparison guard. The exact result is recorded in `reports/h4_parameter_estimation_500x60_v1.json`.
 
 These are internal development results, not external validation.
 
@@ -53,7 +55,7 @@ A 400-trial-per-condition mechanism reachability run passed all intended qualita
 
 The full H0–H4 implementation suite passed in GitHub Actions before the temporary branch-only verification workflow was removed. The permanent main workflow now includes H4 reachability and will exercise it after merge.
 
-No H4 parameter estimation policy has been frozen yet, so **no H4 search should be run yet**.
+The H4 estimation policy is frozen in `hypotheses/h4_parameter_estimation_v1.json`, and the authorized high-resolution search is complete. H4-v1 was **not promoted**. Per the frozen failure rule, do not rescue H4 by changing bounds, seeds, nuisance parameters, metric weights, fold requirements, or by tuning the same mechanism harder. The next hypothesis must be substantively different or justified by genuinely new evidence.
 
 ## Run
 

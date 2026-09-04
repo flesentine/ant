@@ -185,7 +185,30 @@ The qualification reported `reference_outcomes_accessed = false`, `ymaze_accesse
 
 Review artifact `9873626596` has ZIP SHA-256 `ad18e8d7e4ce40acad73ec05c174cbcc937fc1a44e4b169cef86e419f255d59a`.
 
-**No H4 high-resolution parameter search has been run.**
+## Frozen high-resolution result
+
+The authorized frozen high-resolution H4 search has now been completed. The scientific execution used commit `cb63d00e030b87016890f169f2852699ee6f8d6b` and exactly the frozen budget: 500 H4-null candidates per fold; 499 H4-context Halton candidates plus one exact fitted-null anchor per fold; 60 training trials per condition per candidate; 120 held-out evaluation trials per condition; six LOCO folds; root seed `990000`; and `dt = 0.02 s`.
+
+GitHub Actions run `33709353049` completed successfully. Artifact `9876724477` has ZIP SHA-256 `a81dd68a4c0e39f0cd7bf81831b7ab72098c0759b2a3489095ce523af4808473`. The committed report `reports/h4_parameter_estimation_500x60_v1.json` has SHA-256 `05f76e18d6ecdff9f038f4244227ede7a73cc323ca9857ac1d6dbbff1dd2e310`.
+
+### Promotion decision: FAIL
+
+Primary H4 vs H4-null guard:
+
+- H4 wins: **2/6** folds; required **>=5/6**;
+- median relative held-out improvement: **0.0%**; required strictly positive;
+- H4 promotion guard: **failed**.
+
+Secondary comparisons:
+
+- vs H2-v1: **2/6** wins, median relative improvement **-3.43%** → failed;
+- vs H3-v1: **3/6** wins, median relative improvement **+3.05%**, but required >=4/6 wins → failed.
+
+Held-out colonies `20` and `21` selected the exact null anchor. No selected H4-context parameter hit the frozen 1% search-bound diagnostic.
+
+H4-v1 therefore failed its frozen internal development test and is not development-preferred over H2-v1 or H3-v1. No canonical parameters were updated, moving speed remained diagnostic-only, and the Y-maze was not accessed.
+
+Per the frozen failure rule, H4-v1 must not be rescued by changing bounds, seeds, nuisance parameters, metric weights, fold requirements, or by tuning the same mechanism harder. Any next hypothesis must be substantively different or justified by genuinely new evidence.
 
 ## Measurement firewall
 
@@ -208,7 +231,8 @@ Moving speed remains a **diagnostic only** until the AnimalTA movement classifie
 6. Implement the estimator against the exact frozen policy blob — complete.
 7. Run the reference-free synthetic estimator qualification — complete.
 8. Run low-resolution execution-path smoke only — complete; not evidence.
-9. Run the frozen 500 × 60 × 6 high-resolution LOCO search only if explicitly authorized as the next scientific execution.
+9. Run the frozen 500 × 60 × 6 high-resolution LOCO search — complete; failed the frozen promotion guard.
+10. Record the frozen failure and stop same-mechanism H4 retuning — complete.
 
 ## Current scientific status
 
@@ -217,7 +241,7 @@ H0  -> inadequate
 H1  -> unresolved; entry-state evidence missing
 H2  -> not promoted
 H3  -> not promoted
-H4  -> mechanism implemented; estimator implemented + qualified; not high-resolution searched; not fitted/promoted
+H4  -> high-resolution searched; failed frozen promotion guard; not promoted
 ```
 
-The canonical ant remains unchanged.
+The canonical ant remains unchanged. The Y-maze remains locked. The next model-development hypothesis must be substantively different from H4 or be justified by genuinely new evidence.
