@@ -1,0 +1,68 @@
+name: H5 post-qualification authorization gate
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact qualification authorization
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const h5est=require('./tools/run-h5-estimation.js');
+          const q=h5est.assertSyntheticQualification(process.cwd());
+          if(q.status!=='passed_reference_parameter_search_authorized')throw new Error('qualification status');
+          if(q.reference_outcomes_used!==false||q.ymaze_accessed!==false)throw new Error('qualification firewall');
+          const now=h5est.currentImplementationBlobs(process.cwd());
+          if(JSON.stringify(now)!==JSON.stringify(q.implementation_blobs))throw new Error('implementation blob mismatch');
+          console.log(JSON.stringify({status:'passed',reference_parameter_search_authorized:true,reference_parameter_search_run:false,implementation_blobs:now}));
+          NODE
+          node tools/run-h5-estimation.js --mode=describe >/tmp/h5-describe-final.json
+      - name: Runtime and estimator regressions
+        run: |
+          set -euo pipefail
+          node tests/h5-origin-search.test.js
+          node tests/h5-estimator-contract.test.js
+          for f in tests/determinism.test.js tests/h3-reorientation.test.js tests/integrity-firewall.test.js tests/rng-streams.test.js tests/measurement-geometry-policy.test.js; do node "$f"; done
+      - name: Start Chromium
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
+          for i in {1..100}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then exit 0; fi; sleep .2; done
+          exit 1
+      - name: Chromium qualified runtime smoke
+        run: |
+          cat >/tmp/h5-final-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0],ws=new WebSocket(target.webSocketDebuggerUrl);
+          await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!AntLabH5&&!!AntLabIntegrity&&!!AntLabH3"))break;await sleep(100);}
+          const report=await evalv(`(async()=>{const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();};const q=await j('./reports/h5_synthetic_qualification_v1.json'),d=await j('./hypotheses/h5_origin_referenced_search_v1.draft.json'),m=await j('./models/lasius_niger_locomotion_h5_v1.json');if(q.status!=='passed_reference_parameter_search_authorized')throw new Error('qual status');if(d.current_stage.reference_parameter_search!=='authorized_not_run')throw new Error('draft stage');const cfg=AntLabH5.originSearchConfig(m);if(AntLabH5.historyAmplitude(200,cfg)!==.6||AntLabH5.historyAmplitude(1000,cfg)!==.3)throw new Error('history lookup');let rejected=false;try{AntLabH5.historyAmplitude(600,cfg);}catch(e){rejected=true;}if(!rejected)throw new Error('600 accepted');return{status:'passed',qualification:q.status,reference_search:d.current_stage.reference_parameter_search,L600_rejected:rejected};})()`);
+          const forbidden=requests.filter(u=>/neutral_y_maze|\/y_maze|\/y-maze/i.test(u));if(exceptions.length||consoleErrors.length||forbidden.length)throw new Error('browser firewall');
+          report.browser={exceptions:0,console_errors:0,ymaze_requests:0};fs.writeFileSync('/tmp/h5-final-browser.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          NODE
+          node /tmp/h5-final-browser.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h5-post-qualification-authorization-gate
+          path: |
+            /tmp/h5-describe-final.json
+            /tmp/h5-final-browser.json
+            /tmp/chrome-version.json
+            /tmp/chrome.log
+          retention-days: 14
