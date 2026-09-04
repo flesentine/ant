@@ -1,0 +1,43 @@
+name: H5 implementation checkpoint
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: read
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          set -euo pipefail
+          node --check src/h3.js
+          node --check src/h5.js
+          node --check src/integrity.js
+          node --check tools/run-h5-estimation.js
+          node --check tests/h5-origin-search.test.js
+      - name: Runtime tests
+        run: |
+          set -euo pipefail
+          node tests/h5-origin-search.test.js
+          for f in tests/h3-reorientation.test.js tests/determinism.test.js tests/integrity-firewall.test.js tests/rng-streams.test.js tests/measurement-geometry-policy.test.js; do node "$f"; done
+      - name: Estimator describe gate
+        run: |
+          set -euo pipefail
+          node tools/run-h5-estimation.js --mode=describe >/tmp/h5-describe.json
+          if node tools/run-h5-estimation.js --mode=loco >/tmp/h5-loco.out 2>/tmp/h5-loco.err; then
+            echo "Unauthorized H5 reference search unexpectedly ran" >&2
+            exit 1
+          fi
+          grep -q "synthetic qualification record is missing" /tmp/h5-loco.err
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h5-implementation-checkpoint
+          path: |
+            /tmp/h5-describe.json
+            /tmp/h5-loco.err
+          retention-days: 14
