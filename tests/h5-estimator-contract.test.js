@@ -94,7 +94,11 @@ assert(!/loadBundle\(['"]neutral_y_maze/.test(source));
 assert(!/experiments\/neutral_y_maze/.test(source));
 assert(!base.colony && !base.origin_search.colony);
 
-assert.throws(()=>h5est.assertSyntheticQualification(root),/synthetic qualification record is missing/);
+const qualification=h5est.assertSyntheticQualification(root);
+assert.strictEqual(qualification.status,'passed_reference_parameter_search_authorized');
+assert.strictEqual(qualification.reference_outcomes_used,false);
+assert.strictEqual(qualification.ymaze_accessed,false);
+assert.deepStrictEqual(qualification.implementation_blobs,h5est.currentImplementationBlobs(root));
 
 console.log('h5-estimator-contract.test.js PASS '+JSON.stringify({
   exact_anchor_rows:nRows.length,
