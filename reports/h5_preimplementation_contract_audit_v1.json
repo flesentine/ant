@@ -11,7 +11,7 @@
     },
     "H5_estimator_policy": {
       "path": "hypotheses/h5_parameter_estimation_v1.json",
-      "git_blob_sha": "1322c259153d12877a7b78190cb9e2603acb8882"
+      "git_blob_sha": "d81e756c3643778c067ef1b1bb8f68521adb8141"
     },
     "estimator_policy_audit": {
       "path": "reports/h5_estimator_policy_audit_v1.json",
@@ -77,7 +77,7 @@
       "checked_stream_names": [
         "poissonnier2026_measurement_geometry_v1",
         "h2_estimation_entry_transition_v1",
-        "biology_h3_reorientation_event:0",
+        "biology_h3_turn_event:0",
         "biology_h3_turn_angle:0",
         "biology_h5_search_choice:0",
         "biology_h5_search_angle:0"
@@ -168,5 +168,13 @@
     "persistent_H5_runtime_absent_at_audit": true,
     "reference_parameter_search_not_run": true,
     "ymaze_access": false
+  },
+  "transcription_correction": {
+    "date": "2026-09-04",
+    "corrected_policy_blob": "d81e756c3643778c067ef1b1bb8f68521adb8141",
+    "corrected_stream_name": "biology_h3_turn_event:<ant_id>",
+    "scientific_change": false,
+    "runtime_change": false,
+    "H5_reference_results_used": false
   }
 }
