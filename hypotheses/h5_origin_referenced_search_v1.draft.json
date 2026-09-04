@@ -1,8 +1,8 @@
 {
-  "schema_version": 9,
+  "schema_version": 10,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_origin_temporal_effect_scope_radial_gate_and_history_response_frozen_remaining_search_dispersion_and_estimator_questions_open_before_full_mechanism_freeze",
-  "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
+  "status": "mechanism_frozen_estimator_policy_pending_before_runtime_implementation_or_parameter_search",
+  "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The biological mechanism is now frozen after pre-implementation stress audits, but the estimator policy remains unfrozen; H5 runtime implementation and parameter search remain forbidden until that policy is frozen.",
   "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
   "scope": "open-arena DCM-control locomotion context only",
@@ -120,12 +120,13 @@
     "reorientation_effect": {
       "type": "mixture_of_circular_reorientation_distributions",
       "baseline_component": "Use the ordinary H3-null post-reorientation directional law and existing H3 turn-angle RNG stream.",
-      "search_component": "Draw a direction symmetrically around the bearing from current position to O using a dedicated H5 search-angle stream. For the parsimonious v1 candidate, the pre-freeze default is to reuse the same concentration/dispersion parameter as the baseline reorientation family rather than introduce a separate search concentration.",
+      "search_component": "Frozen: draw a direction symmetrically around the bearing from current position to O using the dedicated H5 search-angle stream and the exact same candidate turn_concentration kappa_turn used by the ordinary H3-null baseline reorientation component. No separate H5 search concentration exists.",
       "mixture_rule": "At each baseline major reorientation event, draw a dedicated H5 choice variate u. If u < w use the search component; otherwise use the already-drawn baseline component.",
       "event_timing": "Frozen: event times are generated entirely by the H3-null continuous-time event process. H5-v1 does not alter mean_free_path_mm, event hazard, threshold integration, or event timing.",
       "antipodal_rule": "When the origin is exactly behind the ant, H5 remains a symmetric mixture distribution and does not choose an arbitrary deterministic left-versus-right mean turn.",
       "origin_rule": "At r=0, the frozen boundary-normalized radial gate gives R=0 and therefore w=0. Any inert H5 search-angle draw must not influence the selected baseline trajectory.",
-      "free_path": "Frozen absent in H5-v1: no origin-relative or history-dependent free-path modulation. Any such mechanism requires a later separately versioned hypothesis or direct raw-trajectory discriminator."
+      "free_path": "Frozen absent in H5-v1: no origin-relative or history-dependent free-path modulation. Any such mechanism requires a later separately versioned hypothesis or direct raw-trajectory discriminator.",
+      "dispersion_rule": "Frozen shared-dispersion rule: kappa_search = kappa_turn by identity for every candidate. H5-v1 contains no independent kappa_search field or parameter."
     },
     "rng_candidate": {
       "baseline_event_stream": "existing H3 event-threshold stream, unchanged",
@@ -152,7 +153,7 @@
     }
   ],
   "candidate_baseline_family": {
-    "preferred_representation": "Reuse the already audited continuous-time run-and-reorientation machinery from H3 as a locomotion substrate with the H3 history-dependent hazard gate disabled. H5-v1's history effect is solely the conditional directional mixture at baseline event times; baseline mean free path may be a shared nuisance but is not an H5 effect.",
+    "preferred_representation": "Reuse the already audited continuous-time run-and-reorientation machinery from H3 as a locomotion substrate with the H3 history-dependent hazard gate disabled. H5-v1's history effect is solely the conditional directional mixture at baseline event times. Baseline mean free path and baseline turn concentration may be shared nuisance parameters, but H5 has no separate free-path, hazard, or search-dispersion effect.",
     "reason": "This reuses audited sub-step event timing and separates H5's new biological claim from the failed H3 history-hazard claim.",
     "warning": "Reusing H3 event machinery is not a rescue of H3-v1. H3's history-dependent reorientation hazard remains failed and must stay disabled."
   },
@@ -189,7 +190,10 @@
       "Boundary-hit and near-equivalent candidate diagnostics"
     ],
     "claim_rule": "Do not report lambda_search_mm, a travel-distance half-life, interpolation, or extrapolation from H5-v1. A common-search solution alpha200≈alpha1000 is evidence, at most, for origin-referenced search and not for history modulation.",
-    "history_null_structure": "Because generic origin-referenced search is externally plausible, H5-v1 must distinguish a shared positive origin-search component from a true recent-travel modulation. The history-modulation null is alpha_search_200=alpha_search_1000, not only alpha_search_200=alpha_search_1000=0."
+    "history_null_structure": "Because generic origin-referenced search is externally plausible, H5-v1 must distinguish a shared positive origin-search component from a true recent-travel modulation. The history-modulation null is alpha_search_200=alpha_search_1000, not only alpha_search_200=alpha_search_1000=0.",
+    "search_dispersion": "Resolved for H5-v1 by sharing baseline H3 kappa_turn exactly. A separate search concentration is forbidden because alpha_history * R * A1(kappa_search) creates an amplitude-dispersion tradeoff and the aggregate targets contain no direct angular-dispersion statistic.",
+    "kappa_zero_boundary": "If the shared baseline kappa_turn reaches 0, the origin-search component is uniform and alpha_search_200/1000 do not create directional origin pull. The frozen estimator policy must report or guard this behaviorally degenerate boundary before any H5 mechanism claim.",
+    "tiny_positive_kappa_numerics": "The frozen H3 von Mises sampler showed convergence failures at kappa=1e-8 and 1.1e-8 near its <1e-8 uniform branch. The estimator policy must avoid arbitrary tiny-positive candidates around that seam or require separately versioned H3 hardening."
   },
   "raw_trajectory_discriminators_if_recovered": [
     "post-reorientation heading conditional on bearing to the trial origin",
@@ -211,14 +215,14 @@
     "No origin-relative or history-dependent modulation of mean free path or reorientation-event hazard in H5-v1.",
     "No fitted or treatment-specific radial-search length scale; H5-v1 radial gating is fixed by sampled arena geometry.",
     "No lambda_search_mm, separate rho_search amplitude, or interpolation/extrapolation to unobserved travel distances in H5-v1.",
-    "A common origin-search effect alpha_search_200 = alpha_search_1000 does not by itself support the history-modulation claim."
+    "A common origin-search effect alpha_search_200 = alpha_search_1000 does not by itself support the history-modulation claim.",
+    "No H5-specific, history-specific, treatment-specific, radial-specific, or separately fitted search-direction concentration; search dispersion exactly shares baseline H3 kappa_turn."
   ],
   "pre_freeze_questions": [
-    "Should the H5 origin-oriented search-direction component reuse the baseline H3 reorientation concentration/dispersion exactly, or is a separately justified search concentration required? The current draft default is reuse, but this has not yet been explicitly frozen.",
     "What H5-null nuisance family and bounds are justified independently of H5 outcomes? They remain deliberately unspecified."
   ],
   "firewall": {
-    "mechanism_not_frozen": true,
+    "mechanism_not_frozen": false,
     "implementation_allowed_before_freeze": false,
     "parameter_search_allowed": false,
     "reference_outcomes_may_not_be_used_to_tune_this_draft_into_a_passing_model": true,
@@ -251,7 +255,17 @@
     "H5_history_response_may_not_be_reopened_to_rescue_fit": true,
     "H5_common_origin_search_alone_not_sufficient_for_history_modulation_claim": true,
     "H5_history_modulation_claim_requires_beating_equal_strength_common_search": true,
-    "H5_exact_zero_search_null_alone_not_sufficient_for_history_claim": true
+    "H5_exact_zero_search_null_alone_not_sufficient_for_history_claim": true,
+    "mechanism_frozen": true,
+    "H5_biological_mechanism_frozen": true,
+    "H5_search_dispersion_still_unfrozen": false,
+    "H5_search_dispersion_frozen_to_shared_baseline_H3_concentration": true,
+    "H5_separate_search_concentration_forbidden": true,
+    "H5_search_dispersion_may_not_be_reopened_to_rescue_fit": true,
+    "H5_estimator_policy_still_unfrozen": true,
+    "H5_runtime_implementation_allowed_before_estimator_policy_freeze": false,
+    "H3_tiny_positive_kappa_seam_must_be_avoided_or_separately_hardened_in_estimator_policy": true,
+    "H5_kappa_zero_degeneracy_must_be_reported_or_guarded_in_estimator_policy": true
   },
   "allowed_shared_measurement_or_geometry_inputs_under_frozen_policy": [
     "central_physical_entry_reference_mm (frozen H5 biological origin)",
@@ -334,5 +348,17 @@
       "history_modulated_alternative": "alpha_search_200 > alpha_search_1000 >= 0",
       "claim_guard": "Evidence against the exact zero-search null alone is not sufficient to claim history modulation. A later frozen estimator must explicitly compare against or strictly guard against the equal-strength common-origin-search submodel."
     }
+  },
+  "search_dispersion_decision": {
+    "status": "frozen_before_H5_runtime_implementation_or_parameter_search",
+    "selected_rule": "reuse_baseline_H3_turn_concentration_exactly",
+    "decision_report": "reports/h5_search_dispersion_choice_audit_v1.json",
+    "decision_report_git_blob_sha": "a77a0f49de656b7aba75491de7eb04f6b9f07ccd",
+    "rule": "The origin-search component and ordinary H3-null reorientation component use the exact same candidate baseline turn_concentration kappa_turn. H5-v1 has no separate search-specific concentration or dispersion parameter.",
+    "nuisance_coupling": "If the later frozen estimator varies baseline kappa_turn, both mixture components use that same candidate value.",
+    "reason": "A free search-specific kappa trades strongly with alpha_search_200/alpha_search_1000 in circular-moment structure and aggregate trajectory effects, while no independently validated search-specific kappa is available for the Poissonnier assay.",
+    "kappa_zero_guard": "At kappa_turn=0 both directional laws are uniform, so positive alpha values do not create origin steering; the estimator policy must not count this behaviorally degenerate boundary as support for H5 history modulation.",
+    "tiny_positive_sampler_seam": "The current frozen H3 sampler failed in stress at kappa=1e-8 and 1.1e-8 near its uniform-approximation branch threshold. The estimator policy must avoid that tiny-positive seam or require a separately versioned H3 hardening before search.",
+    "may_not_be_reopened_to_rescue_fit": true
   }
 }
