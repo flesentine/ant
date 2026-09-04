@@ -42,6 +42,16 @@ jobs:
           name: h3-mechanism-reachability
           path: /tmp/antlab-h3/h3-mechanism-results.json
           retention-days: 7
+      - name: Run frozen H4 mechanism reachability
+        run: |
+          mkdir -p /tmp/antlab-h4
+          node tools/run-h4-mechanism.js --trials 400 --seed 928491 --out /tmp/antlab-h4/h4-mechanism-results.json
+      - name: Upload H4 mechanism report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h4-mechanism-reachability
+          path: /tmp/antlab-h4/h4-mechanism-results.json
+          retention-days: 7
       - name: Probe final-version reference supplements
         id: reference_probe
         continue-on-error: true
@@ -96,6 +106,20 @@ jobs:
         with:
           name: h3-estimator-smoke
           path: /tmp/antlab-h3-estimation
+          retention-days: 7
+      - name: Run frozen H4 estimator qualification
+        run: |
+          mkdir -p /tmp/antlab-h4-estimation
+          node tools/run-h4-estimation.js --mode qualification --trials 3 --out /tmp/antlab-h4-estimation/qualification.json >/tmp/h4-estimator-qualification.log
+      - name: Run H4 LOCO estimator smoke test
+        run: |
+          node tools/run-h4-estimation.js --mode smoke --candidates 8 --trials 4 --eval-trials 8 --seed 990000 --out /tmp/antlab-h4-estimation/loco-smoke.json >/tmp/h4-estimation-smoke.log
+          echo "H4 qualification plus low-resolution LOCO execution-path smoke only; no high-resolution H4 search, parameter estimate, promotion decision, or model-selection evidence." > /tmp/antlab-h4-estimation/README.txt
+      - name: Upload H4 estimator qualification and smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: h4-estimator-qualification-and-smoke
+          path: /tmp/antlab-h4-estimation
           retention-days: 7
       - name: Upload reference probe
         if: always()

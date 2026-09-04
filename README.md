@@ -1,81 +1,116 @@
-# ANTLAB v0.3.2c — H2 Development Estimation
+# ANTLAB — H0–H4 open-arena model development
 
 **Live lab:** https://flesentine.github.io/ant/
 
-ANTLAB is a falsifiable ant-simulation substrate built one experimentally testable capability at a time. v0.3.2c keeps the frozen H2 mechanism intact and adds a guarded development-estimation procedure without unlocking canonical biological fitting or touching the Y-maze holdout.
+ANTLAB is a falsifiable ant-simulation substrate built one experimentally testable capability at a time. The canonical ant remains unchanged while alternative open-arena context mechanisms are frozen, implemented, and evaluated behind explicit promotion guards. The Y-maze remains unavailable to development fitting and model selection.
 
-## Why H2 cannot be fit alone
-The current baseline angular diffusion and the vertical-toothpick entry orientation were never independently calibrated. Both can strongly alter arena exit time and path geometry. Fitting only `lambda`, `tau`, and `rho` would risk forcing apparatus/baseline error into H2.
+## Current science state
 
-The estimator therefore includes five development parameters:
+```text
+H0  -> screening-incompatible
+H1  -> unresolved; measured post-toothpick entry state is missing
+H2  -> implemented; high-resolution LOCO not promoted
+H3  -> implemented; high-resolution LOCO not promoted
+H4  -> implemented; frozen high-resolution LOCO failed promotion
+```
 
-- `sigma0`: baseline angular diffusion nuisance parameter.
-- `q`: shared post-toothpick orientation-retention probability; the same value must apply to 20 cm and 100 cm conditions.
-- `lambda_mm`, `tau_s`, `rho`: the frozen H2 mechanism parameters.
+H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a genuinely different speed-side mechanism: recent constrained travel creates a transient locomotor activation state that increases moving speed while leaving heading noise, pauses, entry state, and boundary behavior unchanged.
 
-Treatment-specific entry-heading fitting is forbidden because that would become H1 rather than H2.
+See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record. The original H4 freeze file remains unchanged after implementation so the pre-code mechanism specification stays auditable.
 
-## What data may enter estimation
-Only threshold-independent DCM-control observables from the checksummed final Springer XLSX are allowed:
+## What data may enter development estimation
+
+Only threshold-independent DCM-control observables from the checksummed final Springer XLSX are currently allowed as fitting targets:
 
 - time to edge = `Total_Frames / 25`;
 - middle-zone frame fraction;
 - beeline distance;
 - exit-edge category.
 
-Moving speed, moving distance, straightness and proportion-time-moving remain diagnostics only until the AnimalTA movement classifier is recovered. The Y-maze is unavailable to fitting, candidate ranking, stopping rules and model selection.
+Moving speed, moving distance, straightness, and proportion-time-moving remain diagnostics only until the AnimalTA movement classifier is recovered. In particular, H4 may not fit the moving-speed metric that motivated its mechanism class.
 
 The 51 DCM-control rows are pinned in `reference/poissonnier2026_h2_estimation_targets.json` and regenerated from the final XLSX by `tools/derive-h2-estimation-targets.py`.
 
-## Internal cross-validation
-`tools/run-h2-estimation.js` performs simulation-based minimum-distance estimation using deterministic Halton candidates and common random numbers.
+## H2/H3/H4 held-out status
 
-Leave-one-colony-out mode fits two nested models on five colonies and evaluates them on the sixth:
+H2 and H3 have already undergone leave-one-colony-out development estimation. Neither passed its frozen promotion criteria. H3's corrected 500-candidate × 60-trial result is recorded in `reports/h3_parameter_estimation_500x60_v1.json`; it won only 1/6 held-out colonies versus its own null and 2/6 versus the matched corrected H2 candidates.
 
-1. Baseline: estimate only `sigma0` and shared `q` with H2 disabled (`rho=0`).
-2. H2: estimate `sigma0`, `q`, `lambda_mm`, `tau_s`, and `rho`.
+H4 has also completed its frozen 500-candidate × 60-trial × 6-fold LOCO search. It won 2/6 held-out colonies versus its own fitted null with median relative improvement 0.0%, 2/6 versus H2-v1 with median −3.43%, and 3/6 versus H3-v1 with median +3.05%. H4 therefore failed every frozen promotion/comparison guard. The exact result is recorded in `reports/h4_parameter_estimation_500x60_v1.json`.
 
-H2 is not eligible for canonical promotion unless it improves held-out loss over the nested baseline in at least 5 of 6 folds and has positive median held-out improvement. Passing that gate would still be internal development evidence, not independent validation.
+These are internal development results, not external validation.
 
-Because `lambda` and `rho` may be weakly identifiable with only 200 mm and 1000 mm travel histories, reports also include the more directly identifiable effective amplitudes:
+## H4 mechanism implementation
+
+H4-v1 is frozen in `hypotheses/h4_transient_locomotor_activation_v1.json` and implemented by `models/lasius_niger_locomotion_h4_v1.json` plus the integrity-layer speed multiplier.
 
 ```text
-A200  = rho * (1 - exp(-200/lambda))
-A1000 = rho * (1 - exp(-1000/lambda))
+A0 = 1 - exp(-L / lambda_activation)
+dA/dt = -A / tau_activation
+v_H4(t) = v_baseline(t) * (1 + rho_speed * A(t))
 ```
 
+The engineering demonstration uses `lambda=500 mm`, `tau=5 s`, and `rho_speed=0.25`. These are not biological estimates.
+
+A 400-trial-per-condition mechanism reachability run passed all intended qualitative checks while matched-seed tests verified unchanged heading, pause, and biology RNG cadence. The exact result is recorded in `reports/h4_mechanism_reachability_v1.json`.
+
+The full H0–H4 implementation suite passed in GitHub Actions before the temporary branch-only verification workflow was removed. The permanent main workflow now includes H4 reachability and will exercise it after merge.
+
+The H4 estimation policy is frozen in `hypotheses/h4_parameter_estimation_v1.json`, and the authorized high-resolution search is complete. H4-v1 was **not promoted**. Per the frozen failure rule, do not rescue H4 by changing bounds, seeds, nuisance parameters, metric weights, fold requirements, or by tuning the same mechanism harder. The next hypothesis must be substantively different or justified by genuinely new evidence.
+
 ## Run
+
 ```bash
 python3 -m http.server 8080
 ```
+
 Open `http://localhost:8080`.
 
 ## Tests
+
 ```bash
 ./tests/run-tests.sh
 ```
 
 ## H0 model screen
+
 ```bash
 node tools/run-model-competition.js --trials 400 --seed 928491
 ```
 
 ## Frozen H2 mechanism reachability
+
 ```bash
 node tools/run-h2-mechanism.js --trials 400 --seed 928491
 ```
 
+## Frozen H3 mechanism reachability
+
+```bash
+node tools/run-h3-mechanism.js --trials 400 --seed 928491
+```
+
+## Frozen H4 mechanism reachability
+
+```bash
+node tools/run-h4-mechanism.js --trials 400 --seed 928491
+```
+
+This H4 command performs reachability only: no target fitting, no model selection, and no Y-maze access.
+
 ## H2 development estimation
+
 Quick pooled search:
+
 ```bash
 node tools/run-h2-estimation.js --mode pooled --candidates 400 --trials 50 --seed 970000
 ```
 
 Leave-one-colony-out internal cross-validation:
+
 ```bash
 node tools/run-h2-estimation.js --mode loco --candidates 500 --trials 60 --seed 970000
 ```
 
-Search resolution must always be reported. The small CI LOCO run is only a code-path smoke test and is not a scientific estimate.
+Search resolution must always be reported. Small CI LOCO runs are code-path smoke tests only and are not scientific estimates.
 
-See `docs/H2_ESTIMATION.md` for the full estimation policy.
+See `docs/H2_ESTIMATION.md` and `docs/H4_TRANSIENT_LOCOMOTOR_ACTIVATION.md` for the detailed mechanism/estimation discipline.

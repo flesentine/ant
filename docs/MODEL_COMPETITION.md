@@ -1,6 +1,6 @@
 # Locomotion model competition
 
-ANTLAB v0.3.2c adds guarded development estimation for H2 while preserving the H0 browser assays and the locked Y-maze holdout.
+ANTLAB v0.3.2 has now evaluated three distinct post-history locomotion mechanisms (H2–H4) under frozen held-out development guards while preserving the H0 browser assays and the locked Y-maze holdout. None has earned canonical promotion.
 
 ## Reference contrast
 Only the final-version Poissonnier 2026 **DCM control** rows are used for the already-completed H0 descriptive screen and H2 internal development estimation. The comparison is 20 cm approach versus 100 cm approach. Reference rows are regenerated from the checksummed XLSX.
@@ -72,6 +72,29 @@ canonical parameters updated: NO
 
 H2 often reduced training loss, but it did not generalize reliably enough to earn its three extra biological parameters. Colony 27 is a particularly strong failure.
 
+## H3 — transient reorientation gate
+H3 changed the timing of discrete major reorientation events instead of scaling continuous angular diffusion. Its corrected frozen high-resolution LOCO search is recorded in `reports/h3_parameter_estimation_500x60_v1.json`.
+
+H3 won only **1/6** held-out colonies versus its own null, with median relative improvement **−0.60%**. Against matched re-evaluated H2-v1 candidates it won **2/6**, with median relative improvement **−6.20%**. H3 therefore failed both frozen guards and was not promoted.
+
+## H4 — transient locomotor activation
+H4 moved to a speed-side mechanism: recent constrained travel initialized a decaying activation that increased moving speed without changing heading noise, reorientation events, pauses, entry state, or boundary behavior. Its frozen search is recorded in `reports/h4_parameter_estimation_500x60_v1.json`.
+
+The authorized 500-candidate × 60-trial × 6-fold LOCO search produced:
+
+```text
+H4 vs H4-null held-out wins:  2 / 6
+median relative improvement:   0.00%
+H4 vs H2-v1 wins:             2 / 6
+median vs H2-v1:              -3.43%
+H4 vs H3-v1 wins:             3 / 6
+median vs H3-v1:              +3.05%
+promotion/comparison guards:  FAIL
+canonical parameters updated: NO
+```
+
+Held-out colonies 20 and 21 selected the exact null anchor. Moving speed remained diagnostic-only and the Y-maze was not accessed. Per the frozen failure rule, H4 must not be rescued by changing bounds, seeds, nuisance parameters, metric weights, fold requirements, or by tuning the same speed-gain mechanism harder.
+
 ## Identifiability
 Fold-specific H2 estimates vary substantially rather than converging on one biological parameter set. Across the six folds the selected values span roughly:
 
@@ -93,11 +116,14 @@ The exact v0.3.2c GitHub Pages artifact was re-run in Chromium after estimation.
 The Y-maze was not accessed by parameter fitting, candidate ranking, stopping rules, or model selection. Its 398 choices remain the later cross-apparatus holdout.
 
 ## Current decision
-Do **not** promote H2-v1 parameters. The current evidence is:
+Do **not** promote H2-v1, H3-v1, or H4-v1. The current evidence is:
 
 - H0: inadequate;
-- H1: unresolved because entry-state data are missing;
-- H2-v1: qualitatively plausible but fails the frozen internal generalization guard;
-- canonical browser model: unchanged.
+- H1: unresolved because measured entry-state data are missing;
+- H2-v1: closest so far, but 4/6 held-out wins still failed its frozen >=5/6 guard;
+- H3-v1: failed its own null and H2 comparison guards;
+- H4-v1: failed its own null and H2/H3 comparison guards;
+- canonical browser model: unchanged;
+- Y-maze: still locked.
 
-The next scientific move should be to investigate H1 or specify a genuinely different H3 mechanism rather than tune H2-v1 harder against the same data.
+The short-vs-long data still contain a large, sign-stable locomotion structure that H0 cannot explain, so v0.3.2 remains open. The next scientific move should be either genuinely new H1 evidence or a **substantively different H5 mechanism frozen before implementation/search**. Do not retune H2, H3, or H4 against these same outcomes.

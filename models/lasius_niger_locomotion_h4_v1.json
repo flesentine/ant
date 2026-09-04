@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "lasius_niger_locomotion_h4_v1",
+  "species": "Lasius niger",
+  "status": "mechanism_demo_not_fitted",
+  "movement": {
+    "base_speed_mm_s": 24,
+    "speed_sd_mm_s": 2.0,
+    "angular_sigma_rad_sqrt_s": 0.7,
+    "speed_reversion_rate_s": 2.0,
+    "speed_noise_sigma_sqrt_s": 0.07,
+    "pause_rate_s": 0.008,
+    "pause_min_s": 0.1,
+    "pause_max_s": 0.5
+  },
+  "locomotor_activation": {
+    "enabled": true,
+    "mechanism_id": "H4_transient_locomotor_activation_v1",
+    "input_fact": "recent_constrained_travel_mm",
+    "initialization": {
+      "type": "saturating_distance",
+      "history_distance_scale_mm": 500
+    },
+    "decay": {
+      "type": "exponential",
+      "activation_tau_s": 5
+    },
+    "effect": {
+      "type": "moving_speed_gain",
+      "max_speed_gain_fraction": 0.25
+    }
+  },
+  "contacts": {
+    "enabled": false,
+    "radius_mm": 1.6,
+    "avoidance_turn_rad": 0.18
+  },
+  "provenance": {
+    "parameter_status": "ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED",
+    "mechanism_freeze": "hypotheses/h4_transient_locomotor_activation_v1.json",
+    "note": "Baseline locomotion values are unchanged from lasius_niger_locomotion_v1. H4 adds only a deterministic transient gain on realized moving speed; heading, pause, entry, contact, and observation processes are unchanged."
+  }
+}

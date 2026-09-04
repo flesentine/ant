@@ -39,11 +39,28 @@
 - blocked pending measured initial heading/speed distributions or raw entry frames
 - entry conditions must be measured inputs, not fitted downstream knobs
 
-### v0.3.2c — H2 persistent directional state
-- pre-register minimal decaying persistence-state equation
-- establish parameter provenance / permissible calibration path
-- only fit if measurement/calibration gate is legitimately unlocked
-- validate across colonies before freezing locomotion
+### v0.3.2c — H2 persistent directional state — complete / not promoted
+- pre-registered decaying continuous angular-diffusion reduction
+- frozen 500-candidate × 60-trial × 6-fold LOCO development search completed
+- 4/6 held-out wins with positive median improvement, but failed the frozen >=5/6 promotion guard
+- canonical locomotion unchanged
+
+### v0.3.2d — H3 transient reorientation gate — complete / not promoted
+- changed discrete reorientation-event timing rather than continuous angular diffusion
+- corrected frozen high-resolution LOCO search completed
+- 1/6 held-out wins versus its own null; failed promotion and H2 comparison guards
+
+### v0.3.2e — H4 transient locomotor activation — complete / not promoted
+- changed moving speed only through a decaying activation state
+- frozen 500-candidate × 60-trial × 6-fold LOCO search completed
+- 2/6 held-out wins versus its own null; failed promotion and H2/H3 comparison guards
+- moving speed remained diagnostic-only; Y-maze remained locked
+
+### v0.3.2f — next locomotion mechanism
+- H1 remains blocked pending measured arena-entry heading/speed evidence
+- do not retune H2, H3, or H4 against the same outcomes
+- any H5 mechanism must be substantively different, pre-registered before implementation/search, and preserve the locked Y-maze
+- canonical locomotion remains unchanged until a candidate passes its frozen held-out guard
 
 ## v0.3.3 — externally painted trail response
 - local egocentric chemical sensors
