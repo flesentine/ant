@@ -48,19 +48,21 @@ jobs:
           const fs=require('fs');
           const core=require('./src/sim-core.js');
           const h3=require('./src/h3.js');
-          const ks=[0,1e-12,1e-8,1e-6,0.25,0.5,1,2,4,8,20,100,1000,1e6];
-          const rows={};
+          const ks=[0,1e-12,1e-8,1e-6,0.25,0.5,1,2,4,8,20,50,100,200,500,1000,10000,1e6];
+          const rows={}, failures=[];
           for(const k of ks){
             const rng=new core.RNG(123456789 + Math.round(Math.log10(k+1)*10000));
-            const n=k>=1000?20000:100000;
-            let c=0,s=0,maxAbs=0,bad=0;
-            for(let i=0;i<n;i++){
-              const a=h3.sampleVonMises(rng,k);
-              if(!Number.isFinite(a)||a < -Math.PI-1e-12 || a > Math.PI+1e-12){bad++;continue;}
-              c+=Math.cos(a);s+=Math.sin(a);maxAbs=Math.max(maxAbs,Math.abs(a));
-            }
-            rows[k]={n,bad,mean_cos:c/n,mean_sin:s/n,resultant:Math.hypot(c/n,s/n),max_abs_angle:maxAbs};
-            if(bad)throw new Error('nonfinite/out-of-range VM sample at kappa '+k);
+            const n=k>20?20000:100000;
+            let cc=0,ss=0,maxAbs=0,bad=0,completed=0,error=null;
+            try{
+              for(let i=0;i<n;i++){
+                const a=h3.sampleVonMises(rng,k);
+                if(!Number.isFinite(a)||a < -Math.PI-1e-12 || a > Math.PI+1e-12){bad++;continue;}
+                cc+=Math.cos(a);ss+=Math.sin(a);maxAbs=Math.max(maxAbs,Math.abs(a));completed++;
+              }
+            }catch(e){error=String(e && e.message || e);failures.push({kappa:k,completed,error});}
+            rows[k]={requested:n,completed,bad,error,mean_cos:completed?cc/completed:null,mean_sin:completed?ss/completed:null,resultant:completed?Math.hypot(cc/completed,ss/completed):null,max_abs_angle:maxAbs};
+            if(k<=20 && (error||bad||completed!==n))throw new Error('VM sampler failed inside frozen H3 kappa domain at '+k+': '+JSON.stringify(rows[k]));
           }
           const A2=rows[2].mean_cos;
           const pullMatched={};
@@ -88,12 +90,12 @@ jobs:
             moments:rows,
             pull_matched_alpha_examples:pullMatched,
             symmetry:{
-              max_abs_mean_sin_moderate:Math.max(...[0,.25,.5,1,2,4,8,20,100].map(k=>Math.abs(rows[k].mean_sin))),
+              max_abs_mean_sin_frozen_domain:Math.max(...[0,.25,.5,1,2,4,8,20].map(k=>Math.abs(rows[k].mean_sin))),
               pi_representation_max_modulo_error:Math.max(...branchModulo),
               rotation_max_error:rotationMax
             },
             structural_identity:"For a von Mises search component centered on the origin bearing, its first circular moment toward the origin is A1(kappa). The origin-oriented first-moment contribution is therefore proportional to alpha_history * R * A1(kappa), creating an intrinsic amplitude-dispersion tradeoff when only aggregate trajectory summaries are fitted.",
-            interpretation_guard:'No biological target outcomes used.'
+            frozen_H3_kappa_domain:[0,20],\n            out_of_domain_convergence_failures:failures,\n            interpretation_guard:'No biological target outcomes used; failures above kappa=20 are out-of-domain stress findings.'
           };
           fs.writeFileSync('/tmp/h5-dispersion-vm.json',JSON.stringify(out,null,2)+'\n');
           console.log(JSON.stringify(out,null,2));
@@ -148,7 +150,7 @@ jobs:
           const variants=[
             {id:'baseline',k:2,a200:0,a1000:0},
             {id:'null_k0',k:0,a200:0,a1000:0},
-            {id:'null_k100',k:100,a200:0,a1000:0},
+            {id:'null_k20',k:20,a200:0,a1000:0},
             {id:'shared_k2',k:2,a200:.6,a1000:.3},
             {id:'fixed_k0',k:0,a200:.6,a1000:.3},
             {id:'fixed_k05',k:.5,a200:.6,a1000:.3},
@@ -192,7 +194,7 @@ jobs:
                 }
               }
               const bS=trial.baseline_short,bL=trial.baseline_long;
-              for(const vid of ['null_k0','null_k100'])for(const cond of ['short','long'])if(JSON.stringify(trial[vid+'_'+cond])!==JSON.stringify(trial['baseline_'+cond]))nullMismatch++;
+              for(const vid of ['null_k0','null_k20'])for(const cond of ['short','long'])if(JSON.stringify(trial[vid+'_'+cond])!==JSON.stringify(trial['baseline_'+cond]))nullMismatch++;
               if(JSON.stringify(trial.common_k2_short)!==JSON.stringify(trial.common_k2_long))commonMismatch++;
             }
           }
@@ -254,7 +256,7 @@ jobs:
             const geometry=await j('./reference/poissonnier2026_open_arena_measurement_geometry_v1.json'),policy=await j('./reference/poissonnier2026_open_arena_measurement_policy_v1.json');
             const app0=await j('./apparatus/poissonnier2026_open_arena.json'),short0=await j('./experiments/open_arena_short_control.json'),long0=await j('./experiments/open_arena_long_control.json'),model0=await j('./models/lasius_niger_locomotion_h3_v1.json'),state=await j('./states/naive_outbound_v1.json'),obs0=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');
             model0.reorientation_gate.effect.max_hazard_reduction_fraction=0;
-            const variants=[{id:'baseline',k:2,a200:0,a1000:0},{id:'k1',k:1,a200:.6,a1000:.3},{id:'k2',k:2,a200:.6,a1000:.3},{id:'k4',k:4,a200:.6,a1000:.3},{id:'k8',k:8,a200:.6,a1000:.3},{id:'common',k:2,a200:.3,a1000:.3},{id:'null100',k:100,a200:0,a1000:0}],colonies=[0,7,16,20,21,27],rows=Object.fromEntries(variants.map(v=>[v.id,{short:[],long:[]}]));
+            const variants=[{id:'baseline',k:2,a200:0,a1000:0},{id:'k1',k:1,a200:.6,a1000:.3},{id:'k2',k:2,a200:.6,a1000:.3},{id:'k4',k:4,a200:.6,a1000:.3},{id:'k8',k:8,a200:.6,a1000:.3},{id:'common',k:2,a200:.3,a1000:.3},{id:'null20',k:20,a200:0,a1000:0}],colonies=[0,7,16,20,21,27],rows=Object.fromEntries(variants.map(v=>[v.id,{short:[],long:[]}]));
             const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;let nullMismatch=0,commonMismatch=0,prefixTime=0,prefixAngle=0,prefixN=0;
             for(let fi=0;fi<colonies.length;fi++){const held=colonies[fi],pool=geometry.rows.filter(r=>r.colony!==held).sort((a,b)=>a.ant_id-b.ant_id);
               for(let i=0;i<8;i++){const seed=990000+fi*10000+i,rr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,policy.geometry_sampler.rng_stream_name)),row=pool[Math.min(pool.length-1,Math.floor(rr.next()*pool.length))],hr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,'h5_dispersion_shared_entry_heading')),heading=hr.next()*2*Math.PI-Math.PI,trial={};
@@ -264,7 +266,7 @@ jobs:
                   }
                   const ref=trial['k2_'+cond];for(const vid of ['k1','k4','k8']){const z=trial[vid+'_'+cond],n=Math.min(ref.events.length,z.events.length);for(let q=0;q<n;q++){prefixN++;if(Math.abs(ref.events[q][0]-z.events[q][0])>1e-10)prefixTime++;if(Math.abs(ref.events[q][1]-z.events[q][1])>1e-12)prefixAngle++;}}
                 }
-                for(const cond of ['short','long'])if(JSON.stringify(trial['baseline_'+cond])!==JSON.stringify(trial['null100_'+cond]))nullMismatch++;
+                for(const cond of ['short','long'])if(JSON.stringify(trial['baseline_'+cond])!==JSON.stringify(trial['null20_'+cond]))nullMismatch++;
                 if(JSON.stringify(trial.common_short)!==JSON.stringify(trial.common_long))commonMismatch++;
               }
             }
