@@ -216,14 +216,33 @@
       if (moved.finished) break;
       ant.h3HazardRemaining = drawUnitHazard(ant.h3EventRng);
       const angle = sampleVonMises(ant.h3AngleRng, cfg.kappa);
-      ant.heading = core.normalizeAngle(ant.heading + angle);
+      const baselineHeading = core.normalizeAngle(ant.heading + angle);
+      let h5Decision = null;
+      if (sim.h5Config) {
+        if (!sim.h5Runtime || typeof sim.h5Runtime.resolveReorientation !== 'function') {
+          throw new Error('H5 runtime is unavailable at an H3 reorientation event.');
+        }
+        h5Decision = sim.h5Runtime.resolveReorientation(ant, sim, baselineHeading);
+        ant.heading = h5Decision.heading;
+      } else {
+        ant.heading = baselineHeading;
+      }
       ant.h3TurnCount++;
       ant.h3LastTurnAngle = angle;
       if (ant.h3FirstTurnTime == null) {
         ant.h3FirstTurnTime = sim.time + elapsed;
         ant.h3FirstTurnDistance = ant.distanceTravelled;
       }
-      sim.events.push({ time: sim.time + elapsed, type: 'h3_reorientation', ant: ant.id, sequence: ant.h3TurnCount, angle_rad: angle, x: ant.x, y: ant.y });
+      const event = { time: sim.time + elapsed, type: 'h3_reorientation', ant: ant.id, sequence: ant.h3TurnCount, angle_rad: angle, x: ant.x, y: ant.y };
+      if (h5Decision) {
+        event.h5_search_selected = h5Decision.selected;
+        event.h5_choice = h5Decision.choice;
+        event.h5_search_angle_rad = h5Decision.searchAngle;
+        event.h5_radial_gate = h5Decision.radialGate;
+        event.h5_weight = h5Decision.weight;
+        event.h5_bearing_to_origin_rad = h5Decision.bearingToOrigin;
+      }
+      sim.events.push(event);
     }
 
     setGate(ant, cfg, gate0, elapsed);
