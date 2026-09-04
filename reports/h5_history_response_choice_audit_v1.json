@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "id": "H5_history_response_choice_audit_v1",
+  "status": "history_response_frozen_to_observed_level_effective_amplitudes_before_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-03",
+  "scope": "H5 open-arena DCM-control history-response representation only",
+  "scientific_role": "mechanism-definition and identifiability decision; not parameter fitting, ranking, or promotion evidence",
+  "decision": {
+    "selected_representation": "observed_level_effective_search_amplitudes",
+    "supported_recent_constrained_travel_mm": [
+      200,
+      1000
+    ],
+    "parameters": {
+      "alpha_search_200": {
+        "meaning": "Maximum H5 origin-oriented mixture probability at the arena boundary for recent_constrained_travel_mm = 200, before the frozen radial factor is applied.",
+        "domain": [
+          0,
+          1
+        ]
+      },
+      "alpha_search_1000": {
+        "meaning": "Maximum H5 origin-oriented mixture probability at the arena boundary for recent_constrained_travel_mm = 1000, before the frozen radial factor is applied.",
+        "domain": [
+          0,
+          1
+        ]
+      }
+    },
+    "monotonic_constraint": "0 <= alpha_search_1000 <= alpha_search_200 <= 1",
+    "mixture_rule": "For supported L, w = alpha_search_L * R(X,O,arena), with R the already-frozen boundary-normalized linear radial gate.",
+    "exact_null": "alpha_search_200 = 0 and alpha_search_1000 = 0",
+    "unsupported_history_rule": "H5-v1 is scientifically defined only for L=200 mm and L=1000 mm. Any other recent_constrained_travel_mm must be rejected as unsupported rather than interpolated or extrapolated.",
+    "treatment_label_rule": "The implementation must branch only on the numeric biological input recent_constrained_travel_mm. It may not read the short/long condition label, Path_length label, experiment id, or treatment id.",
+    "lambda_search_mm_present": false,
+    "separate_rho_search_present": false,
+    "interpolation_or_extrapolation_present": false,
+    "reopen_to_rescue_fit_forbidden": true
+  },
+  "structural_identifiability": {
+    "two_level_limitation": "The development assay contains only two history distances, 200 mm and 1000 mm. Two effective response values can be learned at those two support points, but the shape of a continuous history-response curve between or beyond them is not empirically identified.",
+    "exponential_identity": "For an exponential alpha(L)=rho*exp(-L/lambda) with alpha200>alpha1000>0, lambda = 800 / ln(alpha200/alpha1000) and rho = alpha200*exp(200/lambda). Therefore lambda and rho are merely a nonlinear reparameterization of the two endpoint amplitudes at the observed support points.",
+    "equal_effect_limit": "As alpha200/alpha1000 approaches 1, lambda tends to infinity. Equal positive endpoint amplitudes correspond to a constant-history limit, not a finite identified decay length.",
+    "feasible_set_warning": "Specific curve families can impose arbitrary extra restrictions on otherwise valid endpoint probabilities. Example: alpha200=0.6 and alpha1000=0.05 requires rho>1 for the simple exponential and has no positive-scale solution for the tested reciprocal form, even though the endpoint probabilities themselves are valid.",
+    "claim_rule": "H5-v1 may report and interpret alpha_search_200, alpha_search_1000, their difference, and their ratio when defined. It may not report a biological lambda_search_mm, interpolation shape, extrapolated response, or travel-distance half-life."
+  },
+  "nested_scientific_submodels": {
+    "H5_exact_null": "alpha200=alpha1000=0: no origin-oriented H5 component.",
+    "H5_common_origin_search": "alpha200=alpha1000>0: origin-referenced search exists but is not modulated by recent travel distance.",
+    "H5_history_modulated": "alpha200>alpha1000>=0: shorter recent constrained travel has stronger origin-referenced search.",
+    "future_estimator_requirement": "A later frozen H5 estimator policy must distinguish evidence for origin-referenced search from evidence for history modulation. Beating only H5-exact-null is not sufficient to claim history modulation if the selected solution is compatible with the common-origin-search submodel. The estimator policy must include an explicit common-search comparator or an equivalently strict pre-frozen held-out guard."
+  },
+  "mathematical_stress_audit": {
+    "workflow_run": 33842912920,
+    "head_sha": "44a6e558cd3a0cb48a1f70c183715a1c3bfb4950",
+    "artifact_id": 9925504188,
+    "artifact_zip_sha256": "d036ccaa878b984978fbd245392127a86558716d895441b420e81195ba5bef49",
+    "reference_outcome_ranking_used": false,
+    "parameter_fit_used": false,
+    "representative_endpoint_pair": {
+      "alpha200": 0.6,
+      "alpha1000": 0.3,
+      "exponential_equivalent_at_observed_levels": {
+        "rho": 0.7135242690016326,
+        "lambda_mm": 1154.1560327111708
+      },
+      "reciprocal_equivalent_at_observed_levels": {
+        "rho": 0.7999999999999999,
+        "k_mm": 600
+      },
+      "unobserved_L600": {
+        "direct_linear_example": 0.44999999999999996,
+        "exponential": 0.42426406871192845,
+        "reciprocal": 0.39999999999999997
+      },
+      "extrapolated_L0": {
+        "direct_clamped_example": 0.6,
+        "exponential": 0.7135242690016326,
+        "reciprocal": 0.7999999999999999
+      },
+      "extrapolated_L2000": {
+        "direct_clamped_example": 0.3,
+        "exponential": 0.1261344622880572,
+        "reciprocal": 0.18461538461538457
+      }
+    },
+    "lambda_instability_examples": [
+      {
+        "alpha_ratio_200_to_1000": 1.001,
+        "implied_lambda_mm": 800399.9333667336
+      },
+      {
+        "alpha_ratio_200_to_1000": 1.01,
+        "implied_lambda_mm": 80399.33664570434
+      },
+      {
+        "alpha_ratio_200_to_1000": 1.1,
+        "implied_lambda_mm": 8393.646949805649
+      },
+      {
+        "alpha_ratio_200_to_1000": 2,
+        "implied_lambda_mm": 1154.1560327111708
+      },
+      {
+        "alpha_ratio_200_to_1000": 5,
+        "implied_lambda_mm": 497.0679476476895
+      }
+    ],
+    "sensitivity_example": "At an endpoint ratio of 1.01, increasing that ratio by only 1% changes the implied lambda from about 80,399 mm to about 40,200 mm, a 50% change.",
+    "node_endpoint_matched_trajectory_equivalence": {
+      "simulations_per_mode_per_condition": 360,
+      "trajectory_comparisons": 1440,
+      "mismatches": 0,
+      "max_numeric_delta": 0,
+      "event_timing_mismatches": 0,
+      "search_pattern_mismatches": 0
+    },
+    "engineering_basis_examples_not_fit": {
+      "null": {
+        "alpha200": 0,
+        "alpha1000": 0
+      },
+      "common_search": {
+        "alpha200": 0.3,
+        "alpha1000": 0.3
+      },
+      "history_modulated": {
+        "alpha200": 0.6,
+        "alpha1000": 0.3
+      },
+      "long_null_short_active": {
+        "alpha200": 0.6,
+        "alpha1000": 0
+      },
+      "near_equal": {
+        "alpha200": 0.6,
+        "alpha1000": 0.55
+      }
+    }
+  },
+  "chromium_stress_audit": {
+    "workflow_run": 33843028184,
+    "head_sha": "e1feb2ab72bcbfc75cc669955f2b09558ab0a923",
+    "artifact_id": 9925538723,
+    "artifact_zip_sha256": "ad81667d2b63a154739a62819162945a0f7851c2f6e629f0512317e31fdad3d1",
+    "endpoint_matched_trajectory_comparisons": 192,
+    "endpoint_matched_mismatches": 0,
+    "max_numeric_delta": 0,
+    "event_timing_mismatches": 0,
+    "search_pattern_mismatches": 0,
+    "exact_null_comparisons": 96,
+    "exact_null_mismatches": 0,
+    "unsupported_L600_rejected": true,
+    "browser_exceptions": 0,
+    "console_errors": 0,
+    "ymaze_requests": 0
+  },
+  "rejected_alternatives": [
+    {
+      "name": "exponential_history_curve",
+      "form": "rho_search * exp(-L/lambda_search_mm)",
+      "status": "rejected_for_H5_v1",
+      "reason": "With only two observed history levels and two curve parameters, lambda and rho do not test curve shape; they reparameterize the two endpoint strengths, become unstable near equal endpoints, impose extra feasible-set assumptions, and invite unsupported interpolation/extrapolation claims."
+    },
+    {
+      "name": "reciprocal_or_other_two_parameter_continuous_curve",
+      "status": "rejected_for_H5_v1",
+      "reason": "Any two-parameter family that is tuned to the two observed support points can reproduce the same in-domain behavior while making different untested predictions elsewhere."
+    },
+    {
+      "name": "linear_interpolation_or_clamped_extrapolation",
+      "status": "not_part_of_H5_v1",
+      "reason": "It would be an arbitrary curve-shape assumption unsupported by observations between or outside 200 and 1000 mm. Future intermediate-distance data can define a separately versioned response law."
+    }
+  ],
+  "implementation_contract": {
+    "allowed_lookup_input": "experiment.protocol.state_facts.recent_constrained_travel_mm only",
+    "supported_values_exact_mm": [
+      200,
+      1000
+    ],
+    "alpha_at_200": "alpha_search_200",
+    "alpha_at_1000": "alpha_search_1000",
+    "any_other_value": "hard error / unsupported H5-v1 domain",
+    "monotonicity": "alpha_search_200 >= alpha_search_1000",
+    "radial_combination": "multiply the selected endpoint alpha by the frozen boundary-normalized linear R",
+    "time_profile": "constant during the observed traversal",
+    "event_timing": "unchanged H3-null process",
+    "rng": "history lookup itself consumes no RNG; dedicated H5 choice/search-angle streams remain separate from H3 streams"
+  },
+  "remaining_unfrozen_items": [
+    "Whether the H5 search-direction component reuses the baseline H3 reorientation concentration exactly or has a separately justified concentration. The current draft says reuse is the pre-freeze default but this has not yet been explicitly frozen.",
+    "The final H5-null/common/history estimator nuisance family, parameter-coordinate mapping, candidate budget, scoring/promotion guards, and exact search policy."
+  ],
+  "firewall": {
+    "H5_mechanism_fully_frozen": false,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_allowed": false,
+    "history_response_frozen_to_observed_level_effective_amplitudes": true,
+    "lambda_search_parameter_forbidden_in_H5_v1": true,
+    "separate_rho_search_parameter_forbidden_in_H5_v1": true,
+    "unsupported_history_interpolation_or_extrapolation_forbidden": true,
+    "history_response_may_not_be_reopened_to_rescue_fit": true,
+    "common_origin_search_alone_not_sufficient_for_history_modulation_claim": true,
+    "ymaze_access": false,
+    "canonical_model_unchanged": true
+  },
+  "next_step": "Freeze the H5 search-direction concentration/dispersion rule, then freeze the estimator nuisance/comparator/search policy before any persistent H5 runtime implementation or parameter search."
+}
