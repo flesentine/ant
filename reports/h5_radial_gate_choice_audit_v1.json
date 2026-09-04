@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "id": "H5_radial_gate_choice_audit_v1",
+  "status": "radial_gate_frozen_parameter_free_boundary_normalized_linear_before_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-03",
+  "scope": "H5 open-arena DCM-control radial gate only",
+  "scientific_role": "mechanism-definition decision; not parameter fitting, ranking, or promotion evidence",
+  "decision": {
+    "selected_gate": "boundary_normalized_linear",
+    "definition": "Let O be the frozen central physical entry reference and X the current ant position. Let r=||X-O||. If r=0, R=0. Otherwise let u=(X-O)/r and d_edge be the positive distance from O to the sampled rectangular arena boundary along ray O+t*u. Set R=clamp(r/d_edge,0,1).",
+    "mixture_weight": "w = rho_search * D(L) * R, constrained to [0,1]. D(L) remains unfrozen.",
+    "units": "dimensionless",
+    "free_radial_scale_parameter": false,
+    "r_search_mm_forbidden": true,
+    "treatment_specific_radial_gate_forbidden": true,
+    "outcome_dependent_radial_gate_forbidden": true,
+    "reopen_to_rescue_fit_forbidden": true
+  },
+  "rationale": {
+    "biological": "The directional search component has no defined bearing exactly at the origin and should strengthen as the ant moves farther from its remembered origin. A boundary-normalized radial fraction provides that geometry without adding an unsupported biological length scale.",
+    "geometry": "The rule automatically adapts to each frozen sampled arena rectangle and to direction within that rectangle; R=0 at O and R=1 at the first boundary point along the same ray.",
+    "parsimony": "The provisional rational gate r/(r+r_search_mm) introduces a spatial scale that the available aggregate targets do not separately identify from H5 directional amplitude/history strength.",
+    "choice_not_outcome_driven": "No gate form or radial scale was ranked against Poissonnier target loss or held-out biological outcomes. The selected rule was chosen for continuity, symmetry, dimensionless geometry normalization, and removal of a weakly identified parameter."
+  },
+  "rejected_alternatives": [
+    {
+      "name": "rational_free_scale",
+      "form": "R=r/(r+r_search_mm)",
+      "status": "rejected_for_H5_v1",
+      "reason": "Mechanically valid but r_search_mm behaves largely as an amplitude-rescaling knob over the baseline event distribution and aggregate observables. Keeping it would add weakly identified flexibility without independent external calibration."
+    },
+    {
+      "name": "no_gate_except_origin",
+      "form": "R=0 at r=0 and R=1 for every r>0",
+      "status": "rejected",
+      "reason": "Discontinuous at the biological origin: lim r->0+ R=1 while R(0)=0. It also produces substantially stronger search activation immediately after tiny displacements."
+    },
+    {
+      "name": "boundary_normalized_sqrt",
+      "form": "R=sqrt(r/d_edge)",
+      "status": "not_selected",
+      "reason": "Parameter-free and mechanically valid, but adds an arbitrary nonlinear curvature choice. Its aggregate effect is almost a scalar-rescaled version of the linear gate/current rational gate, so the extra curvature is not justified."
+    }
+  ],
+  "stress_audit": {
+    "authoritative_workflow_run": 33840849987,
+    "authoritative_head_sha": "610f3db2c7cfbc8e26c9c12543d3698b209aea96",
+    "authoritative_artifact_id": 9924857087,
+    "authoritative_artifact_zip_sha256": "9490d29b2f5ff598e72af0b81d43fd6fdf42e64f3053b93cdcb0fa5ae9d26161",
+    "superseded_initial_run": {
+      "workflow_run": 33840762096,
+      "reason": "The first run's synthetic translation invariant was formulated incorrectly for a rectangle anchored at zero. The trajectory and event analyses were otherwise valid, but the coordinate-frame symmetry result from that run is not used. The corrected authoritative run replaced that check with generalized translated bounds."
+    },
+    "persistent_H5_runtime_used": false,
+    "parameter_fit_or_reference_outcome_ranking_used": false,
+    "ymaze_access": false,
+    "baseline_event_geometry": {
+      "simulations": 600,
+      "h3_null_reorientation_events": 3094,
+      "radius_mm": {
+        "min": 1.032326844930109,
+        "q10": 15.161018974559028,
+        "q25": 38.38895628377328,
+        "median": 72.06545610922424,
+        "q75": 104.99590359237199,
+        "q90": 130.5508042893608,
+        "max": 174.98153490393074,
+        "mean": 72.70873612128085
+      },
+      "boundary_normalized_radius": {
+        "min": 0.006118575858560753,
+        "q10": 0.10087665868393017,
+        "q25": 0.2653960123321911,
+        "median": 0.5082382891578638,
+        "q75": 0.74317023697318,
+        "q90": 0.8943867053397407,
+        "max": 0.9996825810431198,
+        "mean": 0.503940045215327
+      },
+      "interpretation": "Baseline reorientation events span essentially the full normalized radial domain, so a radial gate is mechanically active rather than trivially saturated or confined to one radius."
+    },
+    "event_level_scale_confounding": {
+      "rational_20_vs_50": {
+        "gate_vector_cosine": 0.9950828155640504,
+        "scalar_fit_r2": 0.836734025506018
+      },
+      "rational_100_vs_50": {
+        "gate_vector_cosine": 0.9973568890829011,
+        "scalar_fit_r2": 0.9637100705458618
+      },
+      "rational_200_vs_50": {
+        "gate_vector_cosine": 0.9911006675385131,
+        "scalar_fit_r2": 0.9022018280017801
+      },
+      "boundary_linear_vs_rational_50": {
+        "gate_vector_cosine": 0.9728249786932149,
+        "scalar_fit_r2": 0.7755992143998475
+      }
+    },
+    "aggregate_effect_confounding": {
+      "simulations_per_variant": 600,
+      "entry_heading": "shared deterministic uniform [-pi,pi) per trial",
+      "fixed_direction_strength_diagnostic": 0.4,
+      "rational_10_vs_50": {
+        "effect_cosine": 0.9938714465532491,
+        "scalar_fit_r2": 0.9859692746644269,
+        "scale_from_50": 1.6093538874577116
+      },
+      "rational_20_vs_50": {
+        "effect_cosine": 0.9885422259296444,
+        "scalar_fit_r2": 0.9738775743677567,
+        "scale_from_50": 1.315747090699496
+      },
+      "rational_100_vs_50": {
+        "effect_cosine": 0.9916397957355676,
+        "scalar_fit_r2": 0.9813126509587068,
+        "scale_from_50": 0.7028716811241804
+      },
+      "rational_200_vs_50": {
+        "effect_cosine": 0.9318661770637362,
+        "scalar_fit_r2": 0.852986245833615,
+        "scale_from_50": 0.40642150034145547
+      },
+      "boundary_linear_vs_rational_50": {
+        "effect_cosine": 0.9978571086272819,
+        "scalar_fit_r2": 0.9951994947286736,
+        "scale_from_50": 1.0331731253828396
+      },
+      "boundary_sqrt_vs_rational_50": {
+        "effect_cosine": 0.9993954781086675,
+        "scalar_fit_r2": 0.9986216136890478,
+        "scale_from_50": 1.4094391461389435
+      },
+      "no_gate_vs_rational_50": {
+        "effect_cosine": 0.994073273061296,
+        "scalar_fit_r2": 0.9862160128236392,
+        "scale_from_50": 1.9965400920868412
+      },
+      "exact_null_equivalence_across_gate_forms": true
+    },
+    "symmetry_and_numerics": {
+      "boundary_linear_max_abs_error_under_translation_reflection_rotation90_and_uniform_scale": 2.220446049250313e-16,
+      "center_value": 0,
+      "near_center_continuity": "Verified from r=1e-12 mm upward with finite monotone values.",
+      "boundary_rule": "R reaches 1 at the rectangular boundary along the same ray; test examples and edge approach were finite and monotone."
+    },
+    "chromium": {
+      "simulations_per_variant": 60,
+      "variants": [
+        "baseline",
+        "rational_20",
+        "rational_50",
+        "rational_100",
+        "boundary_linear",
+        "no_gate_except_origin"
+      ],
+      "baseline": {
+        "mean_time_to_exit_s": 7.818000000000001,
+        "mean_middle_zone_fraction": 0.14953788667914233,
+        "mean_beeline_mm": 133.66796954533254
+      },
+      "rational_20": {
+        "mean_time_to_exit_s": 12.078,
+        "mean_middle_zone_fraction": 0.16124483972356454,
+        "mean_beeline_mm": 129.49544426686967
+      },
+      "rational_50": {
+        "mean_time_to_exit_s": 10.984666666666667,
+        "mean_middle_zone_fraction": 0.1630403273541687,
+        "mean_beeline_mm": 127.03556689903107
+      },
+      "rational_100": {
+        "mean_time_to_exit_s": 10.45,
+        "mean_middle_zone_fraction": 0.16117479355752062,
+        "mean_beeline_mm": 129.7428258638317
+      },
+      "boundary_linear": {
+        "mean_time_to_exit_s": 11.32333333333333,
+        "mean_middle_zone_fraction": 0.15788222285293846,
+        "mean_beeline_mm": 129.99539533145216
+      },
+      "no_gate_except_origin": {
+        "mean_time_to_exit_s": 17.31600000000001,
+        "mean_middle_zone_fraction": 0.18567120633333384,
+        "mean_beeline_mm": 130.38082366050173
+      },
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0
+    }
+  },
+  "implementation_contract": {
+    "geometry_source": "Use the sampled reconstructed arena dimensions and the frozen central physical entry reference from the measurement geometry row.",
+    "event_timing": "Unchanged H3-null continuous-time reorientation process.",
+    "at_center": "R=0 exactly; H5 search component cannot be selected.",
+    "inside_arena": "0<R<1 for points strictly inside the rectangle away from O.",
+    "at_first_boundary": "R=1 along the current radial ray.",
+    "no_extra_rng": "Computing R is deterministic and consumes no RNG.",
+    "no_new_parameter": "H5-v1 contains no r_search_mm or other radial-shape parameter."
+  },
+  "firewall": {
+    "H5_mechanism_fully_frozen": false,
+    "H5_runtime_implemented": false,
+    "H5_parameter_search_allowed": false,
+    "radial_gate_frozen_boundary_normalized_linear": true,
+    "r_search_parameter_forbidden_in_H5_v1": true,
+    "radial_gate_shape_parameter_forbidden_in_H5_v1": true,
+    "radial_gate_may_not_be_reopened_to_rescue_fit": true,
+    "ymaze_access": false,
+    "canonical_model_unchanged": true
+  },
+  "next_step": "Resolve H5 history-response parameterization D(L): retain a functional curve or parameterize directly by identifiable effective short/long search strengths."
+}
