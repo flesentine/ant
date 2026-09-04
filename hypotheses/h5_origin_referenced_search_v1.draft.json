@@ -1,5 +1,5 @@
 {
-  "schema_version": 13,
+  "schema_version": 14,
   "id": "H5_origin_referenced_search_v1",
   "status": "mechanism_and_estimator_policy_frozen_runtime_implementation_pending_synthetic_qualification_before_parameter_search",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The biological mechanism is now frozen after pre-implementation stress audits, but the estimator policy remains unfrozen; H5 runtime implementation and parameter search remain forbidden until that policy is frozen.",
@@ -379,7 +379,7 @@
     "status": "frozen_before_persistent_H5_runtime_implementation_or_parameter_search",
     "selected_policy": "H5_parameter_estimation_v1",
     "policy_file": "hypotheses/h5_parameter_estimation_v1.json",
-    "policy_git_blob_sha": "1322c259153d12877a7b78190cb9e2603acb8882",
+    "policy_git_blob_sha": "d81e756c3643778c067ef1b1bb8f68521adb8141",
     "nested_models": [
       "H5_null",
       "H5_common_search",
@@ -393,13 +393,15 @@
     "search_method": "deterministic Halton low-discrepancy search with exact nesting anchors",
     "geometry_rule": "Use frozen reconstructed measurement geometry with held-out-colony geometry excluded from simulated training and held-out trial pools.",
     "cross_family_rule": "Re-evaluate frozen H2/H3/H4 fold candidates under the same reconstructed geometry and matched held-out scoring without refitting.",
-    "may_not_be_changed_to_rescue_fit": true
+    "may_not_be_changed_to_rescue_fit": true,
+    "transcription_correction": "The H3 event-stream label was corrected to the actual existing biology_h3_turn_event:<ant_id> stream during implementation; semantic rule and runtime sequence are unchanged."
   },
   "preimplementation_contract_audit": {
     "status": "passed_before_persistent_H5_runtime_implementation",
     "report": "reports/h5_preimplementation_contract_audit_v1.json",
     "report_git_blob_sha": "48594ede99e8a2c73fa6e875735b6e33c026a38a",
     "authoritative_run": 33899855386,
-    "important_implementation_constraint": "Historical H3/H4 simulateCandidate helpers are not reconstructed-geometry aware. H5 implementation must use geometry-aware wrappers for H5 and matched H2/H3/H4 reevaluation rather than directly reusing those helpers."
+    "important_implementation_constraint": "Historical H3/H4 simulateCandidate helpers are not reconstructed-geometry aware. H5 implementation must use geometry-aware wrappers for H5 and matched H2/H3/H4 reevaluation rather than directly reusing those helpers.",
+    "estimator_policy_git_blob_sha": "d81e756c3643778c067ef1b1bb8f68521adb8141"
   }
 }
