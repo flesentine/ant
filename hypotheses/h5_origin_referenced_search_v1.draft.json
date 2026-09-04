@@ -1,7 +1,7 @@
 {
-  "schema_version": 6,
+  "schema_version": 7,
   "id": "H5_origin_referenced_search_v1",
-  "status": "draft_origin_temporal_and_effect_scope_frozen_remaining_mechanism_questions_open_before_full_mechanism_freeze",
+  "status": "draft_origin_temporal_effect_scope_and_radial_gate_frozen_remaining_history_and_nuisance_questions_open_before_full_mechanism_freeze",
   "honesty_note": "The Poissonnier 2026 open-arena outcomes and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was drafted. Bonavita et al. 2026 Lasius niger search-behaviour results were also considered. This is outcome-aware mechanism design, not preregistration. The draft has been stress-tested but remains unfrozen, unimplemented, and ineligible for parameter search.",
   "stress_audit": "reports/h5_draft_stress_audit_v1.json",
   "species": "Lasius niger",
@@ -115,8 +115,8 @@
   "candidate_mechanism": {
     "origin": "Frozen O = the central physical entry-hole/trail-crossing reference supplied by the measurement geometry row (entry_reference_x_mm, entry_reference_y_mm). The simulated ant still begins observation at first_track_x_mm/first_track_y_mm. First-track position is not the biological H5 origin and may not be substituted after seeing model performance.",
     "history_search_drive": "Temporal profile frozen constant during the observed arena traversal. The history-response magnitude D(L) remains provisional: current candidate D(L)=exp(-L/lambda_search_mm), so shorter recent constrained travel gives larger search drive, but its functional form and parameterization are not yet frozen. There is no tau_search_s and no elapsed-time decay in H5-v1.",
-    "radial_gate": "Provisional R(r) = r/(r+r_search_mm), where r = ||x-O||. Stress tests show baseline reorientation events span radii over which this gate is active, but r_search_mm remains provisional and potentially confounded with rho_search and lambda_search_mm.",
-    "mixture_weight": "Provisional w = rho_search * D(L) * R(r), constrained to [0,1].",
+    "radial_gate": "Frozen R(X,O,arena): if r=||X-O|| is 0 then R=0; otherwise let d_edge be the positive distance from O to the sampled rectangular arena boundary along the ray through X and set R=clamp(r/d_edge,0,1). This gate is dimensionless and has no fitted radial scale.",
+    "mixture_weight": "Provisional w = rho_search * D(L) * R(X,O,arena), constrained to [0,1]. The temporal profile, biological origin, direction-only effect scope, and radial gate are frozen; D(L) and the effect/history amplitude parameterization remain unfrozen.",
     "reorientation_effect": {
       "type": "mixture_of_circular_reorientation_distributions",
       "baseline_component": "Use the ordinary H3-null post-reorientation directional law and existing H3 turn-angle RNG stream.",
@@ -124,7 +124,7 @@
       "mixture_rule": "At each baseline major reorientation event, draw a dedicated H5 choice variate u. If u < w use the search component; otherwise use the already-drawn baseline component.",
       "event_timing": "Frozen: event times are generated entirely by the H3-null continuous-time event process. H5-v1 does not alter mean_free_path_mm, event hazard, threshold integration, or event timing.",
       "antipodal_rule": "When the origin is exactly behind the ant, H5 remains a symmetric mixture distribution and does not choose an arbitrary deterministic left-versus-right mean turn.",
-      "origin_rule": "At r=0, set w=0. Any inert search-angle draw must not influence the selected baseline trajectory.",
+      "origin_rule": "At r=0, the frozen boundary-normalized radial gate gives R=0 and therefore w=0. Any inert H5 search-angle draw must not influence the selected baseline trajectory.",
       "free_path": "Frozen absent in H5-v1: no origin-relative or history-dependent free-path modulation. Any such mechanism requires a later separately versioned hypothesis or direct raw-trajectory discriminator."
     },
     "rng_candidate": {
@@ -179,18 +179,18 @@
   "identifiability_warnings": {
     "history_levels": "The development assay supplies only two history distances, 200 and 1000 mm. It cannot richly identify the shape of an arbitrary history-response curve.",
     "stress_result": "Across deliberately broad engineering-only lambda values, the implied short-to-long mixture-weight ratio ranged from about 2.23 to 24.53 without changing the qualitative mechanism.",
-    "radial_scale": "Baseline H3-null reorientation events occur over a broad radial range, so a radial gate is mechanically meaningful, but rho_search, lambda_search_mm, and r_search_mm can trade off.",
+    "radial_scale": "Resolved for H5-v1: no r_search_mm or radial-shape parameter will be estimated. The radial gate is frozen to the parameter-free boundary-normalized linear fraction r/d_edge.",
     "reporting_if_ever_fit": [
       "Effective mixture weight at L=200 and L=1000 for representative radii",
       "Predicted number/proportion of origin-oriented reorientations under each observed history",
       "Ridge or equivalence sets if raw parameters are broad",
       "Boundary-hit and near-equivalent candidate diagnostics"
     ],
-    "claim_rule": "Do not report a unique biological lambda_search_mm or r_search_mm unless the frozen estimator supplies strong identifiability evidence beyond merely selecting one candidate."
+    "claim_rule": "Do not report a unique biological lambda_search_mm or other history-shape constant unless the frozen estimator supplies strong identifiability evidence. H5-v1 has no radial-scale constant to estimate."
   },
   "raw_trajectory_discriminators_if_recovered": [
     "post-reorientation heading conditional on bearing to the trial origin",
-    "probability that a reorientation is origin-oriented as a function of radial distance",
+    "probability that a reorientation is origin-oriented as a function of boundary-normalized radial fraction",
     "free-path length conditional on heading toward versus away from the trial origin",
     "radial displacement from origin as a function of time",
     "number and timing of returns toward the origin neighborhood",
@@ -205,10 +205,10 @@
     "No centerline, pheromone, exit-edge, or arena-boundary targeting.",
     "No colony-specific biological parameter.",
     "No Y-maze access for development fitting, ranking, stopping, or model selection.",
-    "No origin-relative or history-dependent modulation of mean free path or reorientation-event hazard in H5-v1."
+    "No origin-relative or history-dependent modulation of mean free path or reorientation-event hazard in H5-v1.",
+    "No fitted or treatment-specific radial-search length scale; H5-v1 radial gating is fixed by sampled arena geometry."
   ],
   "pre_freeze_questions": [
-    "Should the radial gate be retained, simplified, or fixed from an independently justified rule? The external paper does not supply a directly transferable r_search_mm.",
     "If D(L)=exp(-L/lambda_search_mm) is retained, should lambda be estimated at all or should H5 be parameterized directly by constrained effective weights at the two observed history distances? This is an identifiability decision, not a tuning decision.",
     "What H5-null nuisance family and bounds are justified independently of H5 outcomes? They remain deliberately unspecified."
   ],
@@ -232,7 +232,12 @@
     "H5_effect_scope_frozen_direction_only": true,
     "H5_orientation_dependent_freepath_forbidden_in_v1": true,
     "H5_reorientation_hazard_effect_forbidden_in_v1": true,
-    "H5_effect_scope_may_not_be_reopened_to_rescue_fit": true
+    "H5_effect_scope_may_not_be_reopened_to_rescue_fit": true,
+    "H5_radial_gate_still_unfrozen": false,
+    "H5_radial_gate_frozen_boundary_normalized_linear": true,
+    "H5_r_search_parameter_forbidden": true,
+    "H5_radial_shape_parameter_forbidden": true,
+    "H5_radial_gate_may_not_be_reopened_to_rescue_fit": true
   },
   "allowed_shared_measurement_or_geometry_inputs_under_frozen_policy": [
     "central_physical_entry_reference_mm (frozen H5 biological origin)",
@@ -273,6 +278,17 @@
     "rule": "H5-v1 changes only the conditional post-reorientation direction distribution at ordinary H3-null event times. It does not change mean free path, reorientation hazard, or event timing.",
     "baseline_freepath_role": "A shared baseline mean_free_path_mm may remain a nuisance parameter of the H3-null substrate, but H5 biology may not modulate it by history, origin-relative heading, radial position, or treatment.",
     "freepath_external_evidence": "Bonavita et al. 2026 reported origin-relative free-path anisotropy in Lasius niger, but that mechanism is deferred from H5-v1 because the current aggregate Poissonnier targets do not separately identify it from direction steering.",
+    "may_not_be_reopened_to_rescue_fit": true
+  },
+  "radial_gate_decision": {
+    "status": "frozen_before_H5_runtime_implementation_or_parameter_search",
+    "selected_gate": "boundary_normalized_linear",
+    "decision_report": "reports/h5_radial_gate_choice_audit_v1.json",
+    "decision_report_git_blob_sha": "66f0d0204979a17ade267b41c387ed872679115a",
+    "rule": "Let r=||X-O||. If r=0, R=0. Otherwise let d_edge be the distance from O to the sampled rectangular arena boundary along the ray from O through X, and set R=clamp(r/d_edge,0,1).",
+    "units": "dimensionless",
+    "r_search_parameter_present": false,
+    "reason": "The provisional rational family r/(r+r_search_mm) behaved largely as an amplitude-rescaling degree of freedom over baseline event locations and aggregate observables. The boundary-normalized linear rule is continuous, symmetry/scale invariant, adapts to each sampled arena, reaches 0 at the physical origin and 1 at the boundary, and removes the weakly identified r_search_mm.",
     "may_not_be_reopened_to_rescue_fit": true
   }
 }
