@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "id": "H5_preimplementation_contract_audit_v1",
+  "status": "passed_ready_for_frozen_runtime_and_estimator_implementation",
+  "date": "2026-09-04",
+  "scientific_role": "final pre-implementation contract audit after H5 mechanism and estimator policy freeze; no H5 reference-loss ranking or parameter fitting performed",
+  "frozen_inputs": {
+    "H5_mechanism_draft": {
+      "path": "hypotheses/h5_origin_referenced_search_v1.draft.json",
+      "git_blob_sha": "c4f729f04cc737d7a2fa68f1a1e4059ca336da3e"
+    },
+    "H5_estimator_policy": {
+      "path": "hypotheses/h5_parameter_estimation_v1.json",
+      "git_blob_sha": "1322c259153d12877a7b78190cb9e2603acb8882"
+    },
+    "estimator_policy_audit": {
+      "path": "reports/h5_estimator_policy_audit_v1.json",
+      "git_blob_sha": "abfea92095fd2d29d6966cac3cbcf9d18f187c13"
+    },
+    "H3_runner": {
+      "path": "tools/run-h3-estimation.js",
+      "git_blob_sha": "9b27812fcb869489d4979e26e8085cb8d2bf6fc1"
+    },
+    "H4_runner": {
+      "path": "tools/run-h4-estimation.js",
+      "git_blob_sha": "d417c62a4ef4f97c338a1da2f1ff10f49e18c175"
+    },
+    "measurement_geometry_adapter": {
+      "path": "tools/poissonnier2026-measurement-geometry.js",
+      "git_blob_sha": "fde2eae58e230880b24efa7c07ba32fde95bcaea"
+    },
+    "scorer_audit": {
+      "path": "reports/estimator_scoring_audit_v1.json",
+      "git_blob_sha": "f129d9fbabda36b49d0c454a8711de6af7ab18c7"
+    }
+  },
+  "authoritative_run": {
+    "workflow_run": 33899855386,
+    "head_sha": "12dc93b7190d657bac3c02ea00c25772fd42a0b3",
+    "artifact_id": 9947202199,
+    "artifact_zip_sha256": "1cbfc4165763a42aebb56773ed59efb9e34fa7f6442e9e9d26b1c7d93577c5c3",
+    "H5_reference_losses_used": false,
+    "H5_runtime_implemented": false,
+    "ymaze_access": false
+  },
+  "findings": {
+    "runner_api_review": {
+      "status": "passed_with_implementation_constraint",
+      "historical_H3_H4_simulateCandidate_geometry_aware": false,
+      "finding": "The historical H3/H4 simulateCandidate helpers predate the reconstructed measurement geometry policy and do not accept/apply a LOCO geometry pool.",
+      "implementation_requirement": "The H5 estimator must use new geometry-aware simulation wrappers for H5 and for matched H2/H3/H4 comparator reevaluation. It must not call the historical simulateCandidate helpers directly for matched-geometry comparator scoring.",
+      "policy_change_required": false,
+      "reason": "The frozen H5 estimator policy already requires matched reconstructed per-trial geometry; this finding clarifies how the implementation must satisfy that existing rule."
+    },
+    "candidate_sets": {
+      "null_halton": 500,
+      "common_halton": 499,
+      "history_halton": 498,
+      "total_with_required_anchors": {
+        "H5_null": 500,
+        "H5_common_search": 500,
+        "H5_history": 500
+      },
+      "nuisance_pairing_first_498_indices": "exact across null/common/history",
+      "history_ordering": "alpha_search_200=max(u7,u11), alpha_search_1000=min(u7,u11) verified for all 498 history Halton points",
+      "duplicate_common_null_anchor_case": "trajectory/parameter-equivalent anchors preserved as two required records; no replacement candidate allowed",
+      "kappa_support": {
+        "min": 0.027434842249657063,
+        "max": 19.945130315500684
+      },
+      "off_by_one_errors": 0
+    },
+    "seeds_and_rng": {
+      "fit_trial_seed_count": 360,
+      "evaluation_trial_seed_count": 720,
+      "fit_evaluation_seed_overlap": 0,
+      "checked_stream_names": [
+        "poissonnier2026_measurement_geometry_v1",
+        "h2_estimation_entry_transition_v1",
+        "biology_h3_reorientation_event:0",
+        "biology_h3_turn_angle:0",
+        "biology_h5_search_choice:0",
+        "biology_h5_search_angle:0"
+      ],
+      "sampled_streamSeed_collisions": 0
+    },
+    "scorer_and_leakage": {
+      "heldout_metric_scales_training_only": true,
+      "all_fold_scales_positive_finite": true,
+      "five_category_exit_order": [
+        "left",
+        "right",
+        "top",
+        "bottom",
+        "timeout"
+      ],
+      "synthetic_exit_probabilities": [
+        0.25,
+        0.25,
+        0,
+        0.25,
+        0.25
+      ],
+      "synthetic_timeout_probability": 0.25,
+      "identical_sim_real_loss": 0,
+      "heldout_geometry_leaks": 0,
+      "deterministic_geometry_sampling": true
+    },
+    "comparator_extraction": {
+      "H2_fold_candidates": 6,
+      "H3_fold_candidates": 6,
+      "H4_fold_candidates": 6,
+      "unique_heldout_colonies": [
+        0,
+        7,
+        16,
+        20,
+        21,
+        27
+      ],
+      "H2_path": "fold.H2",
+      "H3_path": "fold.H3_context",
+      "H4_path": "fold.H4_context.fit.candidate",
+      "nonfinite_candidate_values": 0
+    },
+    "regressions": {
+      "boundary_timing": "pass",
+      "determinism": "pass",
+      "experiment_definition": "pass",
+      "h3_reorientation": "pass",
+      "integrity_firewall": "pass",
+      "measurement_geometry_policy": "pass",
+      "measurement": "pass",
+      "open_arena_protocol": "pass",
+      "rng_streams": "pass",
+      "state_integrity": "pass"
+    },
+    "chromium": {
+      "history_halton_points": 498,
+      "kappa_min": 0.027434842249657063,
+      "kappa_max": 19.945130315500684,
+      "comparator_folds": {
+        "H2": 6,
+        "H3": 6,
+        "H4": 6
+      },
+      "reconstructed_geometry_simulation_pairs": 24,
+      "H3_null_short_long_neutrality_mismatches": 0,
+      "heldout_geometry_leaks": 0,
+      "geometry_pair_mismatches": 0,
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0
+    }
+  },
+  "implementation_gate": {
+    "mechanism_design_reopen_required": false,
+    "estimator_policy_reopen_required": false,
+    "persistent_H5_runtime_implementation_authorized": true,
+    "frozen_estimator_implementation_authorized": true,
+    "reference_parameter_search_authorized": false,
+    "required_next_gate": "Implement frozen H5 runtime and estimator exactly, then pass the already-frozen synthetic/no-reference-loss estimator qualification before any reference parameter search."
+  },
+  "firewall": {
+    "mechanism_unchanged": true,
+    "estimator_policy_unchanged": true,
+    "canonical_model_unchanged": true,
+    "persistent_H5_runtime_absent_at_audit": true,
+    "reference_parameter_search_not_run": true,
+    "ymaze_access": false
+  }
+}
