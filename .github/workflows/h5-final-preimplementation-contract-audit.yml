@@ -1,0 +1,262 @@
+name: H5 final preimplementation contract audit
+on:
+  push:
+    branches: [h5-origin-referenced-search-v1]
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Exact frozen-state and runner API review
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/h5_parameter_estimation_v1.json)" = "1322c259153d12877a7b78190cb9e2603acb8882"
+          test "$(git hash-object hypotheses/h5_origin_referenced_search_v1.draft.json)" = "c4f729f04cc737d7a2fa68f1a1e4059ca336da3e"
+          test "$(git hash-object reports/h5_estimator_policy_audit_v1.json)" = "abfea92095fd2d29d6966cac3cbcf9d18f187c13"
+          test "$(git hash-object tools/run-h3-estimation.js)" = "9b27812fcb869489d4979e26e8085cb8d2bf6fc1"
+          test "$(git hash-object tools/run-h4-estimation.js)" = "d417c62a4ef4f97c338a1da2f1ff10f49e18c175"
+          test "$(git hash-object tools/poissonnier2026-measurement-geometry.js)" = "fde2eae58e230880b24efa7c07ba32fde95bcaea"
+          test "$(git hash-object reports/estimator_scoring_audit_v1.json)" = "f129d9fbabda36b49d0c454a8711de6af7ab18c7"
+          node <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('hypotheses/h5_parameter_estimation_v1.json','utf8'));
+          const h3=fs.readFileSync('tools/run-h3-estimation.js','utf8');
+          const h4=fs.readFileSync('tools/run-h4-estimation.js','utf8');
+          const geom=fs.readFileSync('tools/poissonnier2026-measurement-geometry.js','utf8');
+          if(!/function simulateCandidate\(c,trials,seed0,base\)/.test(h3.replace(/\s+/g,' '))) throw new Error('H3 simulateCandidate signature drift');
+          if(!/function simulateCandidate\(c, trials, seed0, base\)/.test(h4)) throw new Error('H4 simulateCandidate signature drift');
+          if(h3.includes('applyGeometry(')||h4.includes('applyGeometry(')) throw new Error('Historical runner unexpectedly became geometry-aware; re-audit comparator wrapper plan');
+          if(!geom.includes('function geometryPool(rows, heldoutColony)')||!geom.includes('function sampleGeometry(pool, trialSeed)')||!geom.includes('function applyGeometry(bundle, row)')) throw new Error('geometry adapter API drift');
+          if(!p.measurement_application.comparator_rule.includes('same reconstructed per-trial geometry')) throw new Error('policy missing geometry-aware comparator requirement');
+          if(!p.synthetic_estimator_qualification.required_checks.some(x=>x.includes('Cross-family comparator candidate extraction'))) throw new Error('comparator qualification guard missing');
+          const out={
+            status:'passed',
+            historical_simulateCandidate_geometry_aware:false,
+            required_H5_implementation_rule:'Use geometry-aware simulation wrappers for H5 and historical H2/H3/H4 reevaluation; do not call historical simulateCandidate directly for matched-geometry comparator scoring.',
+            h3_runner_sha:'9b27812fcb869489d4979e26e8085cb8d2bf6fc1',
+            h4_runner_sha:'d417c62a4ef4f97c338a1da2f1ff10f49e18c175',
+            geometry_adapter_sha:'fde2eae58e230880b24efa7c07ba32fde95bcaea'
+          };
+          fs.writeFileSync('/tmp/h5-preimpl-static.json',JSON.stringify(out,null,2)+'\n');
+          console.log(JSON.stringify(out,null,2));
+          NODE
+          if grep -R -n -E 'biology_h5_search|alpha_search_200|alpha_search_1000|kappa_search|search_kappa' src models experiments states apparatus scoring observations; then
+            echo 'Persistent H5 runtime unexpectedly present before implementation' >&2
+            exit 1
+          fi
+
+      - name: Exact candidate-set and anchor audit
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('hypotheses/h5_parameter_estimation_v1.json','utf8'));
+          const halton=(index,base)=>{let f=1,r=0,i=index;while(i>0){f/=base;r+=f*(i%base);i=Math.floor(i/base);}return r;};
+          const mapLog=(u,a,b)=>Math.exp(Math.log(a)+u*(Math.log(b)-Math.log(a)));
+          const nulls=[],common=[],history=[];
+          for(let i=1;i<=500;i++){
+            const nuisance={index:i,ell0:mapLog(halton(i,2),5,150),kappa:halton(i,3)*20,q:halton(i,5)};
+            nulls.push(nuisance);
+            if(i<=499)common.push({...nuisance,alpha_common:halton(i,7)});
+            if(i<=498){const a=halton(i,7),b=halton(i,11);history.push({...nuisance,alpha200:Math.max(a,b),alpha1000:Math.min(a,b)});}
+          }
+          if(nulls.length!==500||common.length!==499||history.length!==498) throw new Error('off-by-one candidate count');
+          for(let i=0;i<498;i++){
+            for(const k of ['ell0','kappa','q']) if(nulls[i][k]!==common[i][k]||nulls[i][k]!==history[i][k]) throw new Error('nuisance pairing drift '+i+' '+k);
+            if(history[i].alpha1000>history[i].alpha200) throw new Error('history ordering drift');
+          }
+          const selectedNull={ell0:31.25,kappa:3.75,q:.42};
+          const commonNullAnchor={...selectedNull,alpha_common:0,_source:'exact_null_anchor'};
+          const selectedCommon={ell0:40,kappa:4.25,q:.35,alpha_common:.37};
+          const historyCommonAnchor={ell0:selectedCommon.ell0,kappa:selectedCommon.kappa,q:selectedCommon.q,alpha200:selectedCommon.alpha_common,alpha1000:selectedCommon.alpha_common,_source:'exact_common_anchor'};
+          const historyNullAnchor={...selectedNull,alpha200:0,alpha1000:0,_source:'exact_null_anchor'};
+          if(historyCommonAnchor.alpha200!==historyCommonAnchor.alpha1000) throw new Error('common anchor not exact equality');
+          if(historyNullAnchor.alpha200!==0||historyNullAnchor.alpha1000!==0||commonNullAnchor.alpha_common!==0) throw new Error('null anchor drift');
+          const duplicateCase={ell0:31.25,kappa:3.75,q:.42,alpha_common:0};
+          const dupCommon={ell0:duplicateCase.ell0,kappa:duplicateCase.kappa,q:duplicateCase.q,alpha200:0,alpha1000:0,_source:'exact_common_anchor'};
+          const dupNull={...selectedNull,alpha200:0,alpha1000:0,_source:'exact_null_anchor'};
+          if(JSON.stringify({...dupCommon,_source:undefined})!==JSON.stringify({...dupNull,_source:undefined})) throw new Error('duplicate-anchor equivalence drift');
+          const minK=Math.min(...nulls.map(x=>x.kappa)),maxK=Math.max(...nulls.map(x=>x.kappa));
+          if(Math.abs(minK-p.search_protocol.safe_kappa_support.frozen_500_point_halton_min)>1e-15||Math.abs(maxK-p.search_protocol.safe_kappa_support.frozen_500_point_halton_max)>1e-15) throw new Error('safe kappa support drift');
+          const out={status:'passed',counts:{null_halton:500,common_halton:499,history_halton:498,total_with_anchors:{null:500,common:500,history:500}},kappa:{min:minK,max:maxK},anchors:{commonNullAnchor,historyCommonAnchor,historyNullAnchor},duplicate_anchor_equivalent:true};
+          fs.writeFileSync('/tmp/h5-preimpl-candidates.json',JSON.stringify(out,null,2)+'\n');
+          console.log(JSON.stringify(out,null,2));
+          NODE
+
+      - name: Seed and RNG namespace collision audit
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const {streamSeed}=require('./src/integrity.js');
+          const p=JSON.parse(fs.readFileSync('hypotheses/h5_parameter_estimation_v1.json','utf8'));
+          const fit=[],evals=[];
+          for(let fi=0;fi<6;fi++){
+            const fs0=990000+fi*10000,es0=1490000+fi*10000;
+            for(let i=0;i<60;i++)fit.push(fs0+i);
+            for(let i=0;i<120;i++)evals.push(es0+i);
+          }
+          const fitSet=new Set(fit),evalSet=new Set(evals);
+          if(fitSet.size!==360||evalSet.size!==720)throw new Error('seed duplicate within phase');
+          if([...fitSet].some(x=>evalSet.has(x)))throw new Error('fit/eval seed collision');
+          const names=[
+            'poissonnier2026_measurement_geometry_v1',
+            'h2_estimation_entry_transition_v1',
+            'biology_h3_reorientation_event:0',
+            'biology_h3_turn_angle:0',
+            'biology_h5_search_choice:0',
+            'biology_h5_search_angle:0'
+          ];
+          if(new Set(names).size!==names.length)throw new Error('stream name duplicate');
+          for(const seed of [990000,990059,1000000,1490000,1540119]){
+            const vals=names.map(n=>streamSeed(seed,n));
+            if(new Set(vals).size!==vals.length)throw new Error('streamSeed collision at '+seed);
+          }
+          const out={status:'passed',fit_seed_count:fitSet.size,evaluation_seed_count:evalSet.size,fit_eval_overlap:0,stream_names:names};
+          fs.writeFileSync('/tmp/h5-preimpl-seeds.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
+          NODE
+
+      - name: Scorer and held-out leakage audit
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const h3=require('./tools/run-h3-estimation.js');
+          const geom=require('./tools/poissonnier2026-measurement-geometry.js');
+          const target=JSON.parse(fs.readFileSync('reference/poissonnier2026_h2_estimation_targets.json','utf8'));
+          const {geometry}=geom.loadFrozenMeasurementGeometry(process.cwd());
+          const colonies=[0,7,16,20,21,27],folds={};
+          for(const held of colonies){
+            const train=target.rows.filter(r=>r.colony!==held),test=target.rows.filter(r=>r.colony===held);
+            const scales=h3.scoreScales(train);
+            const altered=test.map(r=>({...r,time_to_exit_s:(r.time_to_exit_s||0)+1e6,middle_zone_fraction:(r.middle_zone_fraction||0)+1e3,beeline_mm:(r.beeline_mm||0)+1e6}));
+            const scalesAgain=h3.scoreScales(train);
+            if(JSON.stringify(scales)!==JSON.stringify(scalesAgain))throw new Error('heldout affected scales');
+            for(const k of ['time','zone','beeline'])if(!(Number.isFinite(scales[k])&&scales[k]>0))throw new Error('invalid scale '+held+' '+k);
+            const pool=geom.geometryPool(geometry.rows,held);
+            if(pool.some(r=>r.colony===held))throw new Error('geometry leakage '+held);
+            for(const seed of [990000,990001,1490000,1490119]){
+              const a=geom.sampleGeometry(pool,seed),b=geom.sampleGeometry(pool,seed);
+              if(a.row.ant_id!==b.row.ant_id||a.index!==b.index||a.u!==b.u)throw new Error('geometry nondeterminism');
+            }
+            folds[held]={train_n:train.length,test_n:test.length,pool_n:pool.length,scales};
+          }
+          const synthetic=[
+            {path_length:'s',time_to_exit_s:1,middle_zone_fraction:.1,beeline_mm:10,exit_edge:'left'},
+            {path_length:'s',time_to_exit_s:2,middle_zone_fraction:.2,beeline_mm:20,exit_edge:'timeout'},
+            {path_length:'l',time_to_exit_s:3,middle_zone_fraction:.3,beeline_mm:30,exit_edge:'right'},
+            {path_length:'l',time_to_exit_s:4,middle_zone_fraction:.4,beeline_mm:40,exit_edge:'bottom'}
+          ];
+          const ep=h3.edgeProbs(synthetic);
+          if(ep.length!==5||Math.abs(ep.reduce((a,b)=>a+b,0)-1)>1e-12||ep[4]!==.25)throw new Error('five-category timeout normalization drift');
+          const identical=h3.score(synthetic,synthetic,h3.scoreScales(synthetic));
+          if(Math.abs(identical.loss)>1e-15)throw new Error('identical scorer nonzero');
+          const out={status:'passed',folds,synthetic_exit_probs:ep,identical_loss:identical.loss};
+          fs.writeFileSync('/tmp/h5-preimpl-scorer.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify(out,null,2));
+          NODE
+
+      - name: Comparator extraction audit
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const h2=JSON.parse(fs.readFileSync('reports/h2_parameter_estimation_500x60_v1.json','utf8'));
+          const h3=JSON.parse(fs.readFileSync('reports/h3_parameter_estimation_500x60_v1.json','utf8'));
+          const h4=JSON.parse(fs.readFileSync('reports/h4_parameter_estimation_500x60_v1.json','utf8'));
+          const colonies=[0,7,16,20,21,27],out={H2:[],H3:[],H4:[]};
+          for(const held of colonies){
+            const a=h2.folds.find(f=>f.held_out_colony===held),b=h3.folds.find(f=>f.held_out_colony===held),c=h4.folds.find(f=>f.held_out_colony===held);
+            if(!a?.H2)throw new Error('H2 candidate missing '+held);
+            if(!b?.H3_context)throw new Error('H3 candidate missing '+held);
+            if(!c?.H4_context?.fit?.candidate)throw new Error('H4 candidate missing '+held);
+            const h2c={sigma0:a.H2.sigma0,q:a.H2.q,lambda_mm:a.H2.lambda_mm,tau_s:a.H2.tau_s,rho:a.H2.rho};
+            const h3c=b.H3_context;
+            const h4c=c.H4_context.fit.candidate;
+            for(const [name,obj] of [['H2',h2c],['H3',h3c],['H4',h4c]])if(Object.values(obj).some(v=>typeof v==='number'&&!Number.isFinite(v)))throw new Error(name+' nonfinite '+held);
+            out.H2.push({held,candidate:h2c});out.H3.push({held,candidate:h3c});out.H4.push({held,candidate:h4c});
+          }
+          for(const k of Object.keys(out))if(out[k].length!==6||new Set(out[k].map(x=>x.held)).size!==6)throw new Error(k+' extraction count');
+          fs.writeFileSync('/tmp/h5-preimpl-comparators.json',JSON.stringify({status:'passed',...out},null,2)+'\n');console.log(JSON.stringify({status:'passed',counts:{H2:6,H3:6,H4:6}}));
+          NODE
+
+      - name: Y-maze-free regressions
+        run: |
+          set -euo pipefail
+          for f in tests/boundary-timing.test.js tests/determinism.test.js tests/experiment-definition.test.js tests/h3-reorientation.test.js tests/integrity-firewall.test.js tests/measurement-geometry-policy.test.js tests/measurement.test.js tests/open-arena-protocol.test.js tests/rng-streams.test.js tests/state-integrity.test.js; do node "$f"; done
+
+      - name: Start Chromium
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/chrome.log 2>&1 &
+          for i in {1..100}; do if curl -fsS http://127.0.0.1:9222/json/version >/tmp/chrome-version.json 2>/dev/null; then exit 0; fi; sleep .2; done
+          cat /tmp/chrome.log || true
+          exit 1
+
+      - name: Chromium preimplementation contract replay
+        run: |
+          set -euo pipefail
+          cat >/tmp/h5-preimpl-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0],ws=new WebSocket(target.webSocketDebuggerUrl);
+          await new Promise((res,rej)=>{ws.onopen=res;ws.onerror=rej;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!AntLabIntegrity&&!!AntLabCore"))break;await sleep(100);}
+          const report=await evalv(`(async()=>{
+            const j=async p=>{const r=await fetch(p);if(!r.ok)throw new Error(p);return r.json();},clone=x=>JSON.parse(JSON.stringify(x));
+            const policy=await j('./hypotheses/h5_parameter_estimation_v1.json'),draft=await j('./hypotheses/h5_origin_referenced_search_v1.draft.json'),geometry=await j('./reference/poissonnier2026_open_arena_measurement_geometry_v1.json'),mp=await j('./reference/poissonnier2026_open_arena_measurement_policy_v1.json');
+            if(draft.current_stage.estimator_policy!=='fully_frozen'||draft.current_stage.persistent_H5_runtime!=='absent'||draft.current_stage.reference_parameter_search!=='forbidden')throw new Error('stage drift');
+            const halton=(index,base)=>{let f=1,r=0,i=index;while(i>0){f/=base;r+=f*(i%base);i=Math.floor(i/base);}return r;};
+            let minK=Infinity,maxK=-Infinity,pairs=0,alphaBad=0;
+            for(let i=1;i<=500;i++){const k=halton(i,3)*20;minK=Math.min(minK,k);maxK=Math.max(maxK,k);if(i<=498){const a=halton(i,7),b=halton(i,11),a200=Math.max(a,b),a1000=Math.min(a,b);if(a1000>a200||a1000<0||a200>1)alphaBad++;pairs++;}}
+            if(alphaBad||Math.abs(minK-policy.search_protocol.safe_kappa_support.frozen_500_point_halton_min)>1e-15||Math.abs(maxK-policy.search_protocol.safe_kappa_support.frozen_500_point_halton_max)>1e-15)throw new Error('candidate mapping drift');
+
+            const h2=await j('./reports/h2_parameter_estimation_500x60_v1.json'),h3=await j('./reports/h3_parameter_estimation_500x60_v1.json'),h4=await j('./reports/h4_parameter_estimation_500x60_v1.json'),colonies=[0,7,16,20,21,27];
+            for(const held of colonies){if(!h2.folds.find(f=>f.held_out_colony===held)?.H2)throw new Error('H2 extraction');if(!h3.folds.find(f=>f.held_out_colony===held)?.H3_context)throw new Error('H3 extraction');if(!h4.folds.find(f=>f.held_out_colony===held)?.H4_context?.fit?.candidate)throw new Error('H4 extraction');}
+
+            const app0=await j('./apparatus/poissonnier2026_open_arena.json'),short0=await j('./experiments/open_arena_short_control.json'),long0=await j('./experiments/open_arena_long_control.json'),model0=await j('./models/lasius_niger_locomotion_h3_v1.json'),state=await j('./states/naive_outbound_v1.json'),obs0=await j('./observations/poissonnier2026_tracking_25fps.json'),scoring=await j('./scoring/open_arena_first_border_v1.json');
+            model0.reorientation_gate.effect.max_hazard_reduction_fraction=0;
+            const apply=(exp0,row)=>{const exp=clone(exp0),app=clone(app0),obs=clone(obs0),model=clone(model0);exp.model=model.id;app.world.width=row.arena_width_mm;app.world.height=row.arena_height_mm;const rect=app.geometry.primitives.find(p=>p.type==='rect');rect.x=0;rect.y=0;rect.width=row.arena_width_mm;rect.height=row.arena_height_mm;app.entry_points.default={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};app.entry_points.center={x:row.first_track_x_mm,y:row.first_track_y_mm,heading_rad:0};exp.protocol.entry_state.position_jitter_mm=0;obs.metric_definitions.central_zone_fraction.center_y_mm=row.entry_reference_y_mm;obs.metric_definitions.central_zone_fraction.half_width_mm=10;return{experiment:exp,model,apparatus:app,state:clone(state),observation:obs,scoring:clone(scoring)};};
+            const sig=(sum,sim)=>JSON.stringify({o:sum.observed_metrics.ants[0],events:sim.events.filter(e=>e.type==='h3_reorientation').map(e=>[e.time,e.angle_rad,e.x,e.y])});
+            let simPairs=0,neutrality=0,heldoutLeaks=0,geometryPairMismatch=0;
+            const folds={};
+            for(let fi=0;fi<colonies.length;fi++){const held=colonies[fi],pool=geometry.rows.filter(r=>r.colony!==held).sort((a,b)=>a.ant_id-b.ant_id);if(pool.some(r=>r.colony===held))heldoutLeaks++;let fp=0;
+              for(let q=0;q<4;q++){const seed=990000+fi*10000+q,gr1=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,mp.geometry_sampler.rng_stream_name)),gr2=new AntLabCore.RNG(AntLabIntegrity.streamSeed(seed,mp.geometry_sampler.rng_stream_name)),i1=Math.min(pool.length-1,Math.floor(gr1.next()*pool.length)),i2=Math.min(pool.length-1,Math.floor(gr2.next()*pool.length));if(i1!==i2)geometryPairMismatch++;const row=pool[i1],bs=apply(short0,row),bl=apply(long0,row),ss=new AntLabIntegrity.Simulation(bs,seed),sl=new AntLabIntegrity.Simulation(bl,seed),a=ss.runUntilComplete(bs.experiment.duration_s,AntLabIntegrity.FIXED_DT),b=sl.runUntilComplete(bl.experiment.duration_s,AntLabIntegrity.FIXED_DT);simPairs++;fp++;if(sig(a,ss)!==sig(b,sl))neutrality++;}
+              folds[held]={pool_n:pool.length,pairs:fp};
+            }
+            if(heldoutLeaks||geometryPairMismatch||neutrality)throw new Error('geometry or H3-null neutrality contract failed');
+            return{status:'passed',halton_history_points:pairs,kappa:{min:minK,max:maxK},comparator_folds:{H2:h2.folds.length,H3:h3.folds.length,H4:h4.folds.length},simulation_pairs:simPairs,neutrality_mismatches:neutrality,heldout_geometry_leaks:heldoutLeaks,geometry_pair_mismatches:geometryPairMismatch,folds};
+          })()`);
+          const forbidden=requests.filter(u=>/neutral_y_maze|\/y_maze|\/y-maze/i.test(u));
+          if(exceptions.length||consoleErrors.length||forbidden.length)throw new Error('browser firewall failure');
+          report.browser={exceptions:0,console_errors:0,ymaze_requests:0};
+          fs.writeFileSync('/tmp/h5-preimpl-browser.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));ws.close();
+          NODE
+          node /tmp/h5-preimpl-browser.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h5-final-preimplementation-contract-audit
+          path: |
+            /tmp/h5-preimpl-static.json
+            /tmp/h5-preimpl-candidates.json
+            /tmp/h5-preimpl-seeds.json
+            /tmp/h5-preimpl-scorer.json
+            /tmp/h5-preimpl-comparators.json
+            /tmp/h5-preimpl-browser.json
+            /tmp/chrome-version.json
+            /tmp/chrome.log
+          retention-days: 14
