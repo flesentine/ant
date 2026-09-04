@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "id": "H5_estimator_policy_audit_v1",
+  "status": "estimator_policy_frozen_and_prefreeze_search_geometry_qualified_before_H5_runtime_implementation_or_parameter_search",
+  "date": "2026-09-04",
+  "scientific_role": "estimator-policy freeze audit; no H5 reference candidate ranking or parameter fitting performed",
+  "policy": {
+    "path": "hypotheses/h5_parameter_estimation_v1.json",
+    "git_blob_sha": "1322c259153d12877a7b78190cb9e2603acb8882",
+    "mechanism_draft_pre_policy_blob": "bb198c985d6fbf2dd9b006a23b429095c9a7ec82",
+    "mechanism_draft_post_policy_blob": "c4f729f04cc737d7a2fa68f1a1e4059ca336da3e"
+  },
+  "decisions": {
+    "nested_models": [
+      "H5_null",
+      "H5_common_search",
+      "H5_history"
+    ],
+    "nuisance_family": {
+      "ell0_mm": {
+        "bounds": [
+          5,
+          150
+        ],
+        "scale": "log"
+      },
+      "kappa_turn": {
+        "bounds": [
+          0,
+          20
+        ],
+        "scale": "linear",
+        "shared_with_H5_search_dispersion": true
+      },
+      "q": {
+        "bounds": [
+          0,
+          1
+        ],
+        "scale": "linear"
+      }
+    },
+    "H5_common_parameter": "alpha_common in [0,1]",
+    "H5_history_parameters": "0 <= alpha_search_1000 <= alpha_search_200 <= 1",
+    "history_halton_mapping": "For raw Halton coordinates u7,u11, alpha_search_200=max(u7,u11) and alpha_search_1000=min(u7,u11).",
+    "candidate_budgets_per_fold": {
+      "H5_null": "500 Halton",
+      "H5_common_search": "499 Halton + 1 exact null anchor",
+      "H5_history": "498 Halton + 1 exact common anchor + 1 exact null anchor"
+    },
+    "trials": {
+      "training_per_condition_per_candidate": 60,
+      "heldout_evaluation_per_condition": 120
+    },
+    "folds": 6,
+    "seeds": {
+      "root": 990000,
+      "evaluation_offset": 500000
+    },
+    "primary_guard": "H5_history beats H5_common_search in >=5/6 folds and has positive median relative held-out improvement.",
+    "exact_null_guard": "H5_history beats H5_null in >=5/6 folds and has positive median relative held-out improvement.",
+    "cross_family_guard": "Only after own guards pass, H5_history must beat each matched frozen H2/H3/H4 comparator in >=4/6 folds with positive median relative improvement to be called overall development-preferred."
+  },
+  "prefreeze_audit": {
+    "workflow_run": 33896848886,
+    "head_sha": "cde1adb3bdcfd20b44a1e079da7343ecf3030029",
+    "artifact_id": 9946061539,
+    "artifact_zip_sha256": "6ee1b2ec656eee7424c515db3474b82ffead2d89557147b10f21f9583beb1164",
+    "reference_H5_losses_used": false,
+    "findings": {
+      "null_halton_candidates": 500,
+      "common_halton_candidates": 499,
+      "history_halton_candidates": 498,
+      "total_with_anchors_each_model": 500,
+      "kappa_halton_min": 0.027434842249657063,
+      "kappa_halton_max": 19.945130315500684,
+      "kappa_min_to_bad_1_1e_8_ratio": 2494076.5681506423,
+      "history_alpha_coverage": {
+        "min_alpha200": 0.029154518950437316,
+        "min_alpha1000": 0.00041649312786339027,
+        "max_alpha200": 0.9970845481049563,
+        "max_alpha1000": 0.9504373177842564,
+        "min_delta": 0.00008761688640246401,
+        "max_delta": 0.9693757077801606,
+        "mean_delta": 0.3353872242055385
+      },
+      "nuisance_coordinate_pairing_indices": 498,
+      "measurement_geometry_rows": 51,
+      "colonies": [
+        0,
+        7,
+        16,
+        20,
+        21,
+        27
+      ],
+      "pinned_comparator_reports_with_six_folds": [
+        "H2",
+        "H3",
+        "H4"
+      ]
+    }
+  },
+  "measurement_and_scoring": {
+    "measurement_policy_blob": "fd2718cf9351b655340eacd868adc536301a83a4",
+    "geometry_blob": "af0ec6fbacf83b915dd78cb3a822609c126dc1e7",
+    "target_blob": "07e2b8cf2dddbfcb152f0bd6d3031d473e0901b3",
+    "scorer": "corrected H3/H4-compatible 19-quantile W1/training-SD + 2*Hellinger five-category exit scorer",
+    "heldout_geometry_rule": "Held-out colony geometry excluded from simulation geometry pool even during held-out simulation generation.",
+    "CRN": "Trial seed, geometry draw, entry-transition stream, and H5 dedicated choice/search cadence matched across nested H5 models."
+  },
+  "comparator_pins": {
+    "H2_report": {
+      "path": "reports/h2_parameter_estimation_500x60_v1.json",
+      "blob": "342f7a5af7c1ed71a8bdb7ff14becf38d24daa88"
+    },
+    "H3_report": {
+      "path": "reports/h3_parameter_estimation_500x60_v1.json",
+      "blob": "1d5c1b88ca9b425e927d761bc3ff1e5bad5bd5f3"
+    },
+    "H4_report": {
+      "path": "reports/h4_parameter_estimation_500x60_v1.json",
+      "blob": "8619b96bb3a02e78b905320ac96585bec08b2918"
+    },
+    "rule": "Frozen fold-specific candidates are re-evaluated under H5 reconstructed geometry and matched held-out scoring; no refitting from H5 outcomes."
+  },
+  "implementation_authorization": {
+    "persistent_H5_runtime": "now authorized only as an exact implementation of the frozen mechanism and estimator contract",
+    "synthetic_qualification": "required before any reference candidate search",
+    "reference_parameter_search": "still forbidden",
+    "qualification_may_use_reference_losses": false
+  },
+  "firewall": {
+    "biological_mechanism_frozen": true,
+    "estimator_policy_frozen": true,
+    "persistent_H5_runtime_implemented": false,
+    "synthetic_qualification_complete": false,
+    "reference_parameter_search_allowed": false,
+    "Y_maze_access": false,
+    "canonical_model_unchanged": true
+  },
+  "next_step": "Implement the frozen H5 runtime and estimator exactly, then run the required synthetic/no-reference-loss qualification before any high-resolution reference search."
+}
