@@ -1,0 +1,186 @@
+name: H5 official-result posthoc audit
+on:
+  push:
+    branches: [h5-official-result-audit-v1]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact official execution head
+        uses: actions/checkout@v4
+        with:
+          ref: 6087cc044faae586af826f44297e85212d1941a0
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download frozen official H5 result
+        uses: actions/download-artifact@v4
+        with:
+          name: h5-500x60-loco-official-result
+          path: /tmp/h5-official
+          github-token: ${{ github.token }}
+          run-id: 33947883644
+      - name: Verify frozen official artifact and execution chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "6087cc044faae586af826f44297e85212d1941a0"
+          test "$(git hash-object tools/run-h5-estimation.js)" = "7d4a68f024c09c111a38088be2c943b7de74b464"
+          test "$(git hash-object src/h5.js)" = "b43f8e9fcaa4b2cc9981ed4f2922a833cc1a3177"
+          test "$(git hash-object hypotheses/h5_parameter_estimation_v1.json)" = "ead45bacff89bf626deaaf3238a5c363b74279d1"
+          test "$(git hash-object reports/h5_estimator_qualification_v1.json)" = "da5afe375fccb54e38b9bf3ef6d9879e2e03270d"
+          test -f /tmp/h5-official/h5_parameter_estimation_500x60_v1.json
+          test "$(sha256sum /tmp/h5-official/h5_parameter_estimation_500x60_v1.json | awk '{print $1}')" = "28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053"
+          node - <<'NODE'
+          const r=require('/tmp/h5-official/h5_parameter_estimation_500x60_v1.json');
+          if(r.status!=='development_estimation_failed_development_preference_guards')throw new Error('wrong frozen H5 status');
+          if(r.scientific_evidence!==true||r.execution_class!=='frozen_high_resolution')throw new Error('official report not scientific highres');
+          if(r.execution.repo_commit!=='6087cc044faae586af826f44297e85212d1941a0')throw new Error('wrong execution head');
+          if(r.estimator_git_blob_sha!=='7d4a68f024c09c111a38088be2c943b7de74b464')throw new Error('wrong estimator blob');
+          if(r.ymaze_accessed!==false||r.canonical_parameters_updated!==false)throw new Error('scientific firewall violation');
+          if(r.internal_cv.H5_wins_vs_H5_null!==3||r.internal_cv.H5_survival_guard_passed!==false)throw new Error('unexpected H5-null result');
+          if(r.internal_cv.H5_wins_vs_best_prior!==2||r.internal_cv.best_prior_guard_passed!==false)throw new Error('unexpected best-prior result');
+          if(r.internal_cv.development_preferred!==false||r.internal_cv.canonical_promotion!==false)throw new Error('unexpected promotion state');
+          console.log(JSON.stringify({status:'frozen-result-verified',sha256:'28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053',H5_wins_vs_null:3,H5_wins_vs_best_prior:2}));
+          NODE
+      - name: Independently reproduce every held-out reported loss
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/h5-posthoc
+          node - <<'NODE'
+          const fs=require('fs');
+          const h5e=require('./tools/run-h5-estimation.js');
+          const h2e=require('./tools/run-h2-estimation.js');
+          const h3e=require('./tools/run-h3-estimation.js');
+          const h4e=require('./tools/run-h4-estimation.js');
+          const root=process.cwd();
+          const policy=h5e.assertExactPolicyBlob(root).policy;
+          const inputs=h5e.loadReferenceInputs(root,policy);
+          const report=require('/tmp/h5-official/h5_parameter_estimation_500x60_v1.json');
+          const near=(a,b,t=2e-12)=>{if(Math.abs(a-b)>t)throw new Error('numeric mismatch '+a+' vs '+b);};
+          const inflate=(fit,kind)=>{
+            const c=fit.candidate;
+            return {
+              angular_sigma_rad_sqrt_s:c.angular_sigma_rad_sqrt_s,
+              q:c.q,
+              lambda_commitment_mm:c.lambda_commitment_mm==null?500:c.lambda_commitment_mm,
+              tau_commitment_s:c.tau_commitment_s==null?5:c.tau_commitment_s,
+              kappa_restore_per_s:kind==='null'?0:(c.kappa_restore_per_s??0)
+            };
+          };
+          const checked=[];
+          for(const f of report.folds){
+            const held=f.held_out_colony;
+            const train=inputs.target.rows.filter(r=>r.colony!==held);
+            const test=inputs.target.rows.filter(r=>r.colony===held);
+            const scales=h5e.scoreScales(train),seed=f.evaluation_seed,n=f.evaluation_trials_per_condition;
+            const nc=inflate(f.H5_null.fit,'null'),cc=inflate(f.H5_context.fit,'context');
+            const nscore=h5e.score(h5e.simulateCandidate(nc,n,seed,inputs.base),test,scales);
+            const cscore=h5e.score(h5e.simulateCandidate(cc,n,seed,inputs.base),test,scales);
+            near(nscore.loss,f.H5_null.heldout_loss);near(cscore.loss,f.H5_context.heldout_loss);
+            const h2Fold=inputs.h2Report.folds.find(x=>x.held_out_colony===held);
+            const h3Fold=inputs.h3Report.folds.find(x=>x.held_out_colony===held);
+            const h4Fold=inputs.h4Report.folds.find(x=>x.held_out_colony===held);
+            const h2c=h5e.h2CandidateFromReportFold(h2Fold),h3c=h5e.h3CandidateFromReportFold(h3Fold),h4c=h5e.h4CandidateFromReportFold(h4Fold);
+            const h2s=h5e.score(h2e.simulateCandidate(h2c,n,seed,inputs.h2Base),test,scales);
+            const h3s=h5e.score(h3e.simulateCandidate(h3c,n,seed,inputs.h3Base),test,scales);
+            const h4s=h5e.score(h4e.simulateCandidate(h4c,n,seed,inputs.h4Base),test,scales);
+            near(h2s.loss,f.H2_v1_frozen_candidate.reevaluated_heldout_loss_matched_crn);
+            near(h3s.loss,f.H3_v1_frozen_candidate.reevaluated_heldout_loss_matched_crn);
+            near(h4s.loss,f.H4_v1_frozen_candidate.reevaluated_heldout_loss_matched_crn);
+            const prior=[['H2',h2s.loss],['H3',h3s.loss],['H4',h4s.loss]].sort((a,b)=>a[1]-b[1])[0];
+            if(prior[0]!==f.per_fold_best_prior.family)throw new Error('best prior family mismatch on colony '+held);
+            near(prior[1],f.per_fold_best_prior.reevaluated_heldout_loss_matched_crn);
+            const rel=loss=>(loss-cscore.loss)/Math.max(1e-12,loss);
+            near(rel(nscore.loss),f.heldout_relative_improvement_vs_H5_null);
+            near(rel(h2s.loss),f.heldout_relative_improvement_vs_H2_v1);
+            near(rel(h3s.loss),f.heldout_relative_improvement_vs_H3_v1);
+            near(rel(h4s.loss),f.heldout_relative_improvement_vs_H4_v1);
+            near(rel(prior[1]),f.heldout_relative_improvement_vs_best_prior);
+            if(f.H5_context.fit.source==='exact_null_anchor'){
+              near(nscore.loss,cscore.loss,1e-15);
+              if(cc.kappa_restore_per_s!==0)throw new Error('anchor not exact null');
+            }
+            checked.push({held_out_colony:held,null_loss:nscore.loss,context_loss:cscore.loss,best_prior:prior[0],best_prior_loss:prior[1]});
+          }
+          fs.writeFileSync('/tmp/h5-posthoc/heldout-reproduction.json',JSON.stringify({status:'passed',folds:checked},null,2));
+          console.log(JSON.stringify({status:'passed',folds:checked.length}));
+          NODE
+      - name: Build Node parity reference from all official selected H5 candidates
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const h5e=require('./tools/run-h5-estimation.js');
+          const h5=require('./src/h5.js');
+          const {loadBundle,readJson}=require('./tools/load-bundle.js');
+          const report=require('/tmp/h5-official/h5_parameter_estimation_500x60_v1.json');
+          const base=readJson('./models/lasius_niger_locomotion_h5_v1.json');
+          const inflate=(fit,kind)=>{
+            const c=fit.candidate;
+            return {angular_sigma_rad_sqrt_s:c.angular_sigma_rad_sqrt_s,q:c.q,lambda_commitment_mm:c.lambda_commitment_mm==null?500:c.lambda_commitment_mm,tau_commitment_s:c.tau_commitment_s==null?5:c.tau_commitment_s,kappa_restore_per_s:kind==='null'?0:(c.kappa_restore_per_s??0)};
+          };
+          const cases=[];
+          for(const f of report.folds){
+            for(const [kind,fit] of [['null',f.H5_null.fit],['context',f.H5_context.fit]]){
+              const candidate=inflate(fit,kind),model=h5e.configuredModel(base,candidate);
+              for(const experiment of ['open_arena_short_control.json','open_arena_long_control.json']){
+                for(const seed of [f.evaluation_seed,f.evaluation_seed+1]){
+                  const b=loadBundle(experiment,{modelId:model.id});
+                  b.model=JSON.parse(JSON.stringify(model));b.observation.record_trajectories=false;
+                  const sim=new h5.Simulation(b,seed);h5e.applySharedEntryTransition(sim,seed,candidate.q);
+                  const sx=sim.ants[0].x,sy=sim.ants[0].y;
+                  const summary=sim.runUntilComplete(b.experiment.duration_s,0.02),a=sim.ants[0],l=summary.latent_states[0],o=summary.observed_metrics.ants[0],ex=o.exit_coordinate_mm;
+                  cases.push({held_out_colony:f.held_out_colony,kind,candidate,experiment,seed,x:a.x,y:a.y,heading:a.heading,completedAt:a.completedAt,distance:a.distanceTravelled,rng:a.rng.state,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,reference:l.h5_heading_reference_rad,commitment:l.heading_commitment_current,time:o.time_to_arena_edge_s??b.experiment.duration_s,zone:o.central_zone_fraction??0,beeline:ex?Math.hypot(ex.x-sx,ex.y-sy):0,edge:h5e.exitEdge(ex,sim.apparatus.world.width,sim.apparatus.world.height)});
+                }
+              }
+            }
+          }
+          fs.writeFileSync('/tmp/h5-posthoc/node-parity.json',JSON.stringify(cases,null,2));
+          console.log(JSON.stringify({cases:cases.length,folds:report.folds.length}));
+          NODE
+      - name: Real Chromium parity for all official selected H5 candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/h5-posthoc/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/h5-posthoc-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/h5-posthoc-chrome --remote-debugging-port=9222 about:blank >/tmp/h5-posthoc/chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/tmp/h5-posthoc/chrome-version.json 2>/dev/null && break; sleep .2; done
+          curl -fsS http://127.0.0.1:9222/json/version >/tmp/h5-posthoc/chrome-version.json
+          cat >/tmp/h5-posthoc/browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const refs=JSON.parse(fs.readFileSync('/tmp/h5-posthoc/node-parity.json','utf8'));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabH5"))break;await new Promise(r=>setTimeout(r,50));}
+          const title=await evalv('document.title');if(title!=='ANTLAB H5')throw new Error('unexpected title '+title);
+          const browser=await evalv(`(async()=>{const json=async p=>(await fetch(p)).json(),cases=${JSON.stringify(refs.map(r=>({held_out_colony:r.held_out_colony,kind:r.kind,candidate:r.candidate,experiment:r.experiment,seed:r.seed})))},out=[];for(const c of cases){const experiment=await json('./experiments/'+c.experiment);experiment.model='lasius_niger_locomotion_h5_v1';const [model,apparatus,state,observation,scoring]=await Promise.all([json('./models/lasius_niger_locomotion_h5_v1.json'),json('./apparatus/'+experiment.apparatus+'.json'),json('./states/'+experiment.state+'.json'),json('./observations/'+experiment.observation+'.json'),json('./scoring/'+experiment.scoring+'.json')]);model.movement.angular_sigma_rad_sqrt_s=c.candidate.angular_sigma_rad_sqrt_s;model.heading_restoration.initialization.lambda_commitment_mm=c.candidate.lambda_commitment_mm;model.heading_restoration.decay.tau_commitment_s=c.candidate.tau_commitment_s;model.heading_restoration.effect.kappa_restore_per_s=c.candidate.kappa_restore_per_s;observation.record_trajectories=false;const sim=new AntLabH5.Simulation({experiment,model,apparatus,state,observation,scoring},c.seed),rr=new AntLabCore.RNG(AntLabIntegrity.streamSeed(c.seed,'h2_estimation_entry_transition_v1'));if(rr.next()>c.candidate.q)sim.ants[0].heading=rr.next()*2*Math.PI-Math.PI;const sx=sim.ants[0].x,sy=sim.ants[0].y,summary=sim.runUntilComplete(experiment.duration_s,0.02),a=sim.ants[0],l=summary.latent_states[0],o=summary.observed_metrics.ants[0],ex=o.exit_coordinate_mm,edge=ex?Object.entries({left:Math.abs(ex.x),right:Math.abs(ex.x-sim.apparatus.world.width),top:Math.abs(ex.y),bottom:Math.abs(ex.y-sim.apparatus.world.height)}).sort((a,b)=>a[1]-b[1])[0][0]:'timeout';out.push({held_out_colony:c.held_out_colony,kind:c.kind,candidate:c.candidate,experiment:c.experiment,seed:c.seed,x:a.x,y:a.y,heading:a.heading,completedAt:a.completedAt,distance:a.distanceTravelled,rng:a.rng.state,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,reference:l.h5_heading_reference_rad,commitment:l.heading_commitment_current,time:o.time_to_arena_edge_s??experiment.duration_s,zone:o.central_zone_fraction??0,beeline:ex?Math.hypot(ex.x-sx,ex.y-sy):0,edge});}return out;})()`);
+          const near=(a,b,t=2e-10)=>{if(a==null||b==null){if(a!==b)throw new Error('null mismatch');return;}if(Math.abs(a-b)>t)throw new Error('numeric mismatch '+a+' '+b);};
+          if(browser.length!==refs.length)throw new Error('case count mismatch '+browser.length+' '+refs.length);
+          for(let i=0;i<refs.length;i++){const a=refs[i],b=browser[i];for(const k of ['held_out_colony','kind','experiment','seed','rng','edge'])if(a[k]!==b[k])throw new Error(k+' mismatch '+a[k]+' '+b[k]);for(const k of ['x','y','heading','completedAt','distance','speedFactor','pauseRemaining','reference','commitment','time','zone','beeline'])near(a[k],b[k]);}
+          const yreq=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));if(yreq.length)throw new Error('Y-maze request '+JSON.stringify(yreq));if(exceptions.length)throw new Error('browser exceptions '+JSON.stringify(exceptions));if(consoleErrors.length)throw new Error('console errors '+JSON.stringify(consoleErrors));
+          const body=await evalv('document.body.innerText');
+          const report={status:'passed',cases:browser.length,folds:[...new Set(browser.map(x=>x.held_out_colony))].length,exceptions:0,console_errors:0,ymaze_requests:0,execution_head_ui_still_pre_result:body.includes('official search not yet run')};
+          fs.writeFileSync('/tmp/h5-posthoc/browser-result.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));ws.close();
+          NODE
+          node /tmp/h5-posthoc/browser.mjs
+      - name: Upload posthoc audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: h5-official-result-posthoc-audit
+          path: /tmp/h5-posthoc
+          retention-days: 30
