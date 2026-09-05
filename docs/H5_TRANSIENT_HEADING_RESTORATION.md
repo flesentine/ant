@@ -92,8 +92,8 @@ H5 may not read the short/long label, colony identity, reference outcomes, cente
 3. Add invariance, deterministic-drift, RNG, firewall, and timestep tests — **complete**.
 4. Run mechanism reachability only, with no parameter fitting and no Y-maze — **complete**.
 5. Perform code review and real-Chromium Node↔browser parity — **complete for the implementation pass**.
-6. Design and freeze a **separate H5 estimation policy** — **next**.
-7. Do not run a reference-data H5 parameter search until that separate policy is frozen and audited.
+6. Design and freeze a **separate H5 estimation policy** — **complete** (`hypotheses/h5_parameter_estimation_v1.json`).
+7. Implement and synthetically qualify that frozen estimator policy, then code-review and verify Node ↔ real-Chromium parity before any high-resolution reference-data search.
 
 ## Current scientific status
 
@@ -142,3 +142,22 @@ All frozen structural checks passed: larger long-history commitment, all entry-h
 The exact report is `reports/h5_mechanism_reachability_v1.json` (SHA-256 `babcf964ea01a877650a238959b25e7483f6a5afad22aa8ef79ad84da115f2e6`).
 
 A real Chromium parity audit replayed four H5 cases against Node with zero browser exceptions, zero console errors, and zero Y-maze network requests.
+
+
+## Frozen estimator policy
+
+The separate H5 development-estimation policy is now frozen in `hypotheses/h5_parameter_estimation_v1.json` before any H5 estimator implementation or H5 parameter search.
+
+Key choices:
+
+- shared nuisances: `angular_sigma_rad_sqrt_s` and shared entry-retention `q` only;
+- baseline speed remains fixed at 24 mm/s;
+- H5 bounds: `lambda=100–3000 mm`, `tau=0.5–40 s`, `kappa=0–2 s⁻¹`;
+- exact nested null: `kappa=0`;
+- 500 null + 500 total context candidates per fold, 60 training trials per condition, 120 held-out evaluation trials, six LOCO folds;
+- primary guard: at least 5/6 H5-vs-null held-out wins plus positive median relative improvement;
+- development-preferred guard: at least 4/6 wins plus positive median improvement versus the per-fold best frozen H2/H3/H4 comparator;
+- fitting targets remain limited to exit time, middle-zone fraction, beeline, and five-category exit edge;
+- moving speed, distance, straightness, raw heading discriminators, colony identity as biology, treatment-specific entry state, and every Y-maze quantity remain forbidden fitting inputs.
+
+No H5 estimator implementation or high-resolution H5 search is authorized by the policy freeze alone. See `docs/H5_ESTIMATION.md`.

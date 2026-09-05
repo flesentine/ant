@@ -113,7 +113,7 @@ H5 is implemented in `src/h5.js` as an extension over the exact frozen H0–H4 i
 
 The one pre-frozen engineering parameter set was run for 400 common-random-number trials per condition. The long-history engineering condition had lower mean exit time (8.9304 vs 9.0132 s), lower mean observed distance (210.659 vs 212.645 mm), and higher mean straightness (0.7710 vs 0.7440). Mean observed moving speed was essentially unchanged (23.9305 vs 23.9328 mm/s). All frozen structural reachability checks passed.
 
-This is mechanism reachability only. No reference target was loaded, no parameter sweep or fitting occurred, and the Y-maze was not accessed. No H5 estimator exists yet; a separate estimation policy must be frozen before any reference-data H5 search.
+This is mechanism reachability only. No reference target was loaded, no parameter sweep or fitting occurred, and the Y-maze was not accessed. The separate H5 estimation policy is now frozen in `hypotheses/h5_parameter_estimation_v1.json`; no estimator implementation or H5 reference-data search exists yet.
 
 ## Identifiability
 Fold-specific H2 estimates vary substantially rather than converging on one biological parameter set. Across the six folds the selected values span roughly:
@@ -143,8 +143,8 @@ Do **not** promote H2-v1, H3-v1, or H4-v1. The current evidence is:
 - H2-v1: closest so far, but 4/6 held-out wins still failed its frozen >=5/6 guard;
 - H3-v1: failed its own null and H2 comparison guards;
 - H4-v1: failed its own null and H2/H3 comparison guards;
-- H5-v1: implemented; reference-free mechanism reachability verified; not fit or searched;
+- H5-v1: implemented; reference-free mechanism reachability verified; estimator policy frozen; not fit or searched;
 - canonical browser model: unchanged;
 - Y-maze: still locked.
 
-The short-vs-long data still contain a large, sign-stable locomotion structure that H0 cannot explain, so v0.3.2 remains open. H5 now supplies the required substantively different mechanism and its engineering-only implementation/reachability gate is complete. The next scientific move is to design and freeze a separate H5 parameter-estimation policy before any reference-data H5 search, with the Y-maze still locked. Do not retune H2, H3, or H4 against these same outcomes.
+The short-vs-long data still contain a large, sign-stable locomotion structure that H0 cannot explain, so v0.3.2 remains open. H5 now supplies the required substantively different mechanism and its engineering-only implementation/reachability gate is complete. The next scientific move is to implement and synthetically qualify the already-frozen H5 estimator policy, then code-review and verify it in real Chromium before any high-resolution reference-data H5 search. The Y-maze remains locked. Do not retune H2, H3, or H4 against these same outcomes.
