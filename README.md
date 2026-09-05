@@ -12,12 +12,12 @@ H1  -> unresolved; measured post-toothpick entry state is missing
 H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
-H5  -> estimator qualified; frozen high-resolution search authorized; not yet run
+H5  -> official frozen high-resolution LOCO failed promotion; result frozen; closed
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
 
-See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 is implemented in an isolated extension layer (`src/h5.js`) so the exact H0–H4 runtime blobs remain unchanged. H5 estimator v1 is implemented in `tools/run-h5-estimation.js` and passed its frozen reference-free synthetic qualification. The exact frozen H5 high-resolution search is now separately authorized by `hypotheses/h5_highres_authorization_v1.json`, but the official run has not yet occurred.
+See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 is implemented in an isolated extension layer (`src/h5.js`) so the exact H0–H4 runtime blobs remain unchanged. H5 estimator v1 is implemented in `tools/run-h5-estimation.js` and passed its frozen reference-free synthetic qualification. H5-v1 then completed its one official frozen high-resolution LOCO search; the result failed the frozen promotion/development-preference guards and is now committed and closed.
 
 ## What data may enter development estimation
 
@@ -32,13 +32,13 @@ Moving speed, moving distance, straightness, and proportion-time-moving remain d
 
 The 51 DCM-control rows are pinned in `reference/poissonnier2026_h2_estimation_targets.json` and regenerated from the final XLSX by `tools/derive-h2-estimation-targets.py`.
 
-## H2/H3/H4 held-out status
+## H2/H3/H4/H5 held-out status
 
 H2 and H3 have already undergone leave-one-colony-out development estimation. Neither passed its frozen promotion criteria. H3's corrected 500-candidate × 60-trial result is recorded in `reports/h3_parameter_estimation_500x60_v1.json`; it won only 1/6 held-out colonies versus its own null and 2/6 versus the matched corrected H2 candidates.
 
 H4 has also completed its frozen 500-candidate × 60-trial × 6-fold LOCO search. It won 2/6 held-out colonies versus its own fitted null with median relative improvement 0.0%, 2/6 versus H2-v1 with median −3.43%, and 3/6 versus H3-v1 with median +3.05%. H4 therefore failed every frozen promotion/comparison guard. The exact result is recorded in `reports/h4_parameter_estimation_500x60_v1.json`.
 
-These are internal development results, not external validation.
+H5 has now also completed its official frozen high-resolution LOCO evaluation and failed its own-null and best-prior guards. All H2–H5 outcomes are internal development results, not external validation.
 
 ## H4 mechanism implementation
 
@@ -64,7 +64,7 @@ H5-v1 is frozen in `hypotheses/h5_transient_entry_heading_restoration_v1.json` a
 
 A 400-trial-per-condition mechanism reachability run using only the one pre-frozen engineering parameter set passed all intended structural checks: long-history trials had lower exit time (8.9304 vs 9.0132 s), lower observed distance (210.659 vs 212.645 mm), and higher straightness (0.7710 vs 0.7440), while observed moving speed stayed essentially unchanged (23.9305 vs 23.9328 mm/s). This is reachability evidence only, not a fit to the reference data.
 
-The exact mechanism report is `reports/h5_mechanism_reachability_v1.json`. The H5 estimator policy is frozen in `hypotheses/h5_parameter_estimation_v1.json`; the qualified estimator blob is `7d4a68f024c09c111a38088be2c943b7de74b464`. No high-resolution H5 search has been run and the Y-maze remains locked.
+The exact mechanism report is `reports/h5_mechanism_reachability_v1.json`. The H5 estimator policy is frozen in `hypotheses/h5_parameter_estimation_v1.json`; the qualified estimator blob is `7d4a68f024c09c111a38088be2c943b7de74b464`. The official high-resolution H5-v1 search is complete, failed its frozen guards, and is permanently frozen. The Y-maze remains locked.
 
 ## H5 development-estimation policy
 
@@ -72,7 +72,7 @@ The H5 estimator policy is frozen before estimator implementation or reference-d
 
 The primary LOCO guard requires H5-context to beat its exact `kappa=0` null in at least 5/6 held-out colonies with positive median relative improvement. A development-preferred claim additionally requires beating the per-fold best frozen H2/H3/H4 comparator in at least 4/6 folds with positive median improvement.
 
-The estimator has passed synthetic qualification, blob pinning, the full regression suite, low-resolution execution smoke, and real-Chromium parity. The separate authorization record now pins this qualified estimator and the frozen high-resolution procedure. The official 500×60×6 run has not yet been executed.
+The estimator passed synthetic qualification, blob pinning, the full regression suite, low-resolution execution smoke, and real-Chromium parity. The official 500×60×6 run then completed once under the frozen authorization and failed the H5-v1 guards; no rerun or retuning is authorized.
 
 See `docs/H5_ESTIMATION.md`.
 
@@ -80,13 +80,29 @@ See `docs/H5_ESTIMATION.md`.
 
 Estimator v1 is implemented in `tools/run-h5-estimation.js` (Git blob `7d4a68f024c09c111a38088be2c943b7de74b464`). Reference-free synthetic qualification passed all required checks and is recorded in `reports/h5_estimator_qualification_v1.json` (Git blob `da5afe375fccb54e38b9bf3ef6d9879e2e03270d`, SHA-256 `29565eb5f2f67cf8e480def5a0dc1a677795b06e97873b03fbaadf7ed48dc66c`).
 
-A low-resolution 8-candidate run exercised the reference-data/cross-family code path only; it is not scientific evidence. Selected smoke candidates matched Node in real Chromium across 8/8 cases with zero browser exceptions, console errors, or Y-maze requests. High-resolution mode is authorized by the separate pinned authorization record; no official high-resolution result exists yet.
+A low-resolution 8-candidate run exercised the reference-data/cross-family code path only; it is not scientific evidence. Selected smoke candidates matched Node in real Chromium across 8/8 cases with zero browser exceptions, console errors, or Y-maze requests. The later official high-resolution result is now frozen and H5-v1 is closed.
 
-## H5 high-resolution authorization
+## H5 official result — failed and frozen
 
-The authorization record is `hypotheses/h5_highres_authorization_v1.json` (Git blob `24b3c422f40bc4c44437995eff81ecdfd104ca34`). It pins the frozen policy, qualified estimator, qualification report, merged-main verification, and two successful Chromium audits.
+The one official frozen H5-v1 500-candidate × 60-trial × 6-fold LOCO execution completed on GitHub Actions run `33947883644` at execution head `6087cc044faae586af826f44297e85212d1941a0`.
 
-The authorization becomes executable only after merge to `main`; the review branch still rejects `--mode highres`. Before the official run, the permanent main workflow must pass on a `main` commit containing this authorization and the exact hardened estimator blob. It authorizes only the unchanged frozen H5 search: 500 null candidates, 500 total context candidates, 60 training trials per treatment/candidate, 120 held-out evaluation trials per treatment, six LOCO folds, root seed 1,110,000, and 20 ms physics. Canonical promotion and Y-maze access remain unauthorized.
+Exact result:
+- file: `reports/h5_parameter_estimation_500x60_v1.json`
+- Git blob: `1fcdb357e1755b5ba5cb4be6ee8b69db617e732d`
+- SHA-256: `28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053`
+
+Frozen outcome:
+- H5 vs H5-null: **3/6** held-out wins; median relative improvement **+0.81%**; required 5/6 + positive median → **FAIL**
+- H5 vs H2-v1: **4/6** wins; median **+6.37%**
+- H5 vs H3-v1: **4/6** wins; median **+6.70%**
+- H5 vs H4-v1: **3/6** wins; median **+3.01%** → pairwise guard **FAIL**
+- H5 vs per-fold best prior H2/H3/H4: **2/6** wins; median **−7.12%**; required 4/6 + positive median → **FAIL**
+- development preferred: **NO**
+- canonical promotion: **NO**
+
+Post-hoc audit run `33979167192` independently reproduced every stored held-out H5/H2/H3/H4 loss and relative-improvement value across all six folds. Real Chromium replay passed **48/48** selected-candidate cases with zero exceptions, zero console errors, and zero Y-maze requests. Audit artifact digest: `sha256:1c23f363003c430414841eeca5e3f95e512e1d832c9c10c4291b2be005c54fef`.
+
+No implementation error invalidates the official result. Per the frozen failure rule, H5-v1 is closed: do not alter bounds, seeds, nuisance parameters, objective weights, candidate budgets, or tune the same mechanism harder. The historical authorization is preserved byte-for-byte under `hypotheses/archive/`, the active authorization path is removed, and the official-run workflow is removed.
 
 ## Run
 
