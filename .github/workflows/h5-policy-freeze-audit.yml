@@ -1,4 +1,5 @@
 name: H5 policy freeze audit
+# registered workflow trigger
 on:
   push:
     branches: [h5-parameter-estimation-policy-v1]
