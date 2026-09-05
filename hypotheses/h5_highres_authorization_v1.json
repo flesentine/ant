@@ -9,12 +9,12 @@
   "policy_file": "hypotheses/h5_parameter_estimation_v1.json",
   "policy_git_blob_sha": "ead45bacff89bf626deaaf3238a5c363b74279d1",
   "estimator_file": "tools/run-h5-estimation.js",
-  "estimator_git_blob_sha": "e3172bb051de3fab350a7a63746d3e870fbaa0fc",
+  "estimator_git_blob_sha": "7d4a68f024c09c111a38088be2c943b7de74b464",
   "qualified_estimator_merge_commit": "5c99c9e339582594597b21c2f34d1421e5802a21",
   "qualification_report": {
     "file": "reports/h5_estimator_qualification_v1.json",
-    "git_blob_sha": "8ee978588c97d56a9660693bc08ed4ba0600d961",
-    "sha256": "c65b2c67d00fc9ef9e6de2be8d45bd446ae0f9aa1928bc0e71aa949a0871cd97",
+    "git_blob_sha": "da5afe375fccb54e38b9bf3ef6d9879e2e03270d",
+    "sha256": "29565eb5f2f67cf8e480def5a0dc1a677795b06e97873b03fbaadf7ed48dc66c",
     "status": "passed",
     "reference_outcomes_accessed": false,
     "ymaze_accessed": false,
@@ -85,5 +85,10 @@
   "official_execution_rule": "Authorize one official execution of the frozen high-resolution H5-v1 procedure. A rerun is permitted only if the first execution is formally declared invalid because of a genuine implementation/infrastructure error; the complete frozen procedure must then be rerun unchanged.",
   "post_result_rule": "Freeze and record the complete result before any interpretation-driven code or policy change. Failure cannot be rescued by tuning H5-v1 harder.",
   "canonical_promotion_authorized": false,
-  "ymaze_access_authorized": false
+  "ymaze_access_authorized": false,
+  "authorization_gate_hardening": {
+    "main_branch_required": true,
+    "rule": "When effective_when_merged_to_main is true, the estimator CLI rejects high-resolution execution unless the current execution branch is main.",
+    "reason": "Prevents the presence of this authorization file on its review branch from making the official search executable before merge."
+  }
 }
