@@ -348,13 +348,28 @@ function assertHighResolutionArgs(policy){
   const b=policy.search_protocol.high_resolution_budget,checks=[['candidates',b.H5_null_candidates_per_fold],['trials',b.training_trials_per_condition_per_candidate],['eval-trials',b.heldout_evaluation_trials_per_condition],['seed',policy.search_protocol.root_seed],['dt',policy.numerical_invariants.physics_dt_s]];
   for(const[name,expected]of checks)if(hasArg(name)&&Number(arg(name,expected))!==expected)throw new Error(`Frozen H5 high-resolution mode forbids --${name} override; expected ${expected}.`);
 }
-function assertHighResolutionAuthorized(root,estimatorBlob=null){
+function currentBranchName(root){
+  if(process.env.GITHUB_REF_NAME)return process.env.GITHUB_REF_NAME;
+  try{
+    const name=childProcess.execFileSync('git',['branch','--show-current'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+    return name||null;
+  }catch(_){return null;}
+}
+function assertAuthorizationEffective(a,root,{branchName=null}={}){
+  const branch=branchName||currentBranchName(root);
+  if(a.effective_when_merged_to_main===true&&branch!=='main'){
+    throw new Error(`H5 high-resolution authorization is not effective until merged to main; current branch is ${branch||'unknown'}.`);
+  }
+  return branch;
+}
+function assertHighResolutionAuthorized(root,estimatorBlob=null,options={}){
   const file=path.resolve(root,AUTHORIZATION_FILE);
   if(!fs.existsSync(file))throw new Error('H5 high-resolution search is not authorized: missing post-qualification authorization artifact.');
   const a=readJson(file),actualEstimator=estimatorBlob||gitBlobShaFile(__filename);
   if(a.id!=='H5_high_resolution_authorization_v1'||a.status!=='qualified_estimator_authorized_for_frozen_high_resolution_search'||a.high_resolution_search_authorized!==true)throw new Error('Invalid H5 high-resolution authorization status.');
   if(a.policy_git_blob_sha!==POLICY_GIT_BLOB_SHA)throw new Error('H5 authorization policy pin mismatch.');
   if(a.estimator_git_blob_sha!==actualEstimator)throw new Error('H5 authorization estimator blob mismatch.');
+  assertAuthorizationEffective(a,root,options);
   return a;
 }
 function syntheticThetaReferenceQualification(base){
@@ -458,6 +473,6 @@ module.exports={
   gitBlobShaBuffer,gitBlobShaFile,assertExactPolicyBlob,assertFrozenRuntimeBlobs,assertFrozenReferenceComparatorBlobs,assertSafeReportOutput,currentRepoCommit,
   halton,mapVal,nullCandidate,contextCandidate,nullAnchor,reportCandidate,configuredModel,applySharedEntryTransition,exitEdge,simulateCandidate,
   score,scoreScales,edgeProbs,effective,boundaryFlags,searchNull,searchContext,h2CandidateFromReportFold,h3CandidateFromReportFold,h4CandidateFromReportFold,
-  assertPolicySemantics,validateReferenceInputs,loadReferenceInputs,runLoco,finalizeEvidenceRun,assertHighResolutionArgs,assertHighResolutionAuthorized,
+  assertPolicySemantics,validateReferenceInputs,loadReferenceInputs,runLoco,finalizeEvidenceRun,assertHighResolutionArgs,currentBranchName,assertAuthorizationEffective,assertHighResolutionAuthorized,
   syntheticThetaReferenceQualification,deterministicIdentityQualification,qualify,highResolutionPreflight
 };

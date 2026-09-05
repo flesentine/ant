@@ -4,8 +4,8 @@ const h5e=require('../tools/run-h5-estimation.js');
 const h4e=require('../tools/run-h4-estimation.js');
 const root=path.resolve(__dirname,'..');
 const pinned=h5e.assertExactPolicyBlob(root),policy=pinned.policy;
-assert.strictEqual(h5e.gitBlobShaFile(path.join(root,'tools','run-h5-estimation.js')),'e3172bb051de3fab350a7a63746d3e870fbaa0fc','qualified H5 estimator blob drifted');
-assert.strictEqual(h5e.gitBlobShaFile(path.join(root,'reports','h5_estimator_qualification_v1.json')),'8ee978588c97d56a9660693bc08ed4ba0600d961','H5 qualification report blob drifted');
+assert.strictEqual(h5e.gitBlobShaFile(path.join(root,'tools','run-h5-estimation.js')),'7d4a68f024c09c111a38088be2c943b7de74b464','qualified H5 estimator blob drifted');
+assert.strictEqual(h5e.gitBlobShaFile(path.join(root,'reports','h5_estimator_qualification_v1.json')),'da5afe375fccb54e38b9bf3ef6d9879e2e03270d','H5 qualification report blob drifted');
 assert.strictEqual(pinned.sha,h5e.POLICY_GIT_BLOB_SHA);
 h5e.assertPolicySemantics(policy);
 const runtime=h5e.assertFrozenRuntimeBlobs(root),refs=h5e.assertFrozenReferenceComparatorBlobs(root);
@@ -43,7 +43,7 @@ const q=h5e.qualify({root,policy,trials:2});
 assert.strictEqual(q.status,'passed');assert.strictEqual(q.reference_outcomes_accessed,false);assert.strictEqual(q.reference_files_semantically_loaded,false);assert.strictEqual(q.ymaze_accessed,false);assert.strictEqual(q.scientific_evidence,false);
 for(const[name,passed]of Object.entries(q.checks))assert.strictEqual(passed,true,`qualification check failed: ${name}`);
 
-assert.throws(()=>h5e.assertHighResolutionAuthorized(root),/not authorized|missing post-qualification/i);
+assert.throws(()=>h5e.assertHighResolutionAuthorized(root),/not effective until merged to main/);const authorization=h5e.assertHighResolutionAuthorized(root,null,{branchName:'main'});assert.strictEqual(authorization.high_resolution_search_authorized,true);assert.strictEqual(authorization.estimator_git_blob_sha,'7d4a68f024c09c111a38088be2c943b7de74b464');
 
 const synthetic=h5e.simulateCandidate(n,2,885000,base),ns=h5e.searchNull(synthetic,policy,base,{count:2,trials:2,seed0:885000}),cs=h5e.searchContext(synthetic,policy,base,{count:2,trials:2,seed0:885000,nullSelected:ns.selectedCandidate});
 assert.strictEqual(cs.anchor.source,'exact_null_anchor');assert.strictEqual(cs.anchor.candidate.lambda_commitment_mm,null);assert.strictEqual(cs.anchor.candidate.tau_commitment_s,null);assert.strictEqual(cs.anchor.candidate.kappa_restore_per_s,0);

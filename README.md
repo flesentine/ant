@@ -12,12 +12,12 @@ H1  -> unresolved; measured post-toothpick entry state is missing
 H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
-H5  -> estimator implemented + synthetically qualified; high-resolution search not authorized
+H5  -> estimator qualified; frozen high-resolution search authorized; not yet run
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
 
-See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 is implemented in an isolated extension layer (`src/h5.js`) so the exact H0–H4 runtime blobs remain unchanged. H5 estimator v1 is implemented in `tools/run-h5-estimation.js` and passed its frozen reference-free synthetic qualification. High-resolution H5 search remains separately unauthorized.
+See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 is implemented in an isolated extension layer (`src/h5.js`) so the exact H0–H4 runtime blobs remain unchanged. H5 estimator v1 is implemented in `tools/run-h5-estimation.js` and passed its frozen reference-free synthetic qualification. The exact frozen H5 high-resolution search is now separately authorized by `hypotheses/h5_highres_authorization_v1.json`, but the official run has not yet occurred.
 
 ## What data may enter development estimation
 
@@ -64,7 +64,7 @@ H5-v1 is frozen in `hypotheses/h5_transient_entry_heading_restoration_v1.json` a
 
 A 400-trial-per-condition mechanism reachability run using only the one pre-frozen engineering parameter set passed all intended structural checks: long-history trials had lower exit time (8.9304 vs 9.0132 s), lower observed distance (210.659 vs 212.645 mm), and higher straightness (0.7710 vs 0.7440), while observed moving speed stayed essentially unchanged (23.9305 vs 23.9328 mm/s). This is reachability evidence only, not a fit to the reference data.
 
-The exact mechanism report is `reports/h5_mechanism_reachability_v1.json`. The H5 estimator policy is frozen in `hypotheses/h5_parameter_estimation_v1.json`; the qualified estimator blob is `e3172bb051de3fab350a7a63746d3e870fbaa0fc`. No high-resolution H5 search has been run and the Y-maze remains locked.
+The exact mechanism report is `reports/h5_mechanism_reachability_v1.json`. The H5 estimator policy is frozen in `hypotheses/h5_parameter_estimation_v1.json`; the qualified estimator blob is `7d4a68f024c09c111a38088be2c943b7de74b464`. No high-resolution H5 search has been run and the Y-maze remains locked.
 
 ## H5 development-estimation policy
 
@@ -72,15 +72,21 @@ The H5 estimator policy is frozen before estimator implementation or reference-d
 
 The primary LOCO guard requires H5-context to beat its exact `kappa=0` null in at least 5/6 held-out colonies with positive median relative improvement. A development-preferred claim additionally requires beating the per-fold best frozen H2/H3/H4 comparator in at least 4/6 folds with positive median improvement.
 
-The estimator has passed synthetic qualification, blob pinning, the full regression suite, low-resolution execution smoke, and real-Chromium parity. High-resolution search is still blocked until a separate post-qualification authorization record pins this qualified estimator.
+The estimator has passed synthetic qualification, blob pinning, the full regression suite, low-resolution execution smoke, and real-Chromium parity. The separate authorization record now pins this qualified estimator and the frozen high-resolution procedure. The official 500×60×6 run has not yet been executed.
 
 See `docs/H5_ESTIMATION.md`.
 
 ## H5 estimator qualification
 
-Estimator v1 is implemented in `tools/run-h5-estimation.js` (Git blob `e3172bb051de3fab350a7a63746d3e870fbaa0fc`). Reference-free synthetic qualification passed all required checks and is recorded in `reports/h5_estimator_qualification_v1.json` (Git blob `8ee978588c97d56a9660693bc08ed4ba0600d961`, SHA-256 `c65b2c67d00fc9ef9e6de2be8d45bd446ae0f9aa1928bc0e71aa949a0871cd97`).
+Estimator v1 is implemented in `tools/run-h5-estimation.js` (Git blob `7d4a68f024c09c111a38088be2c943b7de74b464`). Reference-free synthetic qualification passed all required checks and is recorded in `reports/h5_estimator_qualification_v1.json` (Git blob `da5afe375fccb54e38b9bf3ef6d9879e2e03270d`, SHA-256 `29565eb5f2f67cf8e480def5a0dc1a677795b06e97873b03fbaadf7ed48dc66c`).
 
-A low-resolution 8-candidate run exercised the reference-data/cross-family code path only; it is not scientific evidence. Selected smoke candidates matched Node in real Chromium across 8/8 cases with zero browser exceptions, console errors, or Y-maze requests. High-resolution mode remains hard-locked pending separate authorization.
+A low-resolution 8-candidate run exercised the reference-data/cross-family code path only; it is not scientific evidence. Selected smoke candidates matched Node in real Chromium across 8/8 cases with zero browser exceptions, console errors, or Y-maze requests. High-resolution mode is authorized by the separate pinned authorization record; no official high-resolution result exists yet.
+
+## H5 high-resolution authorization
+
+The authorization record is `hypotheses/h5_highres_authorization_v1.json` (Git blob `62456b0f3d87313d0208a4254c380b3f284c8b1e`). It pins the frozen policy, qualified estimator, qualification report, merged-main verification, and two successful Chromium audits.
+
+The authorization becomes executable only after merge to `main`; the review branch still rejects `--mode highres`. Before the official run, the permanent main workflow must also pass on the merge commit containing this hardened estimator and authorization. It authorizes only the unchanged frozen H5 search: 500 null candidates, 500 total context candidates, 60 training trials per treatment/candidate, 120 held-out evaluation trials per treatment, six LOCO folds, root seed 1,110,000, and 20 ms physics. Canonical promotion and Y-maze access remain unauthorized.
 
 ## Run
 

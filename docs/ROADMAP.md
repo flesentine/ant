@@ -66,7 +66,8 @@
 - H5 parameter-estimation policy v1 frozen before estimator implementation/search
 - estimator implementation + reference-free synthetic qualification + code/Chromium audit complete
 - qualified estimator blob recorded; high-resolution mode remains hard-locked
-- next gate is separate post-qualification authorization, then the unchanged frozen 500×60×6 H5 LOCO search
+- separate post-qualification authorization record created and pinned
+- next gate is merge authorization, then execute the unchanged frozen 500×60×6 H5 LOCO search exactly once
 - canonical locomotion remains unchanged
 
 ## v0.3.3 — externally painted trail response

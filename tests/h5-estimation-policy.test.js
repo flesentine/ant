@@ -68,13 +68,19 @@ if(fs.existsSync(path.join(root,'tools/run-h5-estimation.js'))){
 }
 const browserHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(!browserHtml.includes('H5 has no frozen estimator policy'),'browser status must not claim the H5 estimator policy is absent');
-assert.ok(browserHtml.includes('H5 estimator qualified')||browserHtml.includes('H5 estimator policy frozen'),'browser status must reflect the frozen-or-qualified H5 estimator state');
+assert.ok(browserHtml.includes('H5 high-resolution authorized')||browserHtml.includes('H5 estimator qualified')||browserHtml.includes('H5 estimator policy frozen'),'browser status must reflect the frozen, qualified, or authorized H5 estimator state');
 
 const h5=decision.hypotheses.find(x=>x.id==='H5_transient_entry_heading_restoration');
 assert.ok(h5);
 assert.strictEqual(h5.estimation_policy,'h5_parameter_estimation_v1.json');
 assert.strictEqual(h5.estimation_policy_git_blob_sha,'ead45bacff89bf626deaaf3238a5c363b74279d1');
-assert.ok(['not_implemented','implemented_pending_qualification','implemented_and_qualified_pending_authorization'].includes(h5.estimator_implementation_status));
-assert.strictEqual(h5.high_resolution_search_authorized,false);
+assert.ok(['not_implemented','implemented_pending_qualification','implemented_and_qualified_pending_authorization','implemented_and_qualified_authorized_pending_highres'].includes(h5.estimator_implementation_status));
+if(fs.existsSync(path.join(root,'hypotheses','h5_highres_authorization_v1.json'))){
+  const auth=readJson('hypotheses/h5_highres_authorization_v1.json');
+  assert.strictEqual(auth.high_resolution_search_authorized,true);
+  assert.strictEqual(h5.high_resolution_search_authorized,true);
+}else{
+  assert.strictEqual(h5.high_resolution_search_authorized,false);
+}
 
 console.log('h5-estimation-policy.test.js PASS policy_blob=ead45bacff89bf626deaaf3238a5c363b74279d1');
