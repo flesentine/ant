@@ -1,4 +1,5 @@
 name: H5 hardened authorization Chromium audit
+# rerun trigger after hardened test fix
 on:
   push:
     branches: [h5-highres-authorization-v1]
