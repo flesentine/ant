@@ -9,15 +9,15 @@ const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).t
 const policy=read('hypotheses/h5_parameter_estimation_v1.json');
 const auth=read('hypotheses/h5_highres_authorization_v1.json');
 
-assert.strictEqual(blob('hypotheses/h5_highres_authorization_v1.json'),'d3d2d61dab1337c321e9a3bf0eaae704ef152706','H5 high-resolution authorization blob drifted');
+assert.strictEqual(blob('hypotheses/h5_highres_authorization_v1.json'),'8741ebfff852d85b319ded5dd45f282d06f2c45e','H5 high-resolution authorization blob drifted');
 assert.strictEqual(auth.id,'H5_high_resolution_authorization_v1');
 assert.strictEqual(auth.status,'qualified_estimator_authorized_for_frozen_high_resolution_search');
 assert.strictEqual(auth.high_resolution_search_authorized,true);
 assert.strictEqual(auth.effective_when_merged_to_main,true);
 assert.strictEqual(auth.policy_git_blob_sha,'ead45bacff89bf626deaaf3238a5c363b74279d1');
-assert.strictEqual(auth.estimator_git_blob_sha,'e3172bb051de3fab350a7a63746d3e870fbaa0fc');
+assert.strictEqual(auth.estimator_git_blob_sha,'7d4a68f024c09c111a38088be2c943b7de74b464');
 assert.strictEqual(auth.qualified_estimator_merge_commit,'5c99c9e339582594597b21c2f34d1421e5802a21');
-assert.strictEqual(auth.qualification_report.git_blob_sha,'8ee978588c97d56a9660693bc08ed4ba0600d961');
+assert.strictEqual(auth.qualification_report.git_blob_sha,'da5afe375fccb54e38b9bf3ef6d9879e2e03270d');
 assert.strictEqual(auth.qualification_report.status,'passed');
 assert.strictEqual(auth.qualification_report.reference_outcomes_accessed,false);
 assert.strictEqual(auth.qualification_report.ymaze_accessed,false);
@@ -51,8 +51,10 @@ assert.strictEqual(auth.canonical_promotion_authorized,false);
 assert.strictEqual(auth.ymaze_access_authorized,false);
 assert.ok(!fs.existsSync(path.join(root,'reports','h5_parameter_estimation_500x60_v1.json')),'authorization checkpoint must precede the official H5 high-resolution result');
 
-const verified=h5e.assertHighResolutionAuthorized(root);
+assert.throws(()=>h5e.assertHighResolutionAuthorized(root),/not effective until merged to main/);
+const verified=h5e.assertHighResolutionAuthorized(root,null,{branchName:'main'});
 assert.strictEqual(verified.estimator_git_blob_sha,auth.estimator_git_blob_sha);
+assert.strictEqual(auth.authorization_gate_hardening.main_branch_required,true);
 assert.strictEqual(verified.high_resolution_search_authorized,true);
 
 console.log('h5-highres-authorization.test.js PASS authorization_blob=d3d2d61dab1337c321e9a3bf0eaae704ef152706');
