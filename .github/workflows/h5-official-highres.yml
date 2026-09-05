@@ -1,7 +1,6 @@
 name: H5 official frozen 500x60 LOCO
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
   actions: read
