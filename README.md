@@ -1,4 +1,4 @@
-# ANTLAB — H0–H4 open-arena model development
+# ANTLAB — H0–H5 open-arena model development
 
 **Live lab:** https://flesentine.github.io/ant/
 
@@ -12,11 +12,12 @@ H1  -> unresolved; measured post-toothpick entry state is missing
 H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
+H5  -> mechanism frozen; not implemented or searched
 ```
 
-H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a genuinely different speed-side mechanism: recent constrained travel creates a transient locomotor activation state that increases moving speed while leaving heading noise, pauses, entry state, and boundary behavior unchanged.
+H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
 
-See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record. The original H4 freeze file remains unchanged after implementation so the pre-code mechanism specification stays auditable.
+See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 has no implementation or estimator yet.
 
 ## What data may enter development estimation
 
@@ -113,4 +114,4 @@ node tools/run-h2-estimation.js --mode loco --candidates 500 --trials 60 --seed 
 
 Search resolution must always be reported. Small CI LOCO runs are code-path smoke tests only and are not scientific estimates.
 
-See `docs/H2_ESTIMATION.md` and `docs/H4_TRANSIENT_LOCOMOTOR_ACTIVATION.md` for the detailed mechanism/estimation discipline.
+See `docs/H2_ESTIMATION.md`, `docs/H4_TRANSIENT_LOCOMOTOR_ACTIVATION.md`, and `docs/H5_TRANSIENT_HEADING_RESTORATION.md` for the detailed mechanism/estimation discipline.

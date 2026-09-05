@@ -1,0 +1,195 @@
+{
+  "schema_version": 2,
+  "id": "H5_transient_entry_heading_restoration_v1",
+  "status": "post_outcome_mechanism_freeze_before_implementation_or_parameter_search",
+  "honesty_note": "The Poissonnier 2026 open-arena outcome and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was specified. This is not a blind preregistration. It freezes a substantively different deterministic heading-drift mechanism before H5 implementation or H5 parameter search.",
+  "species": "Lasius niger",
+  "scope": "open-arena DCM-control locomotion context only",
+  "mechanism_class": "transient_entry_heading_restoration_drift",
+  "claim": "Recent sustained constrained walking creates a transient commitment to the ant's own realized arena-entry heading. After entry, that commitment adds a deterministic circular restoring drift toward that remembered heading while leaving the baseline angular-noise amplitude, moving-speed process, pause process, and entry-state distribution unchanged.",
+  "why_this_is_not_H2_H3_H4": {
+    "H2": "H2 reduced the amplitude of continuous angular diffusion. H5 must keep the baseline angular diffusion coefficient and turnScale unchanged and instead add deterministic heading drift.",
+    "H3": "H3 changed the timing of discrete reorientation events. H5 must not add, remove, delay, or accelerate discrete reorientation events.",
+    "H4": "H4 multiplied moving speed. H5 must leave the moving-speed process and displacement-speed multiplier unchanged.",
+    "H1": "H1 would explain the contrast through different measured entry-state distributions. H5 uses the same shared entry transition for short and long conditions; it only changes how strongly the ant is restored toward its own realized post-transition entry heading."
+  },
+  "outcome_aware_motivation": {
+    "descriptive_reference_only": true,
+    "short_minus_long_total_distance_mm": 173.2587317118461,
+    "short_minus_long_time_to_edge_s": 8.77316923076923,
+    "short_minus_long_straightness": -0.17907046178795855,
+    "all_three_primary_effect_signs_stable_in_leave_one_colony_out": true,
+    "H2_highres_status": "4/6 held-out wins with positive median improvement but failed frozen >=5/6 guard",
+    "H3_highres_status": "1/6 held-out wins versus H3-null; not promoted",
+    "H4_highres_status": "2/6 held-out wins versus H4-null with median 0.0%; not promoted",
+    "interpretation": "The remaining outcome pattern motivates a mechanism that preserves local stochastic angular noise but actively corrects accumulated heading deviations. This is a candidate explanation, not evidence that ants biologically store and restore an entry-heading reference."
+  },
+  "allowed_model_inputs": {
+    "observable_history": [
+      "recent_constrained_travel_mm"
+    ],
+    "realized_entry_state": [
+      "actual ant heading immediately before the first free-arena physics step, after the shared entry transition"
+    ],
+    "note": "The realized entry heading is the ant's own initial condition, not a treatment label or fitted treatment-specific distribution."
+  },
+  "forbidden_inputs": [
+    "Path_length treatment label",
+    "short/long condition id",
+    "reference metric values",
+    "colony identity as a biological control input",
+    "arena centerline direction",
+    "bearing to an exit edge",
+    "distance to an exit edge",
+    "fixed apparatus 'forward' axis used as a steering target",
+    "pheromone presence",
+    "Y-maze outcome",
+    "future trajectory information",
+    "treatment-specific fitted entry-heading distributions"
+  ],
+  "baseline_walk": {
+    "description": "Retain the existing continuous locomotion substrate: individual base-speed heterogeneity, mean-reverting speed noise, continuous angular diffusion, and the existing pause process.",
+    "speed_process": "unchanged from the context-free baseline",
+    "pause_process": "unchanged from the context-free baseline",
+    "angular_noise_process": "dtheta_noise = sigma0 * turnScale * dW_t, with sigma0 and turnScale not modified by H5",
+    "entry_transition": "The existing shared post-toothpick entry transition and any permitted shared pre-step heading manipulation are completed first. H5 captures theta_ref lazily immediately before the first free-arena physics step.",
+    "target_rule": "theta_ref is the ant's realized heading immediately before the first free-arena physics step. It is captured once, after all shared entry-transition logic, and frozen for the trial. It may not be replaced by a geometry-derived direction, centerline bearing, treatment-specific target, or constructor-time heading that precedes the shared entry transition.",
+    "pause_semantics": "H5 restoring drift is part of moving heading dynamics only. If the baseline pause process consumes a step, heading is unchanged by H5 during that paused interval. C still decays in real wall-clock time during pauses."
+  },
+  "latent_state": {
+    "name": "heading_commitment",
+    "symbol": "C",
+    "range": [
+      0,
+      1
+    ],
+    "initialization": "C0 = 1 - exp(-L / lambda_commitment_mm), where L is recent_constrained_travel_mm.",
+    "decay": "dC/dt = -C / tau_commitment_s; exact update C(t+dt)=C(t)*exp(-dt/tau_commitment_s).",
+    "remembered_reference": "theta_ref = the ant's realized heading immediately before the first free-arena physics step, captured lazily after all shared entry-transition logic; theta_ref then remains fixed while C decays.",
+    "behavioral_effect": "While the ant is moving, dtheta_drift/dt = kappa_restore_per_s * C(t) * sin(theta_ref - theta(t)). During pauses, H5 applies no heading drift.",
+    "full_heading_process": "Moving intervals: dtheta = kappa_restore_per_s * C(t) * sin(theta_ref - theta) dt + sigma0 * turnScale * dW_t. Paused intervals: theta is unchanged while C continues exact exponential decay in real time.",
+    "deterministic_drift_identity": "For an uninterrupted moving interval with angular noise disabled and delta = theta - theta_ref, tan(delta(t)/2) = tan(delta(0)/2) * exp[-kappa_restore_per_s * C0 * tau_commitment_s * (1 - exp(-t/tau_commitment_s))]. This identity is a required implementation regression, not a fitting equation.",
+    "parameter_constraints": {
+      "lambda_commitment_mm": "> 0",
+      "tau_commitment_s": "> 0",
+      "kappa_restore_per_s": ">= 0"
+    },
+    "direct_effects_forbidden": [
+      "angular_sigma_rad_sqrt_s",
+      "turnScale",
+      "base speed",
+      "speed noise",
+      "speed multiplier",
+      "pause hazard",
+      "pause duration",
+      "reorientation-event hazard",
+      "turn-angle distribution",
+      "entry heading distribution",
+      "entry position",
+      "boundary behavior",
+      "centerline attraction",
+      "edge attraction",
+      "observation model"
+    ]
+  },
+  "engineering_reachability_parameters": {
+    "status": "frozen_before_implementation_for_mechanism_reachability_only_not_biological_estimates",
+    "lambda_commitment_mm": 500,
+    "tau_commitment_s": 5,
+    "kappa_restore_per_s": 0.5,
+    "rule": "Use this one engineering parameter set for initial mechanism reachability. Do not sweep or tune it against the reference outcomes."
+  },
+  "rng_policy": {
+    "purpose": "H5 adds deterministic drift only and must not create a new source of stochasticity or change baseline random-number consumption.",
+    "new_h5_rng_streams": "none",
+    "baseline_stream_rule": "For matched seeds, H5-null and H5-context consume exactly the same biology, protocol, treatment, and observation random draws in the same order.",
+    "null_equivalence": "Setting kappa_restore_per_s=0 or recent_constrained_travel_mm=0 must recover the context-free trajectory to numerical tolerance for matched seeds.",
+    "observation_ablation_rule": "Changing observation metadata or H5 logging must not alter H5 biological trajectories or RNG state."
+  },
+  "structural_predictions": [
+    "Longer recent constrained travel produces a larger C0 and therefore a stronger early restoring tendency toward theta_ref.",
+    "For the same instantaneous heading error relative to theta_ref, the long-history condition has a larger deterministic drift back toward theta_ref early after entry.",
+    "H5 does not reduce the local angular-noise amplitude: after subtracting the deterministic drift, short-time angular residual variance per unit time is the same in short and long conditions.",
+    "H5 increases longer-lag heading autocorrelation with the realized entry heading and reduces sustained heading excursions without changing speed.",
+    "If H5 explains the open-arena contrast, long-history ants can reach the arena edge sooner, with shorter traveled distance and greater straightness, while their moving-speed process remains unchanged.",
+    "The history effect decays with time as C approaches zero.",
+    "H5 can alter exit-edge probabilities only through stronger persistence around each ant's own realized entry heading; it has no direct knowledge of any edge or arena axis.",
+    "With recent_constrained_travel_mm=0 or kappa_restore_per_s=0, the H5 context effect disappears exactly."
+  ],
+  "raw_trajectory_discriminators_if_recovered": [
+    "conditional mean heading change as a function of signed heading error from realized entry heading",
+    "short-lag angular residual variance after subtracting deterministic restoring drift",
+    "heading autocorrelation with realized entry heading as a function of time since entry",
+    "distribution of maximum angular excursion from realized entry heading",
+    "return rate after large heading deviations",
+    "moving speed as a function of time since entry, predicted unchanged by H5",
+    "pause onset hazard and duration, predicted unchanged by H5",
+    "direct comparison of H2 reduced-noise signature versus H5 unchanged-noise-plus-restoring-drift signature"
+  ],
+  "relationship_to_other_hypotheses": {
+    "H0": "H0 has no path-history effect.",
+    "H1": "H1 remains blocked by missing measured entry-state evidence. H5 may not fit separate short/long entry-heading distributions.",
+    "H2": "H2 reduces continuous angular diffusion. H5 leaves diffusion amplitude unchanged and adds deterministic circular drift.",
+    "H3": "H3 changes discrete reorientation-event timing. H5 leaves event timing unchanged.",
+    "H4": "H4 changes moving speed. H5 leaves speed unchanged.",
+    "non_equivalence_rule": "H5 must not be implemented as a renamed reduction in angular_sigma_rad_sqrt_s, a reorientation-hazard gate, a speed gain, a treatment-specific entry-heading change, or attraction to an apparatus-derived target."
+  },
+  "development_estimation_guardrails": {
+    "estimator_policy_status": "not_yet_frozen",
+    "required_before_any_parameter_search": "A separate H5 parameter-estimation policy must be frozen and pinned before estimator implementation or reference-data search.",
+    "threshold_independent_fit_targets_only": [
+      "time_to_exit_s",
+      "middle_zone_fraction",
+      "beeline_mm",
+      "exit_edge"
+    ],
+    "moving_speed_fit_target": false,
+    "straightness_fit_target": false,
+    "total_moving_distance_fit_target": false,
+    "nested_null_requirement": "Any H5 development estimator must compare H5-context against an H5-null model with kappa_restore_per_s=0, the same shared nuisance baseline parameters, the same shared entry transition, and common random numbers.",
+    "comparator_requirement": "A later frozen policy must specify matched held-out comparisons to previously frozen candidates without retroactively changing H2/H3/H4 results.",
+    "colony_identity_as_fit_input": false,
+    "ymaze_access": false,
+    "canonical_promotion": false
+  },
+  "implementation_freeze": {
+    "implement_model_before_search": true,
+    "fit_parameters_during_initial_mechanism_reachability": false,
+    "canonical_model_unchanged": true,
+    "use_ymaze": false,
+    "required_tests": [
+      "zero-history equivalence to the context-free walk for matched seeds",
+      "kappa_restore_per_s=0 equivalence to the context-free walk for matched seeds",
+      "exact exponential C decay",
+      "theta_ref captured from the realized post-transition entry heading, not from apparatus geometry",
+      "deterministic noise-free heading restoration matches the frozen tan(delta/2) identity",
+      "restoring drift always points along the shortest circular direction toward theta_ref for |delta|<pi",
+      "long history produces larger C0 and stronger early deterministic restoration under matched states",
+      "H5 does not alter angular-noise random draws or angular_sigma_rad_sqrt_s",
+      "H5 does not alter speed draws, speed process, pause draws, pause process, or baseline RNG consumption",
+      "H5 adds no RNG stream",
+      "heading dynamics show reasonable timestep convergence under the frozen continuous-time equation",
+      "protocol/state cannot inject C, theta_ref, or H5 biological parameters",
+      "no centerline, edge bearing, or fixed apparatus axis is read by the H5 mechanism",
+      "same H5 biological model hash in short and long assays",
+      "observation/logging changes do not perturb H5 biological trajectories",
+      "constructor-time heading is not prematurely captured: a permitted shared heading change made after construction but before the first physics step becomes theta_ref",
+      "paused intervals apply no H5 heading drift while C continues real-time exponential decay",
+      "apparatus-boundary partial-step termination advances final C only to the exact event time"
+    ]
+  },
+  "evidence_notes": {
+    "mechanism_status": "The proposed history-dependent entry-heading commitment is a candidate mechanism, not an established biological fact.",
+    "representation_status": "The circular restoring-drift equation is chosen as a minimal falsifiable mechanism class that differs from prior H2/H3/H4 interventions. Biological interpretation must remain provisional unless independent trajectory evidence supports it."
+  },
+  "freeze_review_amendment": {
+    "status": "pre_implementation_clarification_before_any_H5_code_or_parameter_search",
+    "reason": "Code review of the existing runtime found two ambiguities that had to be resolved before implementation: the shared q entry transition is currently applied after Simulation construction, and the baseline heading process is inactive during pauses.",
+    "resolutions": [
+      "theta_ref is captured lazily at the start of the first free-arena physics step, after all shared entry-transition logic and any permitted pre-step heading manipulation are complete.",
+      "H5 restoring drift is active only during moving dynamics. During pauses, heading remains fixed exactly as in the baseline while C continues its real-time exponential decay.",
+      "If an apparatus-boundary event occurs inside a physics step, C is advanced only to the exact terminal event time for final latent-state reporting."
+    ],
+    "scientific_effect": "These are implementation-semantics clarifications only. No outcome data, parameter values, search bounds, estimator policy, or promotion rule was added or changed."
+  }
+}
