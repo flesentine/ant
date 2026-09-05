@@ -64,7 +64,7 @@ jobs:
           set -euo pipefail
           python3 -m http.server 8080 >/tmp/h5-audit/http.log 2>&1 &
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --remote-debugging-port=9222 about:blank >/tmp/h5-audit/chrome.log 2>&1 &
+          mkdir -p /tmp/h5-chrome-profile\n          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/h5-chrome-profile --remote-debugging-port=9222 about:blank >/tmp/h5-audit/chrome.log 2>&1 &
           for i in {1..100}; do
             curl -fsS http://127.0.0.1:9222/json/version >/tmp/h5-audit/chrome-version.json 2>/dev/null && break
             sleep .2
