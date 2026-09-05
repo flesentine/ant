@@ -56,15 +56,15 @@
 - 2/6 held-out wins versus its own null; failed promotion and H2/H3 comparison guards
 - moving speed remained diagnostic-only; Y-maze remained locked
 
-### v0.3.2f — H5 transient entry-heading restoration — mechanism frozen
-- H1 remains blocked pending measured arena-entry heading/speed evidence
-- H5 adds deterministic restoring drift toward each ant's own realized post-transition entry heading
-- H5 leaves angular-noise amplitude, speed, pauses, and the shared entry-state distribution unchanged
-- centerline/edge/fixed-apparatus steering targets are explicitly forbidden
-- engineering reachability values are frozen before implementation; no parameter sweep during reachability
-- no H5 estimator or reference-data search until a separate estimation policy is frozen
-- do not retune H2, H3, or H4 against the same outcomes
-- canonical locomotion remains unchanged; Y-maze remains locked
+### v0.3.2f — H5 transient entry-heading restoration — implemented / reachability verified
+- frozen mechanism implemented in isolated `src/h5.js` extension; pinned H0–H4 runtime blobs remain unchanged
+- deterministic restoring drift targets each ant's own lazily captured post-transition entry heading
+- angular-noise amplitude, speed, pauses, and shared entry-state distribution remain unchanged
+- 400-trial-per-condition reference-free mechanism reachability passed all intended structural checks
+- long-history engineering runs were slightly earlier, shorter, and straighter while moving speed remained essentially unchanged
+- no parameter sweep, no fitting, no estimator policy, and no Y-maze access
+- next gate is a separate frozen H5 estimation policy before any reference-data search
+- canonical locomotion remains unchanged
 
 ## v0.3.3 — externally painted trail response
 - local egocentric chemical sensors

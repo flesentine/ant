@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "lasius_niger_locomotion_h5_v1",
+  "species": "Lasius niger",
+  "status": "mechanism_demo_not_fitted",
+  "movement": {
+    "base_speed_mm_s": 24,
+    "speed_sd_mm_s": 2,
+    "angular_sigma_rad_sqrt_s": 0.7,
+    "speed_reversion_rate_s": 2,
+    "speed_noise_sigma_sqrt_s": 0.07,
+    "pause_rate_s": 0.008,
+    "pause_min_s": 0.1,
+    "pause_max_s": 0.5
+  },
+  "heading_restoration": {
+    "enabled": true,
+    "mechanism_id": "H5_transient_entry_heading_restoration_v1",
+    "input_fact": "recent_constrained_travel_mm",
+    "initialization": {
+      "type": "saturating_distance",
+      "lambda_commitment_mm": 500
+    },
+    "decay": {
+      "type": "exponential",
+      "tau_commitment_s": 5
+    },
+    "effect": {
+      "type": "circular_entry_heading_restoration",
+      "kappa_restore_per_s": 0.5
+    }
+  },
+  "contacts": {
+    "enabled": false,
+    "radius_mm": 1.6,
+    "avoidance_turn_rad": 0.18
+  },
+  "provenance": {
+    "parameter_status": "ASSUMED_ENGINEERING_DEMONSTRATION_NOT_FITTED",
+    "mechanism_freeze": "hypotheses/h5_transient_entry_heading_restoration_v1.json",
+    "mechanism_freeze_git_blob_sha": "d6fe2300db09b18d2a4426d6ef7ce6324b615f94",
+    "note": "Baseline locomotion values are unchanged from lasius_niger_locomotion_v1. H5 adds only deterministic transient restoration toward each ant's own lazily captured post-transition entry heading; angular-noise amplitude, speed, pauses, entry distribution, boundary behavior, and observation are unchanged."
+  }
+}

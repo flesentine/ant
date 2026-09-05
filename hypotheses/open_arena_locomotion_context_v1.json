@@ -1,5 +1,5 @@
 {
-  "schema_version": 8,
+  "schema_version": 9,
   "id": "open_arena_locomotion_context_v1",
   "reference_dataset": "poissonnier2026_open_arena",
   "scope": "DCM control treatments only",
@@ -117,23 +117,47 @@
     },
     {
       "id": "H5_transient_entry_heading_restoration",
-      "status": "mechanism_frozen_before_implementation_or_parameter_search",
+      "status": "implemented_mechanism_reachability_verified_not_searched",
       "model": "lasius_niger_locomotion_h5_v1",
       "freeze": "h5_transient_entry_heading_restoration_v1.json",
       "documentation": "docs/H5_TRANSIENT_HEADING_RESTORATION.md",
       "claim": "Recent sustained constrained walking creates a decaying commitment to the ant's own realized post-transition arena-entry heading, adding deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and the shared entry-state distribution unchanged.",
       "selection_status": "not_evaluated",
-      "implementation_status": "not_implemented",
+      "implementation_status": "implemented_and_mechanism_reachability_verified",
       "estimation_policy_status": "not_frozen",
       "distinction_from_prior": "Unlike H2, H5 does not reduce angular diffusion; unlike H3, it does not alter discrete reorientation timing; unlike H4, it does not alter speed; unlike H1, it does not fit or impose different short/long entry-heading distributions.",
       "anti_cheating_target_rule": "The remembered theta_ref is the ant's own realized heading after the shared entry transition. It may not be replaced by centerline direction, an edge bearing, a fixed apparatus axis, or a treatment-specific target.",
-      "next_step": "Implement engineering-only mechanism reachability exactly against the frozen H5 specification before designing any H5 estimator."
+      "next_step": "Audit the completed H5 implementation and then freeze a separate H5 parameter-estimation policy before any reference-data H5 search.",
+      "runtime_layer": "src/h5.js",
+      "runtime_layer_git_blob_sha": "b43f8e9fcaa4b2cc9981ed4f2922a833cc1a3177",
+      "frozen_h0_h4_integrity_blob_preserved": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+      "frozen_h0_h4_sim_core_blob_preserved": "24777aac3577d442893e4779d70aee4e27761fe8",
+      "reachability_runner": "tools/run-h5-mechanism.js",
+      "reachability_result": "reports/h5_mechanism_reachability_v1.json",
+      "reachability": {
+        "trials_per_condition": 400,
+        "physics_dt_s": 0.02,
+        "model_hash": "68ecf26f",
+        "short_commitment_initial": 0.3296799539643594,
+        "long_commitment_initial": 0.8646647167633948,
+        "short_mean_exit_time_s": 9.013200000000001,
+        "long_mean_exit_time_s": 8.930400000000002,
+        "short_mean_observed_distance_mm": 212.64494563365344,
+        "long_mean_observed_distance_mm": 210.6592841675746,
+        "short_mean_observed_straightness": 0.7439772316744027,
+        "long_mean_observed_straightness": 0.7709957311273662,
+        "short_mean_observed_moving_speed_mm_s": 23.932816376467013,
+        "long_mean_observed_moving_speed_mm_s": 23.930468611290294,
+        "all_frozen_structural_checks_passed": true,
+        "fit_performed": false,
+        "ymaze_accessed": false
+      }
     }
   ],
   "screening_decision": {
     "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
     "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
-    "current_decision": "H2-v1, H3-v1, and H4-v1 are not promoted, while H1 remains unresolved because measured entry-state evidence is missing. H5-v1 is now frozen before implementation as a substantively different mechanism: deterministic transient restoration toward each ant's own realized post-transition entry heading with unchanged angular-noise amplitude, speed, pauses, and shared entry distribution. No H5 parameter-estimation policy exists yet, so H5 reference-data search is forbidden. The canonical ant remains unchanged and the Y-maze remains locked.",
+    "current_decision": "H2-v1, H3-v1, and H4-v1 remain not promoted, while H1 remains unresolved because measured entry-state evidence is missing. H5-v1 is now implemented exactly against its frozen mechanism in a new runtime extension layer that preserves the exact H0–H4 runtime blobs. A reference-free 400-trial-per-condition mechanism reachability run passed all intended structural checks. H5 has not been fit or searched: no H5 estimator policy exists yet, so reference-data H5 parameter search remains forbidden. The canonical ant remains unchanged and the Y-maze remains locked.",
     "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
   }
 }

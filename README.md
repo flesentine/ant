@@ -12,12 +12,12 @@ H1  -> unresolved; measured post-toothpick entry state is missing
 H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
-H5  -> mechanism frozen; not implemented or searched
+H5  -> implemented; mechanism reachability verified; not searched
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
 
-See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 has no implementation or estimator yet.
+See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 is implemented in an isolated extension layer (`src/h5.js`) so the exact H0–H4 runtime blobs remain unchanged. H5 has no estimator yet.
 
 ## What data may enter development estimation
 
@@ -58,6 +58,14 @@ The full H0–H4 implementation suite passed in GitHub Actions before the tempor
 
 The H4 estimation policy is frozen in `hypotheses/h4_parameter_estimation_v1.json`, and the authorized high-resolution search is complete. H4-v1 was **not promoted**. Per the frozen failure rule, do not rescue H4 by changing bounds, seeds, nuisance parameters, metric weights, fold requirements, or by tuning the same mechanism harder. The next hypothesis must be substantively different or justified by genuinely new evidence.
 
+## H5 mechanism implementation
+
+H5-v1 is frozen in `hypotheses/h5_transient_entry_heading_restoration_v1.json` and implemented in `src/h5.js` plus `models/lasius_niger_locomotion_h5_v1.json`. The H5 layer wraps the frozen H0–H4 integrity runtime without changing the pinned `src/integrity.js` or `src/sim-core.js` blobs used by the H4 estimator audit.
+
+A 400-trial-per-condition mechanism reachability run using only the one pre-frozen engineering parameter set passed all intended structural checks: long-history trials had lower exit time (8.9304 vs 9.0132 s), lower observed distance (210.659 vs 212.645 mm), and higher straightness (0.7710 vs 0.7440), while observed moving speed stayed essentially unchanged (23.9305 vs 23.9328 mm/s). This is reachability evidence only, not a fit to the reference data.
+
+The exact report is `reports/h5_mechanism_reachability_v1.json`. No H5 estimator policy exists, no H5 parameter search is authorized, and the Y-maze remains locked.
+
 ## Run
 
 ```bash
@@ -97,6 +105,14 @@ node tools/run-h4-mechanism.js --trials 400 --seed 928491
 ```
 
 This H4 command performs reachability only: no target fitting, no model selection, and no Y-maze access.
+
+## Frozen H5 mechanism reachability
+
+```bash
+node tools/run-h5-mechanism.js --trials 400 --seed 928491
+```
+
+This H5 command performs mechanism reachability only: one pre-frozen engineering parameter set, no target fitting, no model selection, and no Y-maze access.
 
 ## H2 development estimation
 
