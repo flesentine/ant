@@ -84,9 +84,9 @@ A low-resolution 8-candidate run exercised the reference-data/cross-family code 
 
 ## H5 high-resolution authorization
 
-The authorization record is `hypotheses/h5_highres_authorization_v1.json` (Git blob `62456b0f3d87313d0208a4254c380b3f284c8b1e`). It pins the frozen policy, qualified estimator, qualification report, merged-main verification, and two successful Chromium audits.
+The authorization record is `hypotheses/h5_highres_authorization_v1.json` (Git blob `24b3c422f40bc4c44437995eff81ecdfd104ca34`). It pins the frozen policy, qualified estimator, qualification report, merged-main verification, and two successful Chromium audits.
 
-The authorization becomes executable only after merge to `main`; the review branch still rejects `--mode highres`. Before the official run, the permanent main workflow must also pass on the merge commit containing this hardened estimator and authorization. It authorizes only the unchanged frozen H5 search: 500 null candidates, 500 total context candidates, 60 training trials per treatment/candidate, 120 held-out evaluation trials per treatment, six LOCO folds, root seed 1,110,000, and 20 ms physics. Canonical promotion and Y-maze access remain unauthorized.
+The authorization becomes executable only after merge to `main`; the review branch still rejects `--mode highres`. Before the official run, the permanent main workflow must pass on a `main` commit containing this authorization and the exact hardened estimator blob. It authorizes only the unchanged frozen H5 search: 500 null candidates, 500 total context candidates, 60 training trials per treatment/candidate, 120 held-out evaluation trials per treatment, six LOCO folds, root seed 1,110,000, and 20 ms physics. Canonical promotion and Y-maze access remain unauthorized.
 
 ## Run
 

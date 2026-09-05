@@ -92,5 +92,6 @@
     "test_job_id": 101252682455,
     "test_job_conclusion": "success"
   },
-  "post_merge_execution_precondition": "Before the official high-resolution run, verify the permanent Test and deploy ANTLAB workflow succeeds on the merge commit that places this hardened estimator and authorization record on main."
+  "post_merge_execution_precondition": "Before the official high-resolution run, verify the permanent Test and deploy ANTLAB workflow succeeds on a main commit that contains this authorization record together with estimator Git blob 7d4a68f024c09c111a38088be2c943b7de74b464.",
+  "post_merge_execution_precondition_reason": "The first authorization merge commit exposed a branch-assumption regression in tests and was not a valid green execution checkpoint. A later green main commit with the same scientific estimator/runtime/policy and this authorization satisfies the gate without changing the frozen search."
 }

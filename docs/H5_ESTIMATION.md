@@ -169,13 +169,13 @@ The separate post-qualification authorization record now exists at `hypotheses/h
 
 Authorization record:
 - `hypotheses/h5_highres_authorization_v1.json`
-- Git blob: `62456b0f3d87313d0208a4254c380b3f284c8b1e`
+- Git blob: `24b3c422f40bc4c44437995eff81ecdfd104ca34`
 - status: **qualified estimator authorized for frozen high-resolution search**
 - qualified estimator: `7d4a68f024c09c111a38088be2c943b7de74b464`
 - qualification report: `da5afe375fccb54e38b9bf3ef6d9879e2e03270d`
 - authorization PR base main commit: `5c99c9e339582594597b21c2f34d1421e5802a21`
 - pre-hardening main test run on that base: `33946221387` / PASS
-- post-merge execution precondition: the permanent main workflow must pass on the merge commit that first places the hardened estimator and authorization on `main`
+- execution precondition: the permanent main workflow must pass on a `main` commit containing this authorization and the exact hardened estimator blob
 - repeated Chromium audit run: `33945941452`, attempts 1 and 2 / PASS
 
 The authorization permits exactly the already-frozen H5 procedure. It does not change bounds, Halton mapping, seeds, budgets, fit observables, comparator policy, promotion guards, runtime/model pins, or Y-maze lock.
@@ -183,3 +183,5 @@ The authorization permits exactly the already-frozen H5 procedure. It does not c
 No official H5 high-resolution result exists yet. The next step after this authorization is merged is one official execution of the frozen 500×60×6 LOCO search, followed immediately by freezing the complete result before interpretation.
 
 Authorization hardening: because the authorization record is present on its review branch before merge, the estimator now enforces `main` as the execution branch whenever `effective_when_merged_to_main=true`. Thus the review branch can validate authorization semantics but cannot launch the official high-resolution run.
+
+The first authorization merge commit failed only because two regressions assumed they were always running on a review branch. The tests are now branch-aware. No high-resolution execution occurred. The scientific estimator/runtime/search definition is unchanged, and a later green `main` commit containing the same hardened estimator plus authorization is the required execution checkpoint.

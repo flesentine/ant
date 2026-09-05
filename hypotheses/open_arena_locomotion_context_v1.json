@@ -176,16 +176,16 @@
         "artifact_digest": "sha256:ca60b8b0f50dc4cdc64cd9649102aad26e3e27378dc2e2206c2110d8155b672a"
       },
       "high_resolution_authorization": "hypotheses/h5_highres_authorization_v1.json",
-      "high_resolution_authorization_git_blob_sha": "62456b0f3d87313d0208a4254c380b3f284c8b1e",
+      "high_resolution_authorization_git_blob_sha": "24b3c422f40bc4c44437995eff81ecdfd104ca34",
       "high_resolution_result_status": "not_run",
       "authorization_effective_scope": "main_only_after_merge",
-      "post_merge_execution_precondition": "Permanent Test and deploy ANTLAB workflow must pass on the merge commit containing the hardened estimator and authorization before the official high-resolution run."
+      "post_merge_execution_precondition": "Permanent Test and deploy ANTLAB workflow must pass on a main commit containing this authorization and the exact hardened estimator blob before the official high-resolution run."
     }
   ],
   "screening_decision": {
     "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
     "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
-    "current_decision": "H2-v1, H3-v1, and H4-v1 remain not promoted, while H1 remains unresolved because measured entry-state evidence is missing. H5-v1 is implemented, mechanism reachability is verified, its estimator policy is frozen, and estimator v1 passed synthetic qualification plus full regression and repeated real-Chromium parity. The exact H5 high-resolution procedure is now separately authorized by a pinned authorization record, but the official high-resolution search has not yet been run. Canonical promotion remains unauthorized and the Y-maze remains locked.",
+    "current_decision": "H2-v1, H3-v1, and H4-v1 remain not promoted, while H1 remains unresolved because measured entry-state evidence is missing. H5-v1 is implemented, mechanism reachability is verified, its estimator policy is frozen, and estimator v1 passed synthetic qualification plus repeated real-Chromium parity. The exact H5 high-resolution procedure is authorized but the first post-merge main CI exposed a branch-assumption test regression, so the official search remains blocked until a later main commit containing the same hardened estimator and authorization passes permanent CI. Canonical promotion remains unauthorized and the Y-maze remains locked.",
     "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
   }
 }
