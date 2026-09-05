@@ -43,7 +43,7 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const {Simulation}=require('./src/integrity.js');
+          const {Simulation}=require('./src/h5.js');
           const {loadBundle}=require('./tools/load-bundle.js');
           const cases=[];
           for(const experiment of ['open_arena_short_control.json','open_arena_long_control.json']){
@@ -99,7 +99,7 @@ jobs:
                 json('./scoring/'+experiment.scoring+'.json')
               ]);
               observation.record_trajectories=false;
-              const sim=new AntLabIntegrity.Simulation({experiment,model,apparatus,state,observation,scoring},c.seed);
+              const sim=new AntLabH5.Simulation({experiment,model,apparatus,state,observation,scoring},c.seed);
               if(c.pre_step_heading_override!=null)sim.ants[0].heading=c.pre_step_heading_override;
               const s=sim.runUntilComplete(experiment.duration_s,0.02),a=sim.ants[0],o=s.observed_metrics.ants[0],l=s.latent_states[0];
               out.push({experiment:c.experiment,seed:c.seed,pre_step_heading_override:c.pre_step_heading_override,model_hash:s.provenance.model_hash,x:a.x,y:a.y,heading:a.heading,completedAt:a.completedAt,distance:a.distanceTravelled,rng:a.rng.state,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,commitment:l.heading_commitment_current,commitmentInitial:l.heading_commitment_initial,reference:l.h5_heading_reference_rad,referenceCaptured:l.h5_heading_reference_captured,observedTime:o.time_to_arena_edge_s??null,observedDistance:o.total_distance_mm??null,observedStraightness:o.path_straightness??null});

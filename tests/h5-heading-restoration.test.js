@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('assert');
 const core=require('../src/sim-core.js');
-const{Simulation,headingRestorationConfig,exactHeadingRestorationAngle,captureHeadingReferences}=require('../src/integrity.js');
+const{Simulation,headingRestorationConfig,exactHeadingRestorationAngle,captureHeadingReferences}=require('../src/h5.js');
 const{loadBundle}=require('../tools/load-bundle.js');
 const{runH5Mechanism}=require('../tools/run-h5-mechanism.js');
 function clone(v){return JSON.parse(JSON.stringify(v));}
@@ -126,19 +126,19 @@ assert.strictEqual(cfg.kappa,0.5);
 // Protocol/state cannot inject H5 latent state, target heading, or H5 biological parameters.
 {
   const badC=h5Bundle();badC.experiment.protocol.state_facts.C=0.9;
-  assert.throws(()=>new Simulation(badC,1),/Latent biological state forbidden|Model parameter forbidden|Biology override forbidden/);
+  assert.throws(()=>new Simulation(badC,1),/H5 biology override forbidden/);
   const badTheta=h5Bundle();badTheta.experiment.protocol.state_facts.theta_ref=1.2;
-  assert.throws(()=>new Simulation(badTheta,1),/Latent biological state forbidden|Model parameter forbidden|Biology override forbidden/);
+  assert.throws(()=>new Simulation(badTheta,1),/H5 biology override forbidden/);
   const badK=h5Bundle();badK.experiment.protocol.state_facts.kappa_restore_per_s=2;
-  assert.throws(()=>new Simulation(badK,1),/Model parameter forbidden|Biology override forbidden/);
+  assert.throws(()=>new Simulation(badK,1),/H5 biology override forbidden/);
   const badOverride=h5Bundle();badOverride.experiment.protocol.heading_restoration={effect:{kappa_restore_per_s:9}};
-  assert.throws(()=>new Simulation(badOverride,1),/Biology override forbidden/);
+  assert.throws(()=>new Simulation(badOverride,1),/H5 biology override forbidden/);
 }
 
 // H5 cannot be combined with prior context mechanisms.
 {
   const mixed=h5Bundle();mixed.model.locomotor_activation={enabled:true,mechanism_id:'x',input_fact:'recent_constrained_travel_mm',initialization:{type:'saturating_distance',history_distance_scale_mm:500},decay:{type:'exponential',activation_tau_s:5},effect:{type:'moving_speed_gain',max_speed_gain_fraction:0.2}};
-  assert.throws(()=>new Simulation(mixed,1),/cannot be enabled together/);
+  assert.throws(()=>new Simulation(mixed,1),/cannot be combined/);
 }
 
 // Partial-step apparatus-boundary termination advances final C only to the exact event time.

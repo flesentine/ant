@@ -29,6 +29,7 @@ node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
 node --check src/integrity.js
+node --check src/h5.js
 node --check src/app.js
 node --check tools/run-benchmark.js
 node --check tools/run-model-competition.js

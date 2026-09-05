@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path');
-const{Simulation,FIXED_DT,headingRestorationConfig}=require('../src/integrity.js');
+const{Simulation,FIXED_DT,headingRestorationConfig}=require('../src/h5.js');
 const{loadBundle,readJson}=require('./load-bundle.js');
 const MODEL_ID='lasius_niger_locomotion_h5_v1';
 function mean(xs){const v=xs.filter(Number.isFinite);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
