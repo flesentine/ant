@@ -159,10 +159,10 @@
       "estimation_policy_git_blob_sha": "ead45bacff89bf626deaaf3238a5c363b74279d1",
       "estimation_policy_integrity_test": "tests/h5-estimation-policy.test.js",
       "estimator_runner": "tools/run-h5-estimation.js",
-      "estimator_git_blob_sha": "e3172bb051de3fab350a7a63746d3e870fbaa0fc",
+      "estimator_git_blob_sha": "7d4a68f024c09c111a38088be2c943b7de74b464",
       "estimator_qualification_result": "reports/h5_estimator_qualification_v1.json",
-      "estimator_qualification_report_git_blob_sha": "8ee978588c97d56a9660693bc08ed4ba0600d961",
-      "estimator_qualification_report_sha256": "c65b2c67d00fc9ef9e6de2be8d45bd446ae0f9aa1928bc0e71aa949a0871cd97",
+      "estimator_qualification_report_git_blob_sha": "da5afe375fccb54e38b9bf3ef6d9879e2e03270d",
+      "estimator_qualification_report_sha256": "29565eb5f2f67cf8e480def5a0dc1a677795b06e97873b03fbaadf7ed48dc66c",
       "estimator_qualification_status": "passed",
       "estimator_qualification_reference_outcomes_accessed": false,
       "estimator_qualification_ymaze_accessed": false,
@@ -176,8 +176,9 @@
         "artifact_digest": "sha256:ca60b8b0f50dc4cdc64cd9649102aad26e3e27378dc2e2206c2110d8155b672a"
       },
       "high_resolution_authorization": "hypotheses/h5_highres_authorization_v1.json",
-      "high_resolution_authorization_git_blob_sha": "d3d2d61dab1337c321e9a3bf0eaae704ef152706",
-      "high_resolution_result_status": "not_run"
+      "high_resolution_authorization_git_blob_sha": "8741ebfff852d85b319ded5dd45f282d06f2c45e",
+      "high_resolution_result_status": "not_run",
+      "authorization_effective_scope": "main_only_after_merge"
     }
   ],
   "screening_decision": {
