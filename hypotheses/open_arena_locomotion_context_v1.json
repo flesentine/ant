@@ -127,7 +127,7 @@
       "estimation_policy_status": "frozen_before_estimator_implementation_or_parameter_search",
       "distinction_from_prior": "Unlike H2, H5 does not reduce angular diffusion; unlike H3, it does not alter discrete reorientation timing; unlike H4, it does not alter speed; unlike H1, it does not fit or impose different short/long entry-heading distributions.",
       "anti_cheating_target_rule": "The remembered theta_ref is the ant's own realized heading after the shared entry transition. It may not be replaced by centerline direction, an edge bearing, a fixed apparatus axis, or a treatment-specific target.",
-      "next_step": "Implement the frozen H5 estimator, pass synthetic qualification and full regression/Chromium audit, then authorize the unchanged high-resolution H5 LOCO search.",
+      "next_step": "Run reference-free synthetic H5 estimator qualification, full regression suite, low-resolution execution smoke, and real Chromium parity; record the qualified estimator blob before any high-resolution H5 search.",
       "runtime_layer": "src/h5.js",
       "runtime_layer_git_blob_sha": "b43f8e9fcaa4b2cc9981ed4f2922a833cc1a3177",
       "frozen_h0_h4_integrity_blob_preserved": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
@@ -154,7 +154,7 @@
       },
       "estimation_policy": "h5_parameter_estimation_v1.json",
       "estimation_documentation": "docs/H5_ESTIMATION.md",
-      "estimator_implementation_status": "not_implemented",
+      "estimator_implementation_status": "implemented_pending_qualification",
       "high_resolution_search_authorized": false,
       "estimation_policy_git_blob_sha": "ead45bacff89bf626deaaf3238a5c363b74279d1",
       "estimation_policy_integrity_test": "tests/h5-estimation-policy.test.js"
@@ -163,7 +163,7 @@
   "screening_decision": {
     "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
     "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
-    "current_decision": "H2-v1, H3-v1, and H4-v1 remain not promoted, while H1 remains unresolved because measured entry-state evidence is missing. H5-v1 is implemented and reference-free mechanism reachability is verified. Its separate parameter-estimation policy is now frozen before estimator implementation or H5 parameter search. No H5 estimator or reference-data search exists yet; high-resolution H5 search remains unauthorized until synthetic qualification, immutable-blob checks, full regression tests, and real-Chromium parity pass. The canonical ant remains unchanged and the Y-maze remains locked.",
+    "current_decision": "H2-v1, H3-v1, and H4-v1 remain not promoted, while H1 remains unresolved because measured entry-state evidence is missing. H5-v1 is implemented, mechanism reachability is verified, and its frozen estimator policy now has an implementation on a qualification branch. That estimator is not yet qualified or authorized for high-resolution reference-data search. The next gate is reference-free synthetic qualification plus full regression, execution smoke, code review, and real-Chromium parity. The canonical ant remains unchanged and the Y-maze remains locked.",
     "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
   }
 }
