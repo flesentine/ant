@@ -1,0 +1,30 @@
+name: H5 policy freeze audit
+on:
+  push:
+    branches: [h5-parameter-estimation-policy-v1]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen policy and unchanged H5 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/h5_parameter_estimation_v1.json)" = "ead45bacff89bf626deaaf3238a5c363b74279d1"
+          test "$(git hash-object hypotheses/h5_transient_entry_heading_restoration_v1.json)" = "d6fe2300db09b18d2a4426d6ef7ce6324b615f94"
+          test "$(git hash-object src/h5.js)" = "b43f8e9fcaa4b2cc9981ed4f2922a833cc1a3177"
+          test "$(git hash-object models/lasius_niger_locomotion_h5_v1.json)" = "ee2e5570f6d43cd91317fd38299b70bde32f191a"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test ! -e tools/run-h5-estimation.js
+      - name: Run H5 policy integrity regression
+        run: node tests/h5-estimation-policy.test.js
+      - name: Run full H0-H5 regression suite
+        run: ./tests/run-tests.sh
