@@ -1,0 +1,131 @@
+name: H5 official frozen 500x60 LOCO
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: h5-official-highres-v1
+  cancel-in-progress: false
+jobs:
+  highres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout official main execution head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify pre-execution main CI gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          repo=os.environ['GITHUB_REPOSITORY']
+          token=os.environ['GH_TOKEN']
+          req=urllib.request.Request(
+              f'https://api.github.com/repos/{repo}/actions/runs/33947800867',
+              headers={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json'}
+          )
+          with urllib.request.urlopen(req) as r:
+              run=json.load(r)
+          assert run['head_sha']=='b17ff944fdbc46be10c7d84907f0d6cccb093e44', run['head_sha']
+          assert run['status']=='completed', run['status']
+          assert run['conclusion']=='success', run['conclusion']
+          print(json.dumps({'precondition_run':run['id'],'head_sha':run['head_sha'],'conclusion':run['conclusion']}))
+          PY
+      - name: Verify exact frozen H5 execution chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "main"
+          test "$(git hash-object hypotheses/h5_parameter_estimation_v1.json)" = "ead45bacff89bf626deaaf3238a5c363b74279d1"
+          test "$(git hash-object tools/run-h5-estimation.js)" = "7d4a68f024c09c111a38088be2c943b7de74b464"
+          test "$(git hash-object reports/h5_estimator_qualification_v1.json)" = "da5afe375fccb54e38b9bf3ef6d9879e2e03270d"
+          test "$(git hash-object hypotheses/h5_highres_authorization_v1.json)" = "24b3c422f40bc4c44437995eff81ecdfd104ca34"
+          test "$(git hash-object src/h5.js)" = "b43f8e9fcaa4b2cc9981ed4f2922a833cc1a3177"
+          test "$(git hash-object models/lasius_niger_locomotion_h5_v1.json)" = "ee2e5570f6d43cd91317fd38299b70bde32f191a"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object reference/poissonnier2026_h2_estimation_targets.json)" = "07e2b8cf2dddbfcb152f0bd6d3031d473e0901b3"
+          test "$(git hash-object reports/h2_parameter_estimation_500x60_v1.json)" = "342f7a5af7c1ed71a8bdb7ff14becf38d24daa88"
+          test "$(git hash-object reports/h3_parameter_estimation_500x60_v1.json)" = "1d5c1b88ca9b425e927d761bc3ff1e5bad5bd5f3"
+          test "$(git hash-object reports/h4_parameter_estimation_500x60_v1.json)" = "8619b96bb3a02e78b905320ac96585bec08b2918"
+          test ! -e reports/h5_parameter_estimation_500x60_v1.json
+          node - <<'NODE'
+          const h5e=require('./tools/run-h5-estimation.js');
+          const a=h5e.assertHighResolutionAuthorized(process.cwd());
+          if(a.high_resolution_search_authorized!==true)throw new Error('H5 high-resolution authorization false');
+          if(a.ymaze_access_authorized!==false||a.canonical_promotion_authorized!==false)throw new Error('authorization scope too broad');
+          const p=h5e.assertExactPolicyBlob(process.cwd()).policy;
+          h5e.assertPolicySemantics(p);
+          console.log(JSON.stringify({status:'authorized',branch:h5e.currentBranchName(process.cwd()),policy:h5e.POLICY_GIT_BLOB_SHA,estimator:h5e.gitBlobShaFile('./tools/run-h5-estimation.js')}));
+          NODE
+      - name: Run full pre-execution H0-H5 regression suite
+        run: ./tests/run-tests.sh
+      - name: Run one official frozen H5 high-resolution LOCO search
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/h5-highres
+          printf '%s\n' "$GITHUB_SHA" > /tmp/h5-highres/execution-head.txt
+          printf '%s\n' "33947800867" > /tmp/h5-highres/precondition-main-run.txt
+          /usr/bin/time -v node tools/run-h5-estimation.js \
+            --mode highres \
+            --out /tmp/h5-highres/h5_parameter_estimation_500x60_v1.json \
+            > /tmp/h5-highres/h5-highres.log \
+            2> /tmp/h5-highres/time.log
+      - name: Verify and freeze official result artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, hashlib, pathlib, os
+          p=pathlib.Path('/tmp/h5-highres/h5_parameter_estimation_500x60_v1.json')
+          assert p.exists(), 'official H5 high-resolution report was not produced'
+          r=json.loads(p.read_text())
+          assert r['scientific_evidence'] is True
+          assert r['execution_class']=='frozen_high_resolution'
+          assert r['policy_git_blob_sha']=='ead45bacff89bf626deaaf3238a5c363b74279d1'
+          assert r['estimator_git_blob_sha']=='7d4a68f024c09c111a38088be2c943b7de74b464'
+          assert r['execution']['repo_commit']==os.environ['GITHUB_SHA']
+          assert r['ymaze_accessed'] is False
+          assert r['moving_speed_used_for_fit'] is False
+          assert r['moving_distance_used_for_fit'] is False
+          assert r['straightness_used_for_fit'] is False
+          assert r['raw_heading_diagnostics_used_for_fit'] is False
+          assert r['canonical_parameters_updated'] is False
+          s=r['search']
+          assert s['H5_null_candidates_per_fold']==500
+          assert s['H5_context_candidates_per_fold_total']==500
+          assert s['context_halton_candidates_per_fold']==499
+          assert s['exact_null_anchor_per_fold']==1
+          assert s['training_trials_per_condition_per_candidate']==60
+          assert s['evaluation_trials_per_condition']==120
+          assert s['folds']==6
+          assert s['root_seed']==1110000
+          assert s['physics_dt_s']==0.02
+          sha=hashlib.sha256(p.read_bytes()).hexdigest()
+          print('REPORT_SHA256='+sha)
+          print('STATUS='+r['status'])
+          print('SEARCH='+json.dumps(s,sort_keys=True))
+          print('INTERNAL_CV='+json.dumps(r.get('internal_cv',{}),sort_keys=True))
+          pathlib.Path('/tmp/h5-highres/report.sha256').write_text(sha+'  '+p.name+'\n')
+          pathlib.Path('/tmp/h5-highres/internal_cv.json').write_text(json.dumps(r.get('internal_cv',{}),indent=2)+'\n')
+          pathlib.Path('/tmp/h5-highres/search.json').write_text(json.dumps(s,indent=2)+'\n')
+          pathlib.Path('/tmp/h5-highres/status.txt').write_text(r['status']+'\n')
+          PY
+      - name: Upload official frozen H5 result
+        uses: actions/upload-artifact@v4
+        with:
+          name: h5-500x60-loco-official-result
+          path: /tmp/h5-highres
+          retention-days: 90
