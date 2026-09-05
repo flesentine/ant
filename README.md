@@ -12,12 +12,12 @@ H1  -> unresolved; measured post-toothpick entry state is missing
 H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
-H5  -> implemented; mechanism reachability verified; not searched
+H5  -> implemented; mechanism reachability verified; estimator policy frozen; not searched
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
 
-See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 is implemented in an isolated extension layer (`src/h5.js`) so the exact H0–H4 runtime blobs remain unchanged. H5 has no estimator yet.
+See `hypotheses/open_arena_locomotion_context_v1.json` for the current decision record and `hypotheses/h5_transient_entry_heading_restoration_v1.json` for the frozen H5 mechanism. H5 is implemented in an isolated extension layer (`src/h5.js`) so the exact H0–H4 runtime blobs remain unchanged. H5 has no estimator implementation yet; its estimator policy is now frozen in `hypotheses/h5_parameter_estimation_v1.json`.
 
 ## What data may enter development estimation
 
@@ -64,7 +64,17 @@ H5-v1 is frozen in `hypotheses/h5_transient_entry_heading_restoration_v1.json` a
 
 A 400-trial-per-condition mechanism reachability run using only the one pre-frozen engineering parameter set passed all intended structural checks: long-history trials had lower exit time (8.9304 vs 9.0132 s), lower observed distance (210.659 vs 212.645 mm), and higher straightness (0.7710 vs 0.7440), while observed moving speed stayed essentially unchanged (23.9305 vs 23.9328 mm/s). This is reachability evidence only, not a fit to the reference data.
 
-The exact report is `reports/h5_mechanism_reachability_v1.json`. No H5 estimator policy exists, no H5 parameter search is authorized, and the Y-maze remains locked.
+The exact report is `reports/h5_mechanism_reachability_v1.json`. The H5 estimator policy is now frozen in `hypotheses/h5_parameter_estimation_v1.json`, but no H5 estimator implementation or parameter search exists yet and the Y-maze remains locked.
+
+## H5 development-estimation policy
+
+The H5 estimator policy is frozen before estimator implementation or reference-data search. It uses only shared angular diffusion and shared entry-retention `q` as nuisances, with baseline speed fixed at 24 mm/s. The frozen H5 search ranges are `lambda=100–3000 mm`, `tau=0.5–40 s`, and `kappa=0–2 s⁻¹`.
+
+The primary LOCO guard requires H5-context to beat its exact `kappa=0` null in at least 5/6 held-out colonies with positive median relative improvement. A development-preferred claim additionally requires beating the per-fold best frozen H2/H3/H4 comparator in at least 4/6 folds with positive median improvement.
+
+No H5 search is authorized until a future estimator passes synthetic qualification, blob pinning, the full regression suite, and real-Chromium parity.
+
+See `docs/H5_ESTIMATION.md`.
 
 ## Run
 

@@ -62,8 +62,9 @@
 - angular-noise amplitude, speed, pauses, and shared entry-state distribution remain unchanged
 - 400-trial-per-condition reference-free mechanism reachability passed all intended structural checks
 - long-history engineering runs were slightly earlier, shorter, and straighter while moving speed remained essentially unchanged
-- no parameter sweep, no fitting, no estimator policy, and no Y-maze access
-- next gate is a separate frozen H5 estimation policy before any reference-data search
+- no parameter sweep or fitting during reachability; Y-maze remained locked
+- H5 parameter-estimation policy v1 frozen before estimator implementation/search
+- next gate is estimator implementation + synthetic qualification + code/Chromium audit before any high-resolution reference search
 - canonical locomotion remains unchanged
 
 ## v0.3.3 — externally painted trail response

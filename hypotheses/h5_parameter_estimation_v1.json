@@ -1,0 +1,401 @@
+{
+  "schema_version": 1,
+  "id": "H5_parameter_estimation_v1",
+  "status": "development_estimation_policy_frozen_before_estimator_implementation_or_parameter_search",
+  "freeze_date": "2026-09-04",
+  "freeze_scope": "Policy freeze only. No H5 estimator implementation, H5 reference-data parameter search, candidate ranking, or Y-maze access is authorized by this commit.",
+  "honesty_note": "The Poissonnier 2026 open-arena outcomes and the completed H2-v1, H3-v1, and H4-v1 development failures were known before H5 and before this estimation policy. H5 itself was mechanism-frozen and implementation/reachability-verified before this policy. This is post-outcome internal development model comparison, not independent validation or a blind preregistration. Bounds, budgets, objective weights, and guards below are frozen before any H5 estimator implementation or H5 parameter search.",
+  "model_candidate": "lasius_niger_locomotion_h5_v1",
+  "mechanism_freeze": "h5_transient_entry_heading_restoration_v1.json",
+  "mechanism_freeze_git_blob_sha": "d6fe2300db09b18d2a4426d6ef7ce6324b615f94",
+  "frozen_runtime": {
+    "h5_runtime_file": "src/h5.js",
+    "h5_runtime_git_blob_sha": "b43f8e9fcaa4b2cc9981ed4f2922a833cc1a3177",
+    "h5_model_file": "models/lasius_niger_locomotion_h5_v1.json",
+    "h5_model_git_blob_sha": "ee2e5570f6d43cd91317fd38299b70bde32f191a",
+    "shared_integrity_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+    "shared_sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "measurement_git_blob_sha": "8845726e02360655c605851662256bc729277b21",
+    "scorer_reference_file": "tools/run-h4-estimation.js",
+    "scorer_reference_git_blob_sha": "d417c62a4ef4f97c338a1da2f1ff10f49e18c175",
+    "rule": "The H5 estimator must use the frozen H5 runtime/model and the already-audited H2/H3/H4-compatible scorer semantics. High-resolution execution must refuse to run if any pinned runtime/reference/scorer blob differs."
+  },
+  "reference_dataset": "poissonnier2026_open_arena",
+  "reference_target_file": "reference/poissonnier2026_h2_estimation_targets.json",
+  "reference_target_git_blob_sha": "07e2b8cf2dddbfcb152f0bd6d3031d473e0901b3",
+  "reference_source_xlsx_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+  "reference_rows_rule": "Use exactly the same 51 threshold-independent DCM-control reference rows used by H2-v1, H3-v1, and H4-v1. No row addition, removal, relabeling, treatment-specific filtering, outcome substitution, or threshold-dependent reconstruction is permitted.",
+  "scope": "DCM-control 20 cm versus 100 cm open-arena approach only",
+  "colony_identity_rule": "Colony identity may be used only to define the six leave-one-colony-out train/holdout partitions and to report fold results. Colony identity may not enter the simulated ant, model, protocol, state, treatment logic, candidate parameters, or RNG as a biological control input.",
+  "mechanism": {
+    "initialization": "C0 = 1 - exp(-L / lambda_commitment_mm), where L = recent_constrained_travel_mm.",
+    "decay": "C(t) = C0 * exp(-t / tau_commitment_s).",
+    "remembered_reference": "theta_ref is captured once from the ant's realized heading immediately before the first free-arena physics step, after the shared entry transition, and remains fixed.",
+    "moving_effect": "While moving, dtheta_drift/dt = kappa_restore_per_s * C(t) * sin(theta_ref - theta).",
+    "pause_effect": "During baseline pauses, H5 adds no heading drift; theta remains fixed while C continues exact real-time exponential decay.",
+    "only_direct_effect": "deterministic circular heading drift toward the ant's own realized entry heading",
+    "forbidden_targets": [
+      "arena centerline",
+      "exit edge or edge bearing",
+      "fixed apparatus forward axis",
+      "treatment-specific target heading",
+      "future trajectory"
+    ],
+    "forbidden_direct_effects": [
+      "angular-noise amplitude",
+      "turnScale",
+      "base speed",
+      "speed noise",
+      "speed multiplier",
+      "pause hazard",
+      "pause duration",
+      "reorientation-event hazard",
+      "turn-angle distribution",
+      "entry-heading distribution",
+      "entry position",
+      "boundary behavior",
+      "observation behavior"
+    ]
+  },
+  "estimated_parameters": {
+    "angular_sigma_rad_sqrt_s": {
+      "role": "shared_baseline_heading_diffusion_nuisance",
+      "bounds": [
+        0.7,
+        2.4
+      ],
+      "scale": "linear",
+      "provenance": "Reuse the original H2-v1 baseline angular-diffusion nuisance range exactly. H5 is a heading-side mechanism and receives no extra baseline-speed nuisance parameter.",
+      "sharing_rule": "One angular_sigma_rad_sqrt_s value is shared across 20 cm and 100 cm within a candidate. H5-null and H5-context are fitted independently with the same definition, bounds, Halton coordinate, trial budget, and seed scheme."
+    },
+    "entry_orientation_retention_q": {
+      "role": "shared_apparatus_transition_nuisance",
+      "bounds": [
+        0,
+        1
+      ],
+      "scale": "linear",
+      "rule": "One q is shared across 20 cm and 100 cm within a candidate and may not depend on treatment. H5-null and H5-context use the same q definition, bounds, coordinate mapping, and RNG stream."
+    },
+    "lambda_commitment_mm": {
+      "role": "H5",
+      "bounds": [
+        100,
+        3000
+      ],
+      "scale": "log",
+      "provenance": "Reuse the frozen history-distance scale range used for H2/H3/H4 development; not chosen from H5 outcomes."
+    },
+    "tau_commitment_s": {
+      "role": "H5",
+      "bounds": [
+        0.5,
+        40
+      ],
+      "scale": "log",
+      "provenance": "Reuse the frozen transient-decay range used for H2/H3/H4 development; not chosen from H5 outcomes."
+    },
+    "kappa_restore_per_s": {
+      "role": "H5",
+      "bounds": [
+        0,
+        2
+      ],
+      "scale": "linear",
+      "nested_null_value": 0,
+      "provenance": "Lower bound is the exact H5 null. Upper bound is four times the pre-search engineering reachability value 0.5 s^-1 and is frozen from mechanism scale, not reference outcomes."
+    }
+  },
+  "fixed_parameters": [
+    "base_speed_mm_s = 24",
+    "speed_sd_mm_s",
+    "speed_reversion_rate_s",
+    "speed_noise_sigma_sqrt_s",
+    "pause_rate_s",
+    "pause_min_s",
+    "pause_max_s",
+    "turnScale",
+    "entry_position_distribution",
+    "observation_fps",
+    "observation/tracking model",
+    "apparatus geometry",
+    "boundary behavior"
+  ],
+  "fixed_parameter_rule": "Every model, protocol, state, apparatus, scoring, observation, and baseline-locomotion parameter not explicitly listed under estimated_parameters remains fixed at its H5-v1 or assay value. In particular, baseline speed is not an H5 nuisance parameter and may not be tuned.",
+  "treatment_sharing_rules": [
+    "No treatment-specific angular diffusion.",
+    "No treatment-specific q.",
+    "No treatment-specific baseline speed.",
+    "No treatment-specific entry-heading distribution.",
+    "No treatment-specific entry-speed distribution.",
+    "No treatment-specific theta_ref target.",
+    "The short-versus-long H5 effect may arise only from recent_constrained_travel_mm through C0 in the frozen H5 mechanism."
+  ],
+  "entry_transition_model": {
+    "type": "shared_orientation_retention_mixture",
+    "definition": "After Simulation construction and before the first physics step, with probability q preserve the protocol-sampled shared entry heading; otherwise replace it with a uniform draw on [-pi, pi). The resulting realized heading is then lazily captured by H5 as theta_ref on the first physics step.",
+    "rng_stream": "h2_estimation_entry_transition_v1",
+    "rng_reason": "Reuse the existing H2/H3/H4 shared entry-transition stream for cross-family common-random-number compatibility. H5 itself adds no stochastic stream.",
+    "ordering_invariant": "The q transition must be complete before H5 captures theta_ref. Constructor-time theta_ref capture is forbidden.",
+    "H1_boundary": "Treatment-specific entry-heading or entry-speed distributions remain forbidden because they would evaluate an H1-style apparatus-entry explanation rather than H5."
+  },
+  "fit_observables": [
+    {
+      "name": "time_to_exit_s",
+      "source_column": "Total_Frames / 25",
+      "threshold_independent": true
+    },
+    {
+      "name": "middle_zone_fraction",
+      "source_column": "Proportion_Frames_MiddleZone",
+      "threshold_independent": true
+    },
+    {
+      "name": "beeline_mm",
+      "source_column": "Beeline",
+      "threshold_independent": true
+    },
+    {
+      "name": "exit_edge",
+      "source_columns": [
+        "Xlast",
+        "Ylast",
+        "Xmin_Arena",
+        "Xmax_Arena",
+        "Ymin_Arena",
+        "Ymax_Arena"
+      ],
+      "threshold_independent": true
+    }
+  ],
+  "forbidden_fit_observables": [
+    "Average_Speed_Moving",
+    "Traveled_Dist_Moving",
+    "Straightness",
+    "Prop_time_moving",
+    "heading autocorrelation with entry heading",
+    "residual angular variance after subtracting H5 drift",
+    "maximum angular excursion",
+    "return rate after large heading deviations",
+    "any reconstructed movement-state quantity dependent on the unrecovered AnimalTA movement classifier",
+    "Y-maze decision/correct or any Y-maze-derived statistic"
+  ],
+  "diagnostic_firewall": {
+    "moving_speed_fit_target": false,
+    "moving_distance_fit_target": false,
+    "straightness_fit_target": false,
+    "raw_heading_discriminator_fit_target": false,
+    "anti_leakage_rule": "Forbidden diagnostics may not set bounds, objective weights, candidate ranking, stopping rules, fold exclusions, seeds, or post-hoc search refinement. They may be inspected only after candidate selection and held-out scoring are frozen."
+  },
+  "objective": {
+    "compatibility_rule": "Use the corrected audited H2/H3/H4 scorer semantics without H5-specific reweighting so held-out losses remain comparable.",
+    "continuous_distance": "19-quantile Wasserstein-1 divided by pooled training-colony SD.",
+    "categorical_distance": "2 * Hellinger distance for a normalized five-category exit distribution.",
+    "exit_categories": [
+      "left",
+      "right",
+      "top",
+      "bottom",
+      "timeout"
+    ],
+    "aggregation": "Equal-weight mean squared component distance across 4 metrics x 2 path treatments.",
+    "heldout_scaling": "For each LOCO fold, compute continuous metric SDs from the five training colonies once and freeze them for H5-null, H5-context, and all cross-family held-out reevaluations.",
+    "common_random_numbers": true,
+    "forbidden_changes_after_freeze": [
+      "metric addition or removal",
+      "metric reweighting",
+      "alternative normalization",
+      "dropping timeout mass",
+      "held-out-derived scaling",
+      "H5-specific scorer changes"
+    ]
+  },
+  "numerical_invariants": {
+    "physics_dt_s": 0.02,
+    "commitment_decay": "exact exponential",
+    "deterministic_drift": "Use the frozen exact circular drift map from src/h5.js with integrated C exposure over each moving physics step.",
+    "stochastic_ordering": "For a moving step, apply the frozen H5 deterministic restoration map before the unchanged baseline Gaussian angular-noise update, exactly as implemented in the pinned H5 runtime.",
+    "pause_semantics": "The H5 wrapper may preview the next pause decision only by cloning the current biology RNG state. The preview may not mutate the real RNG. If the frozen baseline starts or continues a pause, H5 applies no heading drift for that step.",
+    "reference_capture": "theta_ref is captured lazily from the realized post-q entry heading immediately before the first physics step.",
+    "boundary_timing": "If the apparatus boundary is reached inside a step, final C reporting advances only to the exact terminal event time using the frozen H5 runtime semantics.",
+    "rng_rule": "H5 adds no random draws or independent RNG stream and must preserve baseline biology RNG consumption order."
+  },
+  "cross_validation": {
+    "type": "leave_one_colony_out",
+    "colonies": 6,
+    "nested_models": {
+      "H5_null": "Estimate angular_sigma_rad_sqrt_s and q with kappa_restore_per_s fixed exactly to 0.",
+      "H5_context": "Estimate angular_sigma_rad_sqrt_s, q, lambda_commitment_mm, tau_commitment_s, and kappa_restore_per_s."
+    },
+    "null_inert_parameter_rule": "lambda_commitment_mm and tau_commitment_s have no inferential meaning under H5-null because kappa_restore_per_s=0 makes H5 heading drift identically zero; they may not be reported as null estimates.",
+    "comparison": "Fit H5-null and H5-context independently on the same five colonies and score on the sixth with a separate evaluation seed stream and frozen training-derived metric scales.",
+    "matched_H5_evaluation_rule": "Within each fold, selected H5-null and H5-context candidates must be evaluated on identical held-out reference rows, identical evaluation trial counts, identical named-stream seeds including the shared q stream, and the same training-derived metric scales.",
+    "primary_survival_guard": "H5-context must improve held-out loss over H5-null in at least 5 of 6 folds and have strictly positive median relative held-out improvement.",
+    "relative_improvement_definition": "(loss_comparator - loss_H5) / max(1e-12, loss_comparator)",
+    "pairwise_prior_guards": {
+      "H2": "H5-context must beat the matched re-evaluated frozen H2-v1 fold candidate in at least 4 of 6 folds and have strictly positive median relative improvement versus H2-v1.",
+      "H3": "H5-context must beat the matched re-evaluated frozen H3-v1 fold candidate in at least 4 of 6 folds and have strictly positive median relative improvement versus H3-v1.",
+      "H4": "H5-context must beat the matched re-evaluated frozen H4-v1 fold candidate in at least 4 of 6 folds and have strictly positive median relative improvement versus H4-v1."
+    },
+    "best_prior_guard": "To call H5-v1 development-preferred, H5-context must also beat the per-fold best held-out loss among the matched frozen H2-v1, H3-v1, and H4-v1 candidates in at least 4 of 6 folds and have strictly positive median relative improvement versus that per-fold best-prior comparator.",
+    "frozen_prior_results": {
+      "H2": {
+        "file": "reports/h2_parameter_estimation_500x60_v1.json",
+        "git_blob_sha": "342f7a5af7c1ed71a8bdb7ff14becf38d24daa88"
+      },
+      "H3": {
+        "file": "reports/h3_parameter_estimation_500x60_v1.json",
+        "git_blob_sha": "1d5c1b88ca9b425e927d761bc3ff1e5bad5bd5f3"
+      },
+      "H4": {
+        "file": "reports/h4_parameter_estimation_500x60_v1.json",
+        "git_blob_sha": "8619b96bb3a02e78b905320ac96585bec08b2918"
+      }
+    },
+    "cross_family_reevaluation_rule": "Re-evaluate the previously frozen fold-specific H2/H3/H4 candidates on the same H5 held-out reference rows with H5's frozen training-derived metric scales, held-out evaluation trial count, fold evaluation seeds, and shared entry-transition CRN stream wherever architectures permit matched randomness. Do not refit or alter H2/H3/H4 using H5 outcomes.",
+    "interpretation_rule": "The H5-null survival guard is mandatory and cannot be rescued by cross-family wins. A development-preferred H5 claim additionally requires the best-prior guard. Pairwise H2/H3/H4 comparisons are reported for transparency."
+  },
+  "search_protocol": {
+    "method": "deterministic Halton low-discrepancy search",
+    "high_resolution_budget": {
+      "H5_null_candidates_per_fold": 500,
+      "H5_context_candidates_per_fold_total": 500,
+      "training_trials_per_condition_per_candidate": 60,
+      "heldout_evaluation_trials_per_condition": 120,
+      "folds": 6
+    },
+    "root_seed": 1110000,
+    "fold_fit_seed": "1110000 + fold_index * 10000",
+    "fold_evaluation_seed": "1710000 + fold_index * 10000",
+    "training_CRN_rule": "Within a fold, every candidate is simulated with the same frozen training trial seed set for its treatment. H5-null and H5-context use the same fold fit seed scheme; candidate differences may not be confounded with Monte Carlo seed differences.",
+    "halton_mapping": [
+      {
+        "prime": 2,
+        "parameter": "angular_sigma_rad_sqrt_s"
+      },
+      {
+        "prime": 3,
+        "parameter": "entry_orientation_retention_q"
+      },
+      {
+        "prime": 5,
+        "parameter": "lambda_commitment_mm"
+      },
+      {
+        "prime": 7,
+        "parameter": "tau_commitment_s"
+      },
+      {
+        "prime": 11,
+        "parameter": "kappa_restore_per_s"
+      }
+    ],
+    "halton_indexing": "Halton index starts at 1.",
+    "nuisance_coordinate_pairing": "For Halton indices 1 through 499, angular_sigma_rad_sqrt_s and q coordinates are identical between corresponding H5-null and H5-context candidate indices. H5-null additionally evaluates Halton index 500. The 500th H5-context slot is reserved for the exact null-equivalent anchor.",
+    "nested_null_anchor": {
+      "required": true,
+      "rule": "Fit the 500-candidate H5-null search first. The H5-context set then contains 499 five-dimensional Halton candidates plus one exact null-equivalent anchor that copies the selected H5-null angular_sigma_rad_sqrt_s and q, sets kappa_restore_per_s=0, and uses lambda_commitment_mm=500 and tau_commitment_s=5 only as inert bookkeeping values.",
+      "purpose": "Guarantee exact nesting without giving H5-context more than 500 total candidates."
+    },
+    "search_firewall": [
+      "No local optimizer.",
+      "No adaptive second-stage search.",
+      "No hand-injected favorable context candidate other than the required null-equivalent anchor.",
+      "No bound widening or narrowing after inspecting H5 search results.",
+      "No candidate-budget increase after inspecting H5 search results.",
+      "No alternative seeds after inspecting H5 search results.",
+      "No objective modification after inspecting H5 search results.",
+      "No adding baseline speed as a nuisance after inspecting H5 results."
+    ],
+    "smoke_test_rule": "Low-resolution runs may verify execution only. Their outcomes are not scientific evidence and may not alter any frozen search choice."
+  },
+  "estimator_implementation_gate": {
+    "estimator_status": "not_implemented_at_policy_freeze",
+    "high_resolution_search_authorized": false,
+    "requirements_before_authorization": [
+      "Implement a separate H5 estimator that pins this policy blob plus every frozen runtime/model/reference/comparator/scorer blob listed here.",
+      "Pass synthetic estimator qualification without using Poissonnier outcomes for tuning.",
+      "Pass the full H0-H5 regression suite including the historical H4 immutable-runtime audit.",
+      "Demonstrate selected H5-null/context Node-to-real-Chromium parity under the frozen q ordering and H5 runtime.",
+      "Code review confirms no Y-maze access, no forbidden fit observable, no treatment-specific entry state, no geometry-derived theta_ref, and no adaptive search path.",
+      "Record the qualified estimator executable blob before any high-resolution H5 reference search."
+    ],
+    "rule": "Only after all requirements are satisfied may the already-frozen high-resolution procedure be executed unchanged."
+  },
+  "synthetic_estimator_qualification": {
+    "required_before_high_resolution_reference_search": true,
+    "reference_outcomes_accessed": false,
+    "purpose": "Verify estimator wiring and exact nesting without tuning against Poissonnier outcomes.",
+    "required_checks": [
+      "kappa_restore_per_s=0 H5-context/null equivalence for matched seeds",
+      "selected H5-null nuisance candidate can be inserted as the exact H5-context null anchor",
+      "candidate-to-model parameter wiring is correct",
+      "shared q transition is applied after construction and before first physics step",
+      "theta_ref captures the realized post-q entry heading",
+      "short/long recent_constrained_travel_mm is the only H5 treatment-varying biological input",
+      "H5 reads no centerline, exit edge, edge bearing, or fixed apparatus target axis",
+      "H5 adds no RNG stream and preserves baseline RNG consumption",
+      "pause preview clones RNG state without mutation and H5 drift is absent on paused steps",
+      "exact deterministic tan(delta/2) restoration identity remains satisfied",
+      "five-category exit scoring including timeout is normalized",
+      "training-fold SDs, not held-out SDs, are used for held-out continuous scaling",
+      "cross-family candidates are loaded from frozen H2/H3/H4 result records and are not refit",
+      "colony identity is not supplied as biological input",
+      "Y-maze is inaccessible"
+    ],
+    "anti_tuning_rule": "Synthetic qualification may detect implementation defects only; it may not change parameter bounds, nuisance definitions, objective weights, search budgets, seeds, or promotion thresholds."
+  },
+  "identifiability": {
+    "report_effective_quantities": [
+      "C200 = 1 - exp(-200/lambda_commitment_mm)",
+      "C1000 = 1 - exp(-1000/lambda_commitment_mm)",
+      "R200 = kappa_restore_per_s*C200",
+      "R1000 = kappa_restore_per_s*C1000",
+      "delta_R0 = kappa_restore_per_s*(C1000-C200)",
+      "E200 = kappa_restore_per_s*C200*tau_commitment_s",
+      "E1000 = kappa_restore_per_s*C1000*tau_commitment_s",
+      "commitment_half_life_s = tau_commitment_s*ln(2)"
+    ],
+    "deterministic_contraction_interpretation": "For an uninterrupted noise-free moving interval starting with history L, exp[-kappa*C_L*tau*(1-exp(-t/tau))] is the half-angle-error contraction factor. E_L is its idealized infinite-horizon exponent. These are mechanism summaries, not realized noisy-trajectory effects.",
+    "ridge_rule": "If lambda_commitment_mm, tau_commitment_s, and kappa_restore_per_s form a broad ridge while C/R/E effective quantities are stable, report the ridge and effective quantities rather than a false unique biological point estimate.",
+    "boundary_warning": "A parameter repeatedly selected within 1% of a frozen search boundary is not considered identified."
+  },
+  "structural_negative_controls": [
+    "No H5-dependent angular-noise amplitude.",
+    "No H5-dependent speed or speed RNG.",
+    "No H5-dependent pause hazard or duration.",
+    "No H5-dependent reorientation-event hazard or turn-angle law.",
+    "No treatment-specific entry heading, entry position, or entry speed.",
+    "No treatment-specific baseline locomotion nuisance.",
+    "No colony-identity-dependent biology.",
+    "No centerline attraction, edge attraction, exit targeting, or fixed apparatus target heading.",
+    "No H5-dependent observation behavior."
+  ],
+  "post_fit_diagnostics_only": [
+    "moving speed",
+    "moving distance",
+    "straightness",
+    "heading autocorrelation with entry heading if raw trajectories later become available",
+    "residual angular variance after subtracting deterministic H5 drift if raw trajectories later become available",
+    "maximum angular excursion and return rate if raw trajectories later become available",
+    "effective H5 commitment/restoration through time"
+  ],
+  "post_fit_rule": "Diagnostics may be inspected only after all candidate selection and held-out scoring are complete and frozen. They may not retroactively affect parameter choice, fold inclusion, comparator choice, or pass/fail status.",
+  "measurement_recovery_rule": "If raw trajectories or the AnimalTA movement classifier are later recovered, they define a new measurement-reconstruction, diagnostic, or validation stage. They do not retroactively alter H5-v1 parameter selection, objective, bounds, seeds, or LOCO decision.",
+  "pooled_fit_rule": "A pooled all-six-colony H5 fit may be run only after the complete LOCO result is frozen. It is descriptive parameter summarization only and cannot alter the LOCO decision, mechanism, bounds, objective, comparator guards, or seeds.",
+  "failure_rule": [
+    "Do not widen or narrow H5 parameter ranges in response to failure.",
+    "Do not add baseline speed or another nuisance parameter in response to failure.",
+    "Do not add moving speed, moving distance, straightness, raw heading diagnostics, or another forbidden observable to the objective.",
+    "Do not change objective weights or scaling.",
+    "Do not change the required number of winning folds.",
+    "Do not rerun with favorable seeds.",
+    "Do not refit H2/H3/H4 using H5 outcomes.",
+    "Do not average fold-specific H5 parameters or use a pooled refit to rescue a failed LOCO guard.",
+    "Do not tune the same H5-v1 mechanism harder using the observed failure.",
+    "A subsequent hypothesis must be substantively different or justified by genuinely new evidence."
+  ],
+  "implementation_error_rule": "If a genuine estimator or runtime implementation error is found, declare the affected execution invalid, document and regression-test the defect, and rerun the entire frozen high-resolution procedure unchanged. A poor scientific result is not an implementation error.",
+  "holdout_rule": "The Y-maze may not be loaded, queried, simulated against reference outcomes, used for fitting, candidate ranking, stopping rules, search refinement, model selection, parameter-bound choice, or choosing among H5 variants.",
+  "canonical_model_rule": "Passing the H5 development guards does not automatically update the canonical browser/species model or unlock the Y-maze. Any canonical promotion decision must be made explicitly after the complete LOCO result is frozen and reviewed."
+}
