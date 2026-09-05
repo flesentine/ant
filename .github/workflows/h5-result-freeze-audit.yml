@@ -1,4 +1,5 @@
 name: H5 result-freeze audit
+# registration trigger
 on:
   push:
     branches: [h5-result-freeze-v1]
