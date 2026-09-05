@@ -43,7 +43,7 @@ const q=h5e.qualify({root,policy,trials:2});
 assert.strictEqual(q.status,'passed');assert.strictEqual(q.reference_outcomes_accessed,false);assert.strictEqual(q.reference_files_semantically_loaded,false);assert.strictEqual(q.ymaze_accessed,false);assert.strictEqual(q.scientific_evidence,false);
 for(const[name,passed]of Object.entries(q.checks))assert.strictEqual(passed,true,`qualification check failed: ${name}`);
 
-assert.throws(()=>h5e.assertHighResolutionAuthorized(root),/not authorized|missing post-qualification/i);
+const authorization=h5e.assertHighResolutionAuthorized(root);assert.strictEqual(authorization.high_resolution_search_authorized,true);assert.strictEqual(authorization.estimator_git_blob_sha,'e3172bb051de3fab350a7a63746d3e870fbaa0fc');
 
 const synthetic=h5e.simulateCandidate(n,2,885000,base),ns=h5e.searchNull(synthetic,policy,base,{count:2,trials:2,seed0:885000}),cs=h5e.searchContext(synthetic,policy,base,{count:2,trials:2,seed0:885000,nullSelected:ns.selectedCandidate});
 assert.strictEqual(cs.anchor.source,'exact_null_anchor');assert.strictEqual(cs.anchor.candidate.lambda_commitment_mm,null);assert.strictEqual(cs.anchor.candidate.tau_commitment_s,null);assert.strictEqual(cs.anchor.candidate.kappa_restore_per_s,0);
