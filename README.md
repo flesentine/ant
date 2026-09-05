@@ -64,7 +64,7 @@ H5-v1 is frozen in `hypotheses/h5_transient_entry_heading_restoration_v1.json` a
 
 A 400-trial-per-condition mechanism reachability run using only the one pre-frozen engineering parameter set passed all intended structural checks: long-history trials had lower exit time (8.9304 vs 9.0132 s), lower observed distance (210.659 vs 212.645 mm), and higher straightness (0.7710 vs 0.7440), while observed moving speed stayed essentially unchanged (23.9305 vs 23.9328 mm/s). This is reachability evidence only, not a fit to the reference data.
 
-The exact mechanism report is `reports/h5_mechanism_reachability_v1.json`. The H5 estimator policy is frozen in `hypotheses/h5_parameter_estimation_v1.json`; the qualified estimator blob is `e3172bb051de3fab350a7a63746d3e870fbaa0fc`. No high-resolution H5 search has been run and the Y-maze remains locked.
+The exact mechanism report is `reports/h5_mechanism_reachability_v1.json`. The H5 estimator policy is frozen in `hypotheses/h5_parameter_estimation_v1.json`; the qualified estimator blob is `7d4a68f024c09c111a38088be2c943b7de74b464`. No high-resolution H5 search has been run and the Y-maze remains locked.
 
 ## H5 development-estimation policy
 
@@ -78,15 +78,15 @@ See `docs/H5_ESTIMATION.md`.
 
 ## H5 estimator qualification
 
-Estimator v1 is implemented in `tools/run-h5-estimation.js` (Git blob `e3172bb051de3fab350a7a63746d3e870fbaa0fc`). Reference-free synthetic qualification passed all required checks and is recorded in `reports/h5_estimator_qualification_v1.json` (Git blob `8ee978588c97d56a9660693bc08ed4ba0600d961`, SHA-256 `c65b2c67d00fc9ef9e6de2be8d45bd446ae0f9aa1928bc0e71aa949a0871cd97`).
+Estimator v1 is implemented in `tools/run-h5-estimation.js` (Git blob `7d4a68f024c09c111a38088be2c943b7de74b464`). Reference-free synthetic qualification passed all required checks and is recorded in `reports/h5_estimator_qualification_v1.json` (Git blob `da5afe375fccb54e38b9bf3ef6d9879e2e03270d`, SHA-256 `29565eb5f2f67cf8e480def5a0dc1a677795b06e97873b03fbaadf7ed48dc66c`).
 
 A low-resolution 8-candidate run exercised the reference-data/cross-family code path only; it is not scientific evidence. Selected smoke candidates matched Node in real Chromium across 8/8 cases with zero browser exceptions, console errors, or Y-maze requests. High-resolution mode is authorized by the separate pinned authorization record; no official high-resolution result exists yet.
 
 ## H5 high-resolution authorization
 
-The authorization record is `hypotheses/h5_highres_authorization_v1.json` (Git blob `d3d2d61dab1337c321e9a3bf0eaae704ef152706`). It pins the frozen policy, qualified estimator, qualification report, merged-main verification, and two successful Chromium audits.
+The authorization record is `hypotheses/h5_highres_authorization_v1.json` (Git blob `8741ebfff852d85b319ded5dd45f282d06f2c45e`). It pins the frozen policy, qualified estimator, qualification report, merged-main verification, and two successful Chromium audits.
 
-It authorizes only the unchanged frozen H5 search: 500 null candidates, 500 total context candidates, 60 training trials per treatment/candidate, 120 held-out evaluation trials per treatment, six LOCO folds, root seed 1,110,000, and 20 ms physics. Canonical promotion and Y-maze access remain unauthorized.
+The authorization becomes executable only after merge to `main`; the review branch still rejects `--mode highres`. It authorizes only the unchanged frozen H5 search: 500 null candidates, 500 total context candidates, 60 training trials per treatment/candidate, 120 held-out evaluation trials per treatment, six LOCO folds, root seed 1,110,000, and 20 ms physics. Canonical promotion and Y-maze access remain unauthorized.
 
 ## Run
 
