@@ -155,7 +155,9 @@
       "estimation_policy": "h5_parameter_estimation_v1.json",
       "estimation_documentation": "docs/H5_ESTIMATION.md",
       "estimator_implementation_status": "not_implemented",
-      "high_resolution_search_authorized": false
+      "high_resolution_search_authorized": false,
+      "estimation_policy_git_blob_sha": "ead45bacff89bf626deaaf3238a5c363b74279d1",
+      "estimation_policy_integrity_test": "tests/h5-estimation-policy.test.js"
     }
   ],
   "screening_decision": {

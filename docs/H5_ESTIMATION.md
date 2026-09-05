@@ -8,6 +8,8 @@ This document records the policy in `hypotheses/h5_parameter_estimation_v1.json`
 
 No H5 estimator is implemented by this freeze. No H5 reference-data search is authorized yet.
 
+Frozen policy Git blob: `ead45bacff89bf626deaaf3238a5c363b74279d1`.
+
 ## What H5 is allowed to estimate
 
 H5 remains a heading-side mechanism. The only shared nuisance parameters are:
@@ -138,3 +140,8 @@ Only then may the frozen 500×60×6 LOCO procedure run.
 A failed H5 result is not permission to change bounds, nuisance parameters, objective metrics, weights, seeds, candidate count, fold thresholds, or to add baseline speed. A failed H5-v1 must remain failed unless a genuine implementation error invalidates the execution.
 
 The Y-maze remains locked throughout H5 development estimation.
+
+
+## Freeze integrity regression
+
+`tests/h5-estimation-policy.test.js` pins the exact policy blob plus the H5 mechanism/runtime/model, measurement layer, audited scorer reference, threshold-independent target file, and frozen H2/H3/H4 result records. It also asserts that `tools/run-h5-estimation.js` does not yet exist and that high-resolution H5 search remains unauthorized.

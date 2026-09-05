@@ -25,6 +25,7 @@ node tests/h3-estimation.test.js
 node tests/h4-locomotor-activation.test.js
 node tests/h4-estimation.test.js
 node tests/h5-heading-restoration.test.js
+node tests/h5-estimation-policy.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
