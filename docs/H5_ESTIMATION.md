@@ -169,12 +169,13 @@ The separate post-qualification authorization record now exists at `hypotheses/h
 
 Authorization record:
 - `hypotheses/h5_highres_authorization_v1.json`
-- Git blob: `8741ebfff852d85b319ded5dd45f282d06f2c45e`
+- Git blob: `62456b0f3d87313d0208a4254c380b3f284c8b1e`
 - status: **qualified estimator authorized for frozen high-resolution search**
 - qualified estimator: `7d4a68f024c09c111a38088be2c943b7de74b464`
 - qualification report: `da5afe375fccb54e38b9bf3ef6d9879e2e03270d`
-- merged estimator commit: `5c99c9e339582594597b21c2f34d1421e5802a21`
-- merged-main test run: `33946221387` / PASS
+- authorization PR base main commit: `5c99c9e339582594597b21c2f34d1421e5802a21`
+- pre-hardening main test run on that base: `33946221387` / PASS
+- post-merge execution precondition: the permanent main workflow must pass on the merge commit that first places the hardened estimator and authorization on `main`
 - repeated Chromium audit run: `33945941452`, attempts 1 and 2 / PASS
 
 The authorization permits exactly the already-frozen H5 procedure. It does not change bounds, Halton mapping, seeds, budgets, fit observables, comparator policy, promotion guards, runtime/model pins, or Y-maze lock.
