@@ -64,7 +64,9 @@
 - long-history engineering runs were slightly earlier, shorter, and straighter while moving speed remained essentially unchanged
 - no parameter sweep or fitting during reachability; Y-maze remained locked
 - H5 parameter-estimation policy v1 frozen before estimator implementation/search
-- next gate is estimator implementation + synthetic qualification + code/Chromium audit before any high-resolution reference search
+- estimator implementation + reference-free synthetic qualification + code/Chromium audit complete
+- qualified estimator blob recorded; high-resolution mode remains hard-locked
+- next gate is separate post-qualification authorization, then the unchanged frozen 500×60×6 H5 LOCO search
 - canonical locomotion remains unchanged
 
 ## v0.3.3 — externally painted trail response

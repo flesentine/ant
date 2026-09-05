@@ -61,16 +61,20 @@ assert.strictEqual(policy.estimator_implementation_gate.estimator_status,'not_im
 assert.strictEqual(policy.estimator_implementation_gate.high_resolution_search_authorized,false);
 assert.match(policy.holdout_rule,/Y-maze/);
 
-assert.strictEqual(fs.existsSync(path.join(root,'tools/run-h5-estimation.js')),false,'H5 estimator must not exist at policy-freeze checkpoint');
+assert.strictEqual(policy.estimator_implementation_gate.estimator_status,'not_implemented_at_policy_freeze','policy must preserve the historical estimator status at freeze time');
+if(fs.existsSync(path.join(root,'tools/run-h5-estimation.js'))){
+  const estimator=require('../tools/run-h5-estimation.js');
+  assert.strictEqual(estimator.POLICY_GIT_BLOB_SHA,'ead45bacff89bf626deaaf3238a5c363b74279d1','implemented estimator must pin the exact frozen policy');
+}
 const browserHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(!browserHtml.includes('H5 has no frozen estimator policy'),'browser status must not claim the H5 estimator policy is absent');
-assert.ok(browserHtml.includes('H5 estimator policy frozen'),'browser status must reflect the policy freeze');
+assert.ok(browserHtml.includes('H5 estimator qualified')||browserHtml.includes('H5 estimator policy frozen'),'browser status must reflect the frozen-or-qualified H5 estimator state');
 
 const h5=decision.hypotheses.find(x=>x.id==='H5_transient_entry_heading_restoration');
 assert.ok(h5);
 assert.strictEqual(h5.estimation_policy,'h5_parameter_estimation_v1.json');
 assert.strictEqual(h5.estimation_policy_git_blob_sha,'ead45bacff89bf626deaaf3238a5c363b74279d1');
-assert.strictEqual(h5.estimator_implementation_status,'not_implemented');
+assert.ok(['not_implemented','implemented_pending_qualification','implemented_and_qualified_pending_authorization'].includes(h5.estimator_implementation_status));
 assert.strictEqual(h5.high_resolution_search_authorized,false);
 
 console.log('h5-estimation-policy.test.js PASS policy_blob=ead45bacff89bf626deaaf3238a5c363b74279d1');

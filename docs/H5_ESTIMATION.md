@@ -145,3 +145,21 @@ The Y-maze remains locked throughout H5 development estimation.
 ## Freeze integrity regression
 
 `tests/h5-estimation-policy.test.js` pins the exact policy blob plus the H5 mechanism/runtime/model, measurement layer, audited scorer reference, threshold-independent target file, and frozen H2/H3/H4 result records. It also asserts that `tools/run-h5-estimation.js` does not yet exist and that high-resolution H5 search remains unauthorized.
+
+
+## Qualification result
+
+Estimator v1 is implemented and qualified.
+
+- estimator Git blob: `e3172bb051de3fab350a7a63746d3e870fbaa0fc`
+- qualification report: `reports/h5_estimator_qualification_v1.json`
+- qualification report Git blob: `8ee978588c97d56a9660693bc08ed4ba0600d961`
+- qualification report SHA-256: `c65b2c67d00fc9ef9e6de2be8d45bd446ae0f9aa1928bc0e71aa949a0871cd97`
+- status: **PASS**
+- Poissonnier outcomes semantically loaded during qualification: **NO**
+- Y-maze accessed: **NO**
+- scientific evidence: **NO**
+
+A low-resolution execution smoke exercised the frozen reference/comparator path only and is not evidence. Selected H5-null/H5-context candidates matched Node in real Chromium in 8/8 cases with zero exceptions, console errors, or Y-maze requests. Audit run `33945743636`; artifact digest `sha256:ca60b8b0f50dc4cdc64cd9649102aad26e3e27378dc2e2206c2110d8155b672a`.
+
+High-resolution mode remains blocked unless a separate post-qualification authorization record pins this estimator and audit.
