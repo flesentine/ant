@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "id": "H5_high_resolution_authorization_v1",
+  "status": "qualified_estimator_authorized_for_frozen_high_resolution_search",
+  "authorization_date_local": "2026-09-04",
+  "effective_when_merged_to_main": true,
+  "high_resolution_search_authorized": true,
+  "scientific_scope": "Internal open-arena development estimation only. This authorization does not constitute external validation or canonical promotion.",
+  "policy_file": "hypotheses/h5_parameter_estimation_v1.json",
+  "policy_git_blob_sha": "ead45bacff89bf626deaaf3238a5c363b74279d1",
+  "estimator_file": "tools/run-h5-estimation.js",
+  "estimator_git_blob_sha": "e3172bb051de3fab350a7a63746d3e870fbaa0fc",
+  "qualified_estimator_merge_commit": "5c99c9e339582594597b21c2f34d1421e5802a21",
+  "qualification_report": {
+    "file": "reports/h5_estimator_qualification_v1.json",
+    "git_blob_sha": "8ee978588c97d56a9660693bc08ed4ba0600d961",
+    "sha256": "c65b2c67d00fc9ef9e6de2be8d45bd446ae0f9aa1928bc0e71aa949a0871cd97",
+    "status": "passed",
+    "reference_outcomes_accessed": false,
+    "ymaze_accessed": false,
+    "scientific_evidence": false
+  },
+  "merged_main_verification": {
+    "commit": "5c99c9e339582594597b21c2f34d1421e5802a21",
+    "workflow": "Test and deploy ANTLAB",
+    "run_id": 33946221387,
+    "test_job_id": 101252682455,
+    "test_job_conclusion": "success"
+  },
+  "chromium_qualification_audits": [
+    {
+      "run_id": 33945941452,
+      "attempt": 1,
+      "tested_head": "eecccaa1c411cec07c355d6c133d9c95c3238015",
+      "parity_cases": 8,
+      "exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0,
+      "artifact_digest": "sha256:fc2520cd1242770b702e3cd52e3a1cf7908329394bf624a39fe0b6e7390a719a"
+    },
+    {
+      "run_id": 33945941452,
+      "attempt": 2,
+      "tested_head": "eecccaa1c411cec07c355d6c133d9c95c3238015",
+      "parity_cases": 8,
+      "exceptions": 0,
+      "console_errors": 0,
+      "ymaze_requests": 0,
+      "artifact_digest": "sha256:c75cd14ea8d44e7165e5ba29e31224b083bcdeebc7c0e4d9cc8cf64ae28834a2"
+    }
+  ],
+  "tested_to_clean_head_relation": "The Chromium-tested estimator/UI state and merged estimator are byte-identical for the pinned estimator/runtime/model inputs. The clean PR head differed from the tested workflow-bearing head only by deletion of the temporary audit workflow.",
+  "authorized_frozen_execution": {
+    "mode": "highres",
+    "output_file": "reports/h5_parameter_estimation_500x60_v1.json",
+    "physics_dt_s": 0.02,
+    "folds": 6,
+    "H5_null_candidates_per_fold": 500,
+    "H5_context_candidates_per_fold_total": 500,
+    "context_halton_candidates_per_fold": 499,
+    "exact_null_anchor_per_fold": 1,
+    "training_trials_per_condition_per_candidate": 60,
+    "heldout_evaluation_trials_per_condition": 120,
+    "root_seed": 1110000,
+    "fold_fit_seed_rule": "1110000 + fold_index * 10000",
+    "fold_evaluation_seed_rule": "1710000 + fold_index * 10000",
+    "fit_targets": [
+      "time_to_exit_s",
+      "middle_zone_fraction",
+      "beeline_mm",
+      "exit_edge"
+    ],
+    "primary_survival_guard": "H5-context beats H5-null in at least 5 of 6 held-out folds and has strictly positive median relative improvement.",
+    "development_preferred_guard": "H5-context beats the per-fold best frozen H2/H3/H4 comparator in at least 4 of 6 folds and has strictly positive median relative improvement versus that comparator."
+  },
+  "execution_firewall": [
+    "Do not change parameter bounds, nuisance definitions, Halton mapping, candidate counts, trial counts, seeds, physics dt, objective metrics, objective weights, fold membership, or promotion thresholds.",
+    "Do not add baseline speed as a nuisance parameter.",
+    "Do not fit moving speed, moving distance, straightness, raw heading diagnostics, or any threshold-dependent metric.",
+    "Do not refit H2, H3, or H4; only re-evaluate their frozen fold candidates.",
+    "Do not access or use Y-maze data, outcomes, or simulations for model selection.",
+    "Do not change the H5 runtime/model or any pinned scorer/reference/comparator input.",
+    "Do not run an adaptive second stage or favorable-seed rerun."
+  ],
+  "official_execution_rule": "Authorize one official execution of the frozen high-resolution H5-v1 procedure. A rerun is permitted only if the first execution is formally declared invalid because of a genuine implementation/infrastructure error; the complete frozen procedure must then be rerun unchanged.",
+  "post_result_rule": "Freeze and record the complete result before any interpretation-driven code or policy change. Failure cannot be rescued by tuning H5-v1 harder.",
+  "canonical_promotion_authorized": false,
+  "ymaze_access_authorized": false
+}
