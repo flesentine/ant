@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "mechanism_id": "H5_transient_entry_heading_restoration_v1",
+  "model_id": "lasius_niger_locomotion_h5_v1",
+  "model_hash": "68ecf26f",
+  "mechanism_freeze_git_blob_sha": "d6fe2300db09b18d2a4426d6ef7ce6324b615f94",
+  "fit_performed": false,
+  "reference_targets_accessed": false,
+  "ymaze_accessed": false,
+  "selection_performed": false,
+  "estimator_policy_frozen": false,
+  "common_random_numbers": true,
+  "trials_per_condition": 400,
+  "seed_range": [
+    928491,
+    928890
+  ],
+  "dt_s": 0.02,
+  "engineering_parameters": {
+    "enabled": true,
+    "mechanism_id": "H5_transient_entry_heading_restoration_v1",
+    "input_fact": "recent_constrained_travel_mm",
+    "initialization": {
+      "type": "saturating_distance",
+      "lambda_commitment_mm": 500
+    },
+    "decay": {
+      "type": "exponential",
+      "tau_commitment_s": 5
+    },
+    "effect": {
+      "type": "circular_entry_heading_restoration",
+      "kappa_restore_per_s": 0.5
+    }
+  },
+  "short": {
+    "trials": 400,
+    "commitment_initial": 0.3296799539643594,
+    "references_captured": 400,
+    "mean_exit_time_s": 9.013200000000001,
+    "mean_observed_distance_mm": 212.64494563365344,
+    "mean_observed_straightness": 0.7439772316744027,
+    "mean_observed_moving_speed_mm_s": 23.932816376467013
+  },
+  "long": {
+    "trials": 400,
+    "commitment_initial": 0.8646647167633948,
+    "references_captured": 400,
+    "mean_exit_time_s": 8.930400000000002,
+    "mean_observed_distance_mm": 210.6592841675746,
+    "mean_observed_straightness": 0.7709957311273662,
+    "mean_observed_moving_speed_mm_s": 23.930468611290294
+  },
+  "structural_checks": {
+    "long_commitment_exceeds_short": true,
+    "all_references_captured": true,
+    "long_exit_time_lower": true,
+    "long_distance_lower": true,
+    "long_straightness_exceeds_short": true
+  },
+  "restrictions": [
+    "No reference target file was loaded.",
+    "No parameter optimization or parameter sweep was performed.",
+    "Only the one pre-frozen engineering H5 parameter set was executed.",
+    "The Y-maze was not loaded.",
+    "Moving speed, distance, and straightness are reachability diagnostics only; no H5 fitting objective exists.",
+    "Engineering model values are not biological estimates."
+  ]
+}

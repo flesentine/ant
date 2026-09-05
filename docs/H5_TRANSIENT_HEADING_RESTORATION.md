@@ -88,11 +88,11 @@ H5 may not read the short/long label, colony identity, reference outcomes, cente
 ## Implementation order
 
 1. Mechanism freeze — **complete**.
-2. Implement an engineering-only H5 model exactly against the freeze.
-3. Add invariance, deterministic-drift, RNG, firewall, and timestep tests.
-4. Run mechanism reachability only, with no parameter fitting and no Y-maze.
-5. Perform code review and real-Chromium Node↔browser parity.
-6. Only after the implementation is stable, design and freeze a **separate H5 estimation policy**.
+2. Implement an engineering-only H5 model exactly against the freeze — **complete**.
+3. Add invariance, deterministic-drift, RNG, firewall, and timestep tests — **complete**.
+4. Run mechanism reachability only, with no parameter fitting and no Y-maze — **complete**.
+5. Perform code review and real-Chromium Node↔browser parity — **complete for the implementation pass**.
+6. Design and freeze a **separate H5 estimation policy** — **next**.
 7. Do not run a reference-data H5 parameter search until that separate policy is frozen and audited.
 
 ## Current scientific status
@@ -103,7 +103,7 @@ H1  -> unresolved; measured entry-state evidence missing
 H2  -> high-resolution searched; not promoted
 H3  -> high-resolution searched; not promoted
 H4  -> high-resolution searched; not promoted
-H5  -> mechanism frozen; not implemented; not searched
+H5  -> implemented; mechanism reachability verified; not searched
 ```
 
 The canonical ant remains unchanged, and the Y-maze remains locked.
@@ -118,3 +118,27 @@ Before any H5 code was written, review of the current runtime exposed two implem
 - If an apparatus-boundary termination occurs partway through a step, the reported final `C` must be advanced only to that exact terminal event time.
 
 These clarifications were made before H5 implementation and before any H5 estimator or parameter search. They do not change the frozen engineering reachability values or introduce outcome-dependent tuning.
+
+
+## Implementation and reachability result
+
+H5 is implemented in `src/h5.js`, intentionally layered over the unchanged H0–H4 integrity runtime. This was necessary because the historical H4 estimator pins the exact `src/integrity.js` and `src/sim-core.js` blobs; H5 does not weaken or rewrite that audit boundary.
+
+The H5 runtime uses no independent H5 randomness. To preserve the baseline pause semantics without changing the frozen core, it previews the upcoming pause decision using a cloned copy of the current biology RNG state. The clone does not mutate the real RNG and does not create an independent stochastic source. Deterministic restoration is applied only when the frozen core will execute a moving step.
+
+The real 400-trial-per-condition mechanism-reachability execution used seeds 928491–928890 and `dt=0.02`. It loaded no reference target, performed no fitting or parameter sweep, and did not access the Y-maze.
+
+```text
+                         short history   long history
+commitment initial        0.329680        0.864665
+mean exit time (s)        9.0132          8.9304
+mean distance (mm)      212.6449        210.6593
+mean straightness         0.74398         0.77100
+mean moving speed        23.9328         23.9305
+```
+
+All frozen structural checks passed: larger long-history commitment, all entry-heading references captured, lower long-history exit time, lower long-history distance, and greater long-history straightness. Moving speed remained effectively unchanged, as H5 requires.
+
+The exact report is `reports/h5_mechanism_reachability_v1.json` (SHA-256 `babcf964ea01a877650a238959b25e7483f6a5afad22aa8ef79ad84da115f2e6`).
+
+A real Chromium parity audit replayed four H5 cases against Node with zero browser exceptions, zero console errors, and zero Y-maze network requests.

@@ -1,6 +1,6 @@
 # Locomotion model competition
 
-ANTLAB v0.3.2 has evaluated three distinct post-history locomotion mechanisms (H2–H4) under frozen held-out development guards while preserving the H0 browser assays and the locked Y-maze holdout. None earned canonical promotion. H5 is now frozen as a fourth distinct mechanism class but has not been implemented or searched.
+ANTLAB v0.3.2 has evaluated three distinct post-history locomotion mechanisms (H2–H4) under frozen held-out development guards while preserving the H0 browser assays and the locked Y-maze holdout. None earned canonical promotion. H5 is now implemented as a fourth distinct mechanism class, has passed reference-free mechanism reachability, and has not been fit or searched.
 
 ## Reference contrast
 Only the final-version Poissonnier 2026 **DCM control** rows are used for the already-completed H0 descriptive screen and H2 internal development estimation. The comparison is 20 cm approach versus 100 cm approach. Reference rows are regenerated from the checksummed XLSX.
@@ -109,7 +109,11 @@ dtheta_drift/dt = kappa_restore * C(t) * sin(theta_ref - theta)
 
 The baseline angular-noise amplitude is unchanged. Speed and pauses are unchanged. H5 may not use the arena centerline, edge bearings, a fixed apparatus forward axis, or treatment-specific fitted entry headings as its target.
 
-No H5 estimator exists yet. A separate estimation policy must be frozen before any reference-data H5 search.
+H5 is implemented in `src/h5.js` as an extension over the exact frozen H0–H4 integrity runtime, preserving the historical H4 runtime blob pins.
+
+The one pre-frozen engineering parameter set was run for 400 common-random-number trials per condition. The long-history engineering condition had lower mean exit time (8.9304 vs 9.0132 s), lower mean observed distance (210.659 vs 212.645 mm), and higher mean straightness (0.7710 vs 0.7440). Mean observed moving speed was essentially unchanged (23.9305 vs 23.9328 mm/s). All frozen structural reachability checks passed.
+
+This is mechanism reachability only. No reference target was loaded, no parameter sweep or fitting occurred, and the Y-maze was not accessed. No H5 estimator exists yet; a separate estimation policy must be frozen before any reference-data H5 search.
 
 ## Identifiability
 Fold-specific H2 estimates vary substantially rather than converging on one biological parameter set. Across the six folds the selected values span roughly:
@@ -139,8 +143,8 @@ Do **not** promote H2-v1, H3-v1, or H4-v1. The current evidence is:
 - H2-v1: closest so far, but 4/6 held-out wins still failed its frozen >=5/6 guard;
 - H3-v1: failed its own null and H2 comparison guards;
 - H4-v1: failed its own null and H2/H3 comparison guards;
-- H5-v1: mechanism frozen; not implemented or searched;
+- H5-v1: implemented; reference-free mechanism reachability verified; not fit or searched;
 - canonical browser model: unchanged;
 - Y-maze: still locked.
 
-The short-vs-long data still contain a large, sign-stable locomotion structure that H0 cannot explain, so v0.3.2 remains open. H5 now supplies the required substantively different frozen mechanism. The next scientific move is engineering-only H5 implementation and reachability against the frozen specification, with no reference-data parameter search and no Y-maze access. Do not retune H2, H3, or H4 against these same outcomes.
+The short-vs-long data still contain a large, sign-stable locomotion structure that H0 cannot explain, so v0.3.2 remains open. H5 now supplies the required substantively different mechanism and its engineering-only implementation/reachability gate is complete. The next scientific move is to design and freeze a separate H5 parameter-estimation policy before any reference-data H5 search, with the Y-maze still locked. Do not retune H2, H3, or H4 against these same outcomes.
