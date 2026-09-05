@@ -162,13 +162,13 @@ Estimator v1 is implemented and qualified.
 
 A low-resolution execution smoke exercised the frozen reference/comparator path only and is not evidence. Selected H5-null/H5-context candidates matched Node in real Chromium in 8/8 cases with zero exceptions, console errors, or Y-maze requests. Audit run `33945743636`; artifact digest `sha256:ca60b8b0f50dc4cdc64cd9649102aad26e3e27378dc2e2206c2110d8155b672a`.
 
-The separate post-qualification authorization record now exists at `hypotheses/h5_highres_authorization_v1.json` and pins this estimator and audit. The official high-resolution search has not yet run.
+The historical post-qualification authorization is archived at `hypotheses/archive/h5_highres_authorization_v1.json`. The one official high-resolution search has completed and the result is frozen.
 
 
 ## High-resolution authorization
 
-Authorization record:
-- `hypotheses/h5_highres_authorization_v1.json`
+Historical authorization record (archived after the valid result):
+- `hypotheses/archive/h5_highres_authorization_v1.json`
 - Git blob: `24b3c422f40bc4c44437995eff81ecdfd104ca34`
 - status: **qualified estimator authorized for frozen high-resolution search**
 - qualified estimator: `7d4a68f024c09c111a38088be2c943b7de74b464`
@@ -180,8 +180,24 @@ Authorization record:
 
 The authorization permits exactly the already-frozen H5 procedure. It does not change bounds, Halton mapping, seeds, budgets, fit observables, comparator policy, promotion guards, runtime/model pins, or Y-maze lock.
 
-No official H5 high-resolution result exists yet. The next step after this authorization is merged is one official execution of the frozen 500×60×6 LOCO search, followed immediately by freezing the complete result before interpretation.
+The one official H5 high-resolution result is now frozen at `reports/h5_parameter_estimation_500x60_v1.json`. It failed the frozen own-null and best-prior guards. No rerun or H5-v1 retuning is authorized.
 
 Authorization hardening: because the authorization record is present on its review branch before merge, the estimator now enforces `main` as the execution branch whenever `effective_when_merged_to_main=true`. Thus the review branch can validate authorization semantics but cannot launch the official high-resolution run.
 
 The first authorization merge commit failed only because two regressions assumed they were always running on a review branch. The tests are now branch-aware. No high-resolution execution occurred. The scientific estimator/runtime/search definition is unchanged, and a later green `main` commit containing the same hardened estimator plus authorization is the required execution checkpoint.
+
+
+## Official H5-v1 result freeze
+
+The single authorized 500×60×6 LOCO execution completed successfully as GitHub Actions run `33947883644` (attempt 1) at exact execution head `6087cc044faae586af826f44297e85212d1941a0`.
+
+- result file: `reports/h5_parameter_estimation_500x60_v1.json`
+- result Git blob: `1fcdb357e1755b5ba5cb4be6ee8b69db617e732d`
+- result SHA-256: `28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053`
+- official artifact digest: `sha256:2705fa01d73ae6ab87ef42af3634f8bb4eebd8724a285c652f81245a7e4fc833`
+
+H5-v1 failed its primary survival guard: only **3/6** held-out wins versus H5-null, despite a positive median relative improvement of **+0.81%**. It also failed the stronger best-prior guard with only **2/6** wins and median relative improvement **−7.12%** versus the per-fold best frozen H2/H3/H4 comparator. Therefore `development_preferred=false` and `canonical_promotion=false`.
+
+The post-hoc audit (`33979167192`) reproduced every held-out loss and relative-improvement value exactly and replayed all official selected H5-null/H5-context fold candidates in real Chromium: **48/48** parity cases, zero browser exceptions, zero console errors, zero Y-maze requests. Artifact digest: `sha256:1c23f363003c430414841eeca5e3f95e512e1d832c9c10c4291b2be005c54fef`.
+
+This audit found no genuine implementation error. H5-v1 is therefore **failed, frozen, and closed**. The historical authorization is archived byte-for-byte and the active execution path is removed. The failure rule now applies permanently to H5-v1.
