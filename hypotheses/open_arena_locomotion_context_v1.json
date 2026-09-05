@@ -176,9 +176,10 @@
         "artifact_digest": "sha256:ca60b8b0f50dc4cdc64cd9649102aad26e3e27378dc2e2206c2110d8155b672a"
       },
       "high_resolution_authorization": "hypotheses/h5_highres_authorization_v1.json",
-      "high_resolution_authorization_git_blob_sha": "8741ebfff852d85b319ded5dd45f282d06f2c45e",
+      "high_resolution_authorization_git_blob_sha": "62456b0f3d87313d0208a4254c380b3f284c8b1e",
       "high_resolution_result_status": "not_run",
-      "authorization_effective_scope": "main_only_after_merge"
+      "authorization_effective_scope": "main_only_after_merge",
+      "post_merge_execution_precondition": "Permanent Test and deploy ANTLAB workflow must pass on the merge commit containing the hardened estimator and authorization before the official high-resolution run."
     }
   ],
   "screening_decision": {
