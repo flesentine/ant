@@ -8,6 +8,7 @@ const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).t
 const sha256=p=>crypto.createHash('sha256').update(fs.readFileSync(path.join(root,p))).digest('hex');
 
 const report=read('reports/h5_parameter_estimation_500x60_v1.json');
+assert.strictEqual(blob('hypotheses/h5_result_freeze_v1.json'),'063143e8e9606ab83311083830d7ae816d2e1139','H5 result-freeze record blob drifted');
 const freeze=read('hypotheses/h5_result_freeze_v1.json');
 const decision=read('hypotheses/open_arena_locomotion_context_v1.json');
 const h5=decision.hypotheses.find(x=>x.id==='H5_transient_entry_heading_restoration');
@@ -35,8 +36,16 @@ assert.strictEqual(freeze.status,'official_high_resolution_result_frozen_failed_
 assert.strictEqual(freeze.result.git_blob_sha,'1fcdb357e1755b5ba5cb4be6ee8b69db617e732d');
 assert.strictEqual(freeze.result.sha256,'28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053');
 assert.strictEqual(freeze.official_execution.run_id,33947883644);
+assert.strictEqual(freeze.official_execution.job_id,101257153390);
 assert.strictEqual(freeze.official_execution.attempt,1);
+assert.strictEqual(freeze.official_execution.execution_head,'6087cc044faae586af826f44297e85212d1941a0');
+assert.strictEqual(freeze.official_execution.artifact_id,9964220581);
+assert.strictEqual(freeze.official_execution.artifact_digest,'sha256:2705fa01d73ae6ab87ef42af3634f8bb4eebd8724a285c652f81245a7e4fc833');
+assert.strictEqual(freeze.official_execution.one_official_execution_only,true);
 assert.strictEqual(freeze.posthoc_integrity_audit.run_id,33979167192);
+assert.strictEqual(freeze.posthoc_integrity_audit.job_id,101341127941);
+assert.strictEqual(freeze.posthoc_integrity_audit.artifact_id,9973226023);
+assert.strictEqual(freeze.posthoc_integrity_audit.artifact_digest,'sha256:1c23f363003c430414841eeca5e3f95e512e1d832c9c10c4291b2be005c54fef');
 assert.strictEqual(freeze.posthoc_integrity_audit.all_six_fold_losses_reproduced_exactly,true);
 assert.strictEqual(freeze.posthoc_integrity_audit.chromium_parity_cases,48);
 assert.strictEqual(freeze.posthoc_integrity_audit.browser_exceptions,0);
@@ -44,6 +53,10 @@ assert.strictEqual(freeze.posthoc_integrity_audit.console_errors,0);
 assert.strictEqual(freeze.posthoc_integrity_audit.ymaze_requests,0);
 assert.strictEqual(freeze.posthoc_integrity_audit.result_invalidated,false);
 assert.strictEqual(freeze.closure.H5_v1_closed,true);
+assert.strictEqual(freeze.closure.failure_rule_applies,true);
+assert.strictEqual(freeze.closure.active_authorization_removed,true);
+assert.strictEqual(freeze.closure.official_execution_workflow_removed,true);
+assert.strictEqual(freeze.closure.qualified_estimator_preserved_git_blob_sha,'7d4a68f024c09c111a38088be2c943b7de74b464');
 assert.strictEqual(freeze.closure.retuning_authorized,false);
 assert.strictEqual(freeze.closure.rerun_authorized,false);
 assert.strictEqual(freeze.closure.canonical_promotion_authorized,false);
