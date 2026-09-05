@@ -2,6 +2,7 @@
 const assert=require('assert');
 const core=require('../src/sim-core.js');
 const{Simulation,headingRestorationConfig,exactHeadingRestorationAngle,captureHeadingReferences}=require('../src/h5.js');
+const{Simulation:IntegritySimulation}=require('../src/integrity.js');
 const{loadBundle}=require('../tools/load-bundle.js');
 const{runH5Mechanism}=require('../tools/run-h5-mechanism.js');
 function clone(v){return JSON.parse(JSON.stringify(v));}
@@ -107,7 +108,7 @@ assert.strictEqual(cfg.kappa,0.5);
 {
   const zero=h5Bundle();zero.experiment.protocol.state_facts.recent_constrained_travel_mm=0;
   const nullBundle=clone(zero);nullBundle.model.heading_restoration.enabled=false;
-  const a=new Simulation(zero,99172),b=new Simulation(nullBundle,99172);
+  const a=new Simulation(zero,99172),b=new IntegritySimulation(nullBundle,99172);
   for(let i=0;i<50;i++){a.step(0.02);b.step(0.02);}
   near(a.ants[0].x,b.ants[0].x,1e-12);near(a.ants[0].y,b.ants[0].y,1e-12);angleNear(a.ants[0].heading,b.ants[0].heading,1e-12);
   assert.strictEqual(a.ants[0].rng.state,b.ants[0].rng.state);
@@ -117,7 +118,7 @@ assert.strictEqual(cfg.kappa,0.5);
 {
   const k0=h5Bundle();k0.model.heading_restoration.effect.kappa_restore_per_s=0;
   const nullBundle=clone(k0);nullBundle.model.heading_restoration.enabled=false;
-  const a=new Simulation(k0,55391),b=new Simulation(nullBundle,55391);
+  const a=new Simulation(k0,55391),b=new IntegritySimulation(nullBundle,55391);
   for(let i=0;i<50;i++){a.step(0.02);b.step(0.02);}
   near(a.ants[0].x,b.ants[0].x,1e-12);near(a.ants[0].y,b.ants[0].y,1e-12);angleNear(a.ants[0].heading,b.ants[0].heading,1e-12);
   assert.strictEqual(a.ants[0].rng.state,b.ants[0].rng.state);
