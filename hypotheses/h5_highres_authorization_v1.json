@@ -10,7 +10,6 @@
   "policy_git_blob_sha": "ead45bacff89bf626deaaf3238a5c363b74279d1",
   "estimator_file": "tools/run-h5-estimation.js",
   "estimator_git_blob_sha": "7d4a68f024c09c111a38088be2c943b7de74b464",
-  "qualified_estimator_merge_commit": "5c99c9e339582594597b21c2f34d1421e5802a21",
   "qualification_report": {
     "file": "reports/h5_estimator_qualification_v1.json",
     "git_blob_sha": "da5afe375fccb54e38b9bf3ef6d9879e2e03270d",
@@ -19,13 +18,6 @@
     "reference_outcomes_accessed": false,
     "ymaze_accessed": false,
     "scientific_evidence": false
-  },
-  "merged_main_verification": {
-    "commit": "5c99c9e339582594597b21c2f34d1421e5802a21",
-    "workflow": "Test and deploy ANTLAB",
-    "run_id": 33946221387,
-    "test_job_id": 101252682455,
-    "test_job_conclusion": "success"
   },
   "chromium_qualification_audits": [
     {
@@ -89,6 +81,16 @@
   "authorization_gate_hardening": {
     "main_branch_required": true,
     "rule": "When effective_when_merged_to_main is true, the estimator CLI rejects high-resolution execution unless the current execution branch is main.",
-    "reason": "Prevents the presence of this authorization file on its review branch from making the official search executable before merge."
-  }
+    "reason": "Prevents the presence of this authorization file on its review branch from making the official search executable before merge.",
+    "provenance_note": "The hardened estimator differs from the previously qualified estimator only by enforcement of the main-branch authorization boundary; simulation, scoring, search mapping, seeds, and candidate generation are unchanged. Reference-free qualification was rerun exactly after hardening."
+  },
+  "authorization_pr_base_main_commit": "5c99c9e339582594597b21c2f34d1421e5802a21",
+  "pre_hardening_main_verification": {
+    "commit": "5c99c9e339582594597b21c2f34d1421e5802a21",
+    "workflow": "Test and deploy ANTLAB",
+    "run_id": 33946221387,
+    "test_job_id": 101252682455,
+    "test_job_conclusion": "success"
+  },
+  "post_merge_execution_precondition": "Before the official high-resolution run, verify the permanent Test and deploy ANTLAB workflow succeeds on the merge commit that places this hardened estimator and authorization record on main."
 }
