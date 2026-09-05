@@ -4,6 +4,8 @@ const h5e=require('../tools/run-h5-estimation.js');
 const h4e=require('../tools/run-h4-estimation.js');
 const root=path.resolve(__dirname,'..');
 const pinned=h5e.assertExactPolicyBlob(root),policy=pinned.policy;
+assert.strictEqual(h5e.gitBlobShaFile(path.join(root,'tools','run-h5-estimation.js')),'e3172bb051de3fab350a7a63746d3e870fbaa0fc','qualified H5 estimator blob drifted');
+assert.strictEqual(h5e.gitBlobShaFile(path.join(root,'reports','h5_estimator_qualification_v1.json')),'8ee978588c97d56a9660693bc08ed4ba0600d961','H5 qualification report blob drifted');
 assert.strictEqual(pinned.sha,h5e.POLICY_GIT_BLOB_SHA);
 h5e.assertPolicySemantics(policy);
 const runtime=h5e.assertFrozenRuntimeBlobs(root),refs=h5e.assertFrozenReferenceComparatorBlobs(root);
