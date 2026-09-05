@@ -1,4 +1,5 @@
 name: H5 policy Chromium audit
+# registration trigger
 on:
   push:
     branches: [h5-parameter-estimation-policy-v1]
