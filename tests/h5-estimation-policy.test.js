@@ -68,7 +68,7 @@ if(fs.existsSync(path.join(root,'tools/run-h5-estimation.js'))){
 }
 const browserHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(!browserHtml.includes('H5 has no frozen estimator policy'),'browser status must not claim the H5 estimator policy is absent');
-assert.ok(browserHtml.includes('H5 estimator policy frozen'),'browser status must reflect the policy freeze');
+assert.ok(browserHtml.includes('H5 estimator qualified')||browserHtml.includes('H5 estimator policy frozen'),'browser status must reflect the frozen-or-qualified H5 estimator state');
 
 const h5=decision.hypotheses.find(x=>x.id==='H5_transient_entry_heading_restoration');
 assert.ok(h5);
