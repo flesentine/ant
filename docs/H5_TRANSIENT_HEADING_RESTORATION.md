@@ -13,7 +13,7 @@ C0 = 1 - exp(-L / lambda_commitment)
 dC/dt = -C / tau_commitment
 ```
 
-After the normal shared entry transition is sampled, H5 stores the ant's **own realized free-arena entry heading** as `theta_ref`. It then adds deterministic circular restoring drift:
+After the normal shared entry transition is fully resolved, H5 stores the ant's **own realized free-arena entry heading** as `theta_ref`. Concretely, `theta_ref` is captured lazily immediately before the first free-arena physics step, not in the constructor. It then adds deterministic circular restoring drift while the ant is moving:
 
 ```text
 dtheta =
@@ -21,13 +21,13 @@ dtheta =
   + sigma0 * turnScale * dW_t
 ```
 
-The angular-noise coefficient is unchanged. Speed is unchanged. Pauses are unchanged. H5 creates no new random-number stream.
+The angular-noise coefficient is unchanged. Speed is unchanged. H5 creates no new random-number stream. During a baseline pause, H5 applies no heading drift; heading remains fixed while `C` continues to decay in real time.
 
 ## Critical anti-cheating rule
 
 `theta_ref` is not the arena centerline, an exit bearing, or a fixed apparatus "forward" direction. It is the heading the simulated ant actually has **after** the shared post-toothpick entry transition.
 
-Short and long conditions therefore use the same entry-state distribution. History changes only the strength of restoration around each ant's own realized entry heading.
+Short and long conditions therefore use the same entry-state distribution. History changes only the strength of restoration around each ant's own realized entry heading. The lazy first-step capture is required because the current shared `q` transition can be applied after `Simulation` construction; constructor-time capture would remember the wrong heading.
 
 This keeps H5 distinct from H1, which would require genuinely measured treatment-specific entry-state distributions.
 
@@ -53,7 +53,7 @@ tan(delta(t)/2)
           * (1 - exp(-t/tau_commitment))]
 ```
 
-The implementation must reproduce this identity in a deterministic regression. This prevents H5 from silently turning into an arbitrary per-tick steering rule.
+The implementation must reproduce this identity in a deterministic uninterrupted-moving regression. This prevents H5 from silently turning into an arbitrary per-tick steering rule. Paused intervals are excluded from this identity because H5 applies no drift while paused, although `C` continues to decay.
 
 ## Frozen engineering reachability values
 
@@ -107,3 +107,14 @@ H5  -> mechanism frozen; not implemented; not searched
 ```
 
 The canonical ant remains unchanged, and the Y-maze remains locked.
+
+
+## Pre-implementation freeze review clarification
+
+Before any H5 code was written, review of the current runtime exposed two implementation ambiguities and one event-timing edge case. They are now part of the freeze:
+
+- `theta_ref` is captured **at the first physics step**, after all shared entry-transition logic, so a shared `q` transition applied after construction is correctly remembered.
+- H5 restoring drift runs **only on moving intervals**. Baseline pauses keep heading fixed while `C` decays in real time.
+- If an apparatus-boundary termination occurs partway through a step, the reported final `C` must be advanced only to that exact terminal event time.
+
+These clarifications were made before H5 implementation and before any H5 estimator or parameter search. They do not change the frozen engineering reachability values or introduce outcome-dependent tuning.

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "H5_transient_entry_heading_restoration_v1",
   "status": "post_outcome_mechanism_freeze_before_implementation_or_parameter_search",
   "honesty_note": "The Poissonnier 2026 open-arena outcome and the frozen failures of H2-v1, H3-v1, and H4-v1 were known before H5 was specified. This is not a blind preregistration. It freezes a substantively different deterministic heading-drift mechanism before H5 implementation or H5 parameter search.",
@@ -29,7 +29,7 @@
       "recent_constrained_travel_mm"
     ],
     "realized_entry_state": [
-      "actual ant heading at free-arena start after the shared entry transition"
+      "actual ant heading immediately before the first free-arena physics step, after the shared entry transition"
     ],
     "note": "The realized entry heading is the ant's own initial condition, not a treatment label or fitted treatment-specific distribution."
   },
@@ -52,8 +52,9 @@
     "speed_process": "unchanged from the context-free baseline",
     "pause_process": "unchanged from the context-free baseline",
     "angular_noise_process": "dtheta_noise = sigma0 * turnScale * dW_t, with sigma0 and turnScale not modified by H5",
-    "entry_transition": "The existing shared post-toothpick entry transition is sampled first. H5 captures theta_ref only after that shared transition has produced the ant's realized free-arena entry heading.",
-    "target_rule": "theta_ref is frozen to that realized heading for the trial. It may not be replaced by a geometry-derived direction, centerline bearing, or treatment-specific target."
+    "entry_transition": "The existing shared post-toothpick entry transition and any permitted shared pre-step heading manipulation are completed first. H5 captures theta_ref lazily immediately before the first free-arena physics step.",
+    "target_rule": "theta_ref is the ant's realized heading immediately before the first free-arena physics step. It is captured once, after all shared entry-transition logic, and frozen for the trial. It may not be replaced by a geometry-derived direction, centerline bearing, treatment-specific target, or constructor-time heading that precedes the shared entry transition.",
+    "pause_semantics": "H5 restoring drift is part of moving heading dynamics only. If the baseline pause process consumes a step, heading is unchanged by H5 during that paused interval. C still decays in real wall-clock time during pauses."
   },
   "latent_state": {
     "name": "heading_commitment",
@@ -64,10 +65,10 @@
     ],
     "initialization": "C0 = 1 - exp(-L / lambda_commitment_mm), where L is recent_constrained_travel_mm.",
     "decay": "dC/dt = -C / tau_commitment_s; exact update C(t+dt)=C(t)*exp(-dt/tau_commitment_s).",
-    "remembered_reference": "theta_ref = the ant's realized heading at free-arena start after the shared entry transition; theta_ref remains fixed while C decays.",
-    "behavioral_effect": "dtheta_drift/dt = kappa_restore_per_s * C(t) * sin(theta_ref - theta(t)).",
-    "full_heading_process": "dtheta = kappa_restore_per_s * C(t) * sin(theta_ref - theta) dt + sigma0 * turnScale * dW_t.",
-    "deterministic_drift_identity": "With angular noise disabled and delta = theta - theta_ref, tan(delta(t)/2) = tan(delta(0)/2) * exp[-kappa_restore_per_s * C0 * tau_commitment_s * (1 - exp(-t/tau_commitment_s))]. This identity is a required implementation regression, not a fitting equation.",
+    "remembered_reference": "theta_ref = the ant's realized heading immediately before the first free-arena physics step, captured lazily after all shared entry-transition logic; theta_ref then remains fixed while C decays.",
+    "behavioral_effect": "While the ant is moving, dtheta_drift/dt = kappa_restore_per_s * C(t) * sin(theta_ref - theta(t)). During pauses, H5 applies no heading drift.",
+    "full_heading_process": "Moving intervals: dtheta = kappa_restore_per_s * C(t) * sin(theta_ref - theta) dt + sigma0 * turnScale * dW_t. Paused intervals: theta is unchanged while C continues exact exponential decay in real time.",
+    "deterministic_drift_identity": "For an uninterrupted moving interval with angular noise disabled and delta = theta - theta_ref, tan(delta(t)/2) = tan(delta(0)/2) * exp[-kappa_restore_per_s * C0 * tau_commitment_s * (1 - exp(-t/tau_commitment_s))]. This identity is a required implementation regression, not a fitting equation.",
     "parameter_constraints": {
       "lambda_commitment_mm": "> 0",
       "tau_commitment_s": "> 0",
@@ -171,11 +172,24 @@
       "protocol/state cannot inject C, theta_ref, or H5 biological parameters",
       "no centerline, edge bearing, or fixed apparatus axis is read by the H5 mechanism",
       "same H5 biological model hash in short and long assays",
-      "observation/logging changes do not perturb H5 biological trajectories"
+      "observation/logging changes do not perturb H5 biological trajectories",
+      "constructor-time heading is not prematurely captured: a permitted shared heading change made after construction but before the first physics step becomes theta_ref",
+      "paused intervals apply no H5 heading drift while C continues real-time exponential decay",
+      "apparatus-boundary partial-step termination advances final C only to the exact event time"
     ]
   },
   "evidence_notes": {
     "mechanism_status": "The proposed history-dependent entry-heading commitment is a candidate mechanism, not an established biological fact.",
     "representation_status": "The circular restoring-drift equation is chosen as a minimal falsifiable mechanism class that differs from prior H2/H3/H4 interventions. Biological interpretation must remain provisional unless independent trajectory evidence supports it."
+  },
+  "freeze_review_amendment": {
+    "status": "pre_implementation_clarification_before_any_H5_code_or_parameter_search",
+    "reason": "Code review of the existing runtime found two ambiguities that had to be resolved before implementation: the shared q entry transition is currently applied after Simulation construction, and the baseline heading process is inactive during pauses.",
+    "resolutions": [
+      "theta_ref is captured lazily at the start of the first free-arena physics step, after all shared entry-transition logic and any permitted pre-step heading manipulation are complete.",
+      "H5 restoring drift is active only during moving dynamics. During pauses, heading remains fixed exactly as in the baseline while C continues its real-time exponential decay.",
+      "If an apparatus-boundary event occurs inside a physics step, C is advanced only to the exact terminal event time for final latent-state reporting."
+    ],
+    "scientific_effect": "These are implementation-semantics clarifications only. No outcome data, parameter values, search bounds, estimator policy, or promotion rule was added or changed."
   }
 }
