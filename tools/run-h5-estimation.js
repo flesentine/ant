@@ -335,7 +335,7 @@ function runLoco({policy,inputs,count,trials,evalTrials,seed0,evidence}){
       H5_wins_vs_H3_v1:summaries.H3_v1.wins,median_relative_improvement_vs_H3_v1:summaries.H3_v1.median,H3_pairwise_guard_passed:pairPass.H3,
       H5_wins_vs_H4_v1:summaries.H4_v1.wins,median_relative_improvement_vs_H4_v1:summaries.H4_v1.median,H4_pairwise_guard_passed:pairPass.H4,
       H5_wins_vs_best_prior:summaries.best_prior.wins,median_relative_improvement_vs_best_prior:summaries.best_prior.median,best_prior_guard_passed:bestPass,
-      development_preferred:H5=>undefined, // replaced below
+      development_preferred:null,
       canonical_promotion:false
     }
   };
