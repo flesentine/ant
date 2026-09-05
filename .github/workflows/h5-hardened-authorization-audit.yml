@@ -1,5 +1,5 @@
 name: H5 hardened authorization Chromium audit
-# rerun trigger after hardened test fix
+# rerun trigger after provenance correction
 on:
   push:
     branches: [h5-highres-authorization-v1]
@@ -18,7 +18,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object hypotheses/h5_highres_authorization_v1.json)" = "8741ebfff852d85b319ded5dd45f282d06f2c45e"
+          test "$(git hash-object hypotheses/h5_highres_authorization_v1.json)" = "62456b0f3d87313d0208a4254c380b3f284c8b1e"
           test "$(git hash-object hypotheses/h5_parameter_estimation_v1.json)" = "ead45bacff89bf626deaaf3238a5c363b74279d1"
           test "$(git hash-object tools/run-h5-estimation.js)" = "7d4a68f024c09c111a38088be2c943b7de74b464"
           test "$(git hash-object reports/h5_estimator_qualification_v1.json)" = "da5afe375fccb54e38b9bf3ef6d9879e2e03270d"
