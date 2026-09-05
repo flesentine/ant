@@ -1,0 +1,50 @@
+name: Build H5 result freeze
+on:
+  push:
+    branches: [h5-result-freeze-v1]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  freeze:
+    if: "!contains(github.event.head_commit.message, '[h5-freeze-built]')"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout result-freeze branch
+        uses: actions/checkout@v4
+        with:
+          ref: h5-result-freeze-v1
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download official H5 result
+        uses: actions/download-artifact@v4
+        with:
+          name: h5-500x60-loco-official-result
+          path: /tmp/h5-official
+          github-token: ${{ github.token }}
+          run-id: 33947883644
+      - name: Install result and close execution path
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPORT=/tmp/h5-official/h5_parameter_estimation_500x60_v1.json
+          test -f "$REPORT"
+          test "$(sha256sum "$REPORT" | awk '{print $1}')" = "28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053"
+          test "$(git hash-object "$REPORT")" = "1fcdb357e1755b5ba5cb4be6ee8b69db617e732d"
+          cp "$REPORT" reports/h5_parameter_estimation_500x60_v1.json
+          mkdir -p hypotheses/archive
+          test "$(git hash-object hypotheses/h5_highres_authorization_v1.json)" = "24b3c422f40bc4c44437995eff81ecdfd104ca34"
+          mv hypotheses/h5_highres_authorization_v1.json hypotheses/archive/h5_highres_authorization_v1.json
+          test "$(git hash-object hypotheses/archive/h5_highres_authorization_v1.json)" = "24b3c422f40bc4c44437995eff81ecdfd104ca34"
+          rm -f .github/workflows/h5-official-highres.yml
+          rm -f .github/workflows/h5-result-freeze-build.yml
+          ./tests/run-tests.sh
+          git config user.name "ANTLAB result freeze"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Freeze official H5 failure result [h5-freeze-built]"
+          git push origin HEAD:h5-result-freeze-v1
