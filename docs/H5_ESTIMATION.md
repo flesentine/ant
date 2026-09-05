@@ -151,10 +151,10 @@ The Y-maze remains locked throughout H5 development estimation.
 
 Estimator v1 is implemented and qualified.
 
-- estimator Git blob: `e3172bb051de3fab350a7a63746d3e870fbaa0fc`
+- estimator Git blob: `7d4a68f024c09c111a38088be2c943b7de74b464`
 - qualification report: `reports/h5_estimator_qualification_v1.json`
-- qualification report Git blob: `8ee978588c97d56a9660693bc08ed4ba0600d961`
-- qualification report SHA-256: `c65b2c67d00fc9ef9e6de2be8d45bd446ae0f9aa1928bc0e71aa949a0871cd97`
+- qualification report Git blob: `da5afe375fccb54e38b9bf3ef6d9879e2e03270d`
+- qualification report SHA-256: `29565eb5f2f67cf8e480def5a0dc1a677795b06e97873b03fbaadf7ed48dc66c`
 - status: **PASS**
 - Poissonnier outcomes semantically loaded during qualification: **NO**
 - Y-maze accessed: **NO**
@@ -169,10 +169,10 @@ The separate post-qualification authorization record now exists at `hypotheses/h
 
 Authorization record:
 - `hypotheses/h5_highres_authorization_v1.json`
-- Git blob: `d3d2d61dab1337c321e9a3bf0eaae704ef152706`
+- Git blob: `8741ebfff852d85b319ded5dd45f282d06f2c45e`
 - status: **qualified estimator authorized for frozen high-resolution search**
-- qualified estimator: `e3172bb051de3fab350a7a63746d3e870fbaa0fc`
-- qualification report: `8ee978588c97d56a9660693bc08ed4ba0600d961`
+- qualified estimator: `7d4a68f024c09c111a38088be2c943b7de74b464`
+- qualification report: `da5afe375fccb54e38b9bf3ef6d9879e2e03270d`
 - merged estimator commit: `5c99c9e339582594597b21c2f34d1421e5802a21`
 - merged-main test run: `33946221387` / PASS
 - repeated Chromium audit run: `33945941452`, attempts 1 and 2 / PASS
@@ -180,3 +180,5 @@ Authorization record:
 The authorization permits exactly the already-frozen H5 procedure. It does not change bounds, Halton mapping, seeds, budgets, fit observables, comparator policy, promotion guards, runtime/model pins, or Y-maze lock.
 
 No official H5 high-resolution result exists yet. The next step after this authorization is merged is one official execution of the frozen 500×60×6 LOCO search, followed immediately by freezing the complete result before interpretation.
+
+Authorization hardening: because the authorization record is present on its review branch before merge, the estimator now enforces `main` as the execution branch whenever `effective_when_merged_to_main=true`. Thus the review branch can validate authorization semantics but cannot launch the official high-resolution run.
