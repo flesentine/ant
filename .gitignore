@@ -1,3 +1,5 @@
 benchmark-results.json
 .DS_Store
 reference/materialized/
+__pycache__/
+*.pyc
