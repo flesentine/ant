@@ -1,0 +1,172 @@
+name: P1 v0.3.3c second audit
+on:
+  push:
+    branches: [v0.3.3c-p1-implementation-reachability]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact frozen P1 chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p1_painted_trail_mechanism_v1.json)" = "90e86bce29bf45c6e390f7046a6c25a74f409c78"
+          test "$(git hash-object hypotheses/p1_reachability_execution_v1.json)" = "282a95ec6761acd8d94163b25f712f191181f2ff"
+          test "$(git hash-object hypotheses/p1_implementation_authorization_v1.json)" = "f9fbaeb63c72de7a639d54b597f5c1247d354e20"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_painted_trail_p1_v1.json)" = "73873fd6763838423ca27648136bb0b9ff062817"
+          test "$(git hash-object apparatus/poissonnier2026_open_arena_p1_v1.json)" = "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4"
+          test "$(git hash-object experiments/open_arena_p1_zero_dose_reachability.json)" = "6e47fa91143ed5d4d2b52bf2c555246b7d216297"
+          test "$(git hash-object experiments/open_arena_p1_nominal_dose_reachability.json)" = "8232d378195304f2a15aa76da8abf108d94f2c58"
+          test "$(git hash-object tools/run-p1-reachability.js)" = "42f2a4c27bec95394052fd080ce58bdf70db337b"
+          test "$(git hash-object reports/p1_reference_free_reachability_v1.json)" = "5a8da255db2eb8a9e2b6dc51a7bd8d30a0e429ed"
+          test "$(sha256sum reports/p1_reference_free_reachability_v1.json | awk '{print $1}')" = "6a992cd0a19fefd5d3afbd5fc0b919c55d0b24fbeda9dc5c6d047a758e747fcb"
+          test "$(git hash-object hypotheses/p1_reachability_result_freeze_v1.json)" = "e9187ff27fb04015ded038a5f98354995455e377"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test ! -e .github/workflows/p1-official-reachability.yml
+          test ! -e .github/workflows/p1-install-reachability-result.yml
+      - name: Run full H0-H5 plus P1 suite
+        run: ./tests/run-tests.sh
+      - name: Deep stepwise runtime audit
+        shell: bash
+        run: |
+          mkdir -p /tmp/p1-second-final
+          node - <<'NODE'
+          const fs=require('fs');
+          const core=require('./src/sim-core.js');
+          const integrity=require('./src/integrity.js');
+          const p1=require('./src/p1.js');
+          const {loadBundle}=require('./tools/load-bundle.js');
+          const exact=(a,b,label)=>{if(!Object.is(a,b))throw new Error(label+': '+a+' != '+b);};
+          const biologyKeys=['speedFactor','pauseRemaining','baseSpeed','turnScale','pauseScale'];
+          const fullKeys=['x','y','heading','speedFactor','pauseRemaining','baseSpeed','turnScale','pauseScale','distanceTravelled','movingTime'];
+          let stepwiseSeeds=0,stepwiseComparisons=0;
+          for(let seed=1333001;seed<=1333128;seed++){
+            const bz=loadBundle('open_arena_p1_zero_dose_reachability.json',{modelId:'lasius_niger_locomotion_v1'});
+            const pz=loadBundle('open_arena_p1_zero_dose_reachability.json',{modelId:'lasius_niger_painted_trail_p1_v1'});
+            const bn=loadBundle('open_arena_p1_nominal_dose_reachability.json',{modelId:'lasius_niger_locomotion_v1'});
+            const pn=loadBundle('open_arena_p1_nominal_dose_reachability.json',{modelId:'lasius_niger_painted_trail_p1_v1'});
+            const a=new integrity.Simulation(bz,seed),b=new p1.Simulation(pz,seed),c=new integrity.Simulation(bn,seed),d=new p1.Simulation(pn,seed);
+            for(let step=0;step<150;step++){
+              a.step(.02);b.step(.02);c.step(.02);d.step(.02);
+              for(const k of fullKeys)exact(a.ants[0][k],b.ants[0][k],`zero seed ${seed} step ${step} ${k}`);
+              exact(a.ants[0].rng.state,b.ants[0].rng.state,`zero seed ${seed} step ${step} rng`);
+              exact(a.ants[0].state,b.ants[0].state,`zero seed ${seed} step ${step} state`);
+              if(b.ants[0].p1SteeringSamples!==0)throw new Error('zero-dose sensor evaluation occurred');
+              for(const k of biologyKeys)exact(c.ants[0][k],d.ants[0][k],`nominal biology seed ${seed} step ${step} ${k}`);
+              exact(c.ants[0].rng.state,d.ants[0].rng.state,`nominal biology seed ${seed} step ${step} rng`);
+              exact(c.ants[0].state,d.ants[0].state,`nominal biology seed ${seed} step ${step} state`);
+              stepwiseComparisons++;
+            }
+            stepwiseSeeds++;
+          }
+
+          // Force a pause hazard on the first step and prove the preview neither consumes RNG nor applies P1 steering.
+          let pauseSeed=null;
+          for(let seed=1;seed<=10000&&!pauseSeed;seed++){
+            const bn=loadBundle('open_arena_p1_nominal_dose_reachability.json',{modelId:'lasius_niger_locomotion_v1'});
+            const pn=loadBundle('open_arena_p1_nominal_dose_reachability.json',{modelId:'lasius_niger_painted_trail_p1_v1'});
+            bn.model.movement.pause_rate_s=50;pn.model.movement.pause_rate_s=50;
+            const a=new integrity.Simulation(bn,seed),b=new p1.Simulation(pn,seed);
+            a.step(.02);b.step(.02);
+            if(a.ants[0].state==='paused'){
+              pauseSeed=seed;
+              exact(a.ants[0].rng.state,b.ants[0].rng.state,'forced-pause rng');
+              exact(a.ants[0].pauseRemaining,b.ants[0].pauseRemaining,'forced-pause remaining');
+              exact(a.ants[0].heading,b.ants[0].heading,'forced-pause heading');
+              if(b.ants[0].p1SteeringSamples!==0)throw new Error('P1 steering applied on pause-start step');
+            }
+          }
+          if(pauseSeed==null)throw new Error('no forced pause seed found');
+
+          // Finite-segment directionlessness including endpoints and beyond them.
+          const model=require('./models/lasius_niger_painted_trail_p1_v1.json');
+          const apparatus=require('./apparatus/poissonnier2026_open_arena_p1_v1.json');
+          const cfg=p1.paintedTrailResponseConfig(model),field=p1.paintedTrailApparatusConfig(apparatus);
+          const near=(a,b,t=1e-12)=>{if(Math.abs(a-b)>t)throw new Error('near mismatch '+a+' '+b);};
+          for(const x of [-20,0,1,148.5,296,297,320]){
+            const east=p1.trailSteeringRate(x,105,0,cfg,field,1);
+            const west=p1.trailSteeringRate(x,105,Math.PI,cfg,field,1);
+            near(east.omega,0);near(west.omega,0);
+          }
+          const rev={a:field.b,b:field.a,nominalDose:field.nominalDose};
+          for(let i=0;i<500;i++){
+            const x=-40+(i%50)*8,y=60+((i*17)%90),h=-Math.PI+((i*37)%628)/100;
+            const q=p1.trailSteeringRate(x,y,h,cfg,field,1),r=p1.trailSteeringRate(x,y,h,cfg,rev,1);
+            near(q.omega,r.omega,3e-12);
+          }
+
+          const report=require('./reports/p1_reference_free_reachability_v1.json');
+          const freeze=require('./hypotheses/p1_reachability_result_freeze_v1.json');
+          if(report.structural_checks.overall_pass!==true||freeze.interpretation.response_parameter_search_authorized!==false||freeze.interpretation.ymaze_unlock_authorized!==false)throw new Error('frozen result/firewall drift');
+          const out={status:'passed',stepwise_seeds:stepwiseSeeds,stepwise_steps_per_seed:150,stepwise_comparisons:stepwiseComparisons,forced_pause_seed:pauseSeed,finite_segment_cases:507,response_search_authorized:false,ymaze_authorized:false};
+          fs.writeFileSync('/tmp/p1-second-final/deep-runtime.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));
+          NODE
+      - name: Build expanded Node parity reference
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),p1=require('./src/p1.js'),integrity=require('./src/integrity.js'),{loadBundle}=require('./tools/load-bundle.js');
+          const seeds=[1333001,1333016,1333032,1334001,1334077,1334219,1334333,1334400],cases=[];
+          for(const experiment of ['open_arena_p1_zero_dose_reachability.json','open_arena_p1_nominal_dose_reachability.json'])for(const seed of seeds){
+            const b=loadBundle(experiment,{modelId:'lasius_niger_painted_trail_p1_v1'}),sim=new p1.Simulation(b,seed),summary=sim.runUntilComplete(b.experiment.duration_s,.02),a=sim.ants[0],o=summary.observed_metrics.ants[0];
+            cases.push({experiment,seed,x:a.x,y:a.y,heading:a.heading,completedAt:a.completedAt,distance:a.distanceTravelled,rng:a.rng.state,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,state:a.state,steeringSamples:a.p1SteeringSamples,centralZone:o.central_zone_fraction,movingSpeed:o.mean_moving_speed_mm_s,time:o.time_to_arena_edge_s,exit:o.exit_coordinate_mm});
+          }
+          fs.writeFileSync('/tmp/p1-second-final/node-parity.json',JSON.stringify(cases,null,2));console.log(JSON.stringify({status:'passed',cases:cases.length}));
+          NODE
+      - name: Real Chromium expanded P1 audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p1-second-final/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p1-second-final-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p1-second-final-chrome --remote-debugging-port=9222 about:blank >/tmp/p1-second-final/chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/tmp/p1-second-final/chrome-version.json 2>/dev/null && break; sleep .2; done
+          cat >/tmp/p1-second-final/browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const refs=JSON.parse(fs.readFileSync('/tmp/p1-second-final/node-parity.json','utf8'));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+          const title=await evalv('document.title');
+          if(await evalv("typeof globalThis.AntLabP1!=='undefined'"))throw new Error('canonical browser auto-loaded P1');
+          const report=await evalv("(async()=>await (await fetch('./reports/p1_reference_free_reachability_v1.json')).json())()");
+          const freeze=await evalv("(async()=>await (await fetch('./hypotheses/p1_reachability_result_freeze_v1.json')).json())()");
+          if(report.status!=='reference_free_reachability_passed'||report.structural_checks.overall_pass!==true)throw new Error('browser report drift');
+          if(freeze.interpretation.response_parameter_search_authorized!==false||freeze.interpretation.ymaze_unlock_authorized!==false)throw new Error('browser firewall drift');
+          await evalv(`new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./src/p1.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);})`);
+          if(!(await evalv("typeof globalThis.AntLabP1==='object'")))throw new Error('P1 browser runtime failed to load');
+          const browser=await evalv(`(async()=>{const json=async p=>(await fetch(p)).json(),defs=${JSON.stringify(refs.map(x=>({experiment:x.experiment,seed:x.seed})))},out=[];for(const d of defs){const experiment=await json('./experiments/'+d.experiment);const [model,apparatus,state,observation,scoring]=await Promise.all([json('./models/'+experiment.model+'.json'),json('./apparatus/'+experiment.apparatus+'.json'),json('./states/'+experiment.state+'.json'),json('./observations/'+experiment.observation+'.json'),json('./scoring/'+experiment.scoring+'.json')]);const sim=new AntLabP1.Simulation({experiment,model,apparatus,state,observation,scoring},d.seed),summary=sim.runUntilComplete(experiment.duration_s,.02),a=sim.ants[0],o=summary.observed_metrics.ants[0];out.push({experiment:d.experiment,seed:d.seed,x:a.x,y:a.y,heading:a.heading,completedAt:a.completedAt,distance:a.distanceTravelled,rng:a.rng.state,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,state:a.state,steeringSamples:a.p1SteeringSamples,centralZone:o.central_zone_fraction,movingSpeed:o.mean_moving_speed_mm_s,time:o.time_to_arena_edge_s,exit:o.exit_coordinate_mm});}return out;})()`);
+          const near=(a,b,t=2e-10)=>{if(a==null||b==null){if(a!==b)throw new Error('null mismatch');return;}if(Math.abs(a-b)>t)throw new Error('numeric mismatch '+a+' '+b);};
+          if(browser.length!==refs.length)throw new Error('case count mismatch');
+          for(let i=0;i<refs.length;i++){const a=refs[i],b=browser[i];for(const k of ['experiment','seed','rng','state','steeringSamples'])if(a[k]!==b[k])throw new Error(k+' mismatch');for(const k of ['x','y','heading','completedAt','distance','speedFactor','pauseRemaining','centralZone','movingSpeed','time'])near(a[k],b[k]);if(a.exit==null||b.exit==null){if(a.exit!==b.exit)throw new Error('exit null mismatch');}else{near(a.exit.x,b.exit.x);near(a.exit.y,b.exit.y);}}
+          // Browser-side exact null for representative seeds, step-by-step for 100 steps.
+          const nullCheck=await evalv(`(async()=>{const json=async p=>(await fetch(p)).json(),seeds=[1333001,1333016,1333032],out=[];for(const seed of seeds){const experiment=await json('./experiments/open_arena_p1_zero_dose_reachability.json');const [pmodel,bmodel,apparatus,state,observation,scoring]=await Promise.all([json('./models/lasius_niger_painted_trail_p1_v1.json'),json('./models/lasius_niger_locomotion_v1.json'),json('./apparatus/'+experiment.apparatus+'.json'),json('./states/'+experiment.state+'.json'),json('./observations/'+experiment.observation+'.json'),json('./scoring/'+experiment.scoring+'.json')]);const pe=JSON.parse(JSON.stringify(experiment)),be=JSON.parse(JSON.stringify(experiment));be.model='lasius_niger_locomotion_v1';const p=new AntLabP1.Simulation({experiment:pe,model:pmodel,apparatus,state,observation,scoring},seed),b=new AntLabIntegrity.Simulation({experiment:be,model:bmodel,apparatus,state,observation,scoring},seed);for(let i=0;i<100;i++){p.step(.02);b.step(.02);for(const k of ['x','y','heading','speedFactor','pauseRemaining','baseSpeed','turnScale','pauseScale','distanceTravelled','movingTime'])if(!Object.is(p.ants[0][k],b.ants[0][k]))throw new Error('browser zero-null '+seed+' '+i+' '+k);if(p.ants[0].rng.state!==b.ants[0].rng.state||p.ants[0].state!==b.ants[0].state)throw new Error('browser zero-null rng/state');}out.push(seed);}return out;})()`);
+          if(nullCheck.length!==3)throw new Error('browser null panel incomplete');
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u)),targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          if(exceptions.length||consoleErrors.length||yreq.length||targetReq.length)throw new Error('browser firewall failure');
+          const out={status:'passed',title,cases:browser.length,browser_zero_null_seeds:nullCheck.length,canonical_auto_loaded_p1:false,exceptions:0,console_errors:0,ymaze_requests:0,response_target_requests:0};
+          fs.writeFileSync('/tmp/p1-second-final/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p1-second-final/browser.mjs
+      - name: Upload second P1 final audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-v033c-second-audit
+          path: /tmp/p1-second-final
+          retention-days: 30
