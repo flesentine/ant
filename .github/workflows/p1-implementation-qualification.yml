@@ -36,7 +36,7 @@ jobs:
           set -euo pipefail
           ! grep -n 'poissonnier2026_pheromone_response_targets.json' src/p1.js tools/run-p1-reachability.js
           ! grep -nEi '(loadBundle|readJson|require).{0,120}y[_-]?maze' src/p1.js tools/run-p1-reachability.js
-          ! grep -nEi 'halton|candidate[s]?_per_fold|objective_weight|adaptive refinement|local optimizer' src/p1.js tools/run-p1-reachability.js
+          ! grep -nEi 'halton|candidate[s]?_per_fold|objective_weight|adaptiveRefinement|localOptimizer|run-p1-estimation' src/p1.js tools/run-p1-reachability.js
       - name: Run full H0-H5 plus P1 implementation suite
         run: ./tests/run-tests.sh
       - name: Run low-volume P1 smoke only
