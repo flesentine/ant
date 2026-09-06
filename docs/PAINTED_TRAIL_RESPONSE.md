@@ -132,7 +132,7 @@ Mechanism record:
 
 Git blob:
 
-`e54ea73d14220a9a01e80f51c2e0970532f2ab2d`
+`90e86bce29bf45c6e390f7046a6c25a74f409c78`
 
 P1-v1 represents the painted pheromone as an **undirected external scalar field**. The ant is not given a trail bearing, line distance, arena-center target, edge target, treatment label, path-history label, or any Y-maze information.
 
@@ -220,7 +220,7 @@ Two exact identities are required:
 1. **DCM zero signal:** applied dose (A=0) gives (c_L=c_R=s_L=s_R=omega=0) exactly.
 2. **Zero response gain:** `kappa_trail_per_s=0` gives (omega=0) exactly even with a painted field.
 
-Because P1-v1 adds no RNG draws, both nulls must be bit-for-bit identical to canonical locomotion for the same seed/configuration.
+Because P1-v1 adds no RNG draws, both nulls must be bit-for-bit identical to canonical locomotion for the same seed/configuration. Implementation must take an explicit computational bypass when `A=0` or `kappa_trail_per_s=0`: no field/sensor evaluation and no trail heading addition, returning positive numeric zero rather than relying on floating-point multiplication that can produce signed `-0`.
 
 ### Structural invariances
 
