@@ -10,7 +10,7 @@ const target=read('reference/poissonnier2026_pheromone_response_targets.json');
 const calibration=read('reference/calibration_manifest.json');
 const p1cal=read('reference/p1_painted_trail_calibration_policy_v1.json');
 
-assert.strictEqual(blob('hypotheses/p1_painted_trail_response_evidence_v1.json'),'13ade699b67402cf146d653f0c6342ee8fc450fc','P1 evidence freeze blob drifted');
+assert.strictEqual(blob('hypotheses/p1_painted_trail_response_evidence_v1.json'),'db89c879906aa1f35dc1d395cc3ebbb661b218b6','P1 evidence freeze blob drifted');
 assert.strictEqual(blob('reference/poissonnier2026_pheromone_response_targets.json'),'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed','P1 target blob drifted');
 assert.strictEqual(blob('tools/derive-pheromone-response-targets.py'),'d44fee2d176eb6dcdfea625d4280059d499cf80b','P1 target generator drifted');
 assert.strictEqual(blob('reference/calibration_manifest.json'),'29044577af38dced5cccb83c687117ee878fd66c','historical calibration manifest drifted');
@@ -35,6 +35,14 @@ assert.strictEqual(freeze.response_estimation_firewall.shared_response_parameter
 assert.strictEqual(freeze.response_estimation_firewall.treatment_specific_or_path_specific_response_parameters_forbidden,true);
 assert.strictEqual(freeze.response_estimation_firewall.ymaze_access_for_fitting_ranking_stopping_or_model_selection,false);
 assert.strictEqual(freeze.response_estimation_firewall.ymaze_holdout_remains_locked,true);
+assert.strictEqual(freeze.response_observable_provenance.middle_zone_fraction.status,'article_and_supplement_defined');
+assert.strictEqual(freeze.response_observable_provenance.trail_axis_exit.status,'ANTLAB_derived_geometric_metric_not_article_reported');
+assert.strictEqual(freeze.response_observable_provenance.trail_axis_exit.frozen_before_P1_mechanism_implementation,true);
+assert.strictEqual(freeze.trail_axis_exit_geometry_audit.rows_checked,102);
+assert.strictEqual(freeze.trail_axis_exit_geometry_audit.exit_edge_mismatches,0);
+assert.strictEqual(freeze.trail_axis_exit_geometry_audit.corner_ambiguous_under_5_mm,0);
+assert(freeze.trail_axis_exit_geometry_audit.max_distance_to_assigned_border_mm<7);
+assert(freeze.trail_axis_exit_geometry_audit.min_gap_between_nearest_and_second_nearest_border_mm>9);
 assert.strictEqual(freeze.implementation_gate.chemical_sensor_code_authorized,false);
 assert.strictEqual(freeze.implementation_gate.response_parameter_search_authorized,false);
 for(const v of Object.values(freeze.not_yet_frozen))assert.strictEqual(v,true);
