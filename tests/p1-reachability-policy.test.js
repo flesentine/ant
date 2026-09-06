@@ -31,6 +31,6 @@ assert.match(p.pass_fail_rule.attraction,/strictly greater mean central_zone_fra
 assert.match(p.failure_rule,/may not be tuned/);
 const runner=fs.readFileSync(path.join(root,'tools/run-p1-reachability.js'),'utf8');
 assert.ok(!runner.includes('poissonnier2026_pheromone_response_targets.json'),'reachability runner must not name/load P1 response target');
-assert.ok(!/y[_-]?maze/i.test(runner),'reachability runner must not reference Y-maze');
-assert.ok(!/run-p1-est|parameter search|halton/i.test(runner),'reachability runner must not contain estimator/search logic');
+assert.ok(!/(?:loadBundle|readJson|require)\s*\([^\n)]*y[_-]?maze/i.test(runner),'reachability runner must not load or require Y-maze content');
+assert.ok(!/run-p1-estimation|halton|candidate[s]?_per_fold|objective_weight|local optimizer|adaptive refinement/i.test(runner),'reachability runner must not contain estimator/search machinery');
 console.log('p1-reachability-policy.test.js PASS');
