@@ -501,3 +501,75 @@ Before response-target ranking can occur, a separate estimator must be implement
 A later authorization artifact must pin the exact policy and qualified estimator before the one frozen high-resolution response search.
 
 Canonical locomotion remains unchanged. The Y-maze remains locked.
+
+
+## P1-v1 estimator implementation and qualification
+
+v0.3.3e implements the frozen response-estimator mechanics without authorizing or running the 102-row high-resolution search.
+
+Estimator:
+
+`tools/run-p1-estimation.js`
+
+Current estimator Git blob:
+
+`a307e74e8ba2366e2546eebe1a7cccac69a3ff9a`
+
+### What the estimator is allowed to do now
+
+The default qualification path may:
+
+- verify the exact frozen policy/runtime/model/apparatus chain;
+- hash-verify the frozen P1 response-target file without parsing its outcomes;
+- construct synthetic colony/path/treatment fixtures;
+- verify equal-weight colony contrast construction;
+- verify the 499-point Halton mapping plus exact null anchor;
+- verify short/long seed separation and pheromone/DCM common-random-number pairing;
+- run low-volume reference-free P1 simulation smoke;
+- prove exact DCM and `kappa=0` canonical identity.
+
+Qualification is explicitly marked:
+
+- scientific evidence: false
+- reference outcomes accessed: false
+- response-target semantics loaded: false
+- Y-maze accessed: false
+
+### Authorization boundary
+
+The semantic target loader itself is authorization-gated.
+
+`loadReferenceTarget(...)` refuses to parse the 102-row response outcomes unless the active file
+
+`hypotheses/p1_highres_authorization_v1.json`
+
+exists and pins:
+
+- this exact policy blob;
+- this exact estimator blob;
+- high-resolution response search = true;
+- canonical promotion = false;
+- Y-maze access = false.
+
+The authorization may also be marked effective only after merge to `main`; in that case branch execution is refused.
+
+The CLI high-resolution path runs synthetic qualification and authorization checks **before** the semantic target loader is called.
+
+### Frozen high-resolution implementation
+
+The estimator already implements the frozen future execution path, but it remains inaccessible until authorization:
+
+- 499 Halton candidates + one exact null anchor;
+- no nuisance parameters;
+- six LOCO folds;
+- equal-weight five-colony training contrasts;
+- held-out colony scored separately;
+- primary ranking only on middle-zone and trail-axis-exit treatment contrasts;
+- post-selection exit-time/beeline guards;
+- final all-data fit only if the 5/6 survival gate passes;
+- frozen identifiability checks;
+- no canonical locomotion update;
+- no H2-H5 refit;
+- no Y-maze access.
+
+The next gate is exact-head code + Chromium qualification, followed by a **separate** authorization artifact. The high-resolution response search is still locked.
