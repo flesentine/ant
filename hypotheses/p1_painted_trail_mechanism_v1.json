@@ -91,7 +91,7 @@
   },
   "steering": {
     "equation": "omega_trail = kappa_trail_per_s * (s_R - s_L)",
-    "update": "while moving, sample both sensors at the pre-step position/heading and add omega_trail*dt to the same heading update that receives canonical angular noise",
+    "update": "If neither exact-null bypass applies and the ant is moving, sample both sensors at the pre-step position/heading and add omega_trail*dt to the same heading update that receives canonical angular noise.",
     "sign_check": "with heading east and the trail below the ant, the right sensor is closer to the trail, s_R>s_L, omega_trail>0, and positive ANTLAB rotation turns clockwise/downward toward the trail",
     "paused_intervals": "no trail-induced heading drift while paused",
     "speed_effect": "none",
@@ -126,6 +126,13 @@
       "condition": "kappa_trail_per_s = 0",
       "consequence": "omega_trail=0 exactly even with nonzero pheromone field",
       "required_identity": "trajectory and RNG state must be bit-for-bit identical to canonical locomotion for identical seed/configuration"
+    },
+    "computational_bypass": {
+      "rule": "Before any P1 field/sensor evaluation, if applied dose A is exactly 0 OR kappa_trail_per_s is exactly 0, skip the P1 mechanism and return canonical heading dynamics with no trail addition.",
+      "returned_trail_drift": "positive numeric zero (+0) exactly",
+      "sensor_field_evaluation": "not performed on the bypass path",
+      "rng_effect": "none; no extra draws or streams",
+      "purpose": "Guarantees a computationally exact nested null rather than relying on floating-point multiplication such as 0 * negative_difference, which can produce signed -0."
     }
   },
   "structural_invariances": [
