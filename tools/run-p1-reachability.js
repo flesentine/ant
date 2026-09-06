@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),crypto=require('crypto');
+const {execFileSync}=require('child_process');
 const core=require('../src/sim-core.js');
 const integrity=require('../src/integrity.js');
 const p1=require('../src/p1.js');
@@ -10,10 +11,25 @@ const BASE_MODEL_ID='lasius_niger_locomotion_v1';
 const ZERO_EXPERIMENT='open_arena_p1_zero_dose_reachability.json';
 const NOMINAL_EXPERIMENT='open_arena_p1_nominal_dose_reachability.json';
 const POLICY_PATH='hypotheses/p1_reachability_execution_v1.json';
+const IMPLEMENTATION_PINS={
+  mechanism_freeze:'90e86bce29bf45c6e390f7046a6c25a74f409c78',
+  execution_policy:'282a95ec6761acd8d94163b25f712f191181f2ff',
+  implementation_authorization:'f9fbaeb63c72de7a639d54b597f5c1247d354e20',
+  runtime:'f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca',
+  model:'73873fd6763838423ca27648136bb0b9ff062817',
+  apparatus:'df589d6b39c1617a7dedc3bfa9d34a408c51b2f4',
+  zero_experiment:'6e47fa91143ed5d4d2b52bf2c555246b7d216297',
+  nominal_experiment:'8232d378195304f2a15aa76da8abf108d94f2c58',
+  canonical_model:'2fde196d6c8a9353c1c8c206d4fcef223e92ad1d',
+  sim_core:'24777aac3577d442893e4779d70aee4e27761fe8',
+  integrity:'f23c68a6955832b70eeb3bd3e6893d71a3759018'
+};
 
 function clone(v){return JSON.parse(JSON.stringify(v));}
 function mean(xs){const v=xs.filter(Number.isFinite);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
 function sha256File(p){return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');}
+function gitBlobFile(root,rel){return execFileSync('git',['hash-object',rel],{cwd:root,encoding:'utf8'}).trim();}
+function gitHead(root){return execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();}
 function sameNumber(a,b){return Object.is(a,b);}
 function assertExactAntIdentity(a,b,label){
   const keys=['x','y','heading','speedFactor','pauseRemaining','baseSpeed','turnScale','pauseScale','distanceTravelled','movingTime'];
@@ -35,13 +51,27 @@ function exitEdge(ex,world){
 }
 function validateFrozenInputs(root,policy,model,base,apparatus){
   if(policy.id!=='P1_reference_free_reachability_execution_v1'||policy.status!=='execution_policy_frozen_before_P1_runtime_execution')throw new Error('Unexpected P1 reachability execution policy.');
-  if(policy.mechanism_freeze.git_blob_sha!=='90e86bce29bf45c6e390f7046a6c25a74f409c78')throw new Error('P1 mechanism freeze pin drifted.');
+  if(policy.mechanism_freeze.git_blob_sha!==IMPLEMENTATION_PINS.mechanism_freeze)throw new Error('P1 mechanism freeze pin drifted.');
   if(policy.reference_firewall.poissonnier2026_pheromone_response_targets_may_be_loaded!==false||policy.reference_firewall.any_reference_outcomes_may_be_loaded!==false||policy.reference_firewall.ymaze_may_be_loaded!==false||policy.reference_firewall.fit_or_parameter_search!==false)throw new Error('P1 reference firewall is not closed.');
   const cfg=p1.paintedTrailResponseConfig(model),field=p1.paintedTrailApparatusConfig(apparatus),eng=policy.frozen_execution.engineering_values;
   if(model.id!==MODEL_ID)throw new Error('Unexpected P1 model id.');
   if(JSON.stringify(model.movement)!==JSON.stringify(base.movement))throw new Error('P1 movement block must exactly match canonical locomotion.');
-  if(model.provenance.mechanism_freeze_git_blob_sha!=='90e86bce29bf45c6e390f7046a6c25a74f409c78')throw new Error('P1 model mechanism pin drifted.');
-  if(model.provenance.reachability_execution_freeze_git_blob_sha!=='282a95ec6761acd8d94163b25f712f191181f2ff')throw new Error('P1 model execution-policy pin drifted.');
+  if(model.provenance.mechanism_freeze_git_blob_sha!==IMPLEMENTATION_PINS.mechanism_freeze)throw new Error('P1 model mechanism pin drifted.');
+  if(model.provenance.reachability_execution_freeze_git_blob_sha!==IMPLEMENTATION_PINS.execution_policy)throw new Error('P1 model execution-policy pin drifted.');
+  const filePins={
+    'hypotheses/p1_painted_trail_mechanism_v1.json':IMPLEMENTATION_PINS.mechanism_freeze,
+    'hypotheses/p1_reachability_execution_v1.json':IMPLEMENTATION_PINS.execution_policy,
+    'hypotheses/p1_implementation_authorization_v1.json':IMPLEMENTATION_PINS.implementation_authorization,
+    'src/p1.js':IMPLEMENTATION_PINS.runtime,
+    'models/lasius_niger_painted_trail_p1_v1.json':IMPLEMENTATION_PINS.model,
+    'apparatus/poissonnier2026_open_arena_p1_v1.json':IMPLEMENTATION_PINS.apparatus,
+    'experiments/open_arena_p1_zero_dose_reachability.json':IMPLEMENTATION_PINS.zero_experiment,
+    'experiments/open_arena_p1_nominal_dose_reachability.json':IMPLEMENTATION_PINS.nominal_experiment,
+    'models/lasius_niger_locomotion_v1.json':IMPLEMENTATION_PINS.canonical_model,
+    'src/sim-core.js':IMPLEMENTATION_PINS.sim_core,
+    'src/integrity.js':IMPLEMENTATION_PINS.integrity
+  };
+  for(const[rel,expected]of Object.entries(filePins)){const actual=gitBlobFile(root,rel);if(actual!==expected)throw new Error(`P1 reachability provenance drift: ${rel} ${actual} != ${expected}`);}
   if(cfg.sigma!==eng.sigma_field_mm||cfg.kappa!==eng.kappa_trail_per_s||cfg.forward!==eng.sensor_forward_offset_mm||cfg.half!==eng.sensor_lateral_half_separation_mm)throw new Error('P1 model does not match frozen engineering values.');
   if(Math.abs(field.nominalDose-0.0048)>1e-15)throw new Error('P1 nominal apparatus dose drifted.');
   if(JSON.stringify(field.a)!==JSON.stringify({x:0,y:105})||JSON.stringify(field.b)!==JSON.stringify({x:297,y:105}))throw new Error('P1 trail geometry drifted.');
@@ -134,11 +164,16 @@ function runP1Reachability({root=path.resolve(__dirname,'..')}={}){
     status:checks.overall_pass?'reference_free_reachability_passed':'reference_free_reachability_failed',
     mechanism_id:'P1_egocentric_painted_trail_gradient_steering_v1',
     model_id:MODEL_ID,
-    mechanism_freeze_git_blob_sha:'90e86bce29bf45c6e390f7046a6c25a74f409c78',
-    reachability_execution_policy_git_blob_sha:'282a95ec6761acd8d94163b25f712f191181f2ff',
-    runtime_git_blob_sha:null,
-    model_git_blob_sha:null,
-    apparatus_git_blob_sha:null,
+    mechanism_freeze_git_blob_sha:IMPLEMENTATION_PINS.mechanism_freeze,
+    reachability_execution_policy_git_blob_sha:IMPLEMENTATION_PINS.execution_policy,
+    implementation_authorization_git_blob_sha:IMPLEMENTATION_PINS.implementation_authorization,
+    runtime_git_blob_sha:gitBlobFile(root,'src/p1.js'),
+    model_git_blob_sha:gitBlobFile(root,'models/lasius_niger_painted_trail_p1_v1.json'),
+    apparatus_git_blob_sha:gitBlobFile(root,'apparatus/poissonnier2026_open_arena_p1_v1.json'),
+    zero_experiment_git_blob_sha:gitBlobFile(root,'experiments/open_arena_p1_zero_dose_reachability.json'),
+    nominal_experiment_git_blob_sha:gitBlobFile(root,'experiments/open_arena_p1_nominal_dose_reachability.json'),
+    reachability_runner_git_blob_sha:gitBlobFile(root,'tools/run-p1-reachability.js'),
+    execution_repo_commit:gitHead(root),
     fit_performed:false,
     parameter_search_performed:false,
     reference_targets_accessed:false,
@@ -168,4 +203,4 @@ if(require.main===module){
   console.log(`Saved ${out}`);
   if(!report.structural_checks.overall_pass)process.exitCode=2;
 }
-module.exports={MODEL_ID,BASE_MODEL_ID,ZERO_EXPERIMENT,NOMINAL_EXPERIMENT,validateFrozenInputs,exactIdentityPanel,invariancePanel,runAttractionCondition,summarizeAttraction,runP1Reachability};
+module.exports={MODEL_ID,BASE_MODEL_ID,ZERO_EXPERIMENT,NOMINAL_EXPERIMENT,IMPLEMENTATION_PINS,validateFrozenInputs,exactIdentityPanel,invariancePanel,runAttractionCondition,summarizeAttraction,runP1Reachability};
