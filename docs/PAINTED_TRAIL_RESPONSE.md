@@ -49,14 +49,14 @@ Six colonies are represented: 0, 7, 16, 20, 21, 27.
 Primary response observables:
 
 - `middle_zone_fraction`
-- `trail_axis_exit` — whether first border contact occurred on the left/right trail axis rather than top/bottom
+- `trail_axis_exit` — whether first border contact occurred on the left/right trail axis rather than top/bottom. This is an **ANTLAB-derived geometric metric**, frozen before P1 mechanism implementation; it is not an article-reported outcome.
 
 Secondary guard observables:
 
 - `time_to_exit_s`
 - `beeline_mm`
 
-The response target also retains the four-way `exit_edge` category.
+The response target also retains the four-way `exit_edge` category. A source-XLSX geometry audit found 0 edge-label mismatches, 0 endpoints ambiguous within 5 mm of a competing border, a maximum endpoint-to-assigned-border distance of 6.59 mm, and a minimum nearest-vs-second-nearest border gap of 9.15 mm.
 
 The following remain forbidden fitting targets because they depend on unresolved AnimalTA movement classification or would reopen locomotion fitting:
 
