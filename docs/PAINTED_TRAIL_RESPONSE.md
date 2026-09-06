@@ -411,3 +411,91 @@ The future response parameter surface remains exactly:
 - `kappa_trail_per_s`
 
 The estimator policy must freeze bounds, objective/contrast construction, nuisance handling, folds, seeds, search budget, and promotion guards before search. Canonical locomotion remains unchanged and the Y-maze remains locked.
+
+
+## P1-v1 response-estimation policy freeze
+
+v0.3.3d freezes the response-estimation procedure before any P1 target-ranked candidate search.
+
+Policy:
+
+`hypotheses/p1_response_estimation_v1.json`
+
+Git blob:
+
+`50e00ed729d5f8421f55dcd763f27899f9f2fc8b`
+
+### Estimated response surface
+
+Exactly two P1 quantities may be estimated:
+
+- `sigma_field_mm`: 2–32 mm, log scale
+- `kappa_trail_per_s`: 0–16 s⁻¹, linear scale
+
+There are **no nuisance parameters**. Canonical angular diffusion, speed, pauses, entry state, H2–H5, P1 sensor geometry, transduction, apparatus, and observation behavior remain fixed.
+
+The bounds were frozen from the pre-search engineering scale: sigma spans a factor of four below/above the 8 mm reachability value, and kappa extends from the exact zero-gain null to four times the 4 s⁻¹ reachability value. They were not chosen by target-ranked search.
+
+### Frozen contrast objective
+
+Candidate ranking uses only the two primary response observables:
+
+- middle-zone fraction
+- trail-axis exit probability
+
+For each short/long path stratum separately:
+
+```text
+Delta_ref = reference pheromone summary - reference DCM summary
+Delta_sim = simulated pheromone summary - simulated DCM summary
+```
+
+The primary loss is the equal-weight mean squared error over the four path × primary-observable treatment contrasts.
+
+No short-minus-long quantity is a P1 fitting target. No pooled treatment contrast may erase the path strata.
+
+Secondary guards remain:
+
+- exit time
+- beeline distance
+
+They cannot rank or select candidates. They are checked only after selection.
+
+### Frozen search and validation
+
+Per leave-one-colony-out fold:
+
+- six colonies / six folds
+- 499 deterministic two-dimensional Halton candidates
+- one exact `kappa=0` null anchor
+- 500 candidates total
+- 60 training trials per treatment × path × candidate
+- 120 held-out evaluation trials per treatment × path
+- matched pheromone/DCM common random numbers
+- fixed fit/evaluation seed streams
+- no adaptive refinement
+
+The exact null anchor is `sigma=8 mm, kappa=0`; sigma is inert under the frozen bypass.
+
+P1 survives internal development only if it beats the exact null in at least **5/6 held-out folds** and has strictly positive median relative held-out improvement.
+
+If that guard passes, a final all-102-row fit uses the same frozen candidate panel, followed by an independent simulation-only final-check panel. Identifiability and secondary-observable guards must also pass before a fixed P1 response pair can be eligible for a later v0.4 freeze.
+
+### Current authorization state
+
+This policy freeze does **not** implement an estimator and does **not** authorize the high-resolution response search.
+
+Before response-target ranking can occur, a separate estimator must be implemented and qualified for:
+
+- exact DCM and `kappa=0` canonical identity
+- contrast construction
+- Halton mapping and null anchor
+- fold isolation
+- common-random-number seed pairing
+- target/Y-maze firewalls
+- full regression suite
+- Node ↔ real-Chromium parity
+
+A later authorization artifact must pin the exact policy and qualified estimator before the one frozen high-resolution response search.
+
+Canonical locomotion remains unchanged. The Y-maze remains locked.
