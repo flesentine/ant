@@ -8,17 +8,21 @@ const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).t
 const freeze=read('hypotheses/p1_painted_trail_response_evidence_v1.json');
 const target=read('reference/poissonnier2026_pheromone_response_targets.json');
 const calibration=read('reference/calibration_manifest.json');
+const p1cal=read('reference/p1_painted_trail_calibration_policy_v1.json');
 
-assert.strictEqual(blob('hypotheses/p1_painted_trail_response_evidence_v1.json'),'afa3257468f7290a277c888276b671119e2be169','P1 evidence freeze blob drifted');
+assert.strictEqual(blob('hypotheses/p1_painted_trail_response_evidence_v1.json'),'13ade699b67402cf146d653f0c6342ee8fc450fc','P1 evidence freeze blob drifted');
 assert.strictEqual(blob('reference/poissonnier2026_pheromone_response_targets.json'),'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed','P1 target blob drifted');
 assert.strictEqual(blob('tools/derive-pheromone-response-targets.py'),'d44fee2d176eb6dcdfea625d4280059d499cf80b','P1 target generator drifted');
-assert.strictEqual(blob('reference/calibration_manifest.json'),'58e06a93d9bc1ac1eb25316f4b1590743019c936','P1 calibration scope drifted');
+assert.strictEqual(blob('reference/calibration_manifest.json'),'29044577af38dced5cccb83c687117ee878fd66c','historical calibration manifest drifted');
+assert.strictEqual(blob('reference/p1_painted_trail_calibration_policy_v1.json'),'ec282928a095467c1082a25e0396c390c17cbdb8','P1 calibration addendum drifted');
 
 assert.strictEqual(freeze.id,'P1_painted_trail_response_evidence_v1');
 assert.strictEqual(freeze.status,'evidence_and_protocol_frozen_before_sensor_mechanism_implementation_or_parameter_search');
 assert.strictEqual(freeze.source.source_xlsx_sha256,'b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318');
 assert.strictEqual(freeze.source.target_git_blob_sha,'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed');
 assert.strictEqual(freeze.source.target_generator_git_blob_sha,'d44fee2d176eb6dcdfea625d4280059d499cf80b');
+assert.strictEqual(freeze.source.calibration_manifest_git_blob_sha,'29044577af38dced5cccb83c687117ee878fd66c');
+assert.strictEqual(freeze.source.response_calibration_policy_git_blob_sha,'ec282928a095467c1082a25e0396c390c17cbdb8');
 assert.strictEqual(freeze.published_painted_trail_protocol.pheromone_solution.gland_equivalents_per_ml,4);
 assert.strictEqual(freeze.published_painted_trail_protocol.open_arena_application.nominal_solution_volume_ul,36);
 assert.strictEqual(freeze.published_painted_trail_protocol.open_arena_application.nominal_line_length_mm,300);
@@ -64,14 +68,19 @@ assert(Math.abs(mean('dcm_control','l','trail_axis_exit')-(10/26))<1e-15);
 assert(Math.abs(mean('pheromone','s','trail_axis_exit')-(22/26))<1e-15);
 assert(Math.abs(mean('pheromone','l','trail_axis_exit')-0.68)<1e-15);
 
-assert.strictEqual(calibration.schema_version,6);
-const oa=calibration.datasets.poissonnier2026_open_arena;
-assert.strictEqual(oa.allowed_for_fitting,false);
-assert.strictEqual(oa.development_estimation_targets_by_scope.painted_trail_response,'poissonnier2026_pheromone_response_targets.json');
-assert.strictEqual(oa.development_estimation_policies_by_scope.painted_trail_response_mechanism_policy,'not_yet_frozen');
-assert(oa.development_estimation_constraints.some(x=>/baseline locomotion.*H2\/H3\/H4\/H5/i.test(x)));
-assert(oa.development_estimation_constraints.some(x=>/pheromone-vs-DCM treatment contrasts within each path-length stratum/i.test(x)));
+assert.strictEqual(calibration.schema_version,5);
+assert.strictEqual(calibration.datasets.poissonnier2026_open_arena.allowed_for_fitting,false);
 assert.strictEqual(calibration.datasets.poissonnier2026_ymaze.allowed_for_development_parameter_estimation,false);
+assert.strictEqual(p1cal.status,'development_response_estimation_scope_frozen_without_mutating_historical_calibration_manifest');
+assert.strictEqual(p1cal.base_calibration_manifest.git_blob_sha,'29044577af38dced5cccb83c687117ee878fd66c');
+assert.strictEqual(p1cal.response_target.git_blob_sha,'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed');
+assert.strictEqual(p1cal.allowed_for_canonical_biological_fitting,false);
+assert.strictEqual(p1cal.allowed_for_development_painted_trail_response_estimation,true);
+assert(p1cal.constraints.some(x=>/Baseline locomotion.*H2\/H3\/H4\/H5/i.test(x)));
+assert(p1cal.constraints.some(x=>/pheromone-vs-DCM treatment contrasts within each path-length stratum/i.test(x)));
+assert.strictEqual(p1cal.ymaze.allowed_for_p1_model_selection,false);
+assert.strictEqual(p1cal.implementation_gate.chemical_sensor_code_authorized,false);
+assert.strictEqual(p1cal.implementation_gate.response_parameter_search_authorized,false);
 
 assert.ok(!fs.existsSync(path.join(root,'src','p1.js')),'P1 chemical sensor code must not exist at the evidence-freeze gate');
 assert.ok(!fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json')),'P1 model must not exist at the evidence-freeze gate');
