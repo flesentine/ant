@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "id": "P1_reference_free_reachability_execution_v1",
+  "status": "execution_policy_frozen_before_P1_runtime_execution",
+  "freeze_date_local": "2026-09-06",
+  "mechanism_freeze": {
+    "file": "hypotheses/p1_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "90e86bce29bf45c6e390f7046a6c25a74f409c78"
+  },
+  "scientific_scope": "Reference-free implementation reachability only. Not response fitting, model selection, or biological validation.",
+  "reference_firewall": {
+    "poissonnier2026_pheromone_response_targets_may_be_loaded": false,
+    "any_reference_outcomes_may_be_loaded": false,
+    "ymaze_may_be_loaded": false,
+    "fit_or_parameter_search": false,
+    "candidate_ranking": false,
+    "adaptive_rerun_or_engineering_value_tuning": false
+  },
+  "frozen_execution": {
+    "physics_dt_s": 0.02,
+    "engineering_values": {
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 4,
+      "sensor_forward_offset_mm": 2,
+      "sensor_lateral_half_separation_mm": 1.5,
+      "nominal_dose_ratio_A": 1
+    },
+    "exact_identity_panel": {
+      "seeds": [
+        1333001,
+        1333002,
+        1333003,
+        1333004,
+        1333005,
+        1333006,
+        1333007,
+        1333008,
+        1333009,
+        1333010,
+        1333011,
+        1333012,
+        1333013,
+        1333014,
+        1333015,
+        1333016,
+        1333017,
+        1333018,
+        1333019,
+        1333020,
+        1333021,
+        1333022,
+        1333023,
+        1333024,
+        1333025,
+        1333026,
+        1333027,
+        1333028,
+        1333029,
+        1333030,
+        1333031,
+        1333032
+      ],
+      "fixed_time_s": 2,
+      "comparison": "canonical locomotion vs P1 zero-dose, and canonical locomotion vs P1 kappa=0"
+    },
+    "attraction_panel": {
+      "trials_per_condition": 400,
+      "first_seed": 1334001,
+      "last_seed": 1334400,
+      "common_random_numbers": true,
+      "zero_dose_ratio_A": 0,
+      "pheromone_dose_ratio_A": 1,
+      "duration_s": 120,
+      "conditions_share_identical_entry_protocol": true
+    }
+  },
+  "frozen_reachability_observables": {
+    "structural": [
+      "exact canonical x/y/heading/RNG/biology-state identity in zero-dose panel",
+      "exact canonical x/y/heading/RNG/biology-state identity in kappa=0 panel",
+      "no extra RNG streams or draws",
+      "above/below local steering sign symmetry",
+      "on-trail parallel zero steering",
+      "trail endpoint reversal invariance",
+      "rigid translation invariance",
+      "rigid rotation invariance"
+    ],
+    "pooled_attraction": [
+      "central_zone_fraction",
+      "trail_axis_exit_rate"
+    ],
+    "speed_dynamics": [
+      "baseSpeed",
+      "speedFactor",
+      "pauseScale",
+      "turnScale",
+      "pauseRemaining",
+      "state",
+      "biology RNG state after fixed_time_s"
+    ]
+  },
+  "pass_fail_rule": {
+    "exact_identity": "All 32 seeds must be bit-for-bit identical for zero-dose and kappa=0 comparisons on x, y, heading, biology RNG state, speedFactor, pauseRemaining, state, baseSpeed, turnScale, and pauseScale.",
+    "invariances": "All frozen analytic/local invariance checks must pass.",
+    "attraction": "Across the 400 matched-seed pooled panel, pheromone must have strictly greater mean central_zone_fraction AND strictly greater trail_axis_exit_rate than zero dose.",
+    "moving_speed_dynamics": "All 32 fixed-time matched seeds must have identical baseSpeed, speedFactor, pauseScale, turnScale, pauseRemaining, state, and biology RNG state between canonical and nonzero-dose P1; this demonstrates P1 does not modify the stochastic moving-speed/pause process.",
+    "overall": "PASS only if exact identity, invariances, attraction, moving-speed dynamics, reference firewall, and Y-maze firewall all pass."
+  },
+  "failure_rule": "If the first correctly implemented execution fails any frozen criterion, P1-v1 engineering values may not be tuned on that outcome. Only a genuine implementation or infrastructure defect may be corrected, with this execution policy and the mechanism freeze unchanged."
+}
