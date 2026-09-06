@@ -1,4 +1,4 @@
-# ANTLAB — H0–H5 open-arena model development
+# ANTLAB — open-arena model development
 
 **Live lab:** https://flesentine.github.io/ant/
 
@@ -13,7 +13,7 @@ H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
 H5  -> official frozen high-resolution LOCO failed promotion; result frozen; closed
-P1  -> evidence/protocol frozen; egocentric painted-trail mechanism frozen; implementation not yet started
+P1  -> implemented; frozen reference-free reachability PASS; response estimation not yet authorized
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
@@ -107,23 +107,62 @@ No implementation error invalidates the official result. Per the frozen failure 
 
 ## P1 painted-trail response
 
-v0.3.3 now has two pre-implementation freezes:
+v0.3.3a and v0.3.3b froze the evidence/protocol surface and the egocentric P1-v1 mechanism before implementation. v0.3.3c has now implemented that exact mechanism in an isolated runtime and completed the one frozen **reference-free reachability** execution.
+
+Frozen chain:
 
 - evidence/protocol freeze: `hypotheses/p1_painted_trail_response_evidence_v1.json`
-- egocentric mechanism freeze: `hypotheses/p1_painted_trail_mechanism_v1.json`
+- mechanism freeze: `hypotheses/p1_painted_trail_mechanism_v1.json`
+- reachability execution policy: `hypotheses/p1_reachability_execution_v1.json`
+- post-merge implementation authorization: `hypotheses/p1_implementation_authorization_v1.json`
+- isolated runtime: `src/p1.js`
+- engineering model: `models/lasius_niger_painted_trail_p1_v1.json`
+- frozen result: `reports/p1_reference_free_reachability_v1.json`
+- result-freeze record: `hypotheses/p1_reachability_result_freeze_v1.json`
 
-P1-v1 models the externally painted trail as an undirected Gaussian scalar field sampled only by two symmetric body-frame sensors. Steering is driven by the local right-minus-left transduced signal. The ant receives no trail bearing/distance target, arena-center target, exit target, treatment label, path-history label, colony-specific response, H2–H5 latent state, or Y-maze information.
+Exact frozen reachability report:
 
-Future P1 response fitting is limited to two shared parameters:
+- Git blob: `5a8da255db2eb8a9e2b6dc51a7bd8d30a0e429ed`
+- SHA-256: `6a992cd0a19fefd5d3afbd5fc0b919c55d0b24fbeda9dc5c6d047a758e747fcb`
+- official run: `34055700128`
+- attempt: **1**
+- exact execution head: `da177e90b270d0ed62f627ec1621f7fe2e2ed1ed`
+
+All frozen structural checks passed:
+
+- 32/32 DCM zero-dose matched seeds: exact canonical identity
+- 32/32 `kappa=0` matched seeds: exact canonical identity
+- nonzero-dose speed/pause/biology RNG process: exact matched identity
+- correct local steering sign
+- on-trail parallel zero steering
+- endpoint-reversal invariance
+- translation invariance
+- rotation invariance
+- no added RNG stream/draw
+- no reference target access
+- no Y-maze access
+
+The frozen 400-trial-per-condition engineering panel produced:
+
+- zero-dose mean central-zone fraction: **0.27026**
+- nominal-dose mean central-zone fraction: **0.33142**
+- difference: **+0.06116**
+- zero-dose trail-axis exit rate: **0.4150**
+- nominal-dose trail-axis exit rate: **0.4775**
+- difference: **+0.0625**
+- moving-speed difference: **+0.00036 mm/s**
+
+These numbers are **mechanism reachability only**. They are not a fit to the Poissonnier pheromone-response data and must not be interpreted as biological parameter evidence.
+
+Future P1 response fitting remains limited to two shared parameters:
 
 - `sigma_field_mm`
 - `kappa_trail_per_s`
 
-No parameter search is authorized yet. After the mechanism freeze is merged, the next gate is isolated implementation plus **reference-free** reachability using only the frozen engineering values `sigma=8 mm` and `kappa=4 s^-1`. The 102-row response target may not be loaded during that reachability step.
-
-The exact DCM zero-dose and `kappa=0` paths must remain bit-for-bit identical to canonical locomotion, with no extra RNG draws. Canonical locomotion remains unchanged and the Y-maze remains locked.
+But **response-parameter search is still unauthorized**. The 102-row response target remains off-limits for fitting/ranking until the separate v0.3.3d estimator policy is frozen. Canonical locomotion remains unchanged and the Y-maze remains locked.
 
 See `docs/PAINTED_TRAIL_RESPONSE.md`.
+
 
 ## Run
 
