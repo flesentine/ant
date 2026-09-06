@@ -110,6 +110,7 @@
 - exactly two estimated response parameters: shared `sigma_field_mm` (2–32 mm log) and `kappa_trail_per_s` (0–16 s⁻¹ linear)
 - no nuisance parameters; baseline locomotion, H2–H5, sensor geometry, transduction, apparatus and observation model remain fixed
 - primary objective is equal-weight error in pheromone-minus-DCM contrasts for middle-zone occupancy and trail-axis exits, separately for short and long path strata
+- colony-level contrasts are equal-weighted within LOCO training and the final all-data target; ant-row counts cannot reweight colonies
 - six leave-one-colony-out folds; 499 fixed Halton context candidates + one exact kappa=0 null anchor
 - 60 training trials and 120 held-out trials per treatment × path with matched pheromone/DCM common random numbers
 - survival requires >=5/6 held-out wins vs exact null plus positive median relative improvement
