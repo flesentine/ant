@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "id": "P1_response_estimation_v1",
+  "status": "development_response_estimation_policy_frozen_before_estimator_implementation_or_parameter_search",
+  "freeze_date_local": "2026-09-06",
+  "scientific_scope": "Poissonnier 2026 open-arena Experiment 1 painted-trail response development only. This policy freezes estimation before any P1 response-target candidate search. It does not authorize Y-maze access, canonical locomotion changes, or cross-apparatus validation.",
+  "honesty_note": "The Poissonnier open-arena outcomes and the reference-free P1 reachability result were known before this policy. The reachability result used no response targets and is not fit evidence. This is an internal development policy freeze, not blind preregistration or external validation. Bounds, budgets, objective construction, folds, seeds, null, guards, and final-fit rules below are frozen before any P1 response estimator implementation or candidate ranking against the 102-row response target.",
+  "frozen_inputs": {
+    "evidence_freeze": {
+      "file": "hypotheses/p1_painted_trail_response_evidence_v1.json",
+      "git_blob_sha": "db89c879906aa1f35dc1d395cc3ebbb661b218b6"
+    },
+    "response_calibration_policy": {
+      "file": "reference/p1_painted_trail_calibration_policy_v1.json",
+      "git_blob_sha": "ec282928a095467c1082a25e0396c390c17cbdb8"
+    },
+    "response_target": {
+      "file": "reference/poissonnier2026_pheromone_response_targets.json",
+      "git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+      "rows": 102,
+      "use_rule": "May be loaded only by a separately qualified and authorized P1 response estimator after this policy is merged. Policy qualification must not rank or tune candidates against these outcomes."
+    },
+    "mechanism_freeze": {
+      "file": "hypotheses/p1_painted_trail_mechanism_v1.json",
+      "git_blob_sha": "90e86bce29bf45c6e390f7046a6c25a74f409c78"
+    },
+    "implementation_authorization": {
+      "file": "hypotheses/p1_implementation_authorization_v1.json",
+      "git_blob_sha": "f9fbaeb63c72de7a639d54b597f5c1247d354e20"
+    },
+    "reachability_execution_policy": {
+      "file": "hypotheses/p1_reachability_execution_v1.json",
+      "git_blob_sha": "282a95ec6761acd8d94163b25f712f191181f2ff"
+    },
+    "reachability_result_freeze": {
+      "file": "hypotheses/p1_reachability_result_freeze_v1.json",
+      "git_blob_sha": "e9187ff27fb04015ded038a5f98354995455e377"
+    },
+    "p1_runtime": {
+      "file": "src/p1.js",
+      "git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+    },
+    "p1_engineering_model": {
+      "file": "models/lasius_niger_painted_trail_p1_v1.json",
+      "git_blob_sha": "73873fd6763838423ca27648136bb0b9ff062817"
+    },
+    "p1_apparatus": {
+      "file": "apparatus/poissonnier2026_open_arena_p1_v1.json",
+      "git_blob_sha": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4"
+    },
+    "canonical_locomotion_model": {
+      "file": "models/lasius_niger_locomotion_v1.json",
+      "git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+    },
+    "canonical_runtime": {
+      "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+      "integrity_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+    }
+  },
+  "response_parameter_surface": {
+    "estimated_parameters": {
+      "sigma_field_mm": {
+        "role": "P1 transverse external-field spread",
+        "bounds": [
+          2,
+          32
+        ],
+        "scale": "log",
+        "provenance": "Frozen as a factor-four interval below and above the pre-search engineering reachability value 8 mm. The interval spans sensor-scale to substantially broader-than-middle-zone fields without using response-target candidate outcomes."
+      },
+      "kappa_trail_per_s": {
+        "role": "P1 bilateral trail-steering gain",
+        "bounds": [
+          0,
+          16
+        ],
+        "scale": "linear",
+        "nested_null_value": 0,
+        "provenance": "Lower bound is the exact P1 nested null. Upper bound is four times the pre-search engineering reachability value 4 s^-1 and is frozen before response-target search."
+      }
+    },
+    "estimated_parameter_names_exact": [
+      "sigma_field_mm",
+      "kappa_trail_per_s"
+    ],
+    "nuisance_parameters": [],
+    "nuisance_policy": "None. Baseline angular diffusion, speed, pauses, entry state, path-history mechanisms H2-H5, sensor geometry, transduction, apparatus, observation, and boundary behavior are fixed. P1 response estimation receives no locomotion or apparatus-transition nuisance coordinates.",
+    "sharing_rule": "One sigma_field_mm and one kappa_trail_per_s pair is shared across short and long approach histories, all six colonies, and both treatment strata. Treatment-specific, path-specific, colony-specific, or fold-specific biological parameter definitions are forbidden.",
+    "fixed_structure": [
+      "sensor_forward_offset_mm = 2",
+      "sensor_lateral_half_separation_mm = 1.5",
+      "T(c) = c / (1 + c)",
+      "omega_trail = kappa_trail_per_s * (s_R - s_L)",
+      "nominal pheromone dose ratio A = 1",
+      "DCM active-signal dose ratio A = 0",
+      "physics_dt_s = 0.02"
+    ]
+  },
+  "exact_nested_null": {
+    "definition": "kappa_trail_per_s = 0 with nominal pheromone apparatus/protocol produces the exact canonical trajectory and RNG state because P1 takes the frozen explicit bypass before field/sensor evaluation.",
+    "dcm_identity": "For every candidate, DCM A=0 is also an exact canonical bypass and is independent of sigma_field_mm and kappa_trail_per_s.",
+    "null_anchor": {
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 0,
+      "sigma_semantics": "inert bookkeeping only under the exact kappa=0 bypass"
+    },
+    "required_bit_identity": true,
+    "positive_numeric_zero_required": true
+  },
+  "reference_partition": {
+    "type": "leave_one_colony_out",
+    "colonies": [
+      0,
+      7,
+      16,
+      20,
+      21,
+      27
+    ],
+    "folds": 6,
+    "all_colonies_have_all_four_treatment_by_path_cells": true,
+    "training_rule": "Within each training colony, compute the pheromone-minus-DCM treatment contrast separately for each path x metric. The fold training reference target is the equal-weight arithmetic mean of the five colony-level contrasts. Individual ant rows may estimate each colony cell summary but may not be pooled in a way that weights colonies by sample count.",
+    "heldout_rule": "The heldout reference target is the heldout colony's own within-path pheromone-minus-DCM contrast. The heldout colony is never used for candidate ranking, scaling, bound changes, stopping, or search refinement in that fold.",
+    "colony_firewall": "Colony identity may define train/holdout membership and reporting only. It may not enter the P1 ant, candidate parameterization, protocol biology, RNG, or treatment response.",
+    "colony_weighting_rule": "Each colony has weight 1/5 in a fold training target and 1/6 in the final all-data target, regardless of its number of ant rows."
+  },
+  "contrast_definition": {
+    "reason": "P1 response parameters must explain pheromone treatment response without absorbing the unresolved short-versus-long baseline locomotion structure.",
+    "paths": [
+      "s",
+      "l"
+    ],
+    "treatments": [
+      "dcm_control",
+      "pheromone"
+    ],
+    "reference_contrast": "Within each colony and path stratum, Delta_colony = reference pheromone summary - reference DCM summary. Fold Delta_ref is the equal-weight mean of the five training-colony Delta_colony values; heldout Delta_ref is the heldout colony's Delta_colony; final all-data Delta_ref is the equal-weight mean of all six colony-level contrasts.",
+    "simulation_contrast": "Within each path stratum and metric, Delta_sim = simulated nominal-pheromone summary - simulated DCM summary using matched common-random-number trial seeds.",
+    "forbidden_contrasts": [
+      "short minus long as a P1 fitting target",
+      "pooled pheromone minus DCM without retaining path stratum",
+      "treatment-specific baseline locomotion adjustment",
+      "colony-specific response adjustment"
+    ]
+  },
+  "primary_fit_observables": [
+    {
+      "name": "middle_zone_fraction",
+      "reference_summary": "Within each colony x treatment x path cell, arithmetic mean middle-zone fraction; form the within-colony pheromone-minus-DCM contrast, then equal-weight colonies as frozen by reference_partition.",
+      "simulation_summary": "arithmetic mean across frozen simulation trials",
+      "contrast_range": [
+        -1,
+        1
+      ],
+      "role": "primary"
+    },
+    {
+      "name": "trail_axis_exit",
+      "reference_summary": "Within each colony x treatment x path cell, trail-axis exit proportion; form the within-colony pheromone-minus-DCM contrast, then equal-weight colonies as frozen by reference_partition.",
+      "simulation_summary": "proportion exiting left or right across frozen simulation trials",
+      "contrast_range": [
+        -1,
+        1
+      ],
+      "role": "primary"
+    }
+  ],
+  "primary_objective": {
+    "components": [
+      "short middle_zone_fraction treatment contrast error",
+      "long middle_zone_fraction treatment contrast error",
+      "short trail_axis_exit treatment contrast error",
+      "long trail_axis_exit treatment contrast error"
+    ],
+    "component_error": "Delta_sim - Delta_ref",
+    "aggregation": "Equal-weight arithmetic mean of the four squared component errors.",
+    "scaling": "No reference-derived scaling or fitted weights. All four primary contrasts are dimensionless and lie in [-1,1].",
+    "candidate_ranking_uses_only_primary_objective": true,
+    "forbidden_after_freeze": [
+      "primary metric addition or removal",
+      "metric reweighting",
+      "path reweighting",
+      "reference-derived adaptive weights",
+      "secondary-guard inclusion in candidate ranking",
+      "alternate contrast definition"
+    ]
+  },
+  "secondary_guard_observables": [
+    "time_to_exit_s",
+    "beeline_mm"
+  ],
+  "secondary_guard_policy": {
+    "ranking_use": false,
+    "selection_use": false,
+    "evaluation_stage": "Only after a fold candidate or final all-data candidate has been selected from the primary objective.",
+    "contrast": "pheromone minus DCM within each path stratum",
+    "standardization": "For each path x secondary metric, divide contrast error by the pooled individual-row reference standard deviation across both treatments from the five training colonies for LOCO diagnostics. For the final all-data guard, use the pooled individual-row reference standard deviation across both treatments and all six colonies within that same path stratum. These scales standardize guards only; they never rank or select candidates. Heldout rows may not set LOCO scales.",
+    "final_promotion_guard": "On the independent final-check simulation panel, the absolute standardized contrast error must be <= 1.0 for each of the four secondary path x metric components.",
+    "purpose": "Prevent a primary-only P1 fit from producing a grossly incompatible exit-time or beeline treatment response without allowing those observables to tune candidate selection.",
+    "reference_contrast_weighting": "Secondary reference contrasts use the same equal-weight colony-level pheromone-minus-DCM construction as the primary objective."
+  },
+  "forbidden_fit_observables": [
+    "Average_Speed_Moving",
+    "Traveled_Dist_Moving",
+    "Straightness",
+    "Prop_time_moving",
+    "Average_Speed",
+    "Traveled_Dist",
+    "raw heading diagnostics",
+    "P1 sensor responses or omega diagnostics",
+    "any Y-maze quantity"
+  ],
+  "search_protocol": {
+    "method": "deterministic Halton low-discrepancy panel",
+    "candidate_budget_per_fold_total": 500,
+    "positive_context_candidates": 499,
+    "exact_null_anchor_candidates": 1,
+    "halton_indexing": "starts at 1",
+    "halton_mapping": [
+      {
+        "prime": 2,
+        "parameter": "sigma_field_mm",
+        "mapping": "log-uniform over [2,32]"
+      },
+      {
+        "prime": 3,
+        "parameter": "kappa_trail_per_s",
+        "mapping": "linear over [0,16]"
+      }
+    ],
+    "candidate_panel_rule": "Halton indices 1..499 define the positive-context candidates. The 500th slot is the exact null anchor sigma=8, kappa=0. The parameter panel is identical in every LOCO fold; only reference training rows and simulation seed streams differ.",
+    "training_trials_per_treatment_path_per_candidate": 60,
+    "heldout_evaluation_trials_per_treatment_path": 120,
+    "physics_dt_s": 0.02,
+    "root_fit_seed": 2210000,
+    "fold_fit_seed": "2210000 + fold_index * 10000",
+    "root_evaluation_seed": 2810000,
+    "fold_evaluation_seed": "2810000 + fold_index * 10000",
+    "trial_seed_pairing": {
+      "short_path_offset": 0,
+      "long_path_offset": 1000,
+      "rule": "Within a path stratum, pheromone and DCM use the exact same trial seed for a given trial index. Every candidate uses the same frozen trial seeds. Short and long use disjoint named offsets."
+    },
+    "common_random_numbers": true,
+    "search_firewall": [
+      "No local optimizer.",
+      "No adaptive second-stage search.",
+      "No candidate injection after viewing target-ranked results.",
+      "No bound widening or narrowing after target-ranked results.",
+      "No budget increase after target-ranked results.",
+      "No alternative favorable seeds.",
+      "No objective or guard changes after target-ranked results.",
+      "No locomotion nuisance addition.",
+      "No treatment-specific, path-specific, or colony-specific response parameters."
+    ],
+    "smoke_test_rule": "Low-volume execution smoke may exercise target loading only after estimator qualification policy permits it, but smoke outcomes are not scientific evidence and may not alter the frozen policy, estimator code, bounds, seeds, budget, objective, or authorization decision."
+  },
+  "cross_validation_and_survival": {
+    "candidate_selection": "For each LOCO fold, choose the minimum training primary-objective candidate from the frozen 500-candidate panel. Ties are broken by lower Halton index; the null anchor is considered index 500.",
+    "matched_heldout_evaluation": "Evaluate the selected context candidate and the exact null anchor on the heldout colony using identical frozen evaluation trial seeds and the same reference rows.",
+    "relative_improvement": "(heldout_null_primary_loss - heldout_context_primary_loss) / max(1e-12, heldout_null_primary_loss)",
+    "primary_survival_guard": {
+      "minimum_heldout_fold_wins": 5,
+      "folds_total": 6,
+      "median_relative_improvement_must_be_strictly_positive": true
+    },
+    "failure_rule": "Failure of the primary survival guard closes P1-v1 response estimation. Do not rescue it by changing bounds, seeds, weights, budgets, nuisance policy, folds, or the same mechanism's sensor/transduction structure."
+  },
+  "final_all_data_fit": {
+    "authorized_only_if_primary_survival_guard_passes": true,
+    "reference_rows": "all 102 open-arena response-target rows, summarized as an equal-weight mean of the six colony-level within-path treatment contrasts",
+    "candidate_panel": "the same frozen 499 Halton candidates plus exact null anchor; no new candidates",
+    "ranking_objective": "primary objective only",
+    "training_trials_per_treatment_path_per_candidate": 120,
+    "fit_seed": 3210000,
+    "final_check_trials_per_treatment_path": 240,
+    "final_check_seed": 3610000,
+    "final_check_rule": "After selecting the all-data candidate, rerun only that candidate and the exact null anchor on the independent final-check simulation seeds. Final-check results may evaluate frozen promotion/guard criteria but may not trigger refitting or alternate candidate selection.",
+    "colony_weighting": "1/6 per colony regardless of ant-row count"
+  },
+  "identifiability_guards": {
+    "near_best_set_definition": "All all-data candidates with primary loss <= best_loss + max(0.0004, 0.05 * best_loss).",
+    "normalized_coordinates": {
+      "sigma_field_mm": "log-scale position from 0 at 2 mm to 1 at 32 mm",
+      "kappa_trail_per_s": "linear position from 0 at 0 s^-1 to 1 at 16 s^-1"
+    },
+    "requirements_for_parameter_promotion": [
+      "The exact null anchor is not in the near-best set.",
+      "The selected sigma and kappa normalized coordinates are each at least 0.02 from an active search bound.",
+      "The near-best normalized span is <= 0.60 for sigma_field_mm.",
+      "The near-best normalized span is <= 0.60 for kappa_trail_per_s."
+    ],
+    "interpretation": "If P1 passes LOCO survival but fails identifiability, report mechanism survival without claiming a sufficiently identified fixed parameter pair for v0.4. Do not expand or refine the search to rescue identifiability."
+  },
+  "promotion_rule": {
+    "p1_mechanism_survives_internal_development": "Requires the 5-of-6 heldout primary survival guard plus strictly positive median relative improvement versus the exact nested null.",
+    "fixed_p1_parameter_pair_eligible_for_future_v0_4_freeze": "Additionally requires all identifiability guards and all four final secondary standardized guard errors <= 1.0 on the independent final-check simulation panel.",
+    "canonical_locomotion_update_authorized": false,
+    "ymaze_unlock_authorized": false,
+    "next_gate_if_passed": "Freeze the exact P1 result and fixed response-parameter pair in a separate result record, then create a separate v0.4 cross-apparatus validation authorization before any Y-maze access.",
+    "next_gate_if_failed": "Freeze the failed result and close P1-v1 without retuning."
+  },
+  "estimator_implementation_gate": {
+    "estimator_status": "not_implemented_at_policy_freeze",
+    "high_resolution_response_search_authorized": false,
+    "requirements_before_authorization": [
+      "Implement a separate P1 response estimator that pins this policy and every frozen input blob listed here.",
+      "Prove exact kappa=0 and DCM null identity and unchanged biology RNG semantics under the estimator wiring.",
+      "Pass synthetic/reference-free qualification of contrast construction, Halton mapping, fold isolation, seed pairing, tie-breaking, and report semantics without target-ranked tuning.",
+      "Pass the full H0-H5 plus P1 regression suite.",
+      "Demonstrate Node-to-real-Chromium parity for selected synthetic/null cases.",
+      "Prove the estimator cannot access Y-maze content and cannot write canonical model files.",
+      "Record the exact qualified estimator executable blob in a separate authorization artifact."
+    ],
+    "authorization_rule": "Only a later authorization artifact that pins this exact policy blob and the qualified estimator/audit may permit the one frozen high-resolution P1 response search."
+  },
+  "global_firewalls": {
+    "response_target_candidate_search_during_this_policy_freeze": false,
+    "estimator_implementation_in_this_policy_freeze": false,
+    "canonical_locomotion_refit": false,
+    "H2_H3_H4_H5_refit": false,
+    "sensor_geometry_refit": false,
+    "transduction_refit": false,
+    "Y_maze_access": false,
+    "Y_maze_fitting_or_ranking": false,
+    "adaptive_post_result_tuning": false
+  }
+}
