@@ -7,7 +7,7 @@ const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).t
 
 const p=read('hypotheses/p1_response_estimation_v1.json');
 
-assert.strictEqual(blob('hypotheses/p1_response_estimation_v1.json'),'50e00ed729d5f8421f55dcd763f27899f9f2fc8b','P1 response-estimation policy drifted');
+assert.strictEqual(blob('hypotheses/p1_response_estimation_v1.json'),'628d17f6eb69fd11216aff33d1356d184365aedd','P1 response-estimation policy drifted');
 assert.strictEqual(p.id,'P1_response_estimation_v1');
 assert.strictEqual(p.status,'development_response_estimation_policy_frozen_before_estimator_implementation_or_parameter_search');
 
@@ -39,6 +39,9 @@ assert.strictEqual(p.exact_nested_null.positive_numeric_zero_required,true);
 
 assert.deepStrictEqual(p.reference_partition.colonies,[0,7,16,20,21,27]);
 assert.strictEqual(p.reference_partition.folds,6);
+assert.match(p.reference_partition.training_rule,/equal-weight arithmetic mean of the five colony-level contrasts/);
+assert.match(p.reference_partition.heldout_rule,/heldout colony's own within-path pheromone-minus-DCM contrast/);
+assert.match(p.reference_partition.colony_weighting_rule,/weight 1\/5.*1\/6/);
 assert.deepStrictEqual(p.contrast_definition.paths,['s','l']);
 assert.deepStrictEqual(p.contrast_definition.treatments,['dcm_control','pheromone']);
 assert.match(p.contrast_definition.reference_contrast,/pheromone summary - reference DCM summary/);
