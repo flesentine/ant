@@ -1,0 +1,78 @@
+name: Build painted-trail response target
+on:
+  push:
+    branches: [v0.3.3a-painted-trail-evidence-freeze]
+permissions:
+  contents: write
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, '[p1-target-built]')"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v0.3.3a-painted-trail-evidence-freeze
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download and verify final Springer XLSX
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 \
+            'https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM2_ESM.xlsx' \
+            -o /tmp/poissonnier2026.xlsx
+          test "$(sha256sum /tmp/poissonnier2026.xlsx | awk '{print $1}')" = "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318"
+      - name: Derive exact painted-trail response target
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/derive-pheromone-response-targets.py /tmp/poissonnier2026.xlsx reference/poissonnier2026_pheromone_response_targets.json >/tmp/p1-target.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('reference/poissonnier2026_pheromone_response_targets.json')
+          r=json.loads(p.read_text())
+          assert r['source_xlsx_sha256']=='b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318'
+          assert r['status']=='development_response_estimation_only_not_external_validation'
+          assert len(r['rows'])==102
+          assert r['treatment_groups']=={
+            'dcm_control_short':25,
+            'dcm_control_long':26,
+            'pheromone_short':26,
+            'pheromone_long':25
+          }
+          assert sorted(set(x['colony'] for x in r['rows']))==[0,7,16,20,21,27]
+          assert r['primary_response_observables']==['middle_zone_fraction','trail_axis_exit']
+          assert r['secondary_guard_observables']==['time_to_exit_s','beeline_mm']
+          assert all(x['treatment'] in ('dcm_control','pheromone') for x in r['rows'])
+          assert all(x['path_length'] in ('s','l') for x in r['rows'])
+          assert all(x['trail_present']==(x['treatment']=='pheromone') for x in r['rows'])
+          means={}
+          for treatment in ('dcm_control','pheromone'):
+            for path in ('s','l'):
+              rows=[x for x in r['rows'] if x['treatment']==treatment and x['path_length']==path]
+              means[f'{treatment}_{path}']={
+                'n':len(rows),
+                'middle_zone_fraction':sum(x['middle_zone_fraction'] for x in rows)/len(rows),
+                'trail_axis_exit_rate':sum(x['trail_axis_exit'] for x in rows)/len(rows),
+                'time_to_exit_s':sum(x['time_to_exit_s'] for x in rows)/len(rows),
+                'beeline_mm':sum(x['beeline_mm'] for x in rows)/len(rows),
+              }
+          print(json.dumps({'status':'passed','rows':len(r['rows']),'means':means},sort_keys=True))
+          PY
+          git diff --check
+      - name: Commit generated target and remove build workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/p1-painted-trail-target-build.yml
+          git config user.name "ANTLAB evidence freeze"
+          git config user.email "actions@users.noreply.github.com"
+          git add reference/poissonnier2026_pheromone_response_targets.json .github/workflows/p1-painted-trail-target-build.yml
+          git commit -m "Freeze painted-trail response target [p1-target-built]"
+          git push origin HEAD:v0.3.3a-painted-trail-evidence-freeze
