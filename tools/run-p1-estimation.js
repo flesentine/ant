@@ -219,7 +219,8 @@ function validateReferenceTarget(target,policy){
   for(const c of policy.reference_partition.colonies)for(const pl of PATHS)for(const t of TREATMENTS)if(!target.rows.some(r=>r.colony===c&&r.path_length===pl&&r.treatment===t))throw new Error('P1 response target missing colony x path x treatment cell.');
   return target;
 }
-function loadReferenceTarget(root,policy){
+function loadReferenceTarget(root,policy,options={}){
+  assertHighResolutionAuthorized(root,null,options);
   const file=path.resolve(root,RESPONSE_TARGET_FILE);
   if(gitBlobShaFile(file)!==policy.frozen_inputs.response_target.git_blob_sha)throw new Error('P1 response target Git blob does not match policy.');
   return validateReferenceTarget(readJson(file),policy);
