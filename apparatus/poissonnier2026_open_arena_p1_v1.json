@@ -1,0 +1,52 @@
+{
+  "schema_version": 3,
+  "id": "poissonnier2026_open_arena_p1_v1",
+  "title": "Poissonnier et al. 2026 A4 open arena with externally painted P1 trail field",
+  "world": {
+    "width": 297,
+    "height": 210
+  },
+  "geometry": {
+    "primitives": [
+      {
+        "type": "rect",
+        "name": "a4_arena",
+        "x": 0,
+        "y": 0,
+        "width": 297,
+        "height": 210
+      }
+    ]
+  },
+  "entry_points": {
+    "default": {
+      "x": 148.5,
+      "y": 105,
+      "heading_rad": 0
+    },
+    "center": {
+      "x": 148.5,
+      "y": 105,
+      "heading_rad": 0
+    }
+  },
+  "terminal_regions": [],
+  "external_fields": {
+    "painted_trail": {
+      "type": "line_segment_scalar_field",
+      "line_segment_mm": {
+        "x1": 0,
+        "y1": 105,
+        "x2": 297,
+        "y2": 105
+      },
+      "nominal_dose_hindgut_equivalents_per_cm": 0.0048,
+      "directionality": "undirected"
+    }
+  },
+  "metadata": {
+    "reference": "Poissonnier et al. 2026, Insectes Sociaux, doi:10.1007/s00040-026-01106-9",
+    "role": "P1 reference-free mechanism reachability apparatus",
+    "note": "Geometry is unchanged from poissonnier2026_open_arena. The external painted line is an apparatus fact frozen before P1 implementation."
+  }
+}
