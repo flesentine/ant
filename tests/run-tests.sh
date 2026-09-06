@@ -29,6 +29,7 @@ node tests/h5-estimation-policy.test.js
 node tests/h5-highres-authorization.test.js
 node tests/h5-estimation.test.js
 node tests/h5-result-freeze.test.js
+node tests/p1-painted-trail-evidence.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
@@ -46,5 +47,5 @@ node --check tools/run-h4-estimation.js
 node --check tools/run-h5-mechanism.js
 node --check tools/run-h5-estimation.js
 node --check tools/load-bundle.js
-python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py tools/derive-poissonnier2026-control-effects.py tools/derive-h2-estimation-targets.py
+python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py tools/derive-poissonnier2026-control-effects.py tools/derive-h2-estimation-targets.py tools/derive-pheromone-response-targets.py
 echo "All ANTLAB H0-H5 implementation tests PASS"
