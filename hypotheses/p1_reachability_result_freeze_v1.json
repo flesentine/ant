@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "id": "P1_reference_free_reachability_result_freeze_v1",
+  "status": "reference_free_reachability_passed_frozen",
+  "freeze_date_local": "2026-09-06",
+  "scientific_scope": "Reference-free P1-v1 mechanism wiring and structural reachability only. Not response fitting, model selection, biological parameter estimation, canonical promotion, or Y-maze validation.",
+  "result": {
+    "file": "reports/p1_reference_free_reachability_v1.json",
+    "git_blob_sha": "5a8da255db2eb8a9e2b6dc51a7bd8d30a0e429ed",
+    "sha256": "6a992cd0a19fefd5d3afbd5fc0b919c55d0b24fbeda9dc5c6d047a758e747fcb",
+    "status": "reference_free_reachability_passed"
+  },
+  "official_execution": {
+    "run_id": 34055700128,
+    "job_id": 101547080088,
+    "attempt": 1,
+    "workflow_head": "6bf15baa3672bfef906ea4b9d84cd4ceca3252f9",
+    "execution_head": "da177e90b270d0ed62f627ec1621f7fe2e2ed1ed",
+    "artifact_id": 9995881229,
+    "artifact_digest": "sha256:b89a0860f56daffa00c676768d3e951fa02055492d10a3b1eb93f1f8a7859197",
+    "one_official_frozen_execution": true
+  },
+  "implementation_qualification": {
+    "run_id": 34055606885,
+    "job_id": 101546830143,
+    "conclusion": "success",
+    "artifact_id": 9995854425,
+    "artifact_digest": "sha256:0ecb9fd22ce17e9897d17688ab9960eb2c873a95b05fec6a5c8d806110c7b61d",
+    "low_volume_smoke_scientific_evidence": false,
+    "chromium_parity_cases": 4,
+    "browser_exceptions": 0,
+    "console_errors": 0,
+    "ymaze_requests": 0,
+    "response_target_requests": 0
+  },
+  "frozen_implementation_chain": {
+    "mechanism_freeze_git_blob_sha": "90e86bce29bf45c6e390f7046a6c25a74f409c78",
+    "reachability_execution_policy_git_blob_sha": "282a95ec6761acd8d94163b25f712f191181f2ff",
+    "implementation_authorization_git_blob_sha": "f9fbaeb63c72de7a639d54b597f5c1247d354e20",
+    "runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "model_git_blob_sha": "73873fd6763838423ca27648136bb0b9ff062817",
+    "apparatus_git_blob_sha": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4",
+    "zero_experiment_git_blob_sha": "6e47fa91143ed5d4d2b52bf2c555246b7d216297",
+    "nominal_experiment_git_blob_sha": "8232d378195304f2a15aa76da8abf108d94f2c58",
+    "reachability_runner_git_blob_sha": "42f2a4c27bec95394052fd080ce58bdf70db337b",
+    "canonical_model_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "integrity_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+  },
+  "frozen_outcome": {
+    "identity_panel": {
+      "seeds": 32,
+      "fixed_time_s": 2,
+      "zero_dose_exact": true,
+      "kappa_zero_exact": true,
+      "nonzero_dose_speed_biology_exact": true
+    },
+    "invariances": {
+      "local_steering_sign": true,
+      "on_trail_zero_steering": true,
+      "endpoint_reversal": true,
+      "translation": true,
+      "rotation": true
+    },
+    "attraction_panel": {
+      "trials_per_condition": 400,
+      "seed_range": [
+        1334001,
+        1334400
+      ],
+      "common_random_numbers": true,
+      "zero_dose": {
+        "mean_central_zone_fraction": 0.27026144848339956,
+        "trail_axis_exit_rate": 0.415,
+        "mean_moving_speed_mm_s": 23.714177180825445,
+        "mean_time_to_exit_s": 9.384699999999995
+      },
+      "nominal_dose": {
+        "mean_central_zone_fraction": 0.3314171517139278,
+        "trail_axis_exit_rate": 0.4775,
+        "mean_moving_speed_mm_s": 23.714536715629638,
+        "mean_time_to_exit_s": 9.634300000000007
+      },
+      "differences": {
+        "central_zone_fraction": 0.06115570323052827,
+        "trail_axis_exit_rate": 0.0625,
+        "mean_moving_speed_mm_s": 0.00035953480419337325
+      }
+    },
+    "overall_pass": true
+  },
+  "firewalls": {
+    "fit_performed": false,
+    "parameter_search_performed": false,
+    "reference_targets_accessed": false,
+    "reference_outcomes_accessed": false,
+    "ymaze_accessed": false,
+    "selection_performed": false,
+    "canonical_model_updated": false
+  },
+  "interpretation": {
+    "statement": "P1-v1 passed the frozen reference-free engineering reachability gate. This establishes correct wiring and qualitative local trail-attraction capability only; it is not evidence that the mechanism fits the Poissonnier response data.",
+    "engineering_values_may_be_retuned_from_this_outcome": false,
+    "response_parameter_search_authorized": false,
+    "canonical_promotion_authorized": false,
+    "ymaze_unlock_authorized": false,
+    "next_step": "Freeze the v0.3.3d P1 response-estimation policy before any access to the 102-row pheromone response target for fitting or candidate ranking."
+  }
+}

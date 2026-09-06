@@ -94,17 +94,22 @@
 - frozen engineering-only reachability values before implementation
 - no trail bearing, line distance, arena target, treatment label, path-history label, or Y-maze input allowed
 
-### v0.3.3c — implementation + reachability — next
-- implement only after v0.3.3b mechanism freeze is merged
-- isolate P1 runtime/model extension from canonical H0
-- prove no navigation/edge/centerline target leakage
-- prove exact DCM and kappa=0 identities
-- prove translation/rotation/reflection/endpoint-reversal invariances
-- run frozen reference-free reachability before response fitting
+### v0.3.3c — implementation + reference-free reachability — complete / PASS
+- isolated `src/p1.js` runtime and engineering-only P1 model implemented without changing canonical locomotion
+- exact DCM zero-dose and kappa=0 paths preserve canonical trajectory/biology RNG state
+- nonzero-dose P1 leaves the canonical speed/pause/RNG process unchanged
+- endpoint-reversal, translation, rotation, local steering-sign, and on-trail zero-steering checks passed
+- implementation qualification passed full regression suite + real Chromium parity with zero response-target and Y-maze requests
+- one frozen 400-trial-per-condition reference-free reachability execution completed on attempt 1
+- nominal painted trail increased mean central-zone fraction by +0.06116 and trail-axis exit rate by +0.0625 versus zero dose
+- exact result frozen at `reports/p1_reference_free_reachability_v1.json`
+- no fitting, parameter search, model selection, canonical update, reference-target access, or Y-maze access occurred
+- engineering values remain non-biological and may not be retuned from the reachability outcome
 
-### v0.3.3d — response estimation
-- freeze estimator policy before search
-- fit only pheromone-response parameters against open-arena pheromone data
+### v0.3.3d — response-estimation policy freeze — next
+- freeze estimator objective, response-parameter bounds, candidate/search budget, seeds, folds, nuisances, and promotion guards **before** any response-data search
+- fit only shared `sigma_field_mm` and `kappa_trail_per_s` against open-arena pheromone-vs-DCM response contrasts
+- baseline locomotion and H2–H5 remain fixed
 - keep Y-maze locked for v0.4
 
 ## v0.4 — locked cross-apparatus validation

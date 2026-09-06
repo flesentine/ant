@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "P1_implementation_authorization_v1",
+  "status": "mechanism_freeze_merged_reference_free_implementation_authorized",
+  "authorization_date_local": "2026-09-06",
+  "mechanism_freeze": {
+    "file": "hypotheses/p1_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "90e86bce29bf45c6e390f7046a6c25a74f409c78",
+    "merge_commit": "bd7222be3299f147b19b6c8deeb90bb7e2874514"
+  },
+  "merged_main_verification": {
+    "workflow_name": "Test and deploy ANTLAB",
+    "run_id": 34054828552,
+    "test_job_id": 101544744640,
+    "test_conclusion": "success",
+    "deploy_job_id": 101544824745,
+    "deploy_conclusion": "success"
+  },
+  "reachability_execution_policy": {
+    "file": "hypotheses/p1_reachability_execution_v1.json",
+    "git_blob_sha": "282a95ec6761acd8d94163b25f712f191181f2ff"
+  },
+  "authorization_scope": {
+    "isolated_p1_runtime_and_model_implementation": true,
+    "reference_free_reachability_execution": true,
+    "response_target_access": false,
+    "response_parameter_search": false,
+    "canonical_promotion": false,
+    "ymaze_access_or_unlock": false
+  },
+  "constraints": [
+    "Implementation must match the frozen P1-v1 mechanism exactly.",
+    "Canonical locomotion runtime/model files remain unchanged.",
+    "The 102-row pheromone response target may not be loaded during implementation qualification or reachability.",
+    "The Poissonnier 2026 Y-maze remains inaccessible.",
+    "No response parameter search or tuning is authorized."
+  ]
+}
