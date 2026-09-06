@@ -61,13 +61,19 @@
     "estimated_parameters": {
       "sigma_field_mm": {
         "role": "P1 transverse external-field spread",
-        "bounds": [2, 32],
+        "bounds": [
+          2,
+          32
+        ],
         "scale": "log",
         "provenance": "Frozen as a factor-four interval below and above the pre-search engineering reachability value 8 mm. The interval spans sensor-scale to substantially broader-than-middle-zone fields without using response-target candidate outcomes."
       },
       "kappa_trail_per_s": {
         "role": "P1 bilateral trail-steering gain",
-        "bounds": [0, 16],
+        "bounds": [
+          0,
+          16
+        ],
         "scale": "linear",
         "nested_null_value": 0,
         "provenance": "Lower bound is the exact P1 nested null. Upper bound is four times the pre-search engineering reachability value 4 s^-1 and is frozen before response-target search."
@@ -103,18 +109,32 @@
   },
   "reference_partition": {
     "type": "leave_one_colony_out",
-    "colonies": [0, 7, 16, 20, 21, 27],
+    "colonies": [
+      0,
+      7,
+      16,
+      20,
+      21,
+      27
+    ],
     "folds": 6,
     "all_colonies_have_all_four_treatment_by_path_cells": true,
-    "training_rule": "Pool the five training colonies only after retaining treatment and path-length labels needed to construct within-path pheromone-minus-DCM contrasts.",
-    "heldout_rule": "The sixth colony is never used for candidate ranking, scaling, bound changes, stopping, or search refinement in that fold.",
-    "colony_firewall": "Colony identity may define train/holdout membership and reporting only. It may not enter the P1 ant, candidate parameterization, protocol biology, RNG, or treatment response."
+    "training_rule": "Within each training colony, compute the pheromone-minus-DCM treatment contrast separately for each path x metric. The fold training reference target is the equal-weight arithmetic mean of the five colony-level contrasts. Individual ant rows may estimate each colony cell summary but may not be pooled in a way that weights colonies by sample count.",
+    "heldout_rule": "The heldout reference target is the heldout colony's own within-path pheromone-minus-DCM contrast. The heldout colony is never used for candidate ranking, scaling, bound changes, stopping, or search refinement in that fold.",
+    "colony_firewall": "Colony identity may define train/holdout membership and reporting only. It may not enter the P1 ant, candidate parameterization, protocol biology, RNG, or treatment response.",
+    "colony_weighting_rule": "Each colony has weight 1/5 in a fold training target and 1/6 in the final all-data target, regardless of its number of ant rows."
   },
   "contrast_definition": {
     "reason": "P1 response parameters must explain pheromone treatment response without absorbing the unresolved short-versus-long baseline locomotion structure.",
-    "paths": ["s", "l"],
-    "treatments": ["dcm_control", "pheromone"],
-    "reference_contrast": "Within each path stratum and metric, Delta_ref = reference pheromone summary - reference DCM summary.",
+    "paths": [
+      "s",
+      "l"
+    ],
+    "treatments": [
+      "dcm_control",
+      "pheromone"
+    ],
+    "reference_contrast": "Within each colony and path stratum, Delta_colony = reference pheromone summary - reference DCM summary. Fold Delta_ref is the equal-weight mean of the five training-colony Delta_colony values; heldout Delta_ref is the heldout colony's Delta_colony; final all-data Delta_ref is the equal-weight mean of all six colony-level contrasts.",
     "simulation_contrast": "Within each path stratum and metric, Delta_sim = simulated nominal-pheromone summary - simulated DCM summary using matched common-random-number trial seeds.",
     "forbidden_contrasts": [
       "short minus long as a P1 fitting target",
@@ -126,16 +146,22 @@
   "primary_fit_observables": [
     {
       "name": "middle_zone_fraction",
-      "reference_summary": "arithmetic mean within treatment x path x fold partition",
+      "reference_summary": "Within each colony x treatment x path cell, arithmetic mean middle-zone fraction; form the within-colony pheromone-minus-DCM contrast, then equal-weight colonies as frozen by reference_partition.",
       "simulation_summary": "arithmetic mean across frozen simulation trials",
-      "contrast_range": [-1, 1],
+      "contrast_range": [
+        -1,
+        1
+      ],
       "role": "primary"
     },
     {
       "name": "trail_axis_exit",
-      "reference_summary": "proportion exiting left or right within treatment x path x fold partition",
+      "reference_summary": "Within each colony x treatment x path cell, trail-axis exit proportion; form the within-colony pheromone-minus-DCM contrast, then equal-weight colonies as frozen by reference_partition.",
       "simulation_summary": "proportion exiting left or right across frozen simulation trials",
-      "contrast_range": [-1, 1],
+      "contrast_range": [
+        -1,
+        1
+      ],
       "role": "primary"
     }
   ],
@@ -168,9 +194,10 @@
     "selection_use": false,
     "evaluation_stage": "Only after a fold candidate or final all-data candidate has been selected from the primary objective.",
     "contrast": "pheromone minus DCM within each path stratum",
-    "standardization": "For each path x secondary metric, divide contrast error by the pooled reference standard deviation computed from the relevant training reference rows for LOCO diagnostics and from all 102 reference rows for the final all-data guard. Held-out rows may not set LOCO scales.",
+    "standardization": "For each path x secondary metric, divide contrast error by the pooled individual-row reference standard deviation across both treatments from the five training colonies for LOCO diagnostics. For the final all-data guard, use the pooled individual-row reference standard deviation across both treatments and all six colonies within that same path stratum. These scales standardize guards only; they never rank or select candidates. Heldout rows may not set LOCO scales.",
     "final_promotion_guard": "On the independent final-check simulation panel, the absolute standardized contrast error must be <= 1.0 for each of the four secondary path x metric components.",
-    "purpose": "Prevent a primary-only P1 fit from producing a grossly incompatible exit-time or beeline treatment response without allowing those observables to tune candidate selection."
+    "purpose": "Prevent a primary-only P1 fit from producing a grossly incompatible exit-time or beeline treatment response without allowing those observables to tune candidate selection.",
+    "reference_contrast_weighting": "Secondary reference contrasts use the same equal-weight colony-level pheromone-minus-DCM construction as the primary objective."
   },
   "forbidden_fit_observables": [
     "Average_Speed_Moving",
@@ -241,14 +268,15 @@
   },
   "final_all_data_fit": {
     "authorized_only_if_primary_survival_guard_passes": true,
-    "reference_rows": "all 102 open-arena response-target rows",
+    "reference_rows": "all 102 open-arena response-target rows, summarized as an equal-weight mean of the six colony-level within-path treatment contrasts",
     "candidate_panel": "the same frozen 499 Halton candidates plus exact null anchor; no new candidates",
     "ranking_objective": "primary objective only",
     "training_trials_per_treatment_path_per_candidate": 120,
     "fit_seed": 3210000,
     "final_check_trials_per_treatment_path": 240,
     "final_check_seed": 3610000,
-    "final_check_rule": "After selecting the all-data candidate, rerun only that candidate and the exact null anchor on the independent final-check simulation seeds. Final-check results may evaluate frozen promotion/guard criteria but may not trigger refitting or alternate candidate selection."
+    "final_check_rule": "After selecting the all-data candidate, rerun only that candidate and the exact null anchor on the independent final-check simulation seeds. Final-check results may evaluate frozen promotion/guard criteria but may not trigger refitting or alternate candidate selection.",
+    "colony_weighting": "1/6 per colony regardless of ant-row count"
   },
   "identifiability_guards": {
     "near_best_set_definition": "All all-data candidates with primary loss <= best_loss + max(0.0004, 0.05 * best_loss).",
