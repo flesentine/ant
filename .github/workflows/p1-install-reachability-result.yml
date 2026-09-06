@@ -1,0 +1,39 @@
+name: Install P1 reachability result
+on:
+  push:
+    branches: [v0.3.3c-p1-implementation-reachability]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v0.3.3c-p1-implementation-reachability
+          fetch-depth: 0
+      - name: Download exact official reachability artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: p1-reference-free-reachability-official
+          path: /tmp/p1-official
+          github-token: ${{ github.token }}
+          run-id: 34055700128
+      - name: Verify and install exact report
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPORT=/tmp/p1-official/p1_reference_free_reachability_v1.json
+          test -f "$REPORT"
+          test "$(sha256sum "$REPORT" | awk '{print $1}')" = "6a992cd0a19fefd5d3afbd5fc0b919c55d0b24fbeda9dc5c6d047a758e747fcb"
+          test "$(git hash-object "$REPORT")" = "5a8da255db2eb8a9e2b6dc51a7bd8d30a0e429ed"
+          cp "$REPORT" reports/p1_reference_free_reachability_v1.json
+          test "$(git hash-object reports/p1_reference_free_reachability_v1.json)" = "5a8da255db2eb8a9e2b6dc51a7bd8d30a0e429ed"
+          rm -f .github/workflows/p1-install-reachability-result.yml
+          git config user.name "ANTLAB reachability freeze"
+          git config user.email "actions@users.noreply.github.com"
+          git add reports/p1_reference_free_reachability_v1.json .github/workflows/p1-install-reachability-result.yml
+          git commit -m "Freeze official P1 reference-free reachability result"
+          git push origin HEAD:v0.3.3c-p1-implementation-reachability
