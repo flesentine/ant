@@ -423,7 +423,7 @@ Policy:
 
 Git blob:
 
-`50e00ed729d5f8421f55dcd763f27899f9f2fc8b`
+`628d17f6eb69fd11216aff33d1356d184365aedd`
 
 ### Estimated response surface
 
@@ -451,6 +451,8 @@ Delta_sim = simulated pheromone summary - simulated DCM summary
 ```
 
 The primary loss is the equal-weight mean squared error over the four path × primary-observable treatment contrasts.
+
+Within each colony, the pheromone-minus-DCM contrast is computed first. A LOCO training target is then the equal-weight mean of the five training-colony contrasts, and the final all-data target equal-weights all six colonies. Ant-row count may not give one colony more influence than another.
 
 No short-minus-long quantity is a P1 fitting target. No pooled treatment contrast may erase the path strata.
 
