@@ -87,8 +87,19 @@ assert.strictEqual(p.estimator_implementation_gate.high_resolution_response_sear
 
 for(const [k,v] of Object.entries(p.global_firewalls))assert.strictEqual(v,false,'firewall '+k+' must remain false');
 
-assert.ok(!fs.existsSync(path.join(root,'tools','run-p1-estimation.js')),'P1 estimator must not exist at policy-freeze checkpoint');
-assert.ok(!fs.existsSync(path.join(root,'hypotheses','p1_highres_authorization_v1.json')),'P1 high-resolution authorization must not exist at policy-freeze checkpoint');
+const estimatorPath=path.join(root,'tools','run-p1-estimation.js');
+if(fs.existsSync(estimatorPath)){
+  const estimatorSource=fs.readFileSync(estimatorPath,'utf8');
+  assert.match(estimatorSource,/POLICY_GIT_BLOB_SHA='628d17f6eb69fd11216aff33d1356d184365aedd'/,'later estimator must pin the exact frozen P1 policy');
+  assert.match(estimatorSource,/AUTHORIZATION_FILE='hypotheses\/p1_highres_authorization_v1\.json'/,'later estimator must retain a separate high-resolution authorization gate');
+}
+const activeAuthPath=path.join(root,'hypotheses','p1_highres_authorization_v1.json');
+if(fs.existsSync(activeAuthPath)){
+  const a=JSON.parse(fs.readFileSync(activeAuthPath,'utf8'));
+  assert.strictEqual(a.policy_git_blob_sha,'628d17f6eb69fd11216aff33d1356d184365aedd','later authorization must pin the frozen policy');
+  assert.strictEqual(a.canonical_promotion_authorized,false);
+  assert.strictEqual(a.ymaze_access_authorized,false);
+}
 
 const runtime=fs.readFileSync(path.join(root,'src','p1.js'),'utf8');
 assert.ok(!runtime.includes('poissonnier2026_pheromone_response_targets.json'),'P1 runtime must not load response target');
