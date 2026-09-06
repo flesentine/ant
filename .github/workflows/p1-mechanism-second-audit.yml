@@ -1,0 +1,122 @@
+name: P1 mechanism second audit
+on:
+  push:
+    branches: [v0.3.3b-p1-mechanism-freeze]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact reviewed mechanism head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p1_painted_trail_mechanism_v1.json)" = "90e86bce29bf45c6e390f7046a6c25a74f409c78"
+          test "$(git hash-object tests/p1-painted-trail-mechanism-policy.test.js)" = "2be7159cca9bf92a7b22e7c3e88349efd9d268d6"
+          test "$(git hash-object hypotheses/p1_painted_trail_response_evidence_v1.json)" = "db89c879906aa1f35dc1d395cc3ebbb661b218b6"
+          test "$(git hash-object reference/p1_painted_trail_calibration_policy_v1.json)" = "ec282928a095467c1082a25e0396c390c17cbdb8"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test ! -e src/p1.js
+          test ! -e models/lasius_niger_painted_trail_p1_v1.json
+      - name: Scan for premature P1 runtime or response-search wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find src models tools experiments apparatus states observations scoring -type f -print0 | xargs -0 grep -nE 'AntLabP1|P1_egocentric_painted_trail|sigma_field_mm|kappa_trail_per_s' ; then
+            echo "premature P1 implementation/search symbol found" >&2
+            exit 1
+          fi
+          # The response target may exist as frozen evidence, but no executable source may load it yet.
+          if find src models tools experiments apparatus states observations scoring -type f -print0 | xargs -0 grep -n 'poissonnier2026_pheromone_response_targets.json' ; then
+            echo "response target wired into executable/runtime code before estimator policy" >&2
+            exit 1
+          fi
+      - name: Run full H0-H5 plus P1 policy suite
+        run: ./tests/run-tests.sh
+      - name: Stress frozen analytic invariances
+        shell: bash
+        run: |
+          mkdir -p /tmp/p1-second-mechanism
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=require('./hypotheses/p1_painted_trail_mechanism_v1.json');
+          const norm=(x,y)=>Math.hypot(x,y);
+          const T=c=>c/(1+c);
+          function dist(p,a,b){const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,vv=vx*vx+vy*vy,t=vv===0?0:Math.max(0,Math.min(1,(wx*vx+wy*vy)/vv));return norm(p.x-(a.x+t*vx),p.y-(a.y+t*vy));}
+          function sensors(p,h){const u={x:Math.cos(h),y:Math.sin(h)},r={x:-Math.sin(h),y:Math.cos(h)},l={x:Math.sin(h),y:-Math.cos(h)},f=m.egocentric_sensors.forward_offset_mm,q=m.egocentric_sensors.lateral_half_separation_mm;return{L:{x:p.x+f*u.x+q*l.x,y:p.y+f*u.y+q*l.y},R:{x:p.x+f*u.x+q*r.x,y:p.y+f*u.y+q*r.y}};}
+          function sample(p,h,a,b,sigma,kappa,A){if(A===0||kappa===0)return{omega:0,left:null,right:null,bypass:true};const s=sensors(p,h),field=x=>A*Math.exp(-(dist(x,a,b)**2)/(2*sigma*sigma)),L=T(field(s.L)),R=T(field(s.R));return{omega:kappa*(R-L),left:L,right:R,bypass:false};}
+          const near=(a,b,t=3e-12)=>{if(Math.abs(a-b)>t)throw new Error(`${a} != ${b}`);};
+          let z=0x12345678;const rnd=()=>{z=(Math.imul(z,1664525)+1013904223)>>>0;return z/2**32;};
+          const rotate=(p,q)=>{const c=Math.cos(q),s=Math.sin(q);return{x:c*p.x-s*p.y,y:s*p.x+c*p.y};};
+          const add=(p,q)=>({x:p.x+q.x,y:p.y+q.y});
+          let checked=0;
+          for(let i=0;i<1000;i++){
+            const a={x:-50+400*rnd(),y:-50+300*rnd()},phi=(rnd()*2-1)*Math.PI,len=10+350*rnd(),b={x:a.x+len*Math.cos(phi),y:a.y+len*Math.sin(phi)};
+            const p={x:-75+450*rnd(),y:-75+350*rnd()},h=(rnd()*2-1)*Math.PI,sigma=1+30*rnd(),k=0.05+7.95*rnd(),A=0.05+2.95*rnd();
+            const x=sample(p,h,a,b,sigma,k,A),rev=sample(p,h,b,a,sigma,k,A);
+            near(x.left,rev.left);near(x.right,rev.right);near(x.omega,rev.omega);
+            if(!(x.left>=0&&x.left<1&&x.right>=0&&x.right<1&&Number.isFinite(x.omega)))throw new Error('range/finite failure');
+            const shift={x:-100+200*rnd(),y:-100+200*rnd()},tr=sample(add(p,shift),h,add(a,shift),add(b,shift),sigma,k,A);
+            near(x.left,tr.left);near(x.right,tr.right);near(x.omega,tr.omega);
+            const q=(rnd()*2-1)*Math.PI,ro=sample(rotate(p,q),h+q,rotate(a,q),rotate(b,q),sigma,k,A);
+            near(x.left,ro.left,8e-12);near(x.right,ro.right,8e-12);near(x.omega,ro.omega,8e-12);
+            const n0=sample(p,h,a,b,sigma,k,0),k0=sample(p,h,a,b,sigma,0,A);
+            if(n0.omega!==0||k0.omega!==0||Object.is(n0.omega,-0)||Object.is(k0.omega,-0)||!n0.bypass||!k0.bypass)throw new Error('exact-null bypass failure');
+            checked++;
+          }
+          // Direction-free line-axis check well away from finite-segment endpoints.
+          const a={x:0,y:105},b={x:297,y:105};
+          for(const x of [40,100,148.5,220,260]){
+            const east=sample({x,y:105},0,a,b,8,4,1),west=sample({x,y:105},Math.PI,a,b,8,4,1);
+            near(east.omega,0);near(west.omega,0);
+          }
+          const out={status:'passed',randomized_states:checked,endpoint_reversal:true,translation:true,rotation:true,exact_null_plus_zero:true,parallel_axis_direction_free:true};
+          fs.writeFileSync('/tmp/p1-second-mechanism/invariance.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out));
+          NODE
+      - name: Real Chromium exact-head sanity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p1-second-mechanism/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p1-second-mechanism-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p1-second-mechanism-chrome --remote-debugging-port=9222 about:blank >/tmp/p1-second-mechanism/chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/tmp/p1-second-mechanism/chrome-version.json 2>/dev/null && break; sleep .2; done
+          cat >/tmp/p1-second-mechanism/browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabH5"))break;await new Promise(r=>setTimeout(r,50));}
+          const title=await evalv('document.title'),body=await evalv('document.body.innerText');
+          if(title!=='ANTLAB H5'||!body.includes('H5-v1 closed'))throw new Error('canonical browser drift');
+          const mech=await evalv("(async()=>await (await fetch('./hypotheses/p1_painted_trail_mechanism_v1.json')).json())()");
+          if(mech.id!=='P1_egocentric_painted_trail_gradient_steering_v1'||mech.implementation_gate.response_parameter_search_authorized!==false)throw new Error('P1 mechanism gate drift');
+          const p1Present=await evalv("typeof globalThis.AntLabP1!=='undefined'");
+          const yreq=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));
+          const targetRequests=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          if(p1Present||exceptions.length||consoleErrors.length||yreq.length||targetRequests.length)throw new Error('browser firewall failure');
+          const out={status:'passed',title,exceptions:0,console_errors:0,ymaze_requests:0,response_target_requests:0,p1_runtime_present:false};
+          fs.writeFileSync('/tmp/p1-second-mechanism/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p1-second-mechanism/browser.mjs
+      - name: Upload second P1 mechanism audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-mechanism-second-audit
+          path: /tmp/p1-second-mechanism
+          retention-days: 30
