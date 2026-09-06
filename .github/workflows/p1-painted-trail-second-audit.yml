@@ -1,0 +1,139 @@
+name: P1 painted-trail second audit
+on:
+  push:
+    branches: [v0.3.3a-painted-trail-evidence-freeze]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact P1 evidence/provenance chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p1_painted_trail_response_evidence_v1.json)" = "13ade699b67402cf146d653f0c6342ee8fc450fc"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test "$(git hash-object tools/derive-pheromone-response-targets.py)" = "d44fee2d176eb6dcdfea625d4280059d499cf80b"
+          test "$(git hash-object reference/calibration_manifest.json)" = "29044577af38dced5cccb83c687117ee878fd66c"
+          test "$(git hash-object reference/p1_painted_trail_calibration_policy_v1.json)" = "ec282928a095467c1082a25e0396c390c17cbdb8"
+          test ! -e src/p1.js
+          test ! -e models/lasius_niger_painted_trail_p1_v1.json
+      - name: Re-derive exact target from final Springer XLSX
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p1-second
+          curl -L --fail --retry 3 \
+            'https://media.springernature.com/original/springer-static/esm/art%3A10.1007%2Fs00040-026-01106-9/MediaObjects/40_2026_1106_MOESM2_ESM.xlsx' \
+            -o /tmp/p1-second/source.xlsx
+          test "$(sha256sum /tmp/p1-second/source.xlsx | awk '{print $1}')" = "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318"
+          python3 tools/derive-pheromone-response-targets.py /tmp/p1-second/source.xlsx /tmp/p1-second/rederived.json >/tmp/p1-second/rederive.log
+          cmp reference/poissonnier2026_pheromone_response_targets.json /tmp/p1-second/rederived.json
+          test "$(git hash-object /tmp/p1-second/rederived.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+      - name: Inspect raw endpoint geometry and colony coverage
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import importlib.util,json,pathlib
+          root=pathlib.Path('.')
+          spec=importlib.util.spec_from_file_location('reconstruct',root/'tools/reconstruct-poissonnier2026.py')
+          mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+          rows=mod.records(mod.sheets('/tmp/p1-second/source.xlsx')['Exp 1'])
+          target=json.loads((root/'reference/poissonnier2026_pheromone_response_targets.json').read_text())
+          target_by_id={r['ant_id']:r for r in target['rows']}
+          nearest=[]
+          gaps=[]
+          corner_ambiguous=[]
+          per_colony={}
+          mismatches=[]
+          for r in rows:
+              ant_id=int(float(r['ant_ID']))
+              x=float(r['Xlast']);y=float(r['Ylast'])
+              d={
+                'left':abs(x-float(r['Xmin_Arena'])),
+                'right':abs(x-float(r['Xmax_Arena'])),
+                'top':abs(y-float(r['Ymin_Arena'])),
+                'bottom':abs(y-float(r['Ymax_Arena']))
+              }
+              ordered=sorted(d.items(),key=lambda kv:kv[1])
+              nearest.append(ordered[0][1]);gaps.append(ordered[1][1]-ordered[0][1])
+              if ordered[1][1]-ordered[0][1] < 1.0:
+                  corner_ambiguous.append({'ant_id':ant_id,'distances':d})
+              if target_by_id[ant_id]['exit_edge']!=ordered[0][0]:
+                  mismatches.append({'ant_id':ant_id,'target':target_by_id[ant_id]['exit_edge'],'raw_nearest':ordered[0][0]})
+              colony=int(float(r['Colony']))
+              ph='pheromone' if str(r['Pheromone']).strip().lower()=='y' else 'dcm_control'
+              pl=str(r['Path_length']).strip().lower()
+              key=f'{ph}_{pl}'
+              per_colony.setdefault(colony,{})[key]=per_colony.setdefault(colony,{}).get(key,0)+1
+          expected={'dcm_control_s','dcm_control_l','pheromone_s','pheromone_l'}
+          missing={c:sorted(expected-set(v)) for c,v in per_colony.items() if set(v)!=expected}
+          out={
+            'status':'passed',
+            'rows':len(rows),
+            'max_nearest_border_distance_raw_units':max(nearest),
+            'median_nearest_border_distance_raw_units':sorted(nearest)[len(nearest)//2],
+            'min_nearest_vs_second_nearest_gap_raw_units':min(gaps),
+            'corner_ambiguous_under_1_raw_unit':corner_ambiguous,
+            'exit_edge_mismatches':mismatches,
+            'per_colony_group_counts':per_colony,
+            'colonies_missing_any_group':missing
+          }
+          if len(rows)!=102 or mismatches or missing:
+              raise SystemExit(json.dumps(out))
+          pathlib.Path('/tmp/p1-second/endpoint-geometry.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,sort_keys=True))
+          PY
+      - name: Run full H0-H5 plus P1 evidence suite
+        run: ./tests/run-tests.sh
+      - name: Real Chromium sanity on exact P1 evidence head
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p1-second/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p1-second-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p1-second-chrome --remote-debugging-port=9222 about:blank >/tmp/p1-second/chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/tmp/p1-second/chrome-version.json 2>/dev/null && break; sleep .2; done
+          cat >/tmp/p1-second/browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabH5"))break;await new Promise(r=>setTimeout(r,50));}
+          const body=await evalv('document.body.innerText'),title=await evalv('document.title');
+          if(title!=='ANTLAB H5'||!body.includes('H5-v1 closed'))throw new Error('canonical browser state drift');
+          const targetJson=await evalv("(async()=>await (await fetch('./reference/poissonnier2026_pheromone_response_targets.json')).json())()");
+          const freeze=await evalv("(async()=>await (await fetch('./hypotheses/p1_painted_trail_response_evidence_v1.json')).json())()");
+          const cal=await evalv("(async()=>await (await fetch('./reference/p1_painted_trail_calibration_policy_v1.json')).json())()");
+          if(targetJson.rows.length!==102)throw new Error('P1 target row count drift');
+          if(freeze.implementation_gate.chemical_sensor_code_authorized!==false||freeze.implementation_gate.response_parameter_search_authorized!==false)throw new Error('P1 evidence gate drift');
+          if(cal.implementation_gate.response_parameter_search_authorized!==false)throw new Error('P1 calibration gate drift');
+          const yreq=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));
+          const p1Present=await evalv("typeof globalThis.AntLabP1!=='undefined'");
+          if(p1Present||exceptions.length||consoleErrors.length||yreq.length)throw new Error('browser firewall failure');
+          const out={status:'passed',rows:targetJson.rows.length,exceptions:0,console_errors:0,ymaze_requests:0,p1_implementation_present:false};
+          fs.writeFileSync('/tmp/p1-second/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p1-second/browser.mjs
+      - name: Upload second P1 evidence audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-painted-trail-second-audit
+          path: /tmp/p1-second
+          retention-days: 30
