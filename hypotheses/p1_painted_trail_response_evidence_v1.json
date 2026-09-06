@@ -12,7 +12,9 @@
     "target_git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
     "target_generator": "tools/derive-pheromone-response-targets.py",
     "target_generator_git_blob_sha": "d44fee2d176eb6dcdfea625d4280059d499cf80b",
-    "calibration_manifest_git_blob_sha": "58e06a93d9bc1ac1eb25316f4b1590743019c936"
+    "calibration_manifest_git_blob_sha": "29044577af38dced5cccb83c687117ee878fd66c",
+    "response_calibration_policy": "reference/p1_painted_trail_calibration_policy_v1.json",
+    "response_calibration_policy_git_blob_sha": "ec282928a095467c1082a25e0396c390c17cbdb8"
   },
   "published_painted_trail_protocol": {
     "arena_mm": {
