@@ -122,3 +122,142 @@ Freeze P1 mechanism v1 with:
 6. invariance and anti-navigation-cheat regressions;
 7. one engineering-only reachability parameter set;
 8. no reference-data parameter search.
+
+
+## P1-v1 egocentric mechanism freeze
+
+Mechanism record:
+
+`hypotheses/p1_painted_trail_mechanism_v1.json`
+
+Git blob:
+
+`90e86bce29bf45c6e390f7046a6c25a74f409c78`
+
+P1-v1 represents the painted pheromone as an **undirected external scalar field**. The ant is not given a trail bearing, line distance, arena-center target, edge target, treatment label, path-history label, or any Y-maze information.
+
+### External field
+
+For applied dose ratio (A), trail segment (L), sensor point (p), and effective spread (sigma):
+
+```text
+c(p) = A * exp( -d_segment(p,L)^2 / (2*sigma_field_mm^2) )
+```
+
+The published nominal pheromone dose is normalized to (A=1). DCM is exactly (A=0).
+
+The field is stationary during a P1-v1 open-arena trial. P1-v1 has no deposition, evaporation, diffusion, depletion, or ant-written pheromone state.
+
+### Egocentric sensors
+
+ANTLAB uses x right, y down, so increasing heading is clockwise.
+
+For heading (	heta):
+
+```text
+u(theta) = ( cos(theta),  sin(theta))   forward
+r(theta) = (-sin(theta),  cos(theta))   right
+l(theta) = ( sin(theta), -cos(theta))   left
+```
+
+Two fixed engineering sensor points are used:
+
+```text
+p_L = p + 2.0 mm*u(theta) + 1.5 mm*l(theta)
+p_R = p + 2.0 mm*u(theta) + 1.5 mm*r(theta)
+```
+
+These offsets are structural engineering values, not fitted biological estimates.
+
+### Transduction
+
+Each local concentration is transformed by the same fixed saturating map:
+
+```text
+T(c) = c / (1 + c)
+
+s_L = T(c(p_L))
+s_R = T(c(p_R))
+```
+
+P1-v1 intentionally adds no fitted sensory half-saturation or Hill exponent.
+
+### Steering
+
+While moving:
+
+```text
+omega_trail = kappa_trail_per_s * (s_R - s_L)
+theta <- theta + omega_trail*dt + unchanged canonical angular-noise increment
+```
+
+With the ANTLAB coordinate convention, an eastbound ant above the horizontal trail has the trail closer to its right sensor; (s_R>s_L), so positive trail steering rotates clockwise/downward toward the trail.
+
+P1-v1 changes **heading drift only**. It does not change:
+
+- base speed;
+- speed noise or reversion;
+- pause rate or duration;
+- angular-noise amplitude;
+- RNG streams;
+- locomotion history state.
+
+There is no trail-induced heading update while paused.
+
+### Future response parameters
+
+Only two P1-v1 response quantities may later be estimated:
+
+- `sigma_field_mm`
+- `kappa_trail_per_s`
+
+They must be shared across both 20 cm and 100 cm approach histories, all colonies, and both treatment strata. Bounds and search budget remain unfrozen until the later estimator-policy gate.
+
+### Exact nested nulls
+
+Two exact identities are required:
+
+1. **DCM zero signal:** applied dose (A=0) gives (c_L=c_R=s_L=s_R=omega=0) exactly.
+2. **Zero response gain:** `kappa_trail_per_s=0` gives (omega=0) exactly even with a painted field.
+
+Because P1-v1 adds no RNG draws, both nulls must be bit-for-bit identical to canonical locomotion for the same seed/configuration. Implementation must take an explicit computational bypass when `A=0` or `kappa_trail_per_s=0`: no field/sensor evaluation and no trail heading addition, returning positive numeric zero rather than relying on floating-point multiplication that can produce signed `-0`.
+
+### Structural invariances
+
+Before any reference-data search, implementation must prove:
+
+- reversing trail endpoints changes nothing;
+- translating the whole scene changes nothing;
+- rotating the whole scene and heading together changes nothing;
+- reflection across the trail axis mirrors steering sign;
+- an on-trail ant moving parallel to the trail has zero deterministic trail steering;
+- P1-v1 has no preferred direction along the trail;
+- short/long approach history is not available to the mechanism.
+
+### Frozen engineering reachability values
+
+For the first reference-free implementation check only:
+
+- `sigma_field_mm = 8.0`
+- `kappa_trail_per_s = 4.0`
+- sensor forward offset = 2.0 mm
+- sensor half-separation = 1.5 mm
+- nominal dose ratio = 1.0
+- physics timestep = 0.02 s
+
+These are not biological estimates and were not chosen by fitting the 102-row response target.
+
+If a correctly implemented P1-v1 fails its frozen reference-free structural reachability requirements, do not tune these engineering values after the fact. Only a genuine implementation bug permits an unchanged-mechanism rerun.
+
+## Gate after mechanism freeze
+
+After this mechanism freeze is merged to `main`, P1 sensor/runtime implementation is authorized.
+
+Still **not authorized**:
+
+- response-parameter search;
+- target-driven tuning;
+- canonical promotion;
+- Y-maze access or unlocking.
+
+The next stage is isolated P1 implementation plus reference-free reachability only.

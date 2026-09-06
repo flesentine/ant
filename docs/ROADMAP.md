@@ -84,17 +84,23 @@
 - Y-maze remains locked
 - no chemical-sensor implementation or response-parameter search authorized by this gate
 
-### v0.3.3b — egocentric painted-trail mechanism freeze — next
-- freeze transverse chemical-field kernel
-- freeze local egocentric sensor geometry and dose-aware transduction
-- freeze deterministic steering response with exact zero-signal null
-- preserve baseline speed, pauses, and angular-noise amplitude
-- freeze engineering-only reachability values before implementation
+### v0.3.3b — egocentric painted-trail mechanism freeze — complete
+- frozen undirected Gaussian external line field
+- frozen two-point egocentric bilateral sensor geometry
+- frozen deterministic saturating transduction and left/right steering law
+- exact DCM zero-signal and kappa=0 canonical null identities required
+- baseline speed, pauses, angular-noise amplitude, RNG streams, and locomotion-history state unchanged
+- future P1 response parameters limited to shared sigma_field_mm and kappa_trail_per_s
+- frozen engineering-only reachability values before implementation
+- no trail bearing, line distance, arena target, treatment label, path-history label, or Y-maze input allowed
 
-### v0.3.3c — implementation + reachability
-- implement only after v0.3.3b mechanism freeze
+### v0.3.3c — implementation + reachability — next
+- implement only after v0.3.3b mechanism freeze is merged
+- isolate P1 runtime/model extension from canonical H0
 - prove no navigation/edge/centerline target leakage
-- run reference-free reachability before response fitting
+- prove exact DCM and kappa=0 identities
+- prove translation/rotation/reflection/endpoint-reversal invariances
+- run frozen reference-free reachability before response fitting
 
 ### v0.3.3d — response estimation
 - freeze estimator policy before search

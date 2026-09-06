@@ -13,6 +13,7 @@ H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
 H5  -> official frozen high-resolution LOCO failed promotion; result frozen; closed
+P1  -> evidence/protocol frozen; egocentric painted-trail mechanism frozen; implementation not yet started
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
@@ -103,6 +104,26 @@ Frozen outcome:
 Post-hoc audit run `33979167192` independently reproduced every stored held-out H5/H2/H3/H4 loss and relative-improvement value across all six folds. Real Chromium replay passed **48/48** selected-candidate cases with zero exceptions, zero console errors, and zero Y-maze requests. Audit artifact digest: `sha256:1c23f363003c430414841eeca5e3f95e512e1d832c9c10c4291b2be005c54fef`.
 
 No implementation error invalidates the official result. Per the frozen failure rule, H5-v1 is closed: do not alter bounds, seeds, nuisance parameters, objective weights, candidate budgets, or tune the same mechanism harder. The historical authorization is preserved byte-for-byte under `hypotheses/archive/`, the active authorization path is removed, and the official-run workflow is removed.
+
+## P1 painted-trail response
+
+v0.3.3 now has two pre-implementation freezes:
+
+- evidence/protocol freeze: `hypotheses/p1_painted_trail_response_evidence_v1.json`
+- egocentric mechanism freeze: `hypotheses/p1_painted_trail_mechanism_v1.json`
+
+P1-v1 models the externally painted trail as an undirected Gaussian scalar field sampled only by two symmetric body-frame sensors. Steering is driven by the local right-minus-left transduced signal. The ant receives no trail bearing/distance target, arena-center target, exit target, treatment label, path-history label, colony-specific response, H2–H5 latent state, or Y-maze information.
+
+Future P1 response fitting is limited to two shared parameters:
+
+- `sigma_field_mm`
+- `kappa_trail_per_s`
+
+No parameter search is authorized yet. After the mechanism freeze is merged, the next gate is isolated implementation plus **reference-free** reachability using only the frozen engineering values `sigma=8 mm` and `kappa=4 s^-1`. The 102-row response target may not be loaded during that reachability step.
+
+The exact DCM zero-dose and `kappa=0` paths must remain bit-for-bit identical to canonical locomotion, with no extra RNG draws. Canonical locomotion remains unchanged and the Y-maze remains locked.
+
+See `docs/PAINTED_TRAIL_RESPONSE.md`.
 
 ## Run
 

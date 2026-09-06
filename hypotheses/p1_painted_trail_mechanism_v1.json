@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "id": "P1_egocentric_painted_trail_gradient_steering_v1",
+  "status": "mechanism_frozen_before_implementation_or_parameter_search",
+  "freeze_date_local": "2026-09-05",
+  "scientific_scope": "Poissonnier 2026 open-arena painted-trail response development only. No Y-maze access and no canonical promotion by this freeze.",
+  "frozen_inputs": {
+    "evidence_freeze": {
+      "file": "hypotheses/p1_painted_trail_response_evidence_v1.json",
+      "git_blob_sha": "db89c879906aa1f35dc1d395cc3ebbb661b218b6"
+    },
+    "response_calibration_policy": {
+      "file": "reference/p1_painted_trail_calibration_policy_v1.json",
+      "git_blob_sha": "ec282928a095467c1082a25e0396c390c17cbdb8"
+    },
+    "response_target": {
+      "file": "reference/poissonnier2026_pheromone_response_targets.json",
+      "git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+    },
+    "canonical_locomotion_model": {
+      "file": "models/lasius_niger_locomotion_v1.json",
+      "git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+    },
+    "canonical_runtime": {
+      "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+      "integrity_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+    }
+  },
+  "mechanism_class": "local bilateral tropotaxis on an externally painted undirected scalar trail field",
+  "coordinate_convention": {
+    "world_x": "increases rightward",
+    "world_y": "increases downward",
+    "heading_unit_vector": "u(theta) = (cos(theta), sin(theta))",
+    "positive_heading_rotation": "clockwise in ANTLAB world coordinates",
+    "right_unit_vector": "r(theta) = (-sin(theta), cos(theta))",
+    "left_unit_vector": "l(theta) = (sin(theta), -cos(theta))"
+  },
+  "external_field": {
+    "source": "published painted trail apparatus/protocol, never ant navigation state",
+    "line_segment_mm": {
+      "x1": 0,
+      "y1": 105,
+      "x2": 297,
+      "y2": 105
+    },
+    "line_directionality": "undirected; swapping endpoints must not change the field",
+    "nominal_dose_hindgut_equivalents_per_cm": 0.0048,
+    "treatment_dose": {
+      "pheromone": "0.0048 hindgut-equivalents/cm for the published nominal dose",
+      "dcm_control": "0 exactly"
+    },
+    "normalized_dose": "A = applied_hindgut_equivalents_per_cm / 0.0048",
+    "transverse_kernel": "c(p) = A * exp(-d_segment(p,L)^2 / (2 * sigma_field_mm^2))",
+    "distance_definition": "Euclidean distance from sensor point p to the frozen undirected trail segment L",
+    "temporal_dynamics": "stationary during an open-arena trial; no deposition, evaporation, diffusion, depletion, or ant-written field state in P1-v1",
+    "dose_semantics": "A is an apparatus/protocol input. Treatment labels are not visible to the ant; only sampled scalar field values are."
+  },
+  "egocentric_sensors": {
+    "count": 2,
+    "geometry_status": "fixed engineering structure; not a fitted biological estimate",
+    "forward_offset_mm": 2,
+    "lateral_half_separation_mm": 1.5,
+    "left_sensor": "p_L = p + 2.0*u(theta) + 1.5*l(theta)",
+    "right_sensor": "p_R = p + 2.0*u(theta) + 1.5*r(theta)",
+    "available_signal_only": [
+      "c(p_L)",
+      "c(p_R)"
+    ],
+    "forbidden_direct_geometry": [
+      "trail bearing",
+      "trail signed or unsigned distance",
+      "trail centerline coordinates",
+      "trail endpoint direction",
+      "arena center",
+      "arena edge distance or bearing",
+      "exit edge",
+      "future trajectory"
+    ]
+  },
+  "transduction": {
+    "equation": "T(c) = c / (1 + c)",
+    "status": "fixed deterministic saturating transduction; no fitted half-saturation or Hill exponent in P1-v1",
+    "left_response": "s_L = T(c(p_L))",
+    "right_response": "s_R = T(c(p_R))",
+    "properties": [
+      "T(0)=0 exactly",
+      "T(c) is monotone for c>=0",
+      "0<=T(c)<1",
+      "dose scaling enters only through the external scalar field"
+    ]
+  },
+  "steering": {
+    "equation": "omega_trail = kappa_trail_per_s * (s_R - s_L)",
+    "update": "If neither exact-null bypass applies and the ant is moving, sample both sensors at the pre-step position/heading and add omega_trail*dt to the same heading update that receives canonical angular noise.",
+    "sign_check": "with heading east and the trail below the ant, the right sensor is closer to the trail, s_R>s_L, omega_trail>0, and positive ANTLAB rotation turns clockwise/downward toward the trail",
+    "paused_intervals": "no trail-induced heading drift while paused",
+    "speed_effect": "none",
+    "pause_effect": "none",
+    "angular_noise_amplitude_effect": "none",
+    "speed_noise_effect": "none",
+    "internal_memory_or_history_state": "none",
+    "new_rng_streams": "none"
+  },
+  "future_response_parameters": {
+    "names": [
+      "sigma_field_mm",
+      "kappa_trail_per_s"
+    ],
+    "domains": {
+      "sigma_field_mm": ">0",
+      "kappa_trail_per_s": ">=0"
+    },
+    "bounds_status": "not frozen here; must be frozen in a separate estimator policy before any parameter search",
+    "sharing_rule": "one shared sigma_field_mm and one shared kappa_trail_per_s across short/long histories and all colonies",
+    "treatment_specific_values_forbidden": true,
+    "path_specific_values_forbidden": true,
+    "colony_specific_values_forbidden": true
+  },
+  "exact_nulls": {
+    "dcm_zero_signal": {
+      "condition": "applied dose = 0",
+      "consequence": "c_L=c_R=s_L=s_R=omega_trail=0 exactly for every state",
+      "required_identity": "trajectory and RNG state must be bit-for-bit identical to canonical locomotion for identical seed/configuration"
+    },
+    "zero_gain_nested_null": {
+      "condition": "kappa_trail_per_s = 0",
+      "consequence": "omega_trail=0 exactly even with nonzero pheromone field",
+      "required_identity": "trajectory and RNG state must be bit-for-bit identical to canonical locomotion for identical seed/configuration"
+    },
+    "computational_bypass": {
+      "rule": "Before any P1 field/sensor evaluation, if applied dose A is exactly 0 OR kappa_trail_per_s is exactly 0, skip the P1 mechanism and return canonical heading dynamics with no trail addition.",
+      "returned_trail_drift": "positive numeric zero (+0) exactly",
+      "sensor_field_evaluation": "not performed on the bypass path",
+      "rng_effect": "none; no extra draws or streams",
+      "purpose": "Guarantees a computationally exact nested null rather than relying on floating-point multiplication such as 0 * negative_difference, which can produce signed -0."
+    }
+  },
+  "structural_invariances": [
+    "swapping trail segment endpoints leaves all field samples and trajectories unchanged",
+    "rigidly translating ant, arena, and trail together leaves body-frame sensor signals unchanged",
+    "rigidly rotating ant, arena, trail, and heading together leaves body-frame sensor signals and steering unchanged",
+    "reflection across the trail axis with reflected heading mirrors the steering sign",
+    "on-trail motion exactly parallel to the trail has s_L=s_R and zero deterministic trail steering",
+    "the mechanism has no preferred direction along the trail axis",
+    "short-versus-long approach history is not an input to the P1 mechanism"
+  ],
+  "forbidden_inputs_and_shortcuts": [
+    "Pheromone or DCM treatment label",
+    "Path_length or recent constrained travel",
+    "Colony identity as biology",
+    "Y-maze outcomes or geometry",
+    "arena center or target edge",
+    "precomputed trail-following direction",
+    "distance/bearing-to-line supplied directly to steering",
+    "future position or exit information",
+    "H2/H3/H4/H5 latent state",
+    "canonical parameter changes conditioned on trail presence"
+  ],
+  "engineering_reachability_values": {
+    "status": "frozen engineering values for reference-free reachability only; not biological estimates and not fitted to the response target",
+    "sigma_field_mm": 8,
+    "kappa_trail_per_s": 4,
+    "sensor_forward_offset_mm": 2,
+    "sensor_lateral_half_separation_mm": 1.5,
+    "nominal_dose_ratio_A": 1,
+    "physics_dt_s": 0.02
+  },
+  "reference_free_reachability_requirements": {
+    "target_or_reference_outcomes_may_be_loaded": false,
+    "ymaze_may_be_loaded": false,
+    "required_checks": [
+      "DCM zero-dose identity is bit-for-bit canonical across a frozen seed panel",
+      "kappa=0 identity is bit-for-bit canonical across the same seed panel",
+      "no additional RNG draws or RNG streams",
+      "ant 10 mm above a horizontal trail and heading parallel to it has deterministic steering toward the trail",
+      "the reflected 10 mm-below case has equal-magnitude opposite-sign steering",
+      "on-trail parallel heading has exactly zero deterministic trail steering",
+      "trail endpoint reversal is exactly invariant",
+      "rigid translation and rotation tests pass to numerical tolerance",
+      "with frozen engineering values, a reference-free pooled pheromone-vs-zero-dose simulation shows a positive trail-axis attraction effect without changing canonical moving-speed dynamics"
+    ],
+    "engineering_outcome_rule": "Reachability demonstrates mechanism wiring only. It is not evidence of biological fit and may not be used to choose estimator bounds after seeing reference outcomes."
+  },
+  "implementation_gate": {
+    "chemical_sensor_implementation_authorized_when_this_freeze_is_merged_to_main": true,
+    "implementation_before_merge_authorized": false,
+    "response_parameter_search_authorized": false,
+    "canonical_promotion_authorized": false,
+    "ymaze_unlock_authorized": false,
+    "next_step": "Implement P1-v1 exactly as frozen in an isolated runtime/model extension, add invariance and exact-null regressions, then run the frozen reference-free reachability panel. Do not load the 102-row response target during reachability."
+  },
+  "failure_rule": "If the first correctly implemented reference-free reachability panel fails a frozen structural requirement, do not tune P1-v1 engineering values after the fact. A genuine implementation bug may be corrected and rerun with this mechanism freeze unchanged."
+}
