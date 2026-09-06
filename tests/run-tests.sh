@@ -31,6 +31,8 @@ node tests/h5-estimation.test.js
 node tests/h5-result-freeze.test.js
 node tests/p1-painted-trail-evidence.test.js
 node tests/p1-painted-trail-mechanism-policy.test.js
+node tests/p1-reachability-policy.test.js
+node tests/p1-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
