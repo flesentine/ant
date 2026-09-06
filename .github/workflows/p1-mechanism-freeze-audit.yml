@@ -1,4 +1,5 @@
 name: P1 mechanism-freeze audit
+# rerun after exact-null hardening
 on:
   push:
     branches: [v0.3.3b-p1-mechanism-freeze]
@@ -17,7 +18,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object hypotheses/p1_painted_trail_mechanism_v1.json)" = "e54ea73d14220a9a01e80f51c2e0970532f2ab2d"
+          test "$(git hash-object hypotheses/p1_painted_trail_mechanism_v1.json)" = "90e86bce29bf45c6e390f7046a6c25a74f409c78"
           test "$(git hash-object hypotheses/p1_painted_trail_response_evidence_v1.json)" = "db89c879906aa1f35dc1d395cc3ebbb661b218b6"
           test "$(git hash-object reference/p1_painted_trail_calibration_policy_v1.json)" = "ec282928a095467c1082a25e0396c390c17cbdb8"
           test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
