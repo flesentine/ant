@@ -74,9 +74,32 @@
 - canonical locomotion remains unchanged; Y-maze remains locked
 
 ## v0.3.3 — externally painted trail response
-- local egocentric chemical sensors
-- dose-aware trail stimulus
+### v0.3.3a — evidence/protocol freeze — complete
+- final Poissonnier open-arena pheromone target surface frozen from all 102 Experiment 1 rows
+- published trail recipe/geometry frozen as protocol/apparatus facts
+- primary response observables limited to middle-zone occupancy and trail-axis exits
+- secondary guards: exit time and beeline
+- response estimation must use pheromone-vs-DCM contrasts within each path-length stratum
+- baseline locomotion and H2–H5 remain fixed; short/long-specific response parameters forbidden
+- Y-maze remains locked
+- no chemical-sensor implementation or response-parameter search authorized by this gate
+
+### v0.3.3b — egocentric painted-trail mechanism freeze — next
+- freeze transverse chemical-field kernel
+- freeze local egocentric sensor geometry and dose-aware transduction
+- freeze deterministic steering response with exact zero-signal null
+- preserve baseline speed, pauses, and angular-noise amplitude
+- freeze engineering-only reachability values before implementation
+
+### v0.3.3c — implementation + reachability
+- implement only after v0.3.3b mechanism freeze
+- prove no navigation/edge/centerline target leakage
+- run reference-free reachability before response fitting
+
+### v0.3.3d — response estimation
+- freeze estimator policy before search
 - fit only pheromone-response parameters against open-arena pheromone data
+- keep Y-maze locked for v0.4
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
