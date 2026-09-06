@@ -6,6 +6,7 @@ const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
 const m=read('hypotheses/p1_painted_trail_mechanism_v1.json');
+const implementationAuthPath=path.join(root,'hypotheses','p1_implementation_authorization_v1.json');
 assert.strictEqual(blob('hypotheses/p1_painted_trail_mechanism_v1.json'),'90e86bce29bf45c6e390f7046a6c25a74f409c78','P1 mechanism freeze blob drifted');
 assert.strictEqual(m.id,'P1_egocentric_painted_trail_gradient_steering_v1');
 assert.strictEqual(m.status,'mechanism_frozen_before_implementation_or_parameter_search');
@@ -117,7 +118,19 @@ assert(T(0)===0);
 assert(T(0.1)<T(1)&&T(1)<T(10));
 assert(T(10)<1);
 
-assert.ok(!fs.existsSync(path.join(root,'src','p1.js')),'P1 runtime must not exist at mechanism-freeze checkpoint');
-assert.ok(!fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json')),'P1 model must not exist at mechanism-freeze checkpoint');
+if(fs.existsSync(implementationAuthPath)){
+  const auth=read('hypotheses/p1_implementation_authorization_v1.json');
+  assert.strictEqual(blob('hypotheses/p1_implementation_authorization_v1.json'),'f9fbaeb63c72de7a639d54b597f5c1247d354e20','P1 implementation authorization drifted');
+  assert.strictEqual(auth.mechanism_freeze.merge_commit,'bd7222be3299f147b19b6c8deeb90bb7e2874514');
+  assert.strictEqual(auth.authorization_scope.isolated_p1_runtime_and_model_implementation,true);
+  assert.strictEqual(auth.authorization_scope.reference_free_reachability_execution,true);
+  assert.strictEqual(auth.authorization_scope.response_parameter_search,false);
+  assert.strictEqual(auth.authorization_scope.ymaze_access_or_unlock,false);
+  assert.ok(fs.existsSync(path.join(root,'src','p1.js')),'P1 runtime should exist only after mechanism-freeze merge authorization');
+  assert.ok(fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json')),'P1 model should exist only after mechanism-freeze merge authorization');
+}else{
+  assert.ok(!fs.existsSync(path.join(root,'src','p1.js')),'P1 runtime must not exist before mechanism-freeze merge authorization');
+  assert.ok(!fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json')),'P1 model must not exist before mechanism-freeze merge authorization');
+}
 
 console.log('p1-painted-trail-mechanism-policy.test.js PASS '+JSON.stringify({mechanism_blob:blob('hypotheses/p1_painted_trail_mechanism_v1.json'),above_omega:above.omega,below_omega:below.omega}));
