@@ -17,10 +17,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object hypotheses/p1_painted_trail_response_evidence_v1.json)" = "afa3257468f7290a277c888276b671119e2be169"
+          test "$(git hash-object hypotheses/p1_painted_trail_response_evidence_v1.json)" = "13ade699b67402cf146d653f0c6342ee8fc450fc"
           test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
           test "$(git hash-object tools/derive-pheromone-response-targets.py)" = "d44fee2d176eb6dcdfea625d4280059d499cf80b"
-          test "$(git hash-object reference/calibration_manifest.json)" = "58e06a93d9bc1ac1eb25316f4b1590743019c936"
+          test "$(git hash-object reference/calibration_manifest.json)" = "29044577af38dced5cccb83c687117ee878fd66c"
+          test "$(git hash-object reference/p1_painted_trail_calibration_policy_v1.json)" = "ec282928a095467c1082a25e0396c390c17cbdb8"
           test ! -e src/p1.js
           test ! -e models/lasius_niger_painted_trail_p1_v1.json
       - name: Run full H0-H5 plus P1 evidence regression suite
@@ -34,6 +35,7 @@ jobs:
           const t=require('./reference/poissonnier2026_pheromone_response_targets.json');
           const f=require('./hypotheses/p1_painted_trail_response_evidence_v1.json');
           const c=require('./reference/calibration_manifest.json');
+          const pc=require('./reference/p1_painted_trail_calibration_policy_v1.json');
           const mean=(tr,p,k)=>{const a=t.rows.filter(r=>r.treatment===tr&&r.path_length===p);return a.reduce((s,r)=>s+(typeof r[k]==='boolean'?(r[k]?1:0):r[k]),0)/a.length;};
           const out={
             status:'passed',
@@ -52,9 +54,10 @@ jobs:
             },
             chemical_sensor_code_authorized:f.implementation_gate.chemical_sensor_code_authorized,
             response_parameter_search_authorized:f.implementation_gate.response_parameter_search_authorized,
+            p1_policy_search_authorized:pc.implementation_gate.response_parameter_search_authorized,
             ymaze_allowed:c.datasets.poissonnier2026_ymaze.allowed_for_development_parameter_estimation
           };
-          if(out.rows!==102||out.chemical_sensor_code_authorized!==false||out.response_parameter_search_authorized!==false||out.ymaze_allowed!==false)throw new Error('P1 evidence firewall failed');
+          if(out.rows!==102||out.chemical_sensor_code_authorized!==false||out.response_parameter_search_authorized!==false||out.p1_policy_search_authorized!==false||out.ymaze_allowed!==false)throw new Error('P1 evidence firewall failed');
           fs.writeFileSync('/tmp/p1-evidence/summary.json',JSON.stringify(out,null,2));
           console.log(JSON.stringify(out));
           NODE
