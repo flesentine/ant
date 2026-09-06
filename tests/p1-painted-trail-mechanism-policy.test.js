@@ -6,7 +6,7 @@ const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
 const m=read('hypotheses/p1_painted_trail_mechanism_v1.json');
-assert.strictEqual(blob('hypotheses/p1_painted_trail_mechanism_v1.json'),'e54ea73d14220a9a01e80f51c2e0970532f2ab2d','P1 mechanism freeze blob drifted');
+assert.strictEqual(blob('hypotheses/p1_painted_trail_mechanism_v1.json'),'90e86bce29bf45c6e390f7046a6c25a74f409c78','P1 mechanism freeze blob drifted');
 assert.strictEqual(m.id,'P1_egocentric_painted_trail_gradient_steering_v1');
 assert.strictEqual(m.status,'mechanism_frozen_before_implementation_or_parameter_search');
 assert.strictEqual(m.frozen_inputs.evidence_freeze.git_blob_sha,'db89c879906aa1f35dc1d395cc3ebbb661b218b6');
@@ -29,6 +29,8 @@ assert.strictEqual(m.steering.internal_memory_or_history_state,'none');
 assert.strictEqual(m.steering.new_rng_streams,'none');
 assert.strictEqual(m.reference_free_reachability_requirements.target_or_reference_outcomes_may_be_loaded,false);
 assert.strictEqual(m.reference_free_reachability_requirements.ymaze_may_be_loaded,false);
+assert.match(m.exact_nulls.computational_bypass.rule,/if applied dose A is exactly 0 OR kappa_trail_per_s is exactly 0/);
+assert.strictEqual(m.exact_nulls.computational_bypass.returned_trail_drift,'positive numeric zero (+0) exactly');
 assert.strictEqual(m.implementation_gate.chemical_sensor_implementation_authorized_when_this_freeze_is_merged_to_main,true);
 assert.strictEqual(m.implementation_gate.implementation_before_merge_authorized,false);
 assert.strictEqual(m.implementation_gate.response_parameter_search_authorized,false);
@@ -63,15 +65,20 @@ function sensors(p,theta){
   };
 }
 function omega(p,theta,a,b,sigma,kappa,A){
+  if(A===0||kappa===0)return {omega:0,left:null,right:null,bypass:true};
   const s=sensors(p,theta),l=T(field(s.L,a,b,sigma,A)),r=T(field(s.R,a,b,sigma,A));
-  return {omega:kappa*(r-l),left:l,right:r};
+  return {omega:kappa*(r-l),left:l,right:r,bypass:false};
 }
 const near=(a,b,t=1e-12)=>assert(Math.abs(a-b)<=t,`${a} != ${b}`);
 
 const A={x:0,y:105},B={x:297,y:105};
 for(const p of [{x:100,y:95},{x:100,y:105},{x:100,y:115}]){
-  assert.strictEqual(omega(p,0,A,B,8,4,0).omega,0,'zero dose must be exact zero');
-  assert.strictEqual(omega(p,0,A,B,8,0,1).omega,0,'zero gain must be exact zero');
+  const d0=omega(p,0,A,B,8,4,0),k0=omega(p,0,A,B,8,0,1);
+  assert.strictEqual(d0.omega,0,'zero dose must be exact +0');
+  assert.strictEqual(k0.omega,0,'zero gain must be exact +0');
+  assert.strictEqual(Object.is(d0.omega,-0),false,'zero dose bypass must not return -0');
+  assert.strictEqual(Object.is(k0.omega,-0),false,'zero gain bypass must not return -0');
+  assert.strictEqual(d0.bypass,true);assert.strictEqual(k0.bypass,true);
 }
 const above=omega({x:100,y:95},0,A,B,8,4,1);
 const below=omega({x:100,y:115},0,A,B,8,4,1);
