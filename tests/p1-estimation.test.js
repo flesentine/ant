@@ -6,7 +6,7 @@ const {readJson}=require('../tools/load-bundle.js');
 const root=path.resolve(__dirname,'..');
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
-assert.strictEqual(blob('tools/run-p1-estimation.js'),'c5e737ba6d42c68026ea9b5880a2f9c222d73edb','P1 estimator blob drifted');
+assert.strictEqual(blob('tools/run-p1-estimation.js'),'a307e74e8ba2366e2546eebe1a7cccac69a3ff9a','P1 estimator blob drifted');
 assert.strictEqual(blob('hypotheses/p1_response_estimation_v1.json'),'628d17f6eb69fd11216aff33d1356d184365aedd');
 assert.strictEqual(est.POLICY_GIT_BLOB_SHA,'628d17f6eb69fd11216aff33d1356d184365aedd');
 assert.strictEqual(est.AUTHORIZATION_FILE,'hypotheses/p1_highres_authorization_v1.json');
@@ -60,11 +60,12 @@ assert.strictEqual(q.reference_outcomes_accessed,false);
 assert.strictEqual(q.response_target_semantics_loaded,false);
 assert.strictEqual(q.response_target_hash_verified_only,true);
 assert.strictEqual(q.ymaze_accessed,false);
-assert.strictEqual(q.estimator_git_blob_sha,'c5e737ba6d42c68026ea9b5880a2f9c222d73edb');
+assert.strictEqual(q.estimator_git_blob_sha,'a307e74e8ba2366e2546eebe1a7cccac69a3ff9a');
 assert(Object.values(q.checks).every(Boolean),JSON.stringify(q.checks));
 
 assert.ok(!fs.existsSync(path.join(root,'hypotheses','p1_highres_authorization_v1.json')),'active P1 high-resolution authorization must not exist during estimator qualification');
 assert.throws(()=>est.assertHighResolutionAuthorized(root,null,{branchName:'main'}),/missing post-qualification authorization artifact/);
+assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/,'semantic target loader must be authorization-gated');
 
 const tmp=path.join(os.tmpdir(),'p1-estimation-highres-should-not-exist-'+process.pid+'.json');
 try{fs.rmSync(tmp,{force:true});}catch(_){}
