@@ -1,0 +1,91 @@
+name: P1 mechanism-freeze audit
+on:
+  push:
+    branches: [v0.3.3b-p1-mechanism-freeze]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact P1 mechanism chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p1_painted_trail_mechanism_v1.json)" = "e54ea73d14220a9a01e80f51c2e0970532f2ab2d"
+          test "$(git hash-object hypotheses/p1_painted_trail_response_evidence_v1.json)" = "db89c879906aa1f35dc1d395cc3ebbb661b218b6"
+          test "$(git hash-object reference/p1_painted_trail_calibration_policy_v1.json)" = "ec282928a095467c1082a25e0396c390c17cbdb8"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test ! -e src/p1.js
+          test ! -e models/lasius_niger_painted_trail_p1_v1.json
+      - name: Run full H0-H5 plus P1 policy suite
+        run: ./tests/run-tests.sh
+      - name: Verify mechanism freeze semantics
+        shell: bash
+        run: |
+          mkdir -p /tmp/p1-mechanism
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=require('./hypotheses/p1_painted_trail_mechanism_v1.json');
+          const out={
+            status:'passed',
+            id:m.id,
+            response_parameters:m.future_response_parameters.names,
+            engineering_values:m.engineering_reachability_values,
+            implementation_after_merge:m.implementation_gate.chemical_sensor_implementation_authorized_when_this_freeze_is_merged_to_main,
+            implementation_before_merge:m.implementation_gate.implementation_before_merge_authorized,
+            search_authorized:m.implementation_gate.response_parameter_search_authorized,
+            ymaze_authorized:m.implementation_gate.ymaze_unlock_authorized,
+            canonical_promotion:m.implementation_gate.canonical_promotion_authorized,
+            target_load_allowed_during_reachability:m.reference_free_reachability_requirements.target_or_reference_outcomes_may_be_loaded
+          };
+          if(out.implementation_after_merge!==true||out.implementation_before_merge!==false||out.search_authorized!==false||out.ymaze_authorized!==false||out.canonical_promotion!==false||out.target_load_allowed_during_reachability!==false)throw new Error('P1 mechanism gate drift');
+          if(JSON.stringify(out.response_parameters)!==JSON.stringify(['sigma_field_mm','kappa_trail_per_s']))throw new Error('P1 response parameter surface drift');
+          fs.writeFileSync('/tmp/p1-mechanism/semantics.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out));
+          NODE
+      - name: Real Chromium canonical-state sanity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p1-mechanism/http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p1-mechanism-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p1-mechanism-chrome --remote-debugging-port=9222 about:blank >/tmp/p1-mechanism/chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/tmp/p1-mechanism/chrome-version.json 2>/dev/null && break; sleep .2; done
+          cat >/tmp/p1-mechanism/browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabH5"))break;await new Promise(r=>setTimeout(r,50));}
+          const title=await evalv('document.title'),body=await evalv('document.body.innerText');
+          if(title!=='ANTLAB H5'||!body.includes('H5-v1 closed'))throw new Error('canonical browser state drift');
+          const mech=await evalv("(async()=>await (await fetch('./hypotheses/p1_painted_trail_mechanism_v1.json')).json())()");
+          if(mech.status!=='mechanism_frozen_before_implementation_or_parameter_search')throw new Error('mechanism freeze missing');
+          if(mech.implementation_gate.response_parameter_search_authorized!==false)throw new Error('P1 search unexpectedly authorized');
+          const p1Present=await evalv("typeof globalThis.AntLabP1!=='undefined'");
+          const yreq=requests.filter(u=>/y[_-]?maze|ymaze/i.test(u));
+          if(p1Present||exceptions.length||consoleErrors.length||yreq.length)throw new Error('browser firewall failure');
+          const out={status:'passed',title,exceptions:0,console_errors:0,ymaze_requests:0,p1_runtime_present:false,mechanism_status:mech.status};
+          fs.writeFileSync('/tmp/p1-mechanism/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p1-mechanism/browser.mjs
+      - name: Upload P1 mechanism-freeze audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-mechanism-freeze-audit
+          path: /tmp/p1-mechanism
+          retention-days: 30
