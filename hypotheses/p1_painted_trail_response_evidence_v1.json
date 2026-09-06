@@ -131,5 +131,48 @@
     "response_parameter_search_authorized": false,
     "next_step": "Freeze P1 mechanism v1: transverse field kernel, egocentric sensor geometry, dose transduction, deterministic steering law, exact zero-signal null, invariance tests, and engineering-only reachability values before implementing code."
   },
-  "holdout_rule": "The Poissonnier 2026 Y-maze remains a locked cross-apparatus holdout and may not enter P1 mechanism design, parameter estimation, candidate ranking, stopping rules, or model selection."
+  "holdout_rule": "The Poissonnier 2026 Y-maze remains a locked cross-apparatus holdout and may not enter P1 mechanism design, parameter estimation, candidate ranking, stopping rules, or model selection.",
+  "response_observable_provenance": {
+    "middle_zone_fraction": {
+      "status": "article_and_supplement_defined",
+      "source": "Proportion_Frames_MiddleZone",
+      "definition": "Proportion of frames in the zone 1 cm on each side of the horizontal pheromone/solvent line."
+    },
+    "trail_axis_exit": {
+      "status": "ANTLAB_derived_geometric_metric_not_article_reported",
+      "source_columns": [
+        "Xlast",
+        "Ylast",
+        "Xmin_Arena",
+        "Xmax_Arena",
+        "Ymin_Arena",
+        "Ymax_Arena",
+        "Scale_factor"
+      ],
+      "definition": "Classify the nearest recorded first-contact arena border; left/right are on the frozen horizontal trail axis and top/bottom are off axis.",
+      "frozen_before_P1_mechanism_implementation": true
+    },
+    "time_to_exit_s": {
+      "status": "supplement_derived",
+      "source": "Total_Frames / 25 fps"
+    },
+    "beeline_mm": {
+      "status": "supplement_provided",
+      "source": "Beeline"
+    }
+  },
+  "trail_axis_exit_geometry_audit": {
+    "source_details_sheet": "Xlast/Ylast are defined as coordinates where the ant reached a border; Scale_factor is the arena real width divided by Ymax_Arena-Ymin_Arena and is interpreted as cm per coordinate unit.",
+    "audit_run_id": 34016868960,
+    "audit_job_id": 101442065748,
+    "audit_artifact_id": 9984165032,
+    "audit_artifact_digest": "sha256:0964643554b2a171ad2a1bfa685126374268420538f7b6e32dc44c97449e9836",
+    "rows_checked": 102,
+    "exit_edge_mismatches": 0,
+    "corner_ambiguous_under_5_mm": 0,
+    "max_distance_to_assigned_border_mm": 6.593063856786537,
+    "median_distance_to_assigned_border_mm": 1.7655273766537203,
+    "min_gap_between_nearest_and_second_nearest_border_mm": 9.147379401692884,
+    "all_six_colonies_have_all_four_treatment_by_path_groups": true
+  }
 }
