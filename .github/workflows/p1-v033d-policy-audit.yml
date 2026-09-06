@@ -1,0 +1,114 @@
+name: P1 v0.3.3d policy audit
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [v0.3.3d-p1-response-estimation-policy]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact P1 policy chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p1_response_estimation_v1.json)" = "50e00ed729d5f8421f55dcd763f27899f9f2fc8b"
+          test "$(git hash-object hypotheses/p1_painted_trail_response_evidence_v1.json)" = "db89c879906aa1f35dc1d395cc3ebbb661b218b6"
+          test "$(git hash-object reference/p1_painted_trail_calibration_policy_v1.json)" = "ec282928a095467c1082a25e0396c390c17cbdb8"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test "$(git hash-object hypotheses/p1_painted_trail_mechanism_v1.json)" = "90e86bce29bf45c6e390f7046a6c25a74f409c78"
+          test "$(git hash-object hypotheses/p1_reachability_result_freeze_v1.json)" = "e9187ff27fb04015ded038a5f98354995455e377"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_painted_trail_p1_v1.json)" = "73873fd6763838423ca27648136bb0b9ff062817"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test ! -e tools/run-p1-estimation.js
+          test ! -e hypotheses/p1_highres_authorization_v1.json
+      - name: Run full H0-H5 plus P1 suite
+        run: ./tests/run-tests.sh
+      - name: Policy static firewall audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=require('./hypotheses/p1_response_estimation_v1.json');
+          if(p.estimator_implementation_gate.estimator_status!=='not_implemented_at_policy_freeze')throw new Error('estimator status drift');
+          if(p.estimator_implementation_gate.high_resolution_response_search_authorized!==false)throw new Error('highres unexpectedly authorized');
+          if(p.promotion_rule.ymaze_unlock_authorized!==false)throw new Error('Y-maze unexpectedly authorized');
+          if(p.response_parameter_surface.nuisance_parameters.length!==0)throw new Error('nuisance added');
+          if(JSON.stringify(p.response_parameter_surface.estimated_parameter_names_exact)!==JSON.stringify(['sigma_field_mm','kappa_trail_per_s']))throw new Error('response surface drift');
+          if(p.primary_objective.candidate_ranking_uses_only_primary_objective!==true)throw new Error('ranking objective drift');
+          if(p.secondary_guard_policy.ranking_use!==false||p.secondary_guard_policy.selection_use!==false)throw new Error('secondary guard leaked into selection');
+          const runtime=fs.readFileSync('./src/p1.js','utf8');
+          if(runtime.includes('poissonnier2026_pheromone_response_targets.json'))throw new Error('runtime target leak');
+          if(/(?:loadBundle|readJson|require)\s*\([^\n)]*y[_-]?maze/i.test(runtime))throw new Error('runtime Y-maze leak');
+          fs.mkdirSync('/tmp/p1-policy-audit',{recursive:true});
+          fs.writeFileSync('/tmp/p1-policy-audit/static.json',JSON.stringify({
+            status:'passed',
+            policy_blob:'50e00ed729d5f8421f55dcd763f27899f9f2fc8b',
+            parameters:p.response_parameter_surface.estimated_parameter_names_exact,
+            nuisances:0,
+            candidates:p.search_protocol.candidate_budget_per_fold_total,
+            folds:p.reference_partition.folds,
+            highres_authorized:false,
+            ymaze_authorized:false
+          },null,2));
+          NODE
+      - name: Real Chromium policy/firewall sanity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p1-policy-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p1-policy-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p1-policy-chrome --remote-debugging-port=9222 about:blank >/tmp/p1-policy-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/tmp/p1-policy-version.json 2>/dev/null && break; sleep .2; done
+          cat >/tmp/p1-policy-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json();
+          const target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);
+          await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{
+            const m=JSON.parse(e.data);
+            if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}
+            if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);
+            if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);
+            if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);
+          };
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');
+          await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<100;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+          const title=await evalv('document.title');
+          const policy=await evalv("(async()=>await (await fetch('./hypotheses/p1_response_estimation_v1.json')).json())()");
+          if(policy.status!=='development_response_estimation_policy_frozen_before_estimator_implementation_or_parameter_search')throw new Error('browser policy status drift');
+          if(policy.estimator_implementation_gate.high_resolution_response_search_authorized!==false)throw new Error('browser highres auth drift');
+          if(policy.promotion_rule.ymaze_unlock_authorized!==false)throw new Error('browser Y-maze auth drift');
+          if(policy.response_parameter_surface.nuisance_parameters.length!==0)throw new Error('browser nuisance drift');
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          if(exceptions.length||consoleErrors.length||yreq.length||targetReq.length)throw new Error('browser firewall failure');
+          const out={status:'passed',title,exceptions:0,console_errors:0,ymaze_requests:0,response_target_requests:0,highres_authorized:false,nuisances:0};
+          fs.writeFileSync('/tmp/p1-policy-audit/browser.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out));
+          ws.close();
+          NODE
+          node /tmp/p1-policy-browser.mjs
+      - name: Upload P1 policy audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-v033d-policy-audit
+          path: /tmp/p1-policy-audit
+          retention-days: 30
