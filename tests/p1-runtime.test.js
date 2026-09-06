@@ -17,7 +17,7 @@ assert.strictEqual(blob('models/lasius_niger_painted_trail_p1_v1.json'),'73873fd
 assert.strictEqual(blob('apparatus/poissonnier2026_open_arena_p1_v1.json'),'df589d6b39c1617a7dedc3bfa9d34a408c51b2f4');
 assert.strictEqual(blob('experiments/open_arena_p1_zero_dose_reachability.json'),'6e47fa91143ed5d4d2b52bf2c555246b7d216297');
 assert.strictEqual(blob('experiments/open_arena_p1_nominal_dose_reachability.json'),'8232d378195304f2a15aa76da8abf108d94f2c58');
-assert.strictEqual(blob('tools/run-p1-reachability.js'),'4341bcd34405022551b3b7bb28ee67a76812024e');
+assert.strictEqual(blob('tools/run-p1-reachability.js'),'42f2a4c27bec95394052fd080ce58bdf70db337b');
 assert.strictEqual(blob('hypotheses/p1_reachability_execution_v1.json'),'282a95ec6761acd8d94163b25f712f191181f2ff');
 
 const model=readJson(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json'));
