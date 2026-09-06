@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "P1_painted_trail_calibration_policy_v1",
+  "status": "development_response_estimation_scope_frozen_without_mutating_historical_calibration_manifest",
+  "freeze_date_local": "2026-09-05",
+  "base_calibration_manifest": {
+    "file": "reference/calibration_manifest.json",
+    "git_blob_sha": "29044577af38dced5cccb83c687117ee878fd66c"
+  },
+  "dataset": "poissonnier2026_open_arena",
+  "source_xlsx_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+  "response_target": {
+    "file": "reference/poissonnier2026_pheromone_response_targets.json",
+    "git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+    "status": "development_response_estimation_only_not_external_validation"
+  },
+  "allowed_for_canonical_biological_fitting": false,
+  "allowed_for_development_painted_trail_response_estimation": true,
+  "constraints": [
+    "Only separately frozen painted-trail response parameters may be estimated from the P1 response target.",
+    "Baseline locomotion and all H2/H3/H4/H5 path-history parameters remain fixed and may not be refit.",
+    "The same painted-trail response parameter set must be used for both short and long approach-history strata.",
+    "Treatment-specific or path-specific pheromone-response parameters are forbidden.",
+    "Response fitting must use pheromone-vs-DCM treatment contrasts within each path-length stratum so response parameters cannot absorb the unresolved short-vs-long baseline locomotion structure.",
+    "Primary response observables are middle_zone_fraction and trail_axis_exit.",
+    "Secondary guard observables are time_to_exit_s and beeline_mm.",
+    "Average_Speed_Moving, Traveled_Dist_Moving, Straightness, Prop_time_moving, Average_Speed and Traveled_Dist are forbidden fitting targets.",
+    "Development tools may write reports only and may not update a canonical model file.",
+    "The Poissonnier 2026 Y-maze remains inaccessible to fitting, candidate ranking, stopping rules and model selection."
+  ],
+  "ymaze": {
+    "dataset": "poissonnier2026_ymaze",
+    "allowed_for_p1_fitting": false,
+    "allowed_for_p1_ranking": false,
+    "allowed_for_p1_stopping_rules": false,
+    "allowed_for_p1_model_selection": false,
+    "role": "locked_cross_apparatus_holdout"
+  },
+  "implementation_gate": {
+    "mechanism_policy_file": "not_yet_frozen",
+    "chemical_sensor_code_authorized": false,
+    "response_parameter_search_authorized": false
+  }
+}

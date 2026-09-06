@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "id": "P1_painted_trail_response_evidence_v1",
+  "status": "evidence_and_protocol_frozen_before_sensor_mechanism_implementation_or_parameter_search",
+  "freeze_date_local": "2026-09-05",
+  "scientific_scope": "Poissonnier 2026 open-arena Experiment 1 only. Internal development evidence, not external validation.",
+  "source": {
+    "doi": "10.1007/s00040-026-01106-9",
+    "source_manifest": "reference/poissonnier2026_source_manifest.json",
+    "source_xlsx_sha256": "b311d5fdc89eac56724bb5195743cf4bb52a6cff4040b18704353091e1fe6318",
+    "target_file": "reference/poissonnier2026_pheromone_response_targets.json",
+    "target_git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+    "target_generator": "tools/derive-pheromone-response-targets.py",
+    "target_generator_git_blob_sha": "d44fee2d176eb6dcdfea625d4280059d499cf80b",
+    "calibration_manifest_git_blob_sha": "29044577af38dced5cccb83c687117ee878fd66c",
+    "response_calibration_policy": "reference/p1_painted_trail_calibration_policy_v1.json",
+    "response_calibration_policy_git_blob_sha": "ec282928a095467c1082a25e0396c390c17cbdb8"
+  },
+  "published_painted_trail_protocol": {
+    "arena_mm": {
+      "width": 297,
+      "height": 210
+    },
+    "entry_mm": {
+      "x": 148.5,
+      "y": 105
+    },
+    "approach_distances_mm": [
+      200,
+      1000
+    ],
+    "approach_width_mm": 10,
+    "trail_orientation": "lengthwise through arena center and parallel to incoming runway",
+    "antlab_coordinate_representation": {
+      "line_segment_mm": {
+        "x1": 0,
+        "y1": 105,
+        "x2": 297,
+        "y2": 105
+      },
+      "trail_axis_exit_edges": [
+        "left",
+        "right"
+      ],
+      "off_axis_exit_edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    "pheromone_solution": {
+      "extraction": "trail pheromone glands (hindgut) of 4 workers macerated in 1 mL DCM",
+      "gland_equivalents_per_ml": 4,
+      "solvent": "DCM"
+    },
+    "open_arena_application": {
+      "nominal_solution_volume_ul": 36,
+      "nominal_line_length_mm": 300,
+      "nominal_solution_ul_per_cm": 1.2,
+      "nominal_hindgut_equivalents_total": 0.144,
+      "nominal_hindgut_equivalents_per_cm": 0.0048,
+      "source_wording_precision": "approximately 36 uL over 30 cm"
+    },
+    "control_application": "DCM solvent control on the same nominal trail axis; active pheromone signal is zero in the model control treatment."
+  },
+  "dataset_scope": {
+    "expected_rows": 102,
+    "expected_group_counts": {
+      "dcm_control_short": 25,
+      "dcm_control_long": 26,
+      "pheromone_short": 26,
+      "pheromone_long": 25
+    },
+    "colonies": [
+      0,
+      7,
+      16,
+      20,
+      21,
+      27
+    ],
+    "treatments": [
+      "dcm_control",
+      "pheromone"
+    ],
+    "path_length_strata": [
+      "s",
+      "l"
+    ],
+    "generated_target_verified": true,
+    "target_derivation_run_id": 34014493171,
+    "target_derivation_job_id": 101435821044
+  },
+  "response_estimation_firewall": {
+    "biological_fitting_status": "canonical biological fitting remains locked",
+    "allowed_to_estimate": "painted-trail response parameters only after a separate sensor/mechanism and estimator policy are frozen",
+    "baseline_locomotion_parameters_fixed": true,
+    "H2_H3_H4_H5_parameters_fixed_and_not_reopened": true,
+    "shared_response_parameters_across_short_and_long": true,
+    "treatment_specific_or_path_specific_response_parameters_forbidden": true,
+    "primary_response_observables": [
+      "middle_zone_fraction",
+      "trail_axis_exit"
+    ],
+    "secondary_guard_observables": [
+      "time_to_exit_s",
+      "beeline_mm"
+    ],
+    "forbidden_response_fit_observables": [
+      "Average_Speed_Moving",
+      "Traveled_Dist_Moving",
+      "Straightness",
+      "Prop_time_moving",
+      "Average_Speed",
+      "Traveled_Dist"
+    ],
+    "objective_structure": "Use pheromone-vs-DCM treatment contrasts within each path-length stratum so trail response estimation does not absorb the unresolved short-vs-long baseline locomotion structure.",
+    "ymaze_access_for_fitting_ranking_stopping_or_model_selection": false,
+    "ymaze_holdout_remains_locked": true
+  },
+  "not_yet_frozen": {
+    "transverse_chemical_field_kernel": true,
+    "egocentric_sensor_geometry": true,
+    "sensory_transduction_equation": true,
+    "steering_response_equation": true,
+    "response_parameter_bounds": true,
+    "estimator_search_budget": true,
+    "promotion_rule": true
+  },
+  "implementation_gate": {
+    "chemical_sensor_code_authorized": false,
+    "response_parameter_search_authorized": false,
+    "next_step": "Freeze P1 mechanism v1: transverse field kernel, egocentric sensor geometry, dose transduction, deterministic steering law, exact zero-signal null, invariance tests, and engineering-only reachability values before implementing code."
+  },
+  "holdout_rule": "The Poissonnier 2026 Y-maze remains a locked cross-apparatus holdout and may not enter P1 mechanism design, parameter estimation, candidate ranking, stopping rules, or model selection.",
+  "response_observable_provenance": {
+    "middle_zone_fraction": {
+      "status": "article_and_supplement_defined",
+      "source": "Proportion_Frames_MiddleZone",
+      "definition": "Proportion of frames in the zone 1 cm on each side of the horizontal pheromone/solvent line."
+    },
+    "trail_axis_exit": {
+      "status": "ANTLAB_derived_geometric_metric_not_article_reported",
+      "source_columns": [
+        "Xlast",
+        "Ylast",
+        "Xmin_Arena",
+        "Xmax_Arena",
+        "Ymin_Arena",
+        "Ymax_Arena",
+        "Scale_factor"
+      ],
+      "definition": "Classify the nearest recorded first-contact arena border; left/right are on the frozen horizontal trail axis and top/bottom are off axis.",
+      "frozen_before_P1_mechanism_implementation": true
+    },
+    "time_to_exit_s": {
+      "status": "supplement_derived",
+      "source": "Total_Frames / 25 fps"
+    },
+    "beeline_mm": {
+      "status": "supplement_provided",
+      "source": "Beeline"
+    }
+  },
+  "trail_axis_exit_geometry_audit": {
+    "source_details_sheet": "Xlast/Ylast are defined as coordinates where the ant reached a border; Scale_factor is the arena real width divided by Ymax_Arena-Ymin_Arena and is interpreted as cm per coordinate unit.",
+    "audit_run_id": 34016868960,
+    "audit_job_id": 101442065748,
+    "audit_artifact_id": 9984165032,
+    "audit_artifact_digest": "sha256:0964643554b2a171ad2a1bfa685126374268420538f7b6e32dc44c97449e9836",
+    "rows_checked": 102,
+    "exit_edge_mismatches": 0,
+    "corner_ambiguous_under_5_mm": 0,
+    "max_distance_to_assigned_border_mm": 6.593063856786537,
+    "median_distance_to_assigned_border_mm": 1.7655273766537203,
+    "min_gap_between_nearest_and_second_nearest_border_mm": 9.147379401692884,
+    "all_six_colonies_have_all_four_treatment_by_path_groups": true
+  }
+}
