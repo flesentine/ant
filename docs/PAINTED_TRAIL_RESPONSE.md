@@ -261,3 +261,153 @@ Still **not authorized**:
 - Y-maze access or unlocking.
 
 The next stage is isolated P1 implementation plus reference-free reachability only.
+
+
+## P1-v1 implementation and reference-free reachability
+
+v0.3.3c implements the frozen P1-v1 mechanism in an isolated extension:
+
+- runtime: `src/p1.js`
+- runtime Git blob: `f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca`
+- engineering model: `models/lasius_niger_painted_trail_p1_v1.json`
+- model Git blob: `73873fd6763838423ca27648136bb0b9ff062817`
+- P1 apparatus field: `apparatus/poissonnier2026_open_arena_p1_v1.json`
+- apparatus Git blob: `df589d6b39c1617a7dedc3bfa9d34a408c51b2f4`
+
+The canonical locomotion model, `src/sim-core.js`, and `src/integrity.js` remain unchanged.
+
+### Post-merge implementation authorization
+
+Implementation began only after the v0.3.3b mechanism freeze merged to `main` and the permanent main test/deploy workflow passed.
+
+Authorization:
+
+`hypotheses/p1_implementation_authorization_v1.json`
+
+Git blob:
+
+`f9fbaeb63c72de7a639d54b597f5c1247d354e20`
+
+That authorization permits only isolated P1 implementation and reference-free reachability. It does not authorize response-data search, canonical promotion, or Y-maze access.
+
+### Frozen reachability execution
+
+Because the mechanism freeze required a frozen seed panel but did not itself specify the execution seeds/trial count, a separate execution policy was frozen **before P1 runtime execution**:
+
+`hypotheses/p1_reachability_execution_v1.json`
+
+Git blob:
+
+`282a95ec6761acd8d94163b25f712f191181f2ff`
+
+It fixes:
+
+- physics timestep: 0.02 s
+- 32 exact-identity seeds: 1333001–1333032
+- fixed identity comparison time: 2.0 s
+- 400 matched trials per attraction condition
+- attraction seeds: 1334001–1334400
+- common random numbers
+- zero dose versus the frozen nominal dose
+- all pass/fail criteria
+- no target/reference loading
+- no fitting/search/ranking
+- no Y-maze
+- no adaptive tuning
+
+### Implementation qualification
+
+The final provenance-hardened implementation qualification was:
+
+- run: `34055606885`
+- job: `101546830143`
+- artifact ID: `9995854425`
+- artifact digest: `sha256:0ecb9fd22ce17e9897d17688ab9960eb2c873a95b05fec6a5c8d806110c7b61d`
+
+It passed:
+
+- exact implementation/runtime/model/apparatus pins
+- full H0–H5 + P1 regression suite
+- low-volume code-path smoke explicitly marked **not scientific evidence**
+- real Chromium Node parity: 4/4
+- browser exceptions: 0
+- console errors: 0
+- response-target requests: 0
+- Y-maze requests: 0
+
+### Official reference-free result
+
+The one frozen reachability execution completed on attempt 1:
+
+- run: `34055700128`
+- job: `101547080088`
+- exact execution head: `da177e90b270d0ed62f627ec1621f7fe2e2ed1ed`
+- artifact ID: `9995881229`
+- artifact digest: `sha256:b89a0860f56daffa00c676768d3e951fa02055492d10a3b1eb93f1f8a7859197`
+
+Exact report:
+
+- file: `reports/p1_reference_free_reachability_v1.json`
+- Git blob: `5a8da255db2eb8a9e2b6dc51a7bd8d30a0e429ed`
+- SHA-256: `6a992cd0a19fefd5d3afbd5fc0b919c55d0b24fbeda9dc5c6d047a758e747fcb`
+- status: `reference_free_reachability_passed`
+
+Result-freeze record:
+
+`hypotheses/p1_reachability_result_freeze_v1.json`
+
+Git blob:
+
+`e9187ff27fb04015ded038a5f98354995455e377`
+
+### Frozen outcome
+
+All structural requirements passed:
+
+- exact zero-dose canonical identity: **PASS**
+- exact `kappa=0` canonical identity: **PASS**
+- nonzero-dose speed/pause/biology RNG identity: **PASS**
+- local steering sign: **PASS**
+- on-trail zero deterministic steering: **PASS**
+- endpoint reversal: **PASS**
+- rigid translation: **PASS**
+- rigid rotation: **PASS**
+
+The 400-trial-per-condition engineering panel was:
+
+| Observable | Zero dose | Nominal dose | Difference |
+| --- | ---: | ---: | ---: |
+| Mean central-zone fraction | 0.27026 | 0.33142 | +0.06116 |
+| Trail-axis exit rate | 0.4150 | 0.4775 | +0.0625 |
+| Mean moving speed (mm/s) | 23.71418 | 23.71454 | +0.00036 |
+| Mean time to exit (s) | 9.3847 | 9.6343 | +0.2496 |
+
+The frozen pass rule required both central-zone occupancy and trail-axis exit rate to increase under nominal pheromone. Both did.
+
+The moving-speed difference is not a fit target or biological effect claim. The stronger fixed-time matched-state tests establish that P1 does not alter the stochastic speed/pause/RNG process.
+
+### Interpretation boundary
+
+This is **reference-free engineering reachability**, not evidence that P1-v1 fits the Poissonnier pheromone-response data.
+
+The run did not:
+
+- load the 102-row P1 response target;
+- load reference outcomes;
+- fit or search any parameter;
+- rank candidates;
+- update the canonical model;
+- access the Y-maze.
+
+The frozen engineering values may not be retuned from this outcome.
+
+### Next gate
+
+v0.3.3d must freeze the P1 response-estimation policy **before** any fitting/ranking access to the response target.
+
+The future response parameter surface remains exactly:
+
+- `sigma_field_mm`
+- `kappa_trail_per_s`
+
+The estimator policy must freeze bounds, objective/contrast construction, nuisance handling, folds, seeds, search budget, and promotion guards before search. Canonical locomotion remains unchanged and the Y-maze remains locked.
