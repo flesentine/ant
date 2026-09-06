@@ -56,7 +56,7 @@
 - 2/6 held-out wins versus its own null; failed promotion and H2/H3 comparison guards
 - moving speed remained diagnostic-only; Y-maze remained locked
 
-### v0.3.2f — H5 transient entry-heading restoration — implemented / reachability verified
+### v0.3.2f — H5 transient entry-heading restoration — complete / not promoted / closed
 - frozen mechanism implemented in isolated `src/h5.js` extension; pinned H0–H4 runtime blobs remain unchanged
 - deterministic restoring drift targets each ant's own lazily captured post-transition entry heading
 - angular-noise amplitude, speed, pauses, and shared entry-state distribution remain unchanged
@@ -65,10 +65,13 @@
 - no parameter sweep or fitting during reachability; Y-maze remained locked
 - H5 parameter-estimation policy v1 frozen before estimator implementation/search
 - estimator implementation + reference-free synthetic qualification + code/Chromium audit complete
-- qualified estimator blob recorded; high-resolution mode remains hard-locked
-- separate post-qualification authorization record created and pinned
-- next gate is merge authorization, then execute the unchanged frozen 500×60×6 H5 LOCO search exactly once
-- canonical locomotion remains unchanged
+- qualified estimator and authorization chain completed
+- one official frozen 500×60×6 H5 LOCO search completed
+- 3/6 held-out wins vs H5-null; failed the required 5/6 own-null guard
+- 2/6 held-out wins vs per-fold best H2/H3/H4 prior; median −7.12%; failed best-prior guard
+- exact result frozen and independently reproduced; 48/48 Chromium parity cases
+- H5-v1 not promoted and permanently closed; no rerun or retuning authorized
+- canonical locomotion remains unchanged; Y-maze remains locked
 
 ## v0.3.3 — externally painted trail response
 - local egocentric chemical sensors

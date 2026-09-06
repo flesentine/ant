@@ -1,5 +1,5 @@
 {
-  "schema_version": 10,
+  "schema_version": 11,
   "id": "open_arena_locomotion_context_v1",
   "reference_dataset": "poissonnier2026_open_arena",
   "scope": "DCM control treatments only",
@@ -117,17 +117,17 @@
     },
     {
       "id": "H5_transient_entry_heading_restoration",
-      "status": "implemented_reachability_verified_estimator_qualified_highres_authorized_not_run",
+      "status": "official_high_resolution_failed_frozen_closed",
       "model": "lasius_niger_locomotion_h5_v1",
       "freeze": "h5_transient_entry_heading_restoration_v1.json",
       "documentation": "docs/H5_TRANSIENT_HEADING_RESTORATION.md",
       "claim": "Recent sustained constrained walking creates a decaying commitment to the ant's own realized post-transition arena-entry heading, adding deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and the shared entry-state distribution unchanged.",
-      "selection_status": "not_evaluated",
+      "selection_status": "not_promoted",
       "implementation_status": "implemented_and_mechanism_reachability_verified",
       "estimation_policy_status": "frozen_before_estimator_implementation_or_parameter_search",
       "distinction_from_prior": "Unlike H2, H5 does not reduce angular diffusion; unlike H3, it does not alter discrete reorientation timing; unlike H4, it does not alter speed; unlike H1, it does not fit or impose different short/long entry-heading distributions.",
       "anti_cheating_target_rule": "The remembered theta_ref is the ant's own realized heading after the shared entry transition. It may not be replaced by centerline direction, an edge bearing, a fixed apparatus axis, or a treatment-specific target.",
-      "next_step": "After this authorization record is reviewed and merged, run the unchanged frozen 500×60×6 H5 LOCO high-resolution search exactly once and freeze the complete result before interpretation.",
+      "next_step": "Do not retune H5-v1. Any next hypothesis must be substantively different or justified by genuinely new evidence. Canonical locomotion remains unchanged and the Y-maze remains locked.",
       "runtime_layer": "src/h5.js",
       "runtime_layer_git_blob_sha": "b43f8e9fcaa4b2cc9981ed4f2922a833cc1a3177",
       "frozen_h0_h4_integrity_blob_preserved": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
@@ -154,8 +154,8 @@
       },
       "estimation_policy": "h5_parameter_estimation_v1.json",
       "estimation_documentation": "docs/H5_ESTIMATION.md",
-      "estimator_implementation_status": "implemented_and_qualified_authorized_pending_highres",
-      "high_resolution_search_authorized": true,
+      "estimator_implementation_status": "implemented_and_qualified_highres_complete_failed_closed",
+      "high_resolution_search_authorized": false,
       "estimation_policy_git_blob_sha": "ead45bacff89bf626deaaf3238a5c363b74279d1",
       "estimation_policy_integrity_test": "tests/h5-estimation-policy.test.js",
       "estimator_runner": "tools/run-h5-estimation.js",
@@ -175,17 +175,68 @@
         "ymaze_requests": 0,
         "artifact_digest": "sha256:ca60b8b0f50dc4cdc64cd9649102aad26e3e27378dc2e2206c2110d8155b672a"
       },
-      "high_resolution_authorization": "hypotheses/h5_highres_authorization_v1.json",
-      "high_resolution_authorization_git_blob_sha": "24b3c422f40bc4c44437995eff81ecdfd104ca34",
-      "high_resolution_result_status": "not_run",
-      "authorization_effective_scope": "main_only_after_merge",
-      "post_merge_execution_precondition": "Permanent Test and deploy ANTLAB workflow must pass on a main commit containing this authorization and the exact hardened estimator blob before the official high-resolution run."
+      "high_resolution_result_status": "complete_failed_frozen",
+      "result": "reports/h5_parameter_estimation_500x60_v1.json",
+      "result_git_blob_sha": "1fcdb357e1755b5ba5cb4be6ee8b69db617e732d",
+      "result_sha256": "28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053",
+      "result_freeze": "hypotheses/h5_result_freeze_v1.json",
+      "historical_high_resolution_authorization": "hypotheses/archive/h5_highres_authorization_v1.json",
+      "historical_high_resolution_authorization_git_blob_sha": "24b3c422f40bc4c44437995eff81ecdfd104ca34",
+      "official_execution": {
+        "run_id": 33947883644,
+        "job_id": 101257153390,
+        "attempt": 1,
+        "execution_head": "6087cc044faae586af826f44297e85212d1941a0",
+        "artifact_id": 9964220581,
+        "artifact_digest": "sha256:2705fa01d73ae6ab87ef42af3634f8bb4eebd8724a285c652f81245a7e4fc833",
+        "precondition_main_run_id": 33947800867,
+        "one_official_execution_only": true
+      },
+      "posthoc_integrity_audit": {
+        "run_id": 33979167192,
+        "job_id": 101341127941,
+        "artifact_id": 9973226023,
+        "artifact_digest": "sha256:1c23f363003c430414841eeca5e3f95e512e1d832c9c10c4291b2be005c54fef",
+        "all_six_fold_losses_reproduced_exactly": true,
+        "all_relative_improvements_reproduced_exactly": true,
+        "chromium_parity_cases": 48,
+        "chromium_folds": 6,
+        "browser_exceptions": 0,
+        "console_errors": 0,
+        "ymaze_requests": 0,
+        "result_invalidated": false
+      },
+      "internal_cv": {
+        "folds": 6,
+        "H5_wins_vs_H5_null": 3,
+        "median_relative_improvement_vs_H5_null": 0.008101077922930614,
+        "H5_survival_guard_passed": false,
+        "H5_wins_vs_H2_v1": 4,
+        "median_relative_improvement_vs_H2_v1": 0.06367556387336125,
+        "H2_pairwise_guard_passed": true,
+        "H5_wins_vs_H3_v1": 4,
+        "median_relative_improvement_vs_H3_v1": 0.06699158932351773,
+        "H3_pairwise_guard_passed": true,
+        "H5_wins_vs_H4_v1": 3,
+        "median_relative_improvement_vs_H4_v1": 0.030110485576405572,
+        "H4_pairwise_guard_passed": false,
+        "H5_wins_vs_best_prior": 2,
+        "median_relative_improvement_vs_best_prior": -0.07119343908229395,
+        "best_prior_guard_passed": false,
+        "development_preferred": false,
+        "canonical_promotion": false,
+        "null_anchor_selected_folds": [
+          16
+        ]
+      },
+      "closed": true,
+      "closure_reason": "The one official frozen 500x60x6 LOCO execution failed H5-v1 own-null and best-prior development guards. Exact loss reproduction and 48-case real-Chromium parity found no implementation error that invalidates the result."
     }
   ],
   "screening_decision": {
     "H0_rule": "H0 is screening-incompatible when at least two primary structural metric contrasts fall outside descriptive 95% bootstrap intervals and contrast signs are stable under leave-one-colony-out recalculation.",
     "model_competition_rule": "New context mechanisms must earn held-out predictive improvement over a nested context-free baseline; fitting the development data better is insufficient.",
-    "current_decision": "H2-v1, H3-v1, and H4-v1 remain not promoted, while H1 remains unresolved because measured entry-state evidence is missing. H5-v1 is implemented, mechanism reachability is verified, its estimator policy is frozen, and estimator v1 passed synthetic qualification plus repeated real-Chromium parity. The exact H5 high-resolution procedure is authorized but the first post-merge main CI exposed a branch-assumption test regression, so the official search remains blocked until a later main commit containing the same hardened estimator and authorization passes permanent CI. Canonical promotion remains unauthorized and the Y-maze remains locked.",
+    "current_decision": "H2-v1, H3-v1, H4-v1, and now H5-v1 all failed their frozen held-out development guards and are not promoted. H1 remains unresolved because measured entry-state evidence is missing. The one official H5-v1 500x60x6 LOCO result is frozen and closed: 3/6 held-out wins versus its own null with +0.81% median improvement, and 2/6 wins versus the per-fold best prior H2/H3/H4 comparator with -7.12% median improvement. A post-hoc integrity audit reproduced every held-out loss exactly and achieved 48/48 Node-to-Chromium parity cases with zero Y-maze requests, so no implementation error invalidates the failure. Canonical locomotion remains unchanged and the Y-maze remains locked.",
     "warning": "Open-arena development comparison is internal evidence only. The Y-maze remains the locked cross-apparatus holdout."
   }
 }

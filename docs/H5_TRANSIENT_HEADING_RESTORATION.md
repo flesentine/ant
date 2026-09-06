@@ -93,7 +93,8 @@ H5 may not read the short/long label, colony identity, reference outcomes, cente
 4. Run mechanism reachability only, with no parameter fitting and no Y-maze — **complete**.
 5. Perform code review and real-Chromium Node↔browser parity — **complete for the implementation pass**.
 6. Design and freeze a **separate H5 estimation policy** — **complete** (`hypotheses/h5_parameter_estimation_v1.json`).
-7. Implement and synthetically qualify that frozen estimator policy, then code-review and verify Node ↔ real-Chromium parity before any high-resolution reference-data search.
+7. Implement and synthetically qualify that frozen estimator policy, then code-review and verify Node ↔ real-Chromium parity before any high-resolution reference-data search — **complete**.
+8. Run the one authorized frozen 500×60×6 LOCO search and freeze the result — **complete; failed promotion and closed**.
 
 ## Current scientific status
 
@@ -103,7 +104,7 @@ H1  -> unresolved; measured entry-state evidence missing
 H2  -> high-resolution searched; not promoted
 H3  -> high-resolution searched; not promoted
 H4  -> high-resolution searched; not promoted
-H5  -> implemented; mechanism reachability verified; not searched
+H5  -> official frozen high-resolution search failed promotion; result frozen; closed
 ```
 
 The canonical ant remains unchanged, and the Y-maze remains locked.
@@ -161,3 +162,14 @@ Key choices:
 - moving speed, distance, straightness, raw heading discriminators, colony identity as biology, treatment-specific entry state, and every Y-maze quantity remain forbidden fitting inputs.
 
 No H5 estimator implementation or high-resolution H5 search is authorized by the policy freeze alone. See `docs/H5_ESTIMATION.md`.
+
+
+## Official result and closure
+
+H5-v1 completed its one official frozen high-resolution LOCO evaluation in run `33947883644`. The exact result is `reports/h5_parameter_estimation_500x60_v1.json` (Git blob `1fcdb357e1755b5ba5cb4be6ee8b69db617e732d`, SHA-256 `28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053`).
+
+It won only **3/6** held-out folds versus its own exact nested null, below the frozen **5/6** requirement. Against the per-fold best frozen H2/H3/H4 comparator it won only **2/6**, with median relative improvement **−7.12%**, below the frozen **4/6 + positive median** requirement.
+
+A separate post-hoc audit reproduced every held-out loss exactly and passed **48/48** real-Chromium parity cases with zero exceptions, console errors, or Y-maze requests. No implementation error invalidates the result.
+
+H5-v1 is therefore not promoted. The result is frozen and the hypothesis is permanently closed under its predeclared failure rule.

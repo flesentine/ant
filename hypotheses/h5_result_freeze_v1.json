@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "id": "H5_result_freeze_v1",
+  "status": "official_high_resolution_result_frozen_failed_closed",
+  "freeze_date_local": "2026-09-05",
+  "scientific_scope": "Internal open-arena development estimation only; not external validation.",
+  "result": {
+    "file": "reports/h5_parameter_estimation_500x60_v1.json",
+    "git_blob_sha": "1fcdb357e1755b5ba5cb4be6ee8b69db617e732d",
+    "sha256": "28bcbcb4782dac05606f3c204fe661f5503d2a93ecfefa6fc2c27b719e885053",
+    "status": "development_estimation_failed_development_preference_guards",
+    "scientific_evidence": true,
+    "execution_class": "frozen_high_resolution"
+  },
+  "official_execution": {
+    "run_id": 33947883644,
+    "job_id": 101257153390,
+    "attempt": 1,
+    "execution_head": "6087cc044faae586af826f44297e85212d1941a0",
+    "artifact_id": 9964220581,
+    "artifact_digest": "sha256:2705fa01d73ae6ab87ef42af3634f8bb4eebd8724a285c652f81245a7e4fc833",
+    "precondition_main_run_id": 33947800867,
+    "one_official_execution_only": true
+  },
+  "posthoc_integrity_audit": {
+    "run_id": 33979167192,
+    "job_id": 101341127941,
+    "artifact_id": 9973226023,
+    "artifact_digest": "sha256:1c23f363003c430414841eeca5e3f95e512e1d832c9c10c4291b2be005c54fef",
+    "all_six_fold_losses_reproduced_exactly": true,
+    "all_relative_improvements_reproduced_exactly": true,
+    "chromium_parity_cases": 48,
+    "chromium_folds": 6,
+    "browser_exceptions": 0,
+    "console_errors": 0,
+    "ymaze_requests": 0,
+    "result_invalidated": false
+  },
+  "frozen_result_summary": {
+    "folds": 6,
+    "H5_wins_vs_H5_null": 3,
+    "median_relative_improvement_vs_H5_null": 0.008101077922930614,
+    "H5_survival_guard_passed": false,
+    "H5_wins_vs_H2_v1": 4,
+    "median_relative_improvement_vs_H2_v1": 0.06367556387336125,
+    "H2_pairwise_guard_passed": true,
+    "H5_wins_vs_H3_v1": 4,
+    "median_relative_improvement_vs_H3_v1": 0.06699158932351773,
+    "H3_pairwise_guard_passed": true,
+    "H5_wins_vs_H4_v1": 3,
+    "median_relative_improvement_vs_H4_v1": 0.030110485576405572,
+    "H4_pairwise_guard_passed": false,
+    "H5_wins_vs_best_prior": 2,
+    "median_relative_improvement_vs_best_prior": -0.07119343908229395,
+    "best_prior_guard_passed": false,
+    "development_preferred": false,
+    "canonical_promotion": false,
+    "null_anchor_selected_folds": [
+      16
+    ],
+    "boundary_hit_counts": {
+      "entry_orientation_retention_q": 1
+    }
+  },
+  "closure": {
+    "H5_v1_closed": true,
+    "selection_status": "not_promoted",
+    "failure_rule_applies": true,
+    "retuning_authorized": false,
+    "rerun_authorized": false,
+    "canonical_promotion_authorized": false,
+    "ymaze_unlock_authorized": false,
+    "active_authorization_removed": true,
+    "authorization_archived_file": "hypotheses/archive/h5_highres_authorization_v1.json",
+    "authorization_archived_git_blob_sha": "24b3c422f40bc4c44437995eff81ecdfd104ca34",
+    "official_execution_workflow_removed": true,
+    "qualified_estimator_preserved_git_blob_sha": "7d4a68f024c09c111a38088be2c943b7de74b464",
+    "next_hypothesis_rule": "Any next mechanism must be substantively different or justified by genuinely new evidence; H5-v1 may not be tuned harder on these outcomes."
+  }
+}
