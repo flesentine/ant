@@ -9,6 +9,7 @@ const freeze=read('hypotheses/p1_painted_trail_response_evidence_v1.json');
 const target=read('reference/poissonnier2026_pheromone_response_targets.json');
 const calibration=read('reference/calibration_manifest.json');
 const p1cal=read('reference/p1_painted_trail_calibration_policy_v1.json');
+const implementationAuthPath=path.join(root,'hypotheses','p1_implementation_authorization_v1.json');
 
 assert.strictEqual(blob('hypotheses/p1_painted_trail_response_evidence_v1.json'),'db89c879906aa1f35dc1d395cc3ebbb661b218b6','P1 evidence freeze blob drifted');
 assert.strictEqual(blob('reference/poissonnier2026_pheromone_response_targets.json'),'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed','P1 target blob drifted');
@@ -90,7 +91,22 @@ assert.strictEqual(p1cal.ymaze.allowed_for_p1_model_selection,false);
 assert.strictEqual(p1cal.implementation_gate.chemical_sensor_code_authorized,false);
 assert.strictEqual(p1cal.implementation_gate.response_parameter_search_authorized,false);
 
-assert.ok(!fs.existsSync(path.join(root,'src','p1.js')),'P1 chemical sensor code must not exist at the evidence-freeze gate');
-assert.ok(!fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json')),'P1 model must not exist at the evidence-freeze gate');
+if(fs.existsSync(implementationAuthPath)){
+  const auth=read('hypotheses/p1_implementation_authorization_v1.json');
+  assert.strictEqual(blob('hypotheses/p1_implementation_authorization_v1.json'),'f9fbaeb63c72de7a639d54b597f5c1247d354e20','P1 implementation authorization drifted');
+  assert.strictEqual(auth.status,'mechanism_freeze_merged_reference_free_implementation_authorized');
+  assert.strictEqual(auth.mechanism_freeze.git_blob_sha,'90e86bce29bf45c6e390f7046a6c25a74f409c78');
+  assert.strictEqual(auth.mechanism_freeze.merge_commit,'bd7222be3299f147b19b6c8deeb90bb7e2874514');
+  assert.strictEqual(auth.merged_main_verification.run_id,34054828552);
+  assert.strictEqual(auth.authorization_scope.isolated_p1_runtime_and_model_implementation,true);
+  assert.strictEqual(auth.authorization_scope.response_target_access,false);
+  assert.strictEqual(auth.authorization_scope.response_parameter_search,false);
+  assert.strictEqual(auth.authorization_scope.ymaze_access_or_unlock,false);
+  assert.ok(fs.existsSync(path.join(root,'src','p1.js')),'authorized P1 runtime must exist in implementation stage');
+  assert.ok(fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json')),'authorized P1 model must exist in implementation stage');
+}else{
+  assert.ok(!fs.existsSync(path.join(root,'src','p1.js')),'P1 chemical sensor code must not exist before post-merge implementation authorization');
+  assert.ok(!fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p1_v1.json')),'P1 model must not exist before post-merge implementation authorization');
+}
 
 console.log('p1-painted-trail-evidence.test.js PASS '+JSON.stringify({evidence_blob:blob('hypotheses/p1_painted_trail_response_evidence_v1.json'),target_blob:blob('reference/poissonnier2026_pheromone_response_targets.json'),rows:target.rows.length}));
