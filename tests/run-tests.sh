@@ -47,6 +47,7 @@ node tests/p2-runtime.test.js
 node tests/p2-reachability-result.test.js
 node tests/p2-response-estimation-policy.test.js
 node tests/p2-estimation.test.js
+node tests/p2-estimator-qualification-result.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
