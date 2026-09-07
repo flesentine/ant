@@ -44,6 +44,7 @@ node tests/p2-candidate-class-evidence.test.js
 node tests/p2-mechanism-selection.test.js
 node tests/p2-reachability-policy.test.js
 node tests/p2-runtime.test.js
+node tests/p2-reachability-result.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
