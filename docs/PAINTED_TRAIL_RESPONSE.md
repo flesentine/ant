@@ -1186,3 +1186,192 @@ This does **not** authorize:
 - Y-maze access.
 
 If development continues, the next gate is a separate prospective **P2 response-estimation policy freeze** before estimator implementation or semantic response-target access.
+
+
+## P2-v1 response-estimation policy freeze
+
+v0.3.3l freezes the full P2 response-estimation procedure **before a P2 estimator exists and before semantic access to the 102-row response target**.
+
+Policy:
+
+`hypotheses/p2_response_estimation_v1.json`
+
+Git blob:
+
+`eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce`
+
+### Why the policy is intentionally strict
+
+The failed P1-v1 result is already known. To avoid turning P2 into an outcome-driven rescue, this policy does not soften the existing development standard.
+
+It retains the same meanings for:
+
+- six-colony leave-one-colony-out partition;
+- equal colony weighting;
+- short/long within-path pheromone-minus-DCM contrasts;
+- primary observables:
+  - middle-zone fraction
+  - trail-axis exit;
+- equal-weight four-component squared-error primary objective;
+- 5-of-6 heldout robustness criterion;
+- exit-time and beeline secondary guards;
+- 60 training / 120 heldout / 120 final-fit / 240 independent-final-check simulation budgets.
+
+Fresh P2-only seed streams are used instead of the prior P1 streams.
+
+### Estimated P2 parameters
+
+Three shared biological coordinates are prospectively estimable:
+
+| Parameter | Search domain | Scale |
+| --- | --- | --- |
+| `sigma_field_mm` | 2–32 mm | log |
+| `kappa_trail_per_s` | 0–16 s⁻¹ | linear |
+| `p_lapse` | 0–1 | linear |
+
+The full `p_lapse` probability domain is used deliberately.
+
+The 0.20 literature/reachability anchor is **not** used to narrow the range because it was explicitly frozen as an engineering value rather than a Poissonnier-assay estimate.
+
+There are zero nuisance parameters.
+
+The same sigma, kappa, and p_lapse must apply to:
+
+- both path histories;
+- all six colonies;
+- both treatment strata.
+
+No colony-, path-, treatment-, direction-, or experience-specific response parameters are permitted.
+
+### Exact canonical null
+
+The exact null anchor is:
+
+- sigma = 8 mm
+- kappa = 0 s⁻¹
+- p_lapse = 0.20 bookkeeping value
+
+Under `kappa=0`, sigma and p_lapse are inert because the P2 runtime exact-bypasses the response before field evaluation or response-RNG draw.
+
+DCM `A=0` is likewise an exact canonical bypass for every candidate.
+
+### Nested no-lapse benchmark
+
+P2 must demonstrate that the new transient-lapse structure itself adds predictive value.
+
+For every 3D P2 Halton candidate, a projected benchmark candidate is defined using:
+
+- the same sigma;
+- the same kappa;
+- `p_lapse=0`.
+
+Those projected candidates form a separately ranked no-lapse submodel panel.
+
+Because `p_lapse=0` is the frozen always-engaged endpoint, this benchmark is bit-identical to the local P1 steering kernel for the same sigma/kappa/seed—but it is evaluated through the P2 development procedure and does **not** reopen P1-v1.
+
+### Search panels
+
+P2 panel:
+
+- 999 positive Halton candidates
+- 1 exact canonical null
+- total: 1000 candidates/fold
+
+Halton dimensions:
+
+- prime 2 → sigma, log [2,32]
+- prime 3 → kappa, linear [0,16]
+- prime 5 → p_lapse, linear [0,1]
+
+Nested no-lapse benchmark:
+
+- the 999 matching sigma/kappa projections with `p_lapse=0`
+- the same exact canonical null as slot 1000
+
+Both panels use the exact same primary objective and frozen trial seeds.
+
+### Fresh simulation seeds
+
+LOCO training:
+
+- root: `4210000`
+- fold: `4210000 + fold_index * 10000`
+
+Heldout evaluation:
+
+- root: `4810000`
+- fold: `4810000 + fold_index * 10000`
+
+Final all-data fit:
+
+- `5210000`
+
+Independent final check:
+
+- `5610000`
+
+Short and long path strata retain offsets 0 and 1000.
+
+Within a trial seed, DCM and pheromone are paired by common random numbers.
+
+For P2 candidates, the dedicated response RNG also uses common random numbers: the same trial seed/ant id produces the same underlying response `U` for every candidate. Candidate `p_lapse` changes only the threshold `U >= p_lapse`.
+
+### Dual survival requirement
+
+P2-v1 must pass **both** prospective heldout guards.
+
+#### Canonical-null guard
+
+Across six heldout colonies:
+
+- P2 must have lower primary loss than exact canonical null in at least **5/6** folds;
+- median relative improvement versus null must be **strictly positive**.
+
+#### Structural-increment guard
+
+Independently:
+
+- P2 must have lower primary loss than the separately training-selected no-lapse benchmark in at least **5/6** folds;
+- median relative improvement versus no-lapse must be **strictly positive**.
+
+P2 does not survive development simply by beating canonical locomotion if the new lapse structure does not improve on the best no-lapse nested model.
+
+Failure of either guard closes P2-v1 without retuning.
+
+### Final fit and identifiability
+
+Only if both LOCO guards pass:
+
+- rank the same frozen P2 panel on all six colonies;
+- separately rank the same frozen no-lapse benchmark panel;
+- use 120 trials/treatment × path × candidate;
+- select by primary objective only;
+- run selected P2, selected no-lapse, and exact null on independent 240-trial final-check seeds.
+
+The independent final-check primary loss for P2 must be strictly lower than both comparators.
+
+The P2 near-best set uses:
+
+`loss <= best_loss + max(0.0004, 0.05 * best_loss)`
+
+Parameter promotion additionally requires:
+
+- exact null not near-best;
+- the best no-lapse benchmark lies outside that same P2 near-best tolerance;
+- selected sigma, kappa, and p_lapse each at least 0.02 from an active bound;
+- near-best normalized span <=0.60 for each of the three parameters;
+- all four independent final secondary standardized errors <=1.
+
+### Estimator remains locked
+
+At v0.3.3l:
+
+- P2 estimator: **absent**
+- high-resolution P2 search: **not authorized**
+- response-target semantic loading: **not authorized**
+- P1 official result semantic loading: **not authorized**
+- Candidate B transduction: **not authorized**
+- canonical update: **not authorized**
+- Y-maze: **locked**
+
+A later estimator qualification gate must implement and prove this policy reference-free before a separate authorization can permit one frozen high-resolution P2 search.
