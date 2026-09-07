@@ -158,8 +158,13 @@ if(laterPolicyPresent){
   assert.strictEqual(p.global_firewalls.response_target_semantic_access_during_this_policy_freeze,false);
   assert.strictEqual(p.global_firewalls.Y_maze_access,false);
 }
-for(const p of ['tools/run-p2-estimation.js','hypotheses/p2_highres_authorization_v1.json'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before a later estimator/authorization gate');
+const laterEstimatorPath=path.join(root,'tools','run-p2-estimation.js');
+const laterEstimatorPresent=fs.existsSync(laterEstimatorPath);
+if(laterEstimatorPresent){
+  assert.strictEqual(blob('tools/run-p2-estimation.js'),'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
+  assert.strictEqual(blob('hypotheses/p2_response_estimation_v1.json'),'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')),'highres authorization must remain absent before a later authorization gate');
 
 console.log('p2-mechanism-selection.test.js PASS '+JSON.stringify({
   mechanism_blob:blob('hypotheses/p2_painted_trail_mechanism_v1.json'),
@@ -171,5 +176,6 @@ console.log('p2-mechanism-selection.test.js PASS '+JSON.stringify({
   later_model_present:laterModel,
   response_target_authorized:false,
   later_response_policy_present:laterPolicyPresent,
+  later_estimator_present:laterEstimatorPresent,
   ymaze_authorized:false
 }));
