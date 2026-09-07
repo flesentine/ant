@@ -116,8 +116,13 @@ if(laterPolicyPresent){
   assert.strictEqual(p.estimator_implementation_gate.estimator_status,'not_implemented_at_policy_freeze');
   assert.strictEqual(p.estimator_implementation_gate.response_target_semantic_access_authorized,false);
 }
-for(const p of ['hypotheses/p2_highres_authorization_v1.json','tools/run-p2-estimation.js'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent before later estimator/authorization gates');
+const laterEstimatorPath=path.join(root,'tools','run-p2-estimation.js');
+const laterEstimatorPresent=fs.existsSync(laterEstimatorPath);
+if(laterEstimatorPresent){
+  assert.strictEqual(blob('tools/run-p2-estimation.js'),'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
+  assert.strictEqual(blob('hypotheses/p2_response_estimation_v1.json'),'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')),'P2 highres authorization must remain absent before later authorization gate');
 
 console.log('p2-reachability-result.test.js PASS '+JSON.stringify({
   freeze_blob:blob(freezeRel),
@@ -131,5 +136,6 @@ console.log('p2-reachability-result.test.js PASS '+JSON.stringify({
   implementation_qualified:true,
   biological_fit:false,
   later_response_policy_present:laterPolicyPresent,
+  later_estimator_present:laterEstimatorPresent,
   ymaze:false
 }));
