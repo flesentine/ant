@@ -32,8 +32,9 @@ jobs:
           if(!/paths:\s*\n\s*-\s*'\.github\/workflows\/p1-v033g-official-highres\.yml'/.test(y))throw new Error('official workflow path trigger drift');
           if(/\bpull_request\s*:/.test(y)||/\bworkflow_dispatch\s*:/.test(y))throw new Error('official workflow has a rerunnable/review trigger');
           const cmd='node tools/run-p1-estimation.js --mode highres --out /tmp/p1-official/p1_response_estimation_500x60_v1.json';
-          if(!y.includes(cmd))throw new Error('official command drift');
-          if(/--(?:candidates|trials|eval-trials|seed|final-trials|final-seed|dt)\b/.test(y))throw new Error('official workflow overrides frozen highres parameters');
+          const highresLines=y.split(/\r?\n/).filter(line=>line.includes('node tools/run-p1-estimation.js --mode highres'));
+          if(highresLines.length!==1||!highresLines[0].includes(cmd))throw new Error('official command drift');
+          if(/--(?:candidates|trials|eval-trials|seed|final-trials|final-seed|dt)\b/.test(highresLines[0]))throw new Error('official workflow overrides frozen highres parameters');
           NODE
       - name: Run full H0-H5 plus P1 suite
         run: ./tests/run-tests.sh
