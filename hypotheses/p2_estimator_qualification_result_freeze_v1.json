@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "id": "P2_estimator_qualification_result_freeze_v1",
+  "status": "qualified_reference_free_estimator_frozen_high_resolution_not_authorized",
+  "freeze_date_local": "2026-09-06",
+  "scientific_scope": "Frozen reference-free qualification of the P2-v1 response estimator. This record does not authorize response-target semantic access, a high-resolution search, biological fit claims, canonical updates, Candidate B implementation, or Y-maze access.",
+  "audit": {
+    "tested_head": "cdbce7c9254b607012caf12f734256683f34b8f4",
+    "github_run_id": 34091953598,
+    "github_job_id": 101647130672,
+    "github_run_attempt": 1,
+    "artifact_id": 10007145009,
+    "artifact_name": "p2-v033m-estimator-qualification-audit",
+    "artifact_digest": "sha256:05e0f6a95c0059efc27955c00ebf5e429cd7561fe5412d20c900d4fdc64b9137"
+  },
+  "qualification_report": {
+    "file": "reports/p2_estimator_qualification_v1.json",
+    "git_blob_sha": "9f4d15875b35773b41696987abd1cc4721435bc2",
+    "sha256": "22cd65ffbf3adbfd88fb3998ba4ab41e142b52b2b19d8aa2460ab2d9c42596a2",
+    "bytes": 2902,
+    "status": "passed"
+  },
+  "sidecars": {
+    "browser_git_blob_sha": "94ef114956ad208456343f9c6883914087a3368f",
+    "browser_sha256": "461a67b95bd5954de2446de7c1c8a01ad2cbbe9627aa067f34ec634ef282ff61",
+    "node_parity_git_blob_sha": "b0084aceae276a0296b9f458308307bbef747cd1",
+    "node_parity_sha256": "4d704832389d7ae8ae79c6991962be0351f94fe952d8a2ad70be2107f41eb74c",
+    "chromium_parity_cases": 10,
+    "browser_exceptions": 0,
+    "browser_console_errors": 0,
+    "browser_response_target_requests": 0,
+    "browser_ymaze_requests": 0,
+    "browser_p2_authorization_requests": 0
+  },
+  "frozen_chain": {
+    "policy_git_blob_sha": "eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce",
+    "estimator_git_blob_sha": "38d66d28e94d2f532e9c8a20bd6553d6d11be8a6",
+    "p2_runtime_git_blob_sha": "f91a2f7ede1b8119acc1fd57ac94a9718d074e15",
+    "p2_model_git_blob_sha": "7d3eecc44cb2eaf727249083a6fcfa21986fd475",
+    "reachability_result_freeze_git_blob_sha": "8dddaf083d4af046051fc1b7412b9f22cda8618a",
+    "reachability_report_git_blob_sha": "78a5e0ac4a3dd536a0e2d06ece2e9e37cdb2aefa",
+    "response_target_git_blob_sha_verified_only": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+  },
+  "qualified_checks": {
+    "no_nuisance_parameters": true,
+    "halton_mapping": true,
+    "projected_no_lapse_mapping": true,
+    "exact_null_anchor": true,
+    "candidate_parameter_wiring": true,
+    "exact_null_endpoint_and_nested_P1_identities": true,
+    "response_rng_common_random_numbers": true,
+    "crn_pairing": true,
+    "path_not_runtime_input": true,
+    "equal_weight_colony_contrasts": true,
+    "fold_isolation": true,
+    "primary_objective_ignores_secondary": true,
+    "sample_sd_semantics": true,
+    "dual_survival_comparator_math": true,
+    "three_parameter_identifiability_and_final_increment": true,
+    "simulation_smoke": true,
+    "response_target_semantics_not_loaded": true,
+    "response_target_hash_verified_only": true,
+    "P1_official_result_semantics_not_loaded": true,
+    "ymaze_not_loaded": true
+  },
+  "qualification_consequence": {
+    "estimator_reference_free_qualified": true,
+    "response_target_semantic_access_authorized": false,
+    "high_resolution_response_search_authorized": false,
+    "P1_official_result_semantic_access_authorized": false,
+    "canonical_update_authorized": false,
+    "Candidate_B_authorized": false,
+    "Y_maze_access_authorized": false
+  },
+  "next_gate": "A separate post-qualification authorization freeze may pin this exact policy, estimator, qualification report, and audit. Only after that authorization is merged and effective on main may one frozen P2 high-resolution response search be executed."
+}
