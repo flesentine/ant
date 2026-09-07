@@ -42,12 +42,15 @@ node tests/p1-response-estimation-result-freeze.test.js
 node tests/p1-post-failure-characterization.test.js
 node tests/p2-candidate-class-evidence.test.js
 node tests/p2-mechanism-selection.test.js
+node tests/p2-reachability-policy.test.js
+node tests/p2-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
 node --check src/integrity.js
 node --check src/h5.js
 node --check src/p1.js
+node --check src/p2.js
 node --check src/app.js
 node --check tools/run-benchmark.js
 node --check tools/run-model-competition.js
@@ -60,7 +63,8 @@ node --check tools/run-h4-estimation.js
 node --check tools/run-h5-mechanism.js
 node --check tools/run-h5-estimation.js
 node --check tools/run-p1-reachability.js
+node --check tools/run-p2-reachability.js
 node --check tools/run-p1-estimation.js
 node --check tools/load-bundle.js
 python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py tools/derive-poissonnier2026-control-effects.py tools/derive-h2-estimation-targets.py tools/derive-pheromone-response-targets.py
-echo "All ANTLAB H0-H5 + P1 implementation tests PASS"
+echo "All ANTLAB H0-H5 + P1/P2 implementation tests PASS"
