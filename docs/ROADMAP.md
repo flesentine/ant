@@ -144,14 +144,15 @@
 - no identifiability or final secondary promotion guard was evaluated
 - canonical locomotion unchanged; Y-maze untouched
 
-### v0.3.3h — response-estimation result freeze / P1-v1 closure — in progress
+### v0.3.3h — response-estimation result freeze / P1-v1 closure — complete
 - exact 174770-byte official report materialized without reserialization
 - exact execution provenance frozen from the official Actions artifact
 - active high-resolution authorization retired to archive
 - official execution workflow and one-time result materializer retired
 - result-freeze record closes P1-v1 with rerun/retuning explicitly unauthorized
 - permanent regression pins 4/6 failure, positive median, absent final fit, no fixed pair, no canonical update, and no Y-maze unlock
-- final code + Chromium/firewall audit required before merge
+- final full-suite + real Chromium result-freeze audit passed with 4/4 parity and zero response-target/Y-maze requests
+- P1-v1 permanently closed; canonical locomotion unchanged; Y-maze remains locked
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
