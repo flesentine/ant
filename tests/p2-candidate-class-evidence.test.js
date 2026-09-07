@@ -70,8 +70,14 @@ if(laterPolicyPresent){
   assert.strictEqual(p.estimator_implementation_gate.response_target_semantic_access_authorized,false);
   assert.strictEqual(p.global_firewalls.Y_maze_access,false);
 }
-for(const p of ['hypotheses/p2_highres_authorization_v1.json','tools/run-p2-estimation.js'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before later estimator/authorization gates');
+const laterEstimatorPath=path.join(root,'tools','run-p2-estimation.js');
+const laterEstimatorPresent=fs.existsSync(laterEstimatorPath);
+if(laterEstimatorPresent){
+  assert.strictEqual(blob('tools/run-p2-estimation.js'),'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
+  assert.strictEqual(blob('hypotheses/p2_response_estimation_v1.json'),'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
+  assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')),'highres authorization must remain absent during estimator qualification');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')),'highres authorization must remain absent before later authorization gate');
 
 const neg=Object.fromEntries(e.negative_candidate_classes.map(x=>[x.class_id,x]));
 assert.match(neg.path_history_direction_recent_experience_modulation.status,/not_independently_supported/);
@@ -86,5 +92,6 @@ console.log('p2-candidate-class-evidence.test.js PASS '+JSON.stringify({
   later_implementation_present:laterImplementationPresent,
   historical_evidence_gate_implementation_authorized:false,
   later_response_policy_present:laterPolicyPresent,
+  later_estimator_present:laterEstimatorPresent,
   ymaze_authorized:false
 }));
