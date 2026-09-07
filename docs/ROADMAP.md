@@ -164,6 +164,17 @@
 - final audit run 34084252932 passed full H0-H5 + P1 suite plus real Chromium with zero response-target, Y-maze, or P2 executable-surface requests
 - canonical locomotion unchanged; P1-v1 remains closed; Y-maze remains locked
 
+### v0.3.3j — P2 transient-engagement mechanism selection freeze — in progress
+- Candidate A transient response engagement/lapse selected prospectively for P2-v1 because it has direct Lasius niger support
+- Candidate B relative/Weber bilateral transduction remains unselected because current support is cross-species; no A+B combination is authorized
+- P2 adds one per-ant, per-trial engagement state that is redrawn each simulation trial and is never a persistent specialist identity
+- when engaged, P2 reuses the already-frozen P1 egocentric local steering kernel unchanged as a component; P1-v1 itself remains closed
+- dedicated response-only RNG is namespaced from simulation seed + ant id and adds zero canonical biology RNG draws
+- exact identities frozen for zero dose, kappa=0, p_lapse=1 canonical bypass, and p_lapse=0 nested P1-kernel identity
+- reference-free engineering panel freezes sigma=8 mm, kappa=4 s^-1, and literature-motivated p_lapse=0.20 only for reachability
+- no P2 runtime/model exists; no new simulation, response-target search, estimation policy, canonical update, or Y-maze access authorized
+- exact-head full-suite + Chromium specification/firewall audit required before merge
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
