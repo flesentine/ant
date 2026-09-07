@@ -175,6 +175,18 @@
 - no P2 runtime/model exists; no new simulation, response-target search, estimation policy, canonical update, or Y-maze access authorized
 - final audit run 34085033098 passed full suite + pure specification checks + real Chromium with zero response-target, Y-maze, or P2 executable-surface requests
 
+### v0.3.3k — P2 implementation + reference-free reachability — in progress
+- P2 reachability execution policy frozen before runtime implementation at blob `8431ada87724953128104077f4ce1c11b569b1cf`
+- implementation authorization frozen before runtime implementation at blob `462997ea7399d98efca5a6b19a0e38160fbddbaf`
+- isolated `src/p2.js` implements only the frozen transient per-trial engagement gate over canonical integrity runtime
+- P2 uses a dedicated namespaced response RNG and adds zero canonical biology RNG draws
+- engineering P2 model freezes sigma=8 mm, kappa=4 s^-1, p_lapse=0.20, and unchanged bilateral sensor geometry
+- exact identity panel: zero dose -> canonical, kappa=0 -> canonical, p_lapse=1 -> canonical, p_lapse=0 -> frozen P1-kernel identity
+- stochastic panel pre-frozen to 400 nominal-dose trials on seeds 731000-731399 with no lapse-count tuning threshold beyond non-degeneracy
+- every stochastic P2 trial must be exactly the same-seed P1 trajectory if engaged or exactly canonical if lapsed
+- Candidate B Weber transduction remains absent; no estimation policy/search, response-target access, canonical update, or Y-maze access authorized
+- exact report freeze + full-suite + real Chromium audit required before merge
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
