@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "qualification_id": "P1_estimator_synthetic_qualification_v1",
+  "status": "passed",
+  "scientific_evidence": false,
+  "reference_outcomes_accessed": false,
+  "response_target_semantics_loaded": false,
+  "response_target_hash_verified_only": true,
+  "ymaze_accessed": false,
+  "policy_git_blob_sha": "628d17f6eb69fd11216aff33d1356d184365aedd",
+  "estimator_git_blob_sha": "a307e74e8ba2366e2546eebe1a7cccac69a3ff9a",
+  "frozen_runtime_blobs_verified": {
+    "src/p1.js": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "models/lasius_niger_painted_trail_p1_v1.json": "73873fd6763838423ca27648136bb0b9ff062817",
+    "apparatus/poissonnier2026_open_arena_p1_v1.json": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4",
+    "experiments/open_arena_p1_zero_dose_reachability.json": "6e47fa91143ed5d4d2b52bf2c555246b7d216297",
+    "experiments/open_arena_p1_nominal_dose_reachability.json": "8232d378195304f2a15aa76da8abf108d94f2c58",
+    "models/lasius_niger_locomotion_v1.json": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "src/sim-core.js": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "src/integrity.js": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+    "tools/load-bundle.js": "235067f10ed85eeeaebcfe6fef0963940d516b6b"
+  },
+  "response_target_git_blob_sha_verified": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+  "trials_per_treatment_path": 2,
+  "checks": {
+    "no_nuisance_parameters": true,
+    "halton_mapping": true,
+    "exact_null_anchor": true,
+    "candidate_parameter_wiring": true,
+    "exact_dcm_and_kappa0_identity": true,
+    "crn_pairing": true,
+    "path_not_runtime_input": true,
+    "equal_weight_colony_contrasts": true,
+    "fold_isolation": true,
+    "primary_objective_ignores_secondary": true,
+    "sample_sd_semantics": true,
+    "simulation_smoke": true,
+    "response_target_semantics_not_loaded": true,
+    "response_target_hash_verified_only": true,
+    "ymaze_not_loaded": true
+  }
+}
