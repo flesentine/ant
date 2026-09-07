@@ -59,12 +59,19 @@ if(laterImplementationPresent){
   assert.strictEqual(a.still_forbidden.response_target_access,true);
   assert.strictEqual(a.still_forbidden.Y_maze_access,true);
 }
-const forbiddenPaths=[
-  'hypotheses/p2_response_estimation_v1.json',
-  'hypotheses/p2_highres_authorization_v1.json',
-  'tools/run-p2-estimation.js'
-];
-for(const p of forbiddenPaths)assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before later estimation gates');
+const laterPolicyPath=path.join(root,'hypotheses','p2_response_estimation_v1.json');
+const laterPolicyPresent=fs.existsSync(laterPolicyPath);
+if(laterPolicyPresent){
+  assert.strictEqual(blob('hypotheses/p2_response_estimation_v1.json'),'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
+  const p=read('hypotheses/p2_response_estimation_v1.json');
+  assert.strictEqual(p.frozen_inputs.candidate_class_evidence.git_blob_sha,'f7eb9fe38f8955c0227501e2d257ff32a40eaf74');
+  assert.strictEqual(p.estimator_implementation_gate.estimator_status,'not_implemented_at_policy_freeze');
+  assert.strictEqual(p.estimator_implementation_gate.high_resolution_response_search_authorized,false);
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantic_access_authorized,false);
+  assert.strictEqual(p.global_firewalls.Y_maze_access,false);
+}
+for(const p of ['hypotheses/p2_highres_authorization_v1.json','tools/run-p2-estimation.js'])
+  assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before later estimator/authorization gates');
 
 const neg=Object.fromEntries(e.negative_candidate_classes.map(x=>[x.class_id,x]));
 assert.match(neg.path_history_direction_recent_experience_modulation.status,/not_independently_supported/);
@@ -78,5 +85,6 @@ console.log('p2-candidate-class-evidence.test.js PASS '+JSON.stringify({
   later_mechanism_present:laterMechanismPresent,
   later_implementation_present:laterImplementationPresent,
   historical_evidence_gate_implementation_authorized:false,
+  later_response_policy_present:laterPolicyPresent,
   ymaze_authorized:false
 }));
