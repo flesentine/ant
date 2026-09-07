@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "id": "P2_painted_trail_mechanism_v1",
+  "status": "prospective_mechanism_selected_and_frozen_before_implementation_or_new_simulation",
+  "freeze_date_local": "2026-09-06",
+  "species": "Lasius niger",
+  "scientific_scope": "Prospective P2 painted-trail mechanism selection after permanent P1-v1 closure. This record freezes a new transient response-engagement mechanism before implementation, simulation, parameter estimation, response-target search, or Y-maze access.",
+  "selected_candidate_class": {
+    "class_id": "P2_candidate_A_transient_response_engagement",
+    "source_evidence_file": "hypotheses/p2_painted_trail_candidate_class_evidence_v1.json",
+    "source_evidence_git_blob_sha": "f7eb9fe38f8955c0227501e2d257ff32a40eaf74",
+    "selection_rationale": [
+      "This class has direct Lasius niger support for transient non-following/lapse behavior.",
+      "The same evidence argues against a stable specialist pheromone-ignoring caste, so the state must be redrawn between trials rather than attached persistently to an ant identity.",
+      "Candidate B relative/Weber bilateral transduction remains biologically plausible but is supported here only by cross-species evidence and is therefore not combined into P2-v1.",
+      "Selecting the minimal directly supported class first limits structural complexity and avoids using the P1 failed folds to invent a multi-mechanism rescue."
+    ],
+    "candidate_B_status": "not_selected_retained_for_future_independent_hypothesis_only"
+  },
+  "p1_closure_boundary": {
+    "p1_result_freeze_file": "hypotheses/p1_response_estimation_result_freeze_v1.json",
+    "p1_result_freeze_git_blob_sha": "1d99ebfaa378aeb1b98963f63b3a513a616a6617",
+    "p1_official_report_git_blob_sha": "561aca4a14346ebb4f062f30d0438d3115784172",
+    "p1_v1_closed": true,
+    "p1_rerun_authorized": false,
+    "rule": "P2-v1 is a new versioned structural hypothesis. It does not reinterpret P1-v1 as passing and may not reuse P1 held-out failures to set any new structural value, search bound, fold, weight, seed, or promotion threshold."
+  },
+  "mechanism": {
+    "mechanism_id": "P2_trial_level_transient_trail_engagement_v1",
+    "concept": "Each simulated ant independently draws a fresh trail-response engagement state once per simulation trial when a non-null painted-trail response is active. Engaged ants express the unchanged frozen local P1 steering kernel; lapsed ants express zero painted-trail steering for that trial. The state is not persisted across trials and is not a stable ant phenotype.",
+    "trial_level_engagement_state": {
+      "parameter": "p_lapse",
+      "domain": [0, 1],
+      "draw_rule": "For 0 < p_lapse < 1, draw exactly one U~Uniform[0,1) from the dedicated P2 response RNG for each ant at simulation construction after canonical ant initialization. engaged = (U >= p_lapse).",
+      "within_trial_rule": "The engaged/lapsed state is fixed for that ant for the duration of the simulation trial.",
+      "between_trial_rule": "No engagement state is persisted or reused between simulation trials, seeds, or experiments.",
+      "stable_specialist_identity": false
+    },
+    "engaged_local_response_kernel": {
+      "source_component": "P1 frozen egocentric local steering kernel reused unchanged as a component, not as a promoted P1 result.",
+      "field": {
+        "type": "gaussian_distance_to_segment",
+        "equation": "C(p) = dose_ratio * exp(-d(p, segment)^2 / (2*sigma_field_mm^2))"
+      },
+      "sensors": {
+        "type": "bilateral_body_frame_points",
+        "forward_offset_mm": 2,
+        "lateral_half_separation_mm": 1.5
+      },
+      "transduction": {
+        "type": "c_over_one_plus_c",
+        "equation": "T(C)=C/(1+C)"
+      },
+      "steering": {
+        "type": "engagement_gated_right_minus_left_heading_drift",
+        "equation": "omega_trail = engaged * kappa_trail_per_s * (T(C_right)-T(C_left))"
+      }
+    },
+    "canonical_update_order": "When active and engaged, apply omega_trail*dt to heading immediately before the unchanged canonical Ant.update step, matching the previously audited P1 local-kernel ordering. Lapsed ants receive no trail heading increment.",
+    "moving_step_rule": "Trail steering is evaluated only on steps where the ant is not finished, is not already paused, and a preview of the canonical pause hazard indicates the ant will move; the preview clones biology RNG state without mutation.",
+    "speed_pause_noise_effects": {
+      "base_speed_changed": false,
+      "speed_process_changed": false,
+      "pause_process_changed": false,
+      "angular_noise_amplitude_changed": false,
+      "contact_process_changed": false
+    }
+  },
+  "dedicated_response_rng": {
+    "purpose": "Ensure stochastic engagement does not consume or perturb the canonical biology RNG stream.",
+    "biology_rng_draws_added": 0,
+    "response_rng_draws_per_ant": "0 under exact bypass cases; otherwise exactly 1 when 0 < p_lapse < 1.",
+    "seed_namespace_rule": "response_seed = hash32((world_seed >>> 0) XOR Math.imul(ant_id + 1, 0x27d4eb2d) XOR 0x6c8e9cf5), then coerce zero to 1 exactly as core.RNG does.",
+    "hash32_definition": [
+      "x |= 0",
+      "x = (x + 0x9e3779b9) | 0",
+      "x = Math.imul(x ^ (x >>> 16), 0x21f0aaad)",
+      "x = Math.imul(x ^ (x >>> 15), 0x735a2d97)",
+      "return (x ^ (x >>> 15)) >>> 0"
+    ],
+    "rng_algorithm": "Instantiate a separate core.RNG(response_seed) and use exactly one next() draw for the engagement state.",
+    "common_random_number_future_rule": "If a later frozen P2 estimation policy varies p_lapse, all candidates evaluated under a given simulation trial seed must use the same response_seed and therefore the same underlying U, creating monotone common-random-number coupling across p_lapse values."
+  },
+  "exact_identities": [
+    {
+      "case": "DCM_or_zero_dose",
+      "condition": "dose_ratio == 0",
+      "required_identity": "Exact canonical locomotion trajectory and canonical biology RNG state; no field/sensor evaluation and no P2 response RNG draw."
+    },
+    {
+      "case": "zero_steering_gain",
+      "condition": "kappa_trail_per_s == 0",
+      "required_identity": "Exact canonical locomotion trajectory and canonical biology RNG state; no field/sensor evaluation and no P2 response RNG draw."
+    },
+    {
+      "case": "all_lapse",
+      "condition": "p_lapse == 1",
+      "required_identity": "Exact canonical locomotion trajectory and canonical biology RNG state under nonzero dose; engagement is deterministically false and no P2 response RNG draw occurs."
+    },
+    {
+      "case": "always_engaged_nested_kernel",
+      "condition": "p_lapse == 0",
+      "required_identity": "For identical sigma_field_mm, kappa_trail_per_s, model, apparatus, protocol, seed and dt, P2 trajectory must be exactly identical to the frozen P1 local-kernel trajectory; engagement is deterministically true and no P2 response RNG draw occurs. This nested identity is an implementation invariant only and does not reopen P1-v1."
+    }
+  ],
+  "invariances": [
+    "No treatment-specific response parameter.",
+    "No short-vs-long path-specific response parameter.",
+    "No colony-specific response parameter.",
+    "No inward-vs-outward travel-direction response parameter.",
+    "No recent-food-experience response parameter.",
+    "No persistent ant specialist/ignorer identity.",
+    "No trail bearing, target direction, arena goal, or future path knowledge.",
+    "No speed modulation by painted-trail response.",
+    "No change to canonical pause, speed-noise, angular-noise, contacts, or boundary logic.",
+    "No H2, H3, H4, or H5 mechanism combination in P2-v1.",
+    "No Y-maze geometry, outcomes, or treatment labels."
+  ],
+  "structural_parameters": {
+    "p_lapse": {
+      "role": "P2-specific transient engagement probability",
+      "mathematical_domain": [0, 1],
+      "biological_status": "mechanism_parameter_not_estimated_for_poissonnier_assay",
+      "future_estimation_status": "not_decided_by_this_gate"
+    },
+    "sigma_field_mm": {
+      "role": "shared local field-width parameter inherited as an unchanged component of the frozen P1 local response kernel",
+      "future_estimation_status": "not_decided_by_this_gate"
+    },
+    "kappa_trail_per_s": {
+      "role": "shared local steering-gain parameter inherited as an unchanged component of the frozen P1 local response kernel",
+      "future_estimation_status": "not_decided_by_this_gate"
+    }
+  },
+  "engineering_only_reachability_values": {
+    "parameter_status": "ASSUMED_OR_LITERATURE_ANCHORED_FOR_REFERENCE_FREE_ENGINEERING_REACHABILITY_ONLY_NOT_FITTED",
+    "sigma_field_mm": 8,
+    "kappa_trail_per_s": 4,
+    "p_lapse": 0.2,
+    "p_lapse_basis": "Approximate literature-motivated Lasius niger lapse/non-following anchor from the independently frozen Koch & Czaczkes evidence. It is not asserted to be the Poissonnier open-arena lapse probability and may not be treated as fitted evidence.",
+    "sensor_forward_offset_mm": 2,
+    "sensor_lateral_half_separation_mm": 1.5,
+    "planned_reference_free_panel": [
+      {"name":"zero_dose_canonical_identity","dose":"zero","sigma_field_mm":8,"kappa_trail_per_s":4,"p_lapse":0.2},
+      {"name":"zero_kappa_canonical_identity","dose":"nominal","sigma_field_mm":8,"kappa_trail_per_s":0,"p_lapse":0.2},
+      {"name":"always_engaged_nested_p1_identity","dose":"nominal","sigma_field_mm":8,"kappa_trail_per_s":4,"p_lapse":0},
+      {"name":"literature_anchor_stochastic_reachability","dose":"nominal","sigma_field_mm":8,"kappa_trail_per_s":4,"p_lapse":0.2},
+      {"name":"all_lapse_canonical_identity","dose":"nominal","sigma_field_mm":8,"kappa_trail_per_s":4,"p_lapse":1}
+    ],
+    "retuning_from_reachability_forbidden": true
+  },
+  "selection_decisions": {
+    "candidate_A_transient_response_engagement": "selected_for_P2_v1",
+    "candidate_B_relative_bilateral_transduction": "not_selected_for_P2_v1",
+    "combined_A_plus_B": "not_selected",
+    "path_history_direction_recent_experience_modulation": "forbidden_without_new_independent_evidence",
+    "stable_specialist_pheromone_ignorer_identity": "forbidden_by_current_evidence"
+  },
+  "implementation_gate": {
+    "src_p2_exists_at_this_freeze": false,
+    "p2_model_exists_at_this_freeze": false,
+    "new_simulation_executed_at_this_freeze": false,
+    "implementation_authorized_by_this_record": false,
+    "next_step": "A separate implementation + reference-free reachability PR may implement exactly this frozen mechanism and engineering panel after this record is audited and merged. It may not access the response target or Y-maze."
+  },
+  "estimation_firewall": {
+    "p2_response_estimation_policy_exists": false,
+    "p2_parameter_search_authorized": false,
+    "raw_response_target_access_authorized": false,
+    "candidate_ranking_against_response_target_authorized": false,
+    "p1_official_result_rerun_authorized": false,
+    "adaptive_tuning_authorized": false,
+    "rule": "No P2 estimation bounds, candidate panel, objective, folds, seeds, trial budget, promotion rule, or high-resolution authorization may be chosen from P1 failed-fold behavior. Any future P2 estimation policy must be a separate prospective freeze after implementation and reference-free qualification."
+  },
+  "global_firewall": {
+    "canonical_locomotion_change": false,
+    "H2_H3_H4_H5_refit": false,
+    "P1_rerun_or_rescue": false,
+    "response_target_access": false,
+    "Y_maze_access": false,
+    "Y_maze_fitting_or_ranking": false
+  }
+}
