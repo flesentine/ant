@@ -106,8 +106,18 @@ assert.strictEqual(freeze.promotion_consequence.Y_maze_unlock_authorized,false);
 assert.match(freeze.retuning_rule,/Do not alter sigma, kappa, p_lapse/);
 assert.match(freeze.next_gate,/freeze a separate prospective P2 response-estimation policy/i);
 
-for(const p of ['hypotheses/p2_response_estimation_v1.json','hypotheses/p2_highres_authorization_v1.json','tools/run-p2-estimation.js'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent after reachability qualification');
+const laterPolicyPath=path.join(root,'hypotheses','p2_response_estimation_v1.json');
+const laterPolicyPresent=fs.existsSync(laterPolicyPath);
+if(laterPolicyPresent){
+  assert.strictEqual(blob('hypotheses/p2_response_estimation_v1.json'),'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
+  const p=read('hypotheses/p2_response_estimation_v1.json');
+  assert.strictEqual(p.frozen_inputs.reachability_result_freeze.git_blob_sha,'8dddaf083d4af046051fc1b7412b9f22cda8618a');
+  assert.strictEqual(p.frozen_inputs.reachability_report.git_blob_sha,'78a5e0ac4a3dd536a0e2d06ece2e9e37cdb2aefa');
+  assert.strictEqual(p.estimator_implementation_gate.estimator_status,'not_implemented_at_policy_freeze');
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantic_access_authorized,false);
+}
+for(const p of ['hypotheses/p2_highres_authorization_v1.json','tools/run-p2-estimation.js'])
+  assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent before later estimator/authorization gates');
 
 console.log('p2-reachability-result.test.js PASS '+JSON.stringify({
   freeze_blob:blob(freezeRel),
@@ -120,5 +130,6 @@ console.log('p2-reachability-result.test.js PASS '+JSON.stringify({
   chromium_cases:freeze.audit_sidecars.chromium_parity_cases,
   implementation_qualified:true,
   biological_fit:false,
+  later_response_policy_present:laterPolicyPresent,
   ymaze:false
 }));
