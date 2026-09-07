@@ -126,13 +126,20 @@
 - exact-head full regression + standalone qualification + 8/8 real Chromium parity passed
 - qualified estimator merged to main; canonical locomotion unchanged; Y-maze remained locked
 
-### v0.3.3f — high-resolution authorization freeze — in progress
+### v0.3.3f — high-resolution authorization freeze — complete
 - permanent estimator qualification report frozen from the successful v0.3.3e audit
 - authorization pins exact policy, estimator, qualification report, audit run/job/artifact and one-shot frozen execution contract
-- authorization is effective only after merge to main
-- review-branch high-resolution execution and semantic response-target loading remain blocked
+- authorization merged to main at `a9b57636db9b12cfd88feb2c8560f9eafa84787b`
+- permanent main Test and deploy ANTLAB run 34081603983 passed, including test and deploy jobs
 - canonical promotion remains unauthorized; Y-maze remains locked
-- after merge, permanent main test/deploy must pass before the one official 102-row response-estimation execution
+
+### v0.3.3g — official high-resolution response execution — in progress
+- execution precondition freezes the green authorization main commit and permanent CI provenance
+- exact main-only workflow is path-triggered by its own addition and has no PR or manual-dispatch trigger
+- official command has zero CLI parameter overrides and delegates all budgets/seeds to the frozen policy
+- review branch cannot execute the official response search
+- after merge, exactly one frozen 102-row P1 response-estimation execution is authorized
+- result must be frozen before interpretation or any later main change
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
