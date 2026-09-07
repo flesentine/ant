@@ -1471,3 +1471,78 @@ At v0.3.3m:
 - Y-maze: blocked
 
 The estimator contains the future high-resolution procedure so that the exact executable can be qualified before authorization, but it cannot execute that procedure successfully without a later authorization artifact pinned to the qualified estimator blob.
+
+
+### Frozen P2 estimator qualification result
+
+The first complete reference-free P2 estimator qualification passed on attempt 1.
+
+Qualification audit:
+
+- tested head: `cdbce7c9254b607012caf12f734256683f34b8f4`
+- GitHub Actions run: `34091953598`
+- job: `101647130672`
+- artifact ID: `10007145009`
+- artifact digest: `sha256:05e0f6a95c0059efc27955c00ebf5e429cd7561fe5412d20c900d4fdc64b9137`
+
+Exact qualification report:
+
+- file: `reports/p2_estimator_qualification_v1.json`
+- Git blob: `9f4d15875b35773b41696987abd1cc4721435bc2`
+- bytes: 2902
+- SHA-256: `22cd65ffbf3adbfd88fb3998ba4ab41e142b52b2b19d8aa2460ab2d9c42596a2`
+- status: `passed`
+
+Qualification-freeze record:
+
+- file: `hypotheses/p2_estimator_qualification_result_freeze_v1.json`
+- Git blob: `1d46b594cb154a93c2e321fb67d399acdd821993`
+
+All 20 frozen qualification checks passed:
+
+- no nuisance parameters;
+- 3D Halton mapping;
+- projected no-lapse mapping;
+- exact canonical null;
+- candidate parameter wiring;
+- canonical/null endpoints and nested P1 identity;
+- response-RNG common random numbers;
+- treatment/path CRN pairing;
+- path not used as runtime biology;
+- equal-weight colony contrasts;
+- fold isolation;
+- primary objective excludes secondary guards;
+- n−1 sample-SD semantics;
+- dual-survival comparator math;
+- 3-parameter identifiability + final increment logic;
+- reference-free simulation smoke;
+- response target semantics not loaded;
+- target Git blob hash verified only;
+- P1 official result semantics not loaded;
+- Y-maze not loaded.
+
+Real Chromium qualification:
+
+- parity cases: **10/10**
+- browser exceptions: **0**
+- console errors: **0**
+- response-target requests: **0**
+- Y-maze requests: **0**
+- P2 authorization requests: **0**
+
+The freeze-aware branch audit run `34092138649` independently passed the full permanent suite, the frozen qualification report regression, standalone qualification, unauthorized-highres rejection, and Chromium parity/firewall again.
+
+### Qualification consequence
+
+The P2 estimator is now reference-free qualified.
+
+Still **not authorized**:
+
+- semantic response-target access;
+- high-resolution P2 response search;
+- P1 official result semantic access;
+- canonical model updates;
+- Candidate B transduction;
+- Y-maze access.
+
+The next gate is a separate post-qualification high-resolution authorization freeze that must pin the exact policy, estimator, qualification report, and audit provenance before one official P2 response search can run.
