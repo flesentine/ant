@@ -154,6 +154,16 @@
 - final full-suite + real Chromium result-freeze audit passed with 4/4 parity and zero response-target/Y-maze requests
 - P1-v1 permanently closed; canonical locomotion unchanged; Y-maze remains locked
 
+### v0.3.3i — post-P1 failure characterization + P2 evidence gate — complete
+- post-hoc characterization uses only the immutable official P1 report; no raw target re-read, new simulation, reranking, refit, or inferential testing
+- fold summaries are frozen descriptively and explicitly forbid treating colony 27 or any other colony as an outlier to remove/downweight
+- independent Lasius niger evidence supports transient non-repeatable pheromone lapses as a plausible future mechanism class, but not a stable specialist-ignorer caste
+- cross-species Linepithema humile evidence supports relative/Weber-like bilateral pheromone sensing as a plausible mechanism class, but cannot set Lasius niger parameters
+- 2026 Lasius niger evidence does not support adding path-history, travel-direction, or recent-food-experience response modifiers
+- no P2 mechanism selected; no P2 runtime/model/policy/authorization exists; no new simulation authorized
+- final audit run 34084252932 passed full H0-H5 + P1 suite plus real Chromium with zero response-target, Y-maze, or P2 executable-surface requests
+- canonical locomotion unchanged; P1-v1 remains closed; Y-maze remains locked
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions

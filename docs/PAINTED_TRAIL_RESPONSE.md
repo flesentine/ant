@@ -759,3 +759,89 @@ P1-v1 may not be rescued by changing:
 - favorable reruns.
 
 Any future painted-trail hypothesis must be a **new versioned mechanism with a new pre-search policy**, not a retuned P1-v1.
+
+
+## Post-P1 failure characterization and P2 candidate-class evidence gate
+
+After P1-v1 was permanently closed, v0.3.3i adds a **descriptive-only** characterization of the already-frozen official result and a separate independent-evidence gate for possible future mechanism classes.
+
+Characterization record:
+
+`hypotheses/p1_post_failure_characterization_v1.json`
+
+Git blob:
+
+`1befbcb097959ba698d316adea1eb0c735eccc7f`
+
+Candidate-class evidence record:
+
+`hypotheses/p2_painted_trail_candidate_class_evidence_v1.json`
+
+Git blob:
+
+`f7eb9fe38f8955c0227501e2d257ff32a40eaf74`
+
+### Characterization boundary
+
+The characterization may summarize only quantities already contained in the immutable official P1 report.
+
+It does **not**:
+
+- reload the raw 102-row response target;
+- run new simulations;
+- re-rank candidates;
+- alter folds, weights, objectives, seeds, or budgets;
+- run new significance tests;
+- select a P2 mechanism;
+- authorize implementation;
+- reopen P1-v1;
+- access Y-maze data or geometry.
+
+The frozen report shows substantial variation among the held-out colony/path treatment contrasts. That is a descriptive property of the official development result. It does **not** prove a specific biological source of heterogeneity, and colony 27 may not be removed, downweighted, or used as a tuning target.
+
+### Independent candidate class A — transient response engagement/lapses
+
+Koch & Czaczkes (2021), *No specialist pheromone-ignoring ants in Lasius niger* (Ecological Entomology, DOI 10.1111/een.12995), reports an approximately 20% non-following/lapse rate in *L. niger* and found that ignoring a trail was not repeatable one hour later.
+
+This independently supports considering **transient stochastic response engagement/lapse behavior** as a future mechanism class.
+
+It does **not** support:
+
+- a stable specialist trail-ignorer caste;
+- colony-specific lapse probabilities;
+- a Poissonnier-assay lapse parameter;
+- using the P1 failed folds to set a lapse rate.
+
+### Independent candidate class B — relative bilateral sensing
+
+Perna et al. (2012), *Individual rules for trail pattern formation in Argentine ants* (PLoS Computational Biology; PMID 22829756), reports local turning responses consistent with a Weber-like bilateral signal, where relative left-right pheromone difference rather than an absolute difference predicts turning magnitude. Speed was reported as largely unaffected.
+
+This supports **relative/normalized bilateral transduction** as a mechanistic class worth considering.
+
+However, the evidence is from *Linepithema humile*, not *Lasius niger*. It therefore cannot set a P2 equation or parameters by itself.
+
+### Negative evidence constraint
+
+Poissonnier et al. (2026), *Pheromone trail following is not modulated by previous visit to food location, distance travelled, or travel direction in the ant Lasius niger* (Insectes Sociaux, DOI 10.1007/s00040-026-01106-9), reports no detected trail-following modulation by the tested path-distance, travel-direction, or recent-food-experience variables.
+
+Therefore the P1 failure does **not** authorize:
+
+- short-vs-long response parameters;
+- inward-vs-outward response parameters;
+- naïve-vs-experienced response parameters;
+- recent-food-specific response parameters.
+
+### Selection firewall
+
+At v0.3.3i:
+
+- P2 candidate A: **plausible, not selected**
+- P2 candidate B: **plausible, not selected**
+- P2 mechanism record: **absent**
+- P2 runtime/model: **absent**
+- P2 estimation policy: **absent**
+- P2 high-resolution authorization: **absent**
+- new P2 simulation: **not authorized**
+- Y-maze: **locked**
+
+A later mechanism-selection gate may choose, reject, or prospectively combine classes only by explicit independent biological rationale. If it does, it must freeze the exact equations, structural parameters, null identity, invariances, engineering-only reachability values, and a no-reference-search firewall **before** implementation.

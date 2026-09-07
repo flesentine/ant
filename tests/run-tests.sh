@@ -39,6 +39,8 @@ node tests/p1-estimation.test.js
 node tests/p1-highres-authorization.test.js
 node tests/p1-highres-execution-precondition.test.js
 node tests/p1-response-estimation-result-freeze.test.js
+node tests/p1-post-failure-characterization.test.js
+node tests/p2-candidate-class-evidence.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
