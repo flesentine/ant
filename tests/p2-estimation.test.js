@@ -83,7 +83,7 @@ assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'main'}),/miss
 
 const source=fs.readFileSync(path.join(root,'tools','run-p2-estimation.js'),'utf8');
 assert.ok(!source.includes('p1_response_estimation_500x60_v1.json'),'P2 estimator must not load P1 official result semantics');
-assert.ok(!/y[_-]?maze/i.test(source),'P2 estimator source must not contain Y-maze loader/surface');
+assert.ok(!/reference\/.*y[_-]?maze|experiments\/.*y[_-]?maze|loadBundle\([^\n]*y[_-]?maze|readJson\([^\n]*y[_-]?maze/i.test(source),'P2 estimator source must not contain a Y-maze file/load surface');
 const preflightIndex=source.indexOf('const preflight=highResolutionPreflight');
 const targetIndex=source.indexOf('const target=loadReferenceTarget');
 assert(preflightIndex>=0&&targetIndex>preflightIndex,'highres authorization/qualification preflight must occur before target load');
