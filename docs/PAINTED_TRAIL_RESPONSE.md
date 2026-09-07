@@ -573,3 +573,85 @@ The estimator already implements the frozen future execution path, but it remain
 - no Y-maze access.
 
 The next gate is exact-head code + Chromium qualification, followed by a **separate** authorization artifact. The high-resolution response search is still locked.
+
+
+## P1-v1 high-resolution authorization freeze
+
+v0.3.3f freezes the post-qualification authorization for the one official P1-v1 response-estimation execution.
+
+Authorization:
+
+`hypotheses/p1_highres_authorization_v1.json`
+
+Git blob:
+
+`7e77c5b1b9a6de9d665ff2be55c0780cc7d24d9c`
+
+Permanent qualification report:
+
+`reports/p1_estimator_qualification_v1.json`
+
+Git blob:
+
+`2f737a1e7059f023fa8acfa2a1f1bbc1e688ddb3`
+
+SHA-256:
+
+`6620ebc25729d540bef489bbf7748f2859f5eb4e3fb153428f428fb6ff1c779e`
+
+### Qualification provenance
+
+The authorization pins the successful v0.3.3e estimator audit:
+
+- run: `34058735013`
+- job: `101555308225`
+- tested head: `f733fede7cbd5bd0e9ee2d26f6d2914e438b0990`
+- clean estimator PR head: `93b27f6aa684a4de5d07a0861bc4b786e1b6b9bf`
+- merged estimator main commit: `143e2bd469a0e68b96d8c5f7ba6705e924fe353b`
+- artifact ID: `9996776691`
+- artifact digest: `sha256:75cbf626a1ed579aabfa1c9726612c1f27c85ba5fb5134e798116e8edb81a756`
+- Node↔Chromium parity: 8/8
+- browser exceptions: 0
+- console errors: 0
+- response-target requests: 0
+- Y-maze requests: 0
+
+The qualification itself accessed no response outcomes and loaded no response-target semantics.
+
+### Authorization semantics
+
+The authorization sets:
+
+- high-resolution response search: **authorized after merge to main**
+- canonical locomotion promotion: **not authorized**
+- Y-maze access: **not authorized**
+
+The authorization is intentionally marked `effective_when_merged_to_main=true`.
+
+Therefore, while this authorization is under review on its branch:
+
+- the estimator must reject `--mode highres`;
+- the semantic 102-row target loader must remain blocked;
+- no official result may be produced.
+
+### One-shot execution contract
+
+After merge and a green permanent main checkpoint, exactly one official execution is authorized with the already-frozen policy:
+
+- 499 Halton candidates + one exact `kappa=0` null per fold
+- six LOCO folds
+- 60 training trials per treatment × path × candidate
+- 120 held-out trials per treatment × path
+- fit root seed 2210000
+- evaluation root seed 2810000
+- final all-data candidate panel unchanged
+- 120 final-fit trials per treatment × path × candidate
+- final-fit seed 3210000
+- 240 independent final-check trials per treatment × path
+- final-check seed 3610000
+- no nuisance parameters
+- no adaptive second stage or favorable-seed rerun
+
+If the primary 5/6 survival guard fails, P1-v1 response estimation closes. If survival passes but identifiability or secondary guards fail, mechanism survival may be reported but a fixed parameter pair is not promoted.
+
+The response search has **not been run by this authorization PR**.
