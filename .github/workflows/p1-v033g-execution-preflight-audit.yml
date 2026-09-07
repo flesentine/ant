@@ -1,0 +1,66 @@
+name: P1 v0.3.3g execution preflight audit
+on:
+  push:
+    branches: [v0.3.3g-p1-official-highres-execution]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify execution trigger chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object .github/workflows/p1-v033g-official-highres.yml)" = "4e541499e25ccbd58a0cef80e90590e29926c03c"
+          test "$(git hash-object hypotheses/p1_highres_execution_precondition_v1.json)" = "18f2674ad3ee8da8f0a624a2a93b46f4bf673864"
+          test "$(git hash-object hypotheses/p1_highres_authorization_v1.json)" = "7e77c5b1b9a6de9d665ff2be55c0780cc7d24d9c"
+          test "$(git hash-object hypotheses/p1_response_estimation_v1.json)" = "628d17f6eb69fd11216aff33d1356d184365aedd"
+          test "$(git hash-object tools/run-p1-estimation.js)" = "a307e74e8ba2366e2546eebe1a7cccac69a3ff9a"
+          test ! -e reports/p1_response_estimation_500x60_v1.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const y=fs.readFileSync('.github/workflows/p1-v033g-official-highres.yml','utf8');
+          if(!/push:\s*\n\s*branches:\s*\[main\]/.test(y))throw new Error('official workflow is not main-only');
+          if(!/paths:\s*\n\s*-\s*'\.github\/workflows\/p1-v033g-official-highres\.yml'/.test(y))throw new Error('official workflow path trigger drift');
+          if(/\bpull_request\s*:/.test(y)||/\bworkflow_dispatch\s*:/.test(y))throw new Error('official workflow has a rerunnable/review trigger');
+          const cmd='node tools/run-p1-estimation.js --mode highres --out /tmp/p1-official/p1_response_estimation_500x60_v1.json';
+          if(!y.includes(cmd))throw new Error('official command drift');
+          if(/--(?:candidates|trials|eval-trials|seed|final-trials|final-seed|dt)\b/.test(y))throw new Error('official workflow overrides frozen highres parameters');
+          NODE
+      - name: Run full H0-H5 plus P1 suite
+        run: ./tests/run-tests.sh
+      - name: Re-run reference-free estimator qualification only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p1-execution-preflight
+          node tools/run-p1-estimation.js --mode qualification --trials 2 --out /tmp/p1-execution-preflight/qualification.json
+          node - <<'NODE'
+          const q=require('/tmp/p1-execution-preflight/qualification.json');
+          if(q.status!=='passed'||q.scientific_evidence!==false||q.reference_outcomes_accessed!==false||q.response_target_semantics_loaded!==false||q.ymaze_accessed!==false)throw new Error('reference-free qualification firewall failed');
+          NODE
+      - name: Prove review branch cannot execute official workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const est=require('./tools/run-p1-estimation.js');
+          const root=process.cwd();
+          let blocked=false;
+          try{est.assertHighResolutionAuthorized(root,null,{branchName:'v0.3.3g-p1-official-highres-execution'});}catch(e){blocked=/not effective until merged to main/.test(String(e));}
+          if(!blocked)throw new Error('review branch unexpectedly satisfies main-only authorization');
+          NODE
+      - name: Upload preflight evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-v033g-execution-preflight
+          path: /tmp/p1-execution-preflight
+          retention-days: 30
