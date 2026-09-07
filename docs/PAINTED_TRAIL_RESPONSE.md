@@ -1375,3 +1375,99 @@ At v0.3.3l:
 - Y-maze: **locked**
 
 A later estimator qualification gate must implement and prove this policy reference-free before a separate authorization can permit one frozen high-resolution P2 search.
+
+
+## P2-v1 estimator implementation and reference-free qualification
+
+v0.3.3m implements the estimator defined by the frozen P2 response-estimation policy while keeping the actual 102-row response target semantically locked.
+
+Estimator:
+
+`tools/run-p2-estimation.js`
+
+Current Git blob:
+
+`38d66d28e94d2f532e9c8a20bd6553d6d11be8a6`
+
+Frozen policy:
+
+`hypotheses/p2_response_estimation_v1.json`
+
+Git blob:
+
+`eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce`
+
+### Estimator implementation
+
+The estimator implements exactly the frozen candidate surfaces:
+
+P2 panel:
+
+- Halton indices 1–999
+- prime 2 → sigma
+- prime 3 → kappa
+- prime 5 → p_lapse
+- exact canonical null at index 1000
+
+Projected no-lapse benchmark:
+
+- same 999 sigma/kappa coordinates
+- p_lapse forced to 0
+- same exact canonical null at index 1000
+
+The two panels are ranked separately on the same primary contrast objective.
+
+### Candidate wiring
+
+Each P2 candidate may change only:
+
+- `sigma_field_mm`
+- `kappa_trail_per_s`
+- `p_lapse`
+
+Movement, sensor geometry, transduction, apparatus, observation, scoring, canonical RNG, and P2 response-RNG namespace remain frozen.
+
+DCM is the exact A=0 canonical bypass.
+
+The no-lapse benchmark is the exact p_lapse=0 nested endpoint.
+
+### Reference-free qualification
+
+Before any response target may be parsed, qualification must establish:
+
+- zero nuisance parameters;
+- exact 3D Halton mapping;
+- exact projected no-lapse construction;
+- exact canonical-null anchor;
+- candidate parameter wiring;
+- zero-dose canonical identity;
+- kappa=0 canonical identity;
+- p_lapse=1 canonical identity;
+- p_lapse=0 nested frozen-P1 local-kernel identity;
+- identical response RNG seed/U across P2 candidates sharing a trial seed;
+- response-RNG isolation from canonical biology RNG;
+- common-random-number path/treatment pairing;
+- equal-weight colony contrast construction;
+- LOCO heldout isolation;
+- secondary metrics excluded from candidate ranking;
+- n−1 sample-SD semantics;
+- dual survival comparator logic;
+- 3-parameter identifiability logic;
+- independent final-primary increment logic;
+- reference-free simulation smoke.
+
+The response-target file may be verified by Git blob only during this stage.
+
+### Authorization firewall
+
+The semantic target loader calls the high-resolution authorization check before parsing the target.
+
+At v0.3.3m:
+
+- `hypotheses/p2_highres_authorization_v1.json`: absent
+- high-resolution P2 search: blocked
+- response-target semantic access: blocked
+- P1 official response-result semantic access: blocked
+- Y-maze: blocked
+
+The estimator contains the future high-resolution procedure so that the exact executable can be qualified before authorization, but it cannot execute that procedure successfully without a later authorization artifact pinned to the qualified estimator blob.
