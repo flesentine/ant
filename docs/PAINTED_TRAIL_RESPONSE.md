@@ -655,3 +655,107 @@ After merge and a green permanent main checkpoint, exactly one official executio
 If the primary 5/6 survival guard fails, P1-v1 response estimation closes. If survival passes but identifiability or secondary guards fail, mechanism survival may be reported but a fixed parameter pair is not promoted.
 
 The response search has **not been run by this authorization PR**.
+
+
+## Official P1-v1 response-estimation result and closure
+
+The one authorized frozen high-resolution P1-v1 response-estimation execution completed successfully on **attempt 1**.
+
+Execution provenance:
+
+- main commit: `4da2101267093ead0e3f2569b28940f49f89a552`
+- GitHub Actions run: `34081980126`
+- job: `101618864436`
+- artifact ID: `10004082907`
+- artifact digest: `sha256:e8ad929fca97a5c2d7b74147434ee81ef5ba8fd3b0ab1f44609e566f1769f3c7`
+
+Exact official report:
+
+- file: `reports/p1_response_estimation_500x60_v1.json`
+- Git blob: `561aca4a14346ebb4f062f30d0438d3115784172`
+- bytes: 174770
+- SHA-256: `4e3de4c1fb35465a877fbc78b8ce178763b5bcb968af05d66085186a93a3facf`
+- status: `development_response_estimation_failed_primary_survival_guard`
+
+Exact execution provenance:
+
+- file: `reports/p1_response_estimation_execution_provenance_v1.json`
+- Git blob: `6afe2727a88b7294d2bd09b8704755a5a355826a`
+- SHA-256: `96b86db1070c221a0e5040b2f05ebab40303c7ee3a0b486133a181f56e4d5e93`
+
+Result-freeze record:
+
+- file: `hypotheses/p1_response_estimation_result_freeze_v1.json`
+- Git blob: `1d99ebfaa378aeb1b98963f63b3a513a616a6617`
+
+### Frozen primary result
+
+The preregistered survival rule was conjunctive:
+
+1. P1 must beat the exact `kappa=0` null in at least **5 of 6** held-out colonies; and
+2. median held-out relative improvement must be **strictly positive**.
+
+Observed:
+
+- held-out wins vs exact null: **4/6**
+- required wins: **5/6**
+- median relative improvement: **+0.26132694328143546** (+26.13%)
+- primary survival guard: **FAIL**
+
+The positive median does not override the failed 5/6 requirement.
+
+Held-out relative improvements were:
+
+| Held-out colony | Relative improvement vs exact null |
+| ---: | ---: |
+| 0 | −17.10% |
+| 7 | +31.53% |
+| 16 | +20.74% |
+| 20 | +72.24% |
+| 21 | +52.29% |
+| 27 | −153.94% |
+
+The two failures are not treated as opportunities to alter folds, seeds, bounds, weights, or budgets. Colony 27 in particular is a strong held-out failure under the already-frozen procedure.
+
+### Frozen downstream consequence
+
+Because the primary survival guard failed:
+
+- `final_all_data_fit` is **null**;
+- the final all-102-row candidate ranking was **not run**;
+- identifiability was **not evaluated**;
+- final secondary exit-time/beeline promotion guards were **not evaluated**;
+- no fixed `sigma_field_mm` / `kappa_trail_per_s` pair is eligible for v0.4;
+- canonical locomotion remains unchanged;
+- Y-maze remains locked.
+
+This is the required behavior of the frozen policy, not missing analysis.
+
+### P1-v1 closure
+
+P1-v1 response estimation is now closed.
+
+The active high-resolution authorization has been retired to:
+
+`hypotheses/archive/p1_highres_authorization_v1.json`
+
+with its historical Git blob unchanged:
+
+`7e77c5b1b9a6de9d665ff2be55c0780cc7d24d9c`
+
+The one-shot official execution workflow has also been retired. A valid second P1-v1 search is not authorized.
+
+P1-v1 may not be rescued by changing:
+
+- parameter bounds or scales;
+- Halton candidates or candidate budget;
+- trial counts or seed streams;
+- fold membership or colony weighting;
+- primary objective construction or weights;
+- nuisance parameters;
+- sensor geometry or transduction;
+- apparatus or observation semantics;
+- promotion thresholds;
+- favorable reruns.
+
+Any future painted-trail hypothesis must be a **new versioned mechanism with a new pre-search policy**, not a retuned P1-v1.
