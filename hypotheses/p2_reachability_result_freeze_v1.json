@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "id": "P2_reference_free_reachability_result_freeze_v1",
+  "status": "reference_free_reachability_passed_frozen_P2_v1_implementation_qualified_only",
+  "freeze_date_local": "2026-09-06",
+  "scientific_scope": "Frozen result of the pre-registered P2-v1 implementation and reference-free reachability panel. This is engineering/implementation qualification only and is not biological fit evidence.",
+  "execution_audit": {
+    "tested_head": "e92484e909ddf9968071bda29d19b6a332c1486c",
+    "github_run_id": 34089553046,
+    "github_job_id": 101640096955,
+    "github_run_attempt": 1,
+    "artifact_id": 10006342916,
+    "artifact_name": "p2-v033k-implementation-reachability-audit",
+    "artifact_digest": "sha256:1712b4b9a5ccfcc87659f90c44a5211c5bbaa23a5748d810f610e7363b97b4ee"
+  },
+  "official_report": {
+    "file": "reports/p2_reference_free_reachability_v1.json",
+    "git_blob_sha": "78a5e0ac4a3dd536a0e2d06ece2e9e37cdb2aefa",
+    "sha256": "de481a25ad36d6124bb51cb644bb55199fa655471fbadc082f7d3f04cb2ac37b",
+    "bytes": 5765,
+    "status": "reference_free_reachability_passed"
+  },
+  "audit_sidecars": {
+    "browser_sha256": "d0b769cf50c5a442aa110e2743bee417b781ceeeeed961511fb622b1e0fc9eb4",
+    "node_parity_sha256": "a92657ccc728de24aa579be61db0622e7769a4ca559911b9cdddb6db88328477",
+    "chromium_parity_cases": 6,
+    "browser_exceptions": 0,
+    "browser_console_errors": 0,
+    "browser_response_target_requests": 0,
+    "browser_ymaze_requests": 0,
+    "browser_p2_estimation_surface_requests": 0
+  },
+  "frozen_implementation_chain": {
+    "mechanism_git_blob_sha": "70f51e5cab5db0024947ed71cf760590089f8aea",
+    "reachability_policy_git_blob_sha": "8431ada87724953128104077f4ce1c11b569b1cf",
+    "implementation_authorization_git_blob_sha": "462997ea7399d98efca5a6b19a0e38160fbddbaf",
+    "runtime_git_blob_sha": "f91a2f7ede1b8119acc1fd57ac94a9718d074e15",
+    "model_git_blob_sha": "7d3eecc44cb2eaf727249083a6fcfa21986fd475",
+    "zero_experiment_git_blob_sha": "322b27e3bd92ed7ba7b6f2056b6d7f9dd34a4333",
+    "nominal_experiment_git_blob_sha": "cacfd5514232cd240cd86de126b03f45fb81b8ba",
+    "reachability_runner_git_blob_sha": "88f4a3ee0459ff2e1b33db0195635d1c5c46ca23",
+    "p1_component_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "canonical_model_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "integrity_runtime_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+  },
+  "exact_identity_result": {
+    "seeds": [730001,730002,730003,730004,730005,730006,730007,730008],
+    "zero_dose_canonical_identity": true,
+    "zero_kappa_canonical_identity": true,
+    "all_lapse_canonical_identity": true,
+    "always_engaged_nested_P1_identity": true,
+    "canonical_biology_rng_identity": true
+  },
+  "stochastic_panel_result": {
+    "trials": 400,
+    "seed_range": [731000,731399],
+    "engineering_p_lapse": 0.2,
+    "lapses": 75,
+    "engaged": 325,
+    "observed_lapse_fraction": 0.1875,
+    "all_trials_exact_component_identity": true,
+    "all_trials_exactly_one_response_draw": true,
+    "all_trials_engagement_state_fixed": true,
+    "response_seed_namespace_unique": true,
+    "mean_central_zone_fraction": 0.3105365527822391,
+    "trail_axis_exit_rate": 0.4825,
+    "mean_moving_speed_mm_s": 23.628478016068925,
+    "mean_time_to_exit_s": 9.353299999999999,
+    "mean_steering_samples": 381.61,
+    "interpretation": "All summary values and the 18.75% realized lapse fraction are descriptive consequences of the frozen engineering anchor and seed panel. They are not fitting targets, biological estimates, or grounds for retuning."
+  },
+  "invariance_result": {
+    "local_steering_sign": true,
+    "on_trail_zero_steering": true,
+    "endpoint_reversal": true,
+    "translation": true,
+    "rotation": true
+  },
+  "firewall_result": {
+    "fit_performed": false,
+    "parameter_search_performed": false,
+    "candidate_ranking_performed": false,
+    "response_targets_accessed": false,
+    "reference_outcomes_accessed": false,
+    "P1_official_result_used_for_tuning": false,
+    "Candidate_B_implemented": false,
+    "canonical_model_updated": false,
+    "Y_maze_accessed": false
+  },
+  "promotion_consequence": {
+    "P2_v1_implementation_qualified": true,
+    "reference_free_reachability_passed": true,
+    "biological_fit_claim_authorized": false,
+    "fixed_P2_parameter_set_promoted": false,
+    "P2_response_estimation_policy_authorized_by_this_result": false,
+    "P2_parameter_search_authorized": false,
+    "canonical_locomotion_update_authorized": false,
+    "Y_maze_unlock_authorized": false
+  },
+  "retuning_rule": "Do not alter sigma, kappa, p_lapse, sensors, RNG namespace, seeds, dt, trial count, Candidate B status, or identity criteria in response to this reachability result.",
+  "next_gate": "If P2-v1 development continues, freeze a separate prospective P2 response-estimation policy before estimator implementation or any response-target semantic access."
+}
