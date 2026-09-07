@@ -1,0 +1,4701 @@
+{
+  "schema_version": 1,
+  "estimation_id": "P1_response_estimation_v1",
+  "status": "development_response_estimation_failed_primary_survival_guard",
+  "execution_class": "frozen_high_resolution_response_search",
+  "scientific_evidence": true,
+  "policy_git_blob_sha": "628d17f6eb69fd11216aff33d1356d184365aedd",
+  "estimator_git_blob_sha": "a307e74e8ba2366e2546eebe1a7cccac69a3ff9a",
+  "response_target_git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+  "reference_outcomes_accessed": true,
+  "ymaze_accessed": false,
+  "canonical_locomotion_updated": false,
+  "H2_H3_H4_H5_refit": false,
+  "nuisance_parameters_estimated": false,
+  "pre_reference_qualification": {
+    "schema_version": 1,
+    "qualification_id": "P1_estimator_synthetic_qualification_v1",
+    "status": "passed",
+    "scientific_evidence": false,
+    "reference_outcomes_accessed": false,
+    "response_target_semantics_loaded": false,
+    "response_target_hash_verified_only": true,
+    "ymaze_accessed": false,
+    "policy_git_blob_sha": "628d17f6eb69fd11216aff33d1356d184365aedd",
+    "estimator_git_blob_sha": "a307e74e8ba2366e2546eebe1a7cccac69a3ff9a",
+    "frozen_runtime_blobs_verified": {
+      "src/p1.js": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+      "models/lasius_niger_painted_trail_p1_v1.json": "73873fd6763838423ca27648136bb0b9ff062817",
+      "apparatus/poissonnier2026_open_arena_p1_v1.json": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4",
+      "experiments/open_arena_p1_zero_dose_reachability.json": "6e47fa91143ed5d4d2b52bf2c555246b7d216297",
+      "experiments/open_arena_p1_nominal_dose_reachability.json": "8232d378195304f2a15aa76da8abf108d94f2c58",
+      "models/lasius_niger_locomotion_v1.json": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+      "src/sim-core.js": "24777aac3577d442893e4779d70aee4e27761fe8",
+      "src/integrity.js": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+      "tools/load-bundle.js": "235067f10ed85eeeaebcfe6fef0963940d516b6b"
+    },
+    "response_target_git_blob_sha_verified": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+    "trials_per_treatment_path": 2,
+    "checks": {
+      "no_nuisance_parameters": true,
+      "halton_mapping": true,
+      "exact_null_anchor": true,
+      "candidate_parameter_wiring": true,
+      "exact_dcm_and_kappa0_identity": true,
+      "crn_pairing": true,
+      "path_not_runtime_input": true,
+      "equal_weight_colony_contrasts": true,
+      "fold_isolation": true,
+      "primary_objective_ignores_secondary": true,
+      "sample_sd_semantics": true,
+      "simulation_smoke": true,
+      "response_target_semantics_not_loaded": true,
+      "response_target_hash_verified_only": true,
+      "ymaze_not_loaded": true
+    }
+  },
+  "high_resolution_authorization": {
+    "schema_version": 1,
+    "id": "P1_high_resolution_authorization_v1",
+    "status": "qualified_estimator_authorized_for_frozen_high_resolution_response_search",
+    "authorization_date_local": "2026-09-06",
+    "effective_when_merged_to_main": true,
+    "high_resolution_response_search_authorized": true,
+    "scientific_scope": "Internal Poissonnier 2026 open-arena painted-trail response development estimation only. This authorization permits one frozen high-resolution P1-v1 response search after merge to main. It does not constitute external validation, canonical locomotion promotion, or Y-maze validation.",
+    "policy_file": "hypotheses/p1_response_estimation_v1.json",
+    "policy_git_blob_sha": "628d17f6eb69fd11216aff33d1356d184365aedd",
+    "estimator_file": "tools/run-p1-estimation.js",
+    "estimator_git_blob_sha": "a307e74e8ba2366e2546eebe1a7cccac69a3ff9a",
+    "qualification_report": {
+      "file": "reports/p1_estimator_qualification_v1.json",
+      "git_blob_sha": "2f737a1e7059f023fa8acfa2a1f1bbc1e688ddb3",
+      "sha256": "6620ebc25729d540bef489bbf7748f2859f5eb4e3fb153428f428fb6ff1c779e",
+      "status": "passed",
+      "scientific_evidence": false,
+      "reference_outcomes_accessed": false,
+      "response_target_semantics_loaded": false,
+      "response_target_hash_verified_only": true,
+      "ymaze_accessed": false
+    },
+    "estimator_qualification_audit": {
+      "run_id": 34058735013,
+      "job_id": 101555308225,
+      "attempt": 1,
+      "tested_head": "f733fede7cbd5bd0e9ee2d26f6d2914e438b0990",
+      "clean_pr_head": "93b27f6aa684a4de5d07a0861bc4b786e1b6b9bf",
+      "merged_main_commit": "143e2bd469a0e68b96d8c5f7ba6705e924fe353b",
+      "artifact_id": 9996776691,
+      "artifact_digest": "sha256:75cbf626a1ed579aabfa1c9726612c1f27c85ba5fb5134e798116e8edb81a756",
+      "full_regression_suite": "passed",
+      "standalone_estimator_qualification": "passed",
+      "unauthorized_highres_rejected_before_target_parsing": true,
+      "unauthorized_highres_report_written": false,
+      "chromium_parity_cases": 8,
+      "browser_exceptions": 0,
+      "console_errors": 0,
+      "response_target_requests": 0,
+      "ymaze_requests": 0,
+      "high_resolution_authorized_during_qualification": false
+    },
+    "tested_to_clean_head_relation": "The successful audit-tested head and the clean estimator PR head were byte-identical for the frozen policy, estimator, runtime, model, target hash, tests, and documentation. The clean head differed from the workflow-bearing audit head only by deletion of the temporary estimator-audit workflow.",
+    "authorized_frozen_execution": {
+      "mode": "highres",
+      "output_file": "reports/p1_response_estimation_500x60_v1.json",
+      "physics_dt_s": 0.02,
+      "folds": 6,
+      "candidate_budget_per_fold_total": 500,
+      "positive_halton_candidates_per_fold": 499,
+      "exact_null_anchor_candidates_per_fold": 1,
+      "training_trials_per_treatment_path_per_candidate": 60,
+      "heldout_evaluation_trials_per_treatment_path": 120,
+      "root_fit_seed": 2210000,
+      "fold_fit_seed_rule": "2210000 + fold_index * 10000",
+      "root_evaluation_seed": 2810000,
+      "fold_evaluation_seed_rule": "2810000 + fold_index * 10000",
+      "final_all_data_training_trials_per_treatment_path_per_candidate": 120,
+      "final_all_data_fit_seed": 3210000,
+      "final_check_trials_per_treatment_path": 240,
+      "final_check_seed": 3610000,
+      "common_random_numbers": true,
+      "primary_fit_observables": [
+        "middle_zone_fraction",
+        "trail_axis_exit"
+      ],
+      "primary_objective": "Equal-weight mean squared error over four pheromone-minus-DCM treatment-contrast errors: two primary observables x short/long path strata. Reference targets equal-weight colony-level contrasts.",
+      "secondary_guard_observables": [
+        "time_to_exit_s",
+        "beeline_mm"
+      ],
+      "secondary_guard_rule": "Post-selection only. On the independent final-check panel, absolute standardized contrast error must be <= 1.0 for each of the four path x secondary-metric components.",
+      "primary_survival_guard": "P1 selected context candidate beats the exact kappa=0 null in at least 5 of 6 held-out LOCO folds and has strictly positive median relative held-out improvement.",
+      "identifiability_guard": "If primary survival passes: exact null anchor must be outside the frozen near-best set; selected normalized sigma and kappa coordinates must each be at least 0.02 from an active bound; near-best normalized span must be <= 0.60 for each parameter.",
+      "final_fit_rule": "The final all-102-row fit may occur only after the primary survival guard passes and must reuse the same frozen 499 Halton candidates plus exact null anchor. The independent final-check panel may evaluate frozen guards but may not trigger refitting or alternate candidate selection."
+    },
+    "execution_firewall": [
+      "Do not change sigma or kappa bounds, scales, Halton mapping, candidate counts, trial counts, seeds, physics dt, objective construction, colony weighting, fold membership, secondary guards, identifiability thresholds, or promotion thresholds.",
+      "Do not add nuisance parameters or refit baseline locomotion, H2, H3, H4, or H5.",
+      "Do not fit moving speed, moving distance, straightness, moving-time fraction, raw heading diagnostics, P1 sensor diagnostics, omega diagnostics, or any other forbidden observable.",
+      "Do not pool pheromone-minus-DCM contrasts across path strata or weight colonies by ant-row count.",
+      "Do not introduce treatment-specific, path-specific, colony-specific, or fold-specific response parameters.",
+      "Do not access or use Y-maze data, outcomes, simulations, or geometry for selection, fitting, ranking, or interpretation.",
+      "Do not change the frozen P1 runtime, model structure, sensor geometry, transduction, apparatus, canonical runtime, or canonical locomotion model.",
+      "Do not run an adaptive second-stage search, inject candidates, alter bounds, increase the budget, change seeds, or rerun with favorable seeds after seeing target-ranked outcomes."
+    ],
+    "official_execution_rule": "Authorize exactly one official execution of the frozen high-resolution P1-v1 response-estimation procedure after this authorization is merged and effective on main. A rerun is permitted only if the first execution is formally declared invalid because of a genuine implementation or infrastructure error; the entire frozen procedure must then be rerun unchanged.",
+    "post_result_rule": "Freeze and record the complete result before any interpretation-driven code, policy, or model change. Failure cannot be rescued by retuning P1-v1, changing the search, or selecting a favorable rerun. If the primary survival guard fails, close P1-v1 response estimation. If survival passes but identifiability or secondary guards fail, report mechanism survival without promoting a fixed parameter pair.",
+    "canonical_promotion_authorized": false,
+    "ymaze_access_authorized": false,
+    "authorization_gate_hardening": {
+      "main_branch_required": true,
+      "rule": "Because effective_when_merged_to_main is true, the estimator and semantic response-target loader must reject high-resolution execution on this authorization review branch. High-resolution execution becomes eligible only when the exact authorization is present on main.",
+      "reason": "Prevents review-branch presence of the authorization file from making the official 102-row search executable before the authorization itself is reviewed and merged."
+    },
+    "authorization_pr_base_main_commit": "143e2bd469a0e68b96d8c5f7ba6705e924fe353b",
+    "post_merge_execution_precondition": "Before the official high-resolution P1 response search, verify the permanent main test/deploy workflow succeeds on a main commit containing this authorization record together with estimator Git blob a307e74e8ba2366e2546eebe1a7cccac69a3ff9a and policy Git blob 628d17f6eb69fd11216aff33d1356d184365aedd.",
+    "post_merge_execution_precondition_reason": "The official target-ranked search must begin from a green permanent main checkpoint, not merely from a successful temporary branch audit."
+  },
+  "execution": {
+    "repo_commit": "4da2101267093ead0e3f2569b28940f49f89a552",
+    "node_version": "v22.23.2",
+    "physics_dt_s": 0.02
+  },
+  "search": {
+    "method": "deterministic Halton low-discrepancy panel",
+    "candidates_per_fold_total": 500,
+    "positive_halton_candidates": 499,
+    "exact_null_anchor_candidates": 1,
+    "training_trials_per_treatment_path_per_candidate": 60,
+    "heldout_evaluation_trials_per_treatment_path": 120,
+    "folds": 6,
+    "root_fit_seed": 2210000,
+    "root_evaluation_seed": 2810000,
+    "common_random_numbers": true,
+    "halton_mapping": [
+      {
+        "prime": 2,
+        "parameter": "sigma_field_mm",
+        "mapping": "log-uniform over [2,32]"
+      },
+      {
+        "prime": 3,
+        "parameter": "kappa_trail_per_s",
+        "mapping": "linear over [0,16]"
+      }
+    ]
+  },
+  "folds": [
+    {
+      "held_out_colony": 0,
+      "training_colonies": [
+        7,
+        16,
+        20,
+        21,
+        27
+      ],
+      "fit_seed": 2210000,
+      "evaluation_seed": 2810000,
+      "selected_training_fit": {
+        "candidate": {
+          "sigma_field_mm": 2.2530432372164837,
+          "kappa_trail_per_s": 6.847736625514403
+        },
+        "candidate_index": 208,
+        "source": "halton",
+        "loss": 0.0026822474137669456,
+        "components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.30090475112871573,
+            "simulation_contrast": 0.31340803868103095,
+            "error": 0.012503287552315223,
+            "squared_error": 0.0001563321996158808
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.15000000000000002,
+            "simulation_contrast": 0.19999999999999996,
+            "error": 0.04999999999999993,
+            "squared_error": 0.0024999999999999935
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.24251136242558302,
+            "simulation_contrast": 0.31551063148436403,
+            "error": 0.07299926905878101,
+            "squared_error": 0.005328893283116303
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.35238095238095235,
+            "simulation_contrast": 0.29999999999999993,
+            "error": -0.05238095238095242,
+            "squared_error": 0.0027437641723356047
+          }
+        ]
+      },
+      "training_top_candidates": [
+        {
+          "candidate": {
+            "sigma_field_mm": 2.2530432372164837,
+            "kappa_trail_per_s": 6.847736625514403
+          },
+          "candidate_index": 208,
+          "source": "halton",
+          "loss": 0.0026822474137669456,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.31340803868103095,
+              "error": 0.012503287552315223,
+              "squared_error": 0.0001563321996158808
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.19999999999999996,
+              "error": 0.04999999999999993,
+              "squared_error": 0.0024999999999999935
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.31551063148436403,
+              "error": 0.07299926905878101,
+              "squared_error": 0.005328893283116303
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.29999999999999993,
+              "error": -0.05238095238095242,
+              "squared_error": 0.0027437641723356047
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 3.118008800475674,
+            "kappa_trail_per_s": 8.164609053497943
+          },
+          "candidate_index": 148,
+          "source": "halton",
+          "loss": 0.003280072421889643,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.32615296827182183,
+              "error": 0.0252482171431061,
+              "squared_error": 0.0006374724689054368
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.23333333333333328,
+              "error": 0.08333333333333326,
+              "squared_error": 0.006944444444444432
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.3078019633580838,
+              "error": 0.06529060093250078,
+              "squared_error": 0.0042628625701270715
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.31666666666666665,
+              "error": -0.0357142857142857,
+              "squared_error": 0.0012755102040816315
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.82842712474619,
+            "kappa_trail_per_s": 7.111111111111111
+          },
+          "candidate_index": 4,
+          "source": "halton",
+          "loss": 0.004031655525766567,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.2842001163711959,
+              "error": -0.01670463475751982,
+              "squared_error": 0.00027904482238213927
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.18333333333333335,
+              "error": 0.033333333333333326,
+              "squared_error": 0.0011111111111111107
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.26626279540689984,
+              "error": 0.023751432981316822,
+              "squared_error": 0.0005641305686659846
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.23333333333333328,
+              "error": -0.11904761904761907,
+              "squared_error": 0.014172335600907034
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.3586700962132126,
+            "kappa_trail_per_s": 11.193415637860081
+          },
+          "candidate_index": 218,
+          "source": "halton",
+          "loss": 0.004189397400610163,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.23908199064846974,
+              "error": -0.061822760480245986,
+              "squared_error": 0.003822053713397865
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.1333333333333333,
+              "error": -0.01666666666666672,
+              "squared_error": 0.0002777777777777795
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.3153867309375487,
+              "error": 0.07287536851196569,
+              "squared_error": 0.0053108193357548
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.2666666666666666,
+              "error": -0.08571428571428574,
+              "squared_error": 0.007346938775510209
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 3.914288248350801,
+            "kappa_trail_per_s": 9.74485596707819
+          },
+          "candidate_index": 124,
+          "source": "halton",
+          "loss": 0.004963869704295682,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.29196754959894444,
+              "error": -0.008937201529771288,
+              "squared_error": 0.00007987357118374626
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.21666666666666667,
+              "error": 0.06666666666666665,
+              "squared_error": 0.004444444444444443
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.3121482879114465,
+              "error": 0.06963692548586348,
+              "squared_error": 0.004849301391123702
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.25,
+              "error": -0.10238095238095235,
+              "squared_error": 0.010481859410430833
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.443692065945515,
+            "kappa_trail_per_s": 7.198902606310013
+          },
+          "candidate_index": 328,
+          "source": "halton",
+          "loss": 0.004990322662299458,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.3245152851245132,
+              "error": 0.02361053399579749,
+              "squared_error": 0.000557457315566709
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.21666666666666667,
+              "error": 0.06666666666666665,
+              "squared_error": 0.004444444444444443
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.32976071837550663,
+              "error": 0.08724935594992361,
+              "squared_error": 0.007612450113676471
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.2666666666666666,
+              "error": -0.08571428571428574,
+              "squared_error": 0.007346938775510209
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.524394700788501,
+            "kappa_trail_per_s": 6.672153635116598
+          },
+          "candidate_index": 424,
+          "source": "halton",
+          "loss": 0.005383237709102743,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.3034007090112457,
+              "error": 0.0024959578825299866,
+              "squared_error": 0.000006229805751363575
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.19999999999999996,
+              "error": 0.04999999999999993,
+              "squared_error": 0.0024999999999999935
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.2671761892792394,
+              "error": 0.024664826853656396,
+              "squared_error": 0.0006083536837208496
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.21666666666666667,
+              "error": -0.13571428571428568,
+              "squared_error": 0.018418367346938764
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.103767113585568,
+            "kappa_trail_per_s": 11.544581618655693
+          },
+          "candidate_index": 362,
+          "source": "halton",
+          "loss": 0.005433077543877705,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.2683259759226565,
+              "error": -0.03257877520605923,
+              "squared_error": 0.0010613765939269397
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.21666666666666667,
+              "error": 0.06666666666666665,
+              "squared_error": 0.004444444444444443
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.3183046980607733,
+              "error": 0.07579333563519025,
+              "squared_error": 0.005744629726708601
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.25,
+              "error": -0.10238095238095235,
+              "squared_error": 0.010481859410430833
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.076203828766932,
+            "kappa_trail_per_s": 10.139917695473251
+          },
+          "candidate_index": 106,
+          "source": "halton",
+          "loss": 0.005659926553425237,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.21902363515705087,
+              "error": -0.08188111597166486,
+              "squared_error": 0.006704517152765231
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.16666666666666663,
+              "error": 0.016666666666666607,
+              "squared_error": 0.0002777777777777758
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.281048042124941,
+              "error": 0.03853667969935798,
+              "squared_error": 0.0014850756822509094
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.23333333333333328,
+              "error": -0.11904761904761907,
+              "squared_error": 0.014172335600907034
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.109783796475054,
+            "kappa_trail_per_s": 10.491083676268861
+          },
+          "candidate_index": 322,
+          "source": "halton",
+          "loss": 0.005901878203676983,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.3326092175193083,
+              "error": 0.031704466390592545,
+              "squared_error": 0.0010051731891122123
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.25,
+              "error": 0.09999999999999998,
+              "squared_error": 0.009999999999999995
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.31500550598273885,
+              "error": 0.07249414355715583,
+              "squared_error": 0.005255400850085519
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.2666666666666666,
+              "error": -0.08571428571428574,
+              "squared_error": 0.007346938775510209
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.629760294535004,
+            "kappa_trail_per_s": 11.017832647462274
+          },
+          "candidate_index": 434,
+          "source": "halton",
+          "loss": 0.00653645081270704,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.27090514407314636,
+              "error": -0.029999607055569366,
+              "squared_error": 0.0008999764234885673
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.25,
+              "error": 0.09999999999999998,
+              "squared_error": 0.009999999999999995
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.31153286209712566,
+              "error": 0.06902149967154264,
+              "squared_error": 0.004763967416908761
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.25,
+              "error": -0.10238095238095235,
+              "squared_error": 0.010481859410430833
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.0437942973082333,
+            "kappa_trail_per_s": 6.320987654320987
+          },
+          "candidate_index": 64,
+          "source": "halton",
+          "loss": 0.0065423269500597,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.30090475112871573,
+              "simulation_contrast": 0.28676224398043715,
+              "error": -0.014142507148278582,
+              "squared_error": 0.0002000105084391108
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.15000000000000002,
+              "simulation_contrast": 0.16666666666666663,
+              "error": 0.016666666666666607,
+              "squared_error": 0.0002777777777777758
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24251136242558302,
+              "simulation_contrast": 0.2922261978924317,
+              "error": 0.049714835466848684,
+              "squared_error": 0.002471564865495836
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.35238095238095235,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.1523809523809524,
+              "squared_error": 0.02321995464852608
+            }
+          ]
+        }
+      ],
+      "heldout_selected": {
+        "candidate": {
+          "sigma_field_mm": 2.2530432372164837,
+          "kappa_trail_per_s": 6.847736625514403
+        },
+        "candidate_index": 208,
+        "source": "halton",
+        "primary_loss": 0.033016033271095487,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.20934326997474073,
+            "simulation_contrast": 0.32019246175314836,
+            "error": 0.11084919177840763,
+            "squared_error": 0.012287543317926194
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.15000000000000002,
+            "simulation_contrast": 0.29166666666666663,
+            "error": 0.1416666666666666,
+            "squared_error": 0.020069444444444428
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.21552934364371296,
+            "simulation_contrast": 0.3549186098884047,
+            "error": 0.13938926624469172,
+            "squared_error": 0.019429367544233557
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0,
+            "simulation_contrast": 0.2833333333333333,
+            "error": 0.2833333333333333,
+            "squared_error": 0.08027777777777777
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -14.868000000000002,
+              "simulation_contrast": -0.4853333333333296,
+              "reference_sd": 7.117024590683261,
+              "standardized_error": 2.020881968778737,
+              "absolute_standardized_error": 2.020881968778737,
+              "passed": false
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 12.377768187110519,
+              "simulation_contrast": 6.0457716897598175,
+              "reference_sd": 17.824240340300996,
+              "standardized_error": -0.3552463598145004,
+              "absolute_standardized_error": 0.3552463598145004,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -7.790000000000001,
+              "simulation_contrast": -0.6579999999999977,
+              "reference_sd": 5.819888610016614,
+              "standardized_error": 1.2254530074209864,
+              "absolute_standardized_error": 1.2254530074209864,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": -11.436212011955405,
+              "simulation_contrast": 7.511359255076059,
+              "reference_sd": 19.949791248877368,
+              "standardized_error": 0.9497628837643952,
+              "absolute_standardized_error": 0.9497628837643952,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_exact_null": {
+        "candidate": {
+          "sigma_field_mm": 8,
+          "kappa_trail_per_s": 0
+        },
+        "candidate_index": 500,
+        "source": "exact_null_anchor",
+        "primary_loss": 0.028194375663801723,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.20934326997474073,
+            "simulation_contrast": 0,
+            "error": -0.20934326997474073,
+            "squared_error": 0.04382460468371718
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.15000000000000002,
+            "simulation_contrast": 0,
+            "error": -0.15000000000000002,
+            "squared_error": 0.022500000000000006
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.21552934364371296,
+            "simulation_contrast": 0,
+            "error": -0.21552934364371296,
+            "squared_error": 0.04645289797148971
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0,
+            "simulation_contrast": 0,
+            "error": 0,
+            "squared_error": 0
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -14.868000000000002,
+              "simulation_contrast": 0,
+              "reference_sd": 7.117024590683261,
+              "standardized_error": 2.089075260392295,
+              "absolute_standardized_error": 2.089075260392295,
+              "passed": false
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 12.377768187110519,
+              "simulation_contrast": 0,
+              "reference_sd": 17.824240340300996,
+              "standardized_error": -0.6944345425551806,
+              "absolute_standardized_error": 0.6944345425551806,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -7.790000000000001,
+              "simulation_contrast": 0,
+              "reference_sd": 5.819888610016614,
+              "standardized_error": 1.3385135905509646,
+              "absolute_standardized_error": 1.3385135905509646,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": -11.436212011955405,
+              "simulation_contrast": 0,
+              "reference_sd": 19.949791248877368,
+              "standardized_error": 0.5732497081942626,
+              "absolute_standardized_error": 0.5732497081942626,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_relative_improvement_vs_exact_null": -0.17101487420004152
+    },
+    {
+      "held_out_colony": 7,
+      "training_colonies": [
+        0,
+        16,
+        20,
+        21,
+        27
+      ],
+      "fit_seed": 2220000,
+      "evaluation_seed": 2820000,
+      "selected_training_fit": {
+        "candidate": {
+          "sigma_field_mm": 10.097578803154006,
+          "kappa_trail_per_s": 12.00548696844993
+        },
+        "candidate_index": 425,
+        "source": "halton",
+        "loss": 0.0008477881664129831,
+        "components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.22445001166693762,
+            "simulation_contrast": 0.18339474374436918,
+            "error": -0.041055267922568445,
+            "squared_error": 0.0016855350241938775
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.046666666666666676,
+            "simulation_contrast": 0.06666666666666665,
+            "error": 0.019999999999999976,
+            "squared_error": 0.00039999999999999904
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.17941503342100892,
+            "simulation_contrast": 0.18490205787661515,
+            "error": 0.005487024455606226,
+            "squared_error": 0.000030107437376420805
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.20238095238095238,
+            "simulation_contrast": 0.16666666666666663,
+            "error": -0.035714285714285754,
+            "squared_error": 0.0012755102040816356
+          }
+        ]
+      },
+      "training_top_candidates": [
+        {
+          "candidate": {
+            "sigma_field_mm": 10.097578803154006,
+            "kappa_trail_per_s": 12.00548696844993
+          },
+          "candidate_index": 425,
+          "source": "halton",
+          "loss": 0.0008477881664129831,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.18339474374436918,
+              "error": -0.041055267922568445,
+              "squared_error": 0.0016855350241938775
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.06666666666666665,
+              "error": 0.019999999999999976,
+              "squared_error": 0.00039999999999999904
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.18490205787661515,
+              "error": 0.005487024455606226,
+              "squared_error": 0.000030107437376420805
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.16666666666666663,
+              "error": -0.035714285714285754,
+              "squared_error": 0.0012755102040816356
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 8.583478940207804,
+            "kappa_trail_per_s": 10.951989026063098
+          },
+          "candidate_index": 353,
+          "source": "halton",
+          "loss": 0.0010061947669133542,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.19748130934286165,
+              "error": -0.02696870232407597,
+              "squared_error": 0.0007273109050446207
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.06666666666666665,
+              "error": 0.019999999999999976,
+              "squared_error": 0.00039999999999999904
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.19181277475857514,
+              "error": 0.012397741337566215,
+              "squared_error": 0.00015370399027319812
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.15000000000000002,
+              "error": -0.05238095238095236,
+              "squared_error": 0.002743764172335599
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 12.88392265559403,
+            "kappa_trail_per_s": 15.604938271604937
+          },
+          "candidate_index": 53,
+          "source": "halton",
+          "loss": 0.001368108823891168,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.1695290936417839,
+              "error": -0.054920918025153725,
+              "squared_error": 0.0030163072367256553
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.08333333333333331,
+              "error": 0.03666666666666664,
+              "squared_error": 0.0013444444444444424
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.19180994075318622,
+              "error": 0.012394907332177296,
+              "squared_error": 0.0001536337277732625
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.23333333333333328,
+              "error": 0.030952380952380898,
+              "squared_error": 0.0009580498866213118
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 12.676306122019946,
+            "kappa_trail_per_s": 14.902606310013715
+          },
+          "candidate_index": 341,
+          "source": "halton",
+          "loss": 0.0014384337596301863,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.17056510698847696,
+              "error": -0.05388490467846066,
+              "squared_error": 0.0029035829522067913
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.10000000000000003,
+              "error": 0.05333333333333336,
+              "squared_error": 0.002844444444444447
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.17961177596633834,
+              "error": 0.00019674254532942026,
+              "squared_error": 3.870762914269899e-8
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.002380952380952428,
+              "squared_error": 0.0000056689342403630355
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 11.87876132698202,
+            "kappa_trail_per_s": 13.849108367626883
+          },
+          "candidate_index": 293,
+          "source": "halton",
+          "loss": 0.0015643403867446498,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.17840715221773382,
+              "error": -0.046042859449203805,
+              "squared_error": 0.0021199449062591362
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.10000000000000003,
+              "error": 0.05333333333333336,
+              "squared_error": 0.002844444444444447
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.1752362785594049,
+              "error": -0.004178754861604017,
+              "squared_error": 0.00001746199219337921
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.16666666666666663,
+              "error": -0.035714285714285754,
+              "squared_error": 0.0012755102040816356
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 12.271055982727649,
+            "kappa_trail_per_s": 15.956104252400547
+          },
+          "candidate_index": 485,
+          "source": "halton",
+          "loss": 0.0016218810884308646,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.19786889656134957,
+              "error": -0.026581115105588055,
+              "squared_error": 0.0007065556802565215
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.11666666666666664,
+              "error": 0.06999999999999997,
+              "squared_error": 0.0048999999999999955
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.20900049842033888,
+              "error": 0.029585464999329958,
+              "squared_error": 0.000875299739226578
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.002380952380952428,
+              "squared_error": 0.0000056689342403630355
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 12.472035201902697,
+            "kappa_trail_per_s": 13.497942386831273
+          },
+          "candidate_index": 149,
+          "source": "halton",
+          "loss": 0.0018819306427724561,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.16053154279517554,
+              "error": -0.06391846887176209,
+              "squared_error": 0.004085570662910419
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.06666666666666665,
+              "error": 0.019999999999999976,
+              "squared_error": 0.00039999999999999904
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.16214113010288747,
+              "error": -0.017273903318121453,
+              "squared_error": 0.00029838773584380733
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.15000000000000002,
+              "error": -0.05238095238095236,
+              "squared_error": 0.002743764172335599
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 10.952019383796722,
+            "kappa_trail_per_s": 13.761316872427981
+          },
+          "candidate_index": 185,
+          "source": "halton",
+          "loss": 0.0019116484074123998,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.1762041675509596,
+              "error": -0.048245844115978015,
+              "squared_error": 0.0023276614744632503
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.06666666666666665,
+              "error": 0.019999999999999976,
+              "squared_error": 0.00039999999999999904
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.191717815994119,
+              "error": 0.012302782573110072,
+              "squared_error": 0.00015135845904122087
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.1333333333333333,
+              "error": -0.06904761904761908,
+              "squared_error": 0.004767573696145129
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 13.52739839415444,
+            "kappa_trail_per_s": 15.429355281207132
+          },
+          "candidate_index": 269,
+          "source": "halton",
+          "loss": 0.0021776338289781405,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.1579514162007443,
+              "error": -0.06649859546619333,
+              "squared_error": 0.004422063198976428
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.08333333333333331,
+              "error": 0.03666666666666664,
+              "squared_error": 0.0013444444444444424
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.16526358472640199,
+              "error": -0.014151448694606938,
+              "squared_error": 0.00020026350015609244
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.15000000000000002,
+              "error": -0.05238095238095236,
+              "squared_error": 0.002743764172335599
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 10.601893145277932,
+            "kappa_trail_per_s": 14.288065843621398
+          },
+          "candidate_index": 89,
+          "source": "halton",
+          "loss": 0.0021924161853244997,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.21029646763308138,
+              "error": -0.014153544033856241,
+              "squared_error": 0.0002003228087183076
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.11666666666666664,
+              "error": 0.06999999999999997,
+              "squared_error": 0.0048999999999999955
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.20983834290969042,
+              "error": 0.030423309488681494,
+              "squared_error": 0.0009255777602440974
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.15000000000000002,
+              "error": -0.05238095238095236,
+              "squared_error": 0.002743764172335599
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 9.934862496587872,
+            "kappa_trail_per_s": 13.234567901234566
+          },
+          "candidate_index": 41,
+          "source": "halton",
+          "loss": 0.002325826918545889,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.2046708695127845,
+              "error": -0.019779142154153134,
+              "squared_error": 0.0003912144643541975
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.11666666666666664,
+              "error": 0.06999999999999997,
+              "squared_error": 0.0048999999999999955
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.21502864089755871,
+              "error": 0.03561360747654979,
+              "squared_error": 0.0012683290374937632
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.15000000000000002,
+              "error": -0.05238095238095236,
+              "squared_error": 0.002743764172335599
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 10.775534289863565,
+            "kappa_trail_per_s": 13.585733882030175
+          },
+          "candidate_index": 473,
+          "source": "halton",
+          "loss": 0.0023733571801679296,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22445001166693762,
+              "simulation_contrast": 0.1786781659935722,
+              "error": -0.045771845673365424,
+              "squared_error": 0.002095061856346381
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.046666666666666676,
+              "simulation_contrast": 0.04999999999999999,
+              "error": 0.003333333333333313,
+              "squared_error": 0.000011111111111110976
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.17941503342100892,
+              "simulation_contrast": 0.18576459857966568,
+              "error": 0.006349565158656756,
+              "squared_error": 0.000040316977704027796
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.20238095238095238,
+              "simulation_contrast": 0.1166666666666667,
+              "error": -0.08571428571428569,
+              "squared_error": 0.007346938775510199
+            }
+          ]
+        }
+      ],
+      "heldout_selected": {
+        "candidate": {
+          "sigma_field_mm": 10.097578803154006,
+          "kappa_trail_per_s": 12.00548696844993
+        },
+        "candidate_index": 425,
+        "source": "halton",
+        "primary_loss": 0.2805537574197958,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.5916169672836311,
+            "simulation_contrast": 0.17896229648633888,
+            "error": -0.41265467079729223,
+            "squared_error": 0.17028387733082162
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.6666666666666667,
+            "simulation_contrast": 0.09166666666666662,
+            "error": -0.5750000000000002,
+            "squared_error": 0.3306250000000002
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.5310109886665833,
+            "simulation_contrast": 0.15298536179641503,
+            "error": -0.3780256268701682,
+            "squared_error": 0.14290337457058364
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.75,
+            "simulation_contrast": 0.05833333333333329,
+            "error": -0.6916666666666667,
+            "squared_error": 0.47840277777777773
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -4.216000000000001,
+              "simulation_contrast": 0.3803333333333363,
+              "reference_sd": 10.285565240067864,
+              "standardized_error": 0.44687221616446726,
+              "absolute_standardized_error": 0.44687221616446726,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 20.609512236901907,
+              "simulation_contrast": 1.490897266638001,
+              "reference_sd": 16.413630823614938,
+              "standardized_error": -1.1648010836674358,
+              "absolute_standardized_error": 1.1648010836674358,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 2.0766666666666644,
+              "simulation_contrast": 0.7396666666666736,
+              "reference_sd": 6.635442219331639,
+              "standardized_error": -0.20149372955200887,
+              "absolute_standardized_error": 0.20149372955200887,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 1.5973316415262389,
+              "simulation_contrast": 1.7505569744609772,
+              "reference_sd": 20.68163758038669,
+              "standardized_error": 0.007408762112727899,
+              "absolute_standardized_error": 0.007408762112727899,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_exact_null": {
+        "candidate": {
+          "sigma_field_mm": 8,
+          "kappa_trail_per_s": 0
+        },
+        "candidate_index": 500,
+        "source": "exact_null_anchor",
+        "primary_loss": 0.409731937626747,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.5916169672836311,
+            "simulation_contrast": 0,
+            "error": -0.5916169672836311,
+            "squared_error": 0.35001063597788107
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.6666666666666667,
+            "simulation_contrast": 0,
+            "error": -0.6666666666666667,
+            "squared_error": 0.44444444444444453
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.5310109886665833,
+            "simulation_contrast": 0,
+            "error": -0.5310109886665833,
+            "squared_error": 0.2819726700846622
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.75,
+            "simulation_contrast": 0,
+            "error": -0.75,
+            "squared_error": 0.5625
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -4.216000000000001,
+              "simulation_contrast": 0,
+              "reference_sd": 10.285565240067864,
+              "standardized_error": 0.4098948284899687,
+              "absolute_standardized_error": 0.4098948284899687,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 20.609512236901907,
+              "simulation_contrast": 0,
+              "reference_sd": 16.413630823614938,
+              "standardized_error": -1.2556339580423723,
+              "absolute_standardized_error": 1.2556339580423723,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 2.0766666666666644,
+              "simulation_contrast": 0,
+              "reference_sd": 6.635442219331639,
+              "standardized_error": -0.31296582775094056,
+              "absolute_standardized_error": 0.31296582775094056,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 1.5973316415262389,
+              "simulation_contrast": 0,
+              "reference_sd": 20.68163758038669,
+              "standardized_error": -0.07723429227098821,
+              "absolute_standardized_error": 0.07723429227098821,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_relative_improvement_vs_exact_null": 0.3152748622799047
+    },
+    {
+      "held_out_colony": 16,
+      "training_colonies": [
+        0,
+        7,
+        20,
+        21,
+        27
+      ],
+      "fit_seed": 2230000,
+      "evaluation_seed": 2830000,
+      "selected_training_fit": {
+        "candidate": {
+          "sigma_field_mm": 2.82842712474619,
+          "kappa_trail_per_s": 7.111111111111111
+        },
+        "candidate_index": 4,
+        "source": "halton",
+        "loss": 0.0021475869949758226,
+        "components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.3290461169541929,
+            "simulation_contrast": 0.2940827237764816,
+            "error": -0.0349633931777113,
+            "squared_error": 0.0012224388624992291
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.16333333333333336,
+            "simulation_contrast": 0.21666666666666662,
+            "error": 0.05333333333333326,
+            "squared_error": 0.0028444444444444368
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.25241016963597007,
+            "simulation_contrast": 0.316913292673358,
+            "error": 0.06450312303738792,
+            "squared_error": 0.004160652881576405
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.2523809523809524,
+            "simulation_contrast": 0.23333333333333334,
+            "error": -0.019047619047619035,
+            "squared_error": 0.0003628117913832195
+          }
+        ]
+      },
+      "training_top_candidates": [
+        {
+          "candidate": {
+            "sigma_field_mm": 2.82842712474619,
+            "kappa_trail_per_s": 7.111111111111111
+          },
+          "candidate_index": 4,
+          "source": "halton",
+          "loss": 0.0021475869949758226,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.2940827237764816,
+              "error": -0.0349633931777113,
+              "squared_error": 0.0012224388624992291
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.21666666666666662,
+              "error": 0.05333333333333326,
+              "squared_error": 0.0028444444444444368
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.316913292673358,
+              "error": 0.06450312303738792,
+              "squared_error": 0.004160652881576405
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.23333333333333334,
+              "error": -0.019047619047619035,
+              "squared_error": 0.0003628117913832195
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.530554078394877,
+            "kappa_trail_per_s": 9.43758573388203
+          },
+          "candidate_index": 466,
+          "source": "halton",
+          "loss": 0.002297972569535558,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.28089047603134265,
+              "error": -0.04815564092285024,
+              "squared_error": 0.0023189657526904886
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.16666666666666669,
+              "error": 0.003333333333333327,
+              "squared_error": 0.00001111111111111107
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.3352120082635046,
+              "error": 0.08280183862753454,
+              "squared_error": 0.006856144480100271
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.24999999999999994,
+              "error": -0.002380952380952428,
+              "squared_error": 0.0000056689342403630355
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.177095129709655,
+            "kappa_trail_per_s": 9.086419753086421
+          },
+          "candidate_index": 34,
+          "source": "halton",
+          "loss": 0.002721523973796735,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.2836615319951262,
+              "error": -0.045384584959066665,
+              "squared_error": 0.0020597605519067403
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.21666666666666662,
+              "error": 0.05333333333333326,
+              "squared_error": 0.0028444444444444368
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.30931471010946976,
+              "error": 0.05690454047349969,
+              "squared_error": 0.003238126726500164
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.2,
+              "error": -0.05238095238095236,
+              "squared_error": 0.002743764172335599
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.365569421968682,
+            "kappa_trail_per_s": 5.969821673525377
+          },
+          "candidate_index": 496,
+          "source": "halton",
+          "loss": 0.0030092895175098874,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.2604787578011625,
+              "error": -0.06856735915303042,
+              "squared_error": 0.004701482741220664
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.2,
+              "error": 0.03666666666666665,
+              "squared_error": 0.0013444444444444435
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.2873909813508133,
+              "error": 0.03498081171484324,
+              "squared_error": 0.001223657188229314
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.1833333333333333,
+              "error": -0.06904761904761908,
+              "squared_error": 0.004767573696145129
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 6.512109687429392,
+            "kappa_trail_per_s": 11.983539094650205
+          },
+          "candidate_index": 182,
+          "source": "halton",
+          "loss": 0.0031129724477159675,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.2817202008037658,
+              "error": -0.04732591615042708,
+              "squared_error": 0.002239742339477255
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.23333333333333334,
+              "error": 0.06999999999999998,
+              "squared_error": 0.004899999999999997
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.3227616846161281,
+              "error": 0.07035151498015801,
+              "squared_error": 0.0049493356600033974
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.23333333333333334,
+              "error": -0.019047619047619035,
+              "squared_error": 0.0003628117913832195
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.145869735051951,
+            "kappa_trail_per_s": 5.618655692729766
+          },
+          "candidate_index": 352,
+          "source": "halton",
+          "loss": 0.003196202228756383,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.26941743583872924,
+              "error": -0.059628681115463655,
+              "squared_error": 0.003555579611569652
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.21666666666666662,
+              "error": 0.05333333333333326,
+              "squared_error": 0.0028444444444444368
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.2926247337000789,
+              "error": 0.04021456406410884,
+              "squared_error": 0.0016172111628663139
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.1833333333333333,
+              "error": -0.06904761904761908,
+              "squared_error": 0.004767573696145129
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.3586700962132126,
+            "kappa_trail_per_s": 11.193415637860081
+          },
+          "candidate_index": 218,
+          "source": "halton",
+          "loss": 0.003214176987456796,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.30449931248727424,
+              "error": -0.024546804466918648,
+              "squared_error": 0.0006025456095371372
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.2,
+              "error": 0.03666666666666665,
+              "squared_error": 0.0013444444444444435
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.35683262393390947,
+              "error": 0.1044224542979394,
+              "squared_error": 0.010904048961605241
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.24999999999999994,
+              "error": -0.002380952380952428,
+              "squared_error": 0.0000056689342403630355
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.595918690153243,
+            "kappa_trail_per_s": 8.910836762688614
+          },
+          "candidate_index": 250,
+          "source": "halton",
+          "loss": 0.003423330849310314,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.23046121588301827,
+              "error": -0.09858490107117462,
+              "squared_error": 0.009718982719213287
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.2,
+              "error": 0.03666666666666665,
+              "squared_error": 0.0013444444444444435
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.30002407981146717,
+              "error": 0.0476139101754971,
+              "squared_error": 0.0022670844422003063
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.23333333333333334,
+              "error": -0.019047619047619035,
+              "squared_error": 0.0003628117913832195
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.604756919811932,
+            "kappa_trail_per_s": 9.613168724279834
+          },
+          "candidate_index": 178,
+          "source": "halton",
+          "loss": 0.00356813172361937,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.28740906946325373,
+              "error": -0.04163704749093916,
+              "squared_error": 0.0017336437237627231
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.2,
+              "error": 0.03666666666666665,
+              "squared_error": 0.0013444444444444435
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.35724507362131863,
+              "error": 0.10483490398534856,
+              "squared_error": 0.010990357093617252
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.26666666666666666,
+              "error": 0.01428571428571429,
+              "squared_error": 0.00020408163265306137
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 7.063153743733091,
+            "kappa_trail_per_s": 12.86145404663923
+          },
+          "candidate_index": 302,
+          "source": "halton",
+          "loss": 0.003727050841924664,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.2672979913573469,
+              "error": -0.061748125596846004,
+              "squared_error": 0.003812831014723869
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.23333333333333334,
+              "error": 0.06999999999999998,
+              "squared_error": 0.004899999999999997
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.3298135979858935,
+              "error": 0.07740342834992342,
+              "squared_error": 0.005991290720321728
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.26666666666666666,
+              "error": 0.01428571428571429,
+              "squared_error": 0.00020408163265306137
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 3.6089083356132474,
+            "kappa_trail_per_s": 7.989026063100137
+          },
+          "candidate_index": 364,
+          "source": "halton",
+          "loss": 0.00400669981347796,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.26111032861564787,
+              "error": -0.06793578833854502,
+              "squared_error": 0.00461527133717959
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.21666666666666662,
+              "error": 0.05333333333333326,
+              "squared_error": 0.0028444444444444368
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.31405033329687126,
+              "error": 0.06164016366090119,
+              "squared_error": 0.003799509776142684
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.1833333333333333,
+              "error": -0.06904761904761908,
+              "squared_error": 0.004767573696145129
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.043557144206802,
+            "kappa_trail_per_s": 8.559670781893002
+          },
+          "candidate_index": 130,
+          "source": "halton",
+          "loss": 0.004118131385893014,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.3290461169541929,
+              "simulation_contrast": 0.2543917572842721,
+              "error": -0.07465435966992079,
+              "squared_error": 0.005573273417725896
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.16333333333333336,
+              "simulation_contrast": 0.2,
+              "error": 0.03666666666666665,
+              "squared_error": 0.0013444444444444435
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.25241016963597007,
+              "simulation_contrast": 0.3216000098240829,
+              "error": 0.0691898401881128,
+              "squared_error": 0.00478723398525659
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2523809523809524,
+              "simulation_contrast": 0.1833333333333333,
+              "error": -0.06904761904761908,
+              "squared_error": 0.004767573696145129
+            }
+          ]
+        }
+      ],
+      "heldout_selected": {
+        "candidate": {
+          "sigma_field_mm": 2.82842712474619,
+          "kappa_trail_per_s": 7.111111111111111
+        },
+        "candidate_index": 4,
+        "source": "halton",
+        "primary_loss": 0.057311079642050164,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.06863644084735485,
+            "simulation_contrast": 0.35885441618235026,
+            "error": 0.2902179753349954,
+            "squared_error": 0.08422647320754399
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.08333333333333337,
+            "simulation_contrast": 0.19166666666666665,
+            "error": 0.10833333333333328,
+            "squared_error": 0.0117361111111111
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.16603530759177754,
+            "simulation_contrast": 0.26987043772385544,
+            "error": 0.1038351301320779,
+            "squared_error": 0.010781734249545552
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.5,
+            "simulation_contrast": 0.14999999999999997,
+            "error": -0.35000000000000003,
+            "squared_error": 0.12250000000000003
+          }
+        ],
+        "secondary_guard": {
+          "passed": true,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 1.3833333333333346,
+              "simulation_contrast": -0.48199999999999577,
+              "reference_sd": 9.653596816785807,
+              "standardized_error": -0.1932267701598914,
+              "absolute_standardized_error": 0.1932267701598914,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 16.13367011915969,
+              "simulation_contrast": 1.8283386060210205,
+              "reference_sd": 17.64185442114207,
+              "standardized_error": -0.8108745924121843,
+              "absolute_standardized_error": 0.8108745924121843,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 0.7300000000000022,
+              "simulation_contrast": 0.5543333333333322,
+              "reference_sd": 6.76005124254039,
+              "standardized_error": -0.02598599631334383,
+              "absolute_standardized_error": 0.02598599631334383,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 16.013191024219168,
+              "simulation_contrast": 6.888298576337547,
+              "reference_sd": 20.324846990112704,
+              "standardized_error": -0.4489525777153721,
+              "absolute_standardized_error": 0.4489525777153721,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_exact_null": {
+        "candidate": {
+          "sigma_field_mm": 8,
+          "kappa_trail_per_s": 0
+        },
+        "candidate_index": 500,
+        "source": "exact_null_anchor",
+        "primary_loss": 0.07230578220593327,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.06863644084735485,
+            "simulation_contrast": 0,
+            "error": -0.06863644084735485,
+            "squared_error": 0.004710961012192441
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.08333333333333337,
+            "simulation_contrast": 0,
+            "error": -0.08333333333333337,
+            "squared_error": 0.006944444444444451
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.16603530759177754,
+            "simulation_contrast": 0,
+            "error": -0.16603530759177754,
+            "squared_error": 0.02756772336709618
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.5,
+            "simulation_contrast": 0,
+            "error": -0.5,
+            "squared_error": 0.25
+          }
+        ],
+        "secondary_guard": {
+          "passed": true,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 1.3833333333333346,
+              "simulation_contrast": 0,
+              "reference_sd": 9.653596816785807,
+              "standardized_error": -0.14329719373901917,
+              "absolute_standardized_error": 0.14329719373901917,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 16.13367011915969,
+              "simulation_contrast": 0,
+              "reference_sd": 17.64185442114207,
+              "standardized_error": -0.9145110108053625,
+              "absolute_standardized_error": 0.9145110108053625,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 0.7300000000000022,
+              "simulation_contrast": 0,
+              "reference_sd": 6.76005124254039,
+              "standardized_error": -0.10798734710858082,
+              "absolute_standardized_error": 0.10798734710858082,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 16.013191024219168,
+              "simulation_contrast": 0,
+              "reference_sd": 20.324846990112704,
+              "standardized_error": -0.7878628081189984,
+              "absolute_standardized_error": 0.7878628081189984,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_relative_improvement_vs_exact_null": 0.20737902428296626
+    },
+    {
+      "held_out_colony": 20,
+      "training_colonies": [
+        0,
+        7,
+        16,
+        21,
+        27
+      ],
+      "fit_seed": 2240000,
+      "evaluation_seed": 2840000,
+      "selected_training_fit": {
+        "candidate": {
+          "sigma_field_mm": 8.724061861322062,
+          "kappa_trail_per_s": 14.814814814814813
+        },
+        "candidate_index": 17,
+        "source": "halton",
+        "loss": 0.008253982847965606,
+        "components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.27519503376334453,
+            "simulation_contrast": 0.26205629810837405,
+            "error": -0.01313873565497048,
+            "squared_error": 0.00017262637461119254
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.18,
+            "simulation_contrast": 0.23333333333333334,
+            "error": 0.053333333333333344,
+            "squared_error": 0.0028444444444444454
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.22835504650158192,
+            "simulation_contrast": 0.27548341158068246,
+            "error": 0.04712836507910054,
+            "squared_error": 0.002221082795028983
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.2666666666666667,
+            "simulation_contrast": 0.09999999999999998,
+            "error": -0.16666666666666674,
+            "squared_error": 0.027777777777777804
+          }
+        ]
+      },
+      "training_top_candidates": [
+        {
+          "candidate": {
+            "sigma_field_mm": 8.724061861322062,
+            "kappa_trail_per_s": 14.814814814814813
+          },
+          "candidate_index": 17,
+          "source": "halton",
+          "loss": 0.008253982847965606,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.26205629810837405,
+              "error": -0.01313873565497048,
+              "squared_error": 0.00017262637461119254
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.23333333333333334,
+              "error": 0.053333333333333344,
+              "squared_error": 0.0028444444444444454
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.27548341158068246,
+              "error": 0.04712836507910054,
+              "squared_error": 0.002221082795028983
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.09999999999999998,
+              "error": -0.16666666666666674,
+              "squared_error": 0.027777777777777804
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.780723227908186,
+            "kappa_trail_per_s": 9.876543209876543
+          },
+          "candidate_index": 70,
+          "source": "halton",
+          "loss": 0.009957086745596899,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.27330980600032273,
+              "error": -0.0018852277630218017,
+              "squared_error": 0.0000035540837184681865
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.25000000000000006,
+              "error": 0.07000000000000006,
+              "squared_error": 0.0049000000000000085
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.2645997949150831,
+              "error": 0.0362447484135012,
+              "squared_error": 0.0013136817875579977
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.08333333333333337,
+              "error": -0.18333333333333335,
+              "squared_error": 0.03361111111111112
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.535639527855329,
+            "kappa_trail_per_s": 13.300411522633743
+          },
+          "candidate_index": 122,
+          "source": "halton",
+          "loss": 0.010279860587416373,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.3299335057873889,
+              "error": 0.05473847202404436,
+              "squared_error": 0.002996300319527087
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.26666666666666666,
+              "error": 0.08666666666666667,
+              "squared_error": 0.007511111111111112
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.3416434092810373,
+              "error": 0.11328836277945539,
+              "squared_error": 0.012834253141249493
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.1333333333333333,
+              "error": -0.13333333333333341,
+              "squared_error": 0.0177777777777778
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 12.271055982727649,
+            "kappa_trail_per_s": 15.956104252400547
+          },
+          "candidate_index": 485,
+          "source": "halton",
+          "loss": 0.010664237456247987,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.18186157253409319,
+              "error": -0.09333346122925135,
+              "squared_error": 0.008711134985032164
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.16666666666666669,
+              "error": -0.013333333333333308,
+              "squared_error": 0.0001777777777777771
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.215828037637895,
+              "error": -0.012527008863686934,
+              "squared_error": 0.000156925951070891
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.08333333333333337,
+              "error": -0.18333333333333335,
+              "squared_error": 0.03361111111111112
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.329730188332646,
+            "kappa_trail_per_s": 8.384087791495197
+          },
+          "candidate_index": 346,
+          "source": "halton",
+          "loss": 0.010788262298956706,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.23632876498759064,
+              "error": -0.03886626877575389,
+              "squared_error": 0.0015105868485491415
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.21666666666666673,
+              "error": 0.036666666666666736,
+              "squared_error": 0.0013444444444444495
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.24561824153706724,
+              "error": 0.017263195035485318,
+              "squared_error": 0.00029801790283320493
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.06666666666666665,
+              "error": -0.20000000000000007,
+              "squared_error": 0.04000000000000003
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.404313462905406,
+            "kappa_trail_per_s": 5.794238683127571
+          },
+          "candidate_index": 136,
+          "source": "halton",
+          "loss": 0.011860084918078962,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.25741576710803127,
+              "error": -0.017779266655313264,
+              "squared_error": 0.0003161023228007341
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.16666666666666669,
+              "error": -0.013333333333333308,
+              "squared_error": 0.0001777777777777771
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.2297745982945384,
+              "error": 0.0014195517929564694,
+              "squared_error": 0.000002015127292885927
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.050000000000000044,
+              "error": -0.21666666666666667,
+              "squared_error": 0.04694444444444445
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 8.30907281569103,
+            "kappa_trail_per_s": 15.165980795610423
+          },
+          "candidate_index": 449,
+          "source": "halton",
+          "loss": 0.012045156858813657,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.29359883852894664,
+              "error": 0.018403804765602105,
+              "squared_error": 0.0003387000298503988
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.3,
+              "error": 0.12,
+              "squared_error": 0.0144
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.3036155914612514,
+              "error": 0.07526054495966947,
+              "squared_error": 0.005664149627626429
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.09999999999999998,
+              "error": -0.16666666666666674,
+              "squared_error": 0.027777777777777804
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.812111983396209,
+            "kappa_trail_per_s": 10.754458161865568
+          },
+          "candidate_index": 326,
+          "source": "halton",
+          "loss": 0.012799759322822925,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.2778867352955916,
+              "error": 0.0026917015322470705,
+              "squared_error": 0.000007245257138701227
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.3,
+              "error": 0.12,
+              "squared_error": 0.0144
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.2847525723608063,
+              "error": 0.05639752585922439,
+              "squared_error": 0.0031806809230418838
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.08333333333333337,
+              "error": -0.18333333333333335,
+              "squared_error": 0.03361111111111112
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.595918690153243,
+            "kappa_trail_per_s": 8.910836762688614
+          },
+          "candidate_index": 250,
+          "source": "halton",
+          "loss": 0.013190749772222054,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.2478197491075128,
+              "error": -0.027375284655831722,
+              "squared_error": 0.0007494062099878158
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.25000000000000006,
+              "error": 0.07000000000000006,
+              "squared_error": 0.0049000000000000085
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.2413607542660961,
+              "error": 0.01300570776451418,
+              "squared_error": 0.0001691484344559444
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.050000000000000044,
+              "error": -0.21666666666666667,
+              "squared_error": 0.04694444444444445
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 6.372568605369068,
+            "kappa_trail_per_s": 10.403292181069958
+          },
+          "candidate_index": 214,
+          "source": "halton",
+          "loss": 0.01322193578610811,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.25233161298250684,
+              "error": -0.022863420780837695,
+              "squared_error": 0.0005227360098016409
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.25000000000000006,
+              "error": 0.07000000000000006,
+              "squared_error": 0.0049000000000000085
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.251170889466205,
+              "error": 0.022815842964623106,
+              "squared_error": 0.0005205626901863417
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.050000000000000044,
+              "error": -0.21666666666666667,
+              "squared_error": 0.04694444444444445
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 7.786297670316931,
+            "kappa_trail_per_s": 13.388203017832645
+          },
+          "candidate_index": 446,
+          "source": "halton",
+          "loss": 0.013230091924286275,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.2750826667278288,
+              "error": -0.0001123670355157591,
+              "squared_error": 1.2626350670599868e-8
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.2833333333333334,
+              "error": 0.10333333333333339,
+              "squared_error": 0.01067777777777779
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.2757109045659927,
+              "error": 0.047355858064410755,
+              "squared_error": 0.002242577293016617
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.06666666666666665,
+              "error": -0.20000000000000007,
+              "squared_error": 0.04000000000000003
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.680175078733001,
+            "kappa_trail_per_s": 6.8038408779149515
+          },
+          "candidate_index": 370,
+          "source": "halton",
+          "loss": 0.0135230654689002,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27519503376334453,
+              "simulation_contrast": 0.20427907399718642,
+              "error": -0.07091595976615811,
+              "squared_error": 0.005029073349555355
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.18,
+              "simulation_contrast": 0.16666666666666669,
+              "error": -0.013333333333333308,
+              "squared_error": 0.0001777777777777771
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.22835504650158192,
+              "simulation_contrast": 0.18429864737701407,
+              "error": -0.04405639912456785,
+              "squared_error": 0.001940966303823223
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.2666666666666667,
+              "simulation_contrast": 0.050000000000000044,
+              "error": -0.21666666666666667,
+              "squared_error": 0.04694444444444445
+            }
+          ]
+        }
+      ],
+      "heldout_selected": {
+        "candidate": {
+          "sigma_field_mm": 8.724061861322062,
+          "kappa_trail_per_s": 14.814814814814813
+        },
+        "candidate_index": 17,
+        "source": "halton",
+        "primary_loss": 0.02636268368724288,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.3378918568015968,
+            "simulation_contrast": 0.2691599807215861,
+            "error": -0.06873187608001069,
+            "squared_error": 0.004724070789477946
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0,
+            "simulation_contrast": 0.25,
+            "error": 0.25,
+            "squared_error": 0.0625
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.28631092326371843,
+            "simulation_contrast": 0.2758825903531321,
+            "error": -0.010428332910586313,
+            "squared_error": 0.00010875012729401761
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.4285714285714286,
+            "simulation_contrast": 0.23333333333333334,
+            "error": -0.19523809523809527,
+            "squared_error": 0.038117913832199556
+          }
+        ],
+        "secondary_guard": {
+          "passed": true,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -6.739999999999998,
+              "simulation_contrast": 1.2929999999999957,
+              "reference_sd": 9.961096796674175,
+              "standardized_error": 0.8064372994228972,
+              "absolute_standardized_error": 0.8064372994228972,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 7.447738811963063,
+              "simulation_contrast": 5.48781334350312,
+              "reference_sd": 18.727581447923175,
+              "standardized_error": -0.10465448909727167,
+              "absolute_standardized_error": 0.10465448909727167,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 2.8857142857142843,
+              "simulation_contrast": 1.3243333333333442,
+              "reference_sd": 6.59123359928628,
+              "standardized_error": -0.2368875156465417,
+              "absolute_standardized_error": 0.2368875156465417,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 0.6343069408333974,
+              "simulation_contrast": 6.7025779620935,
+              "reference_sd": 20.772682530573455,
+              "standardized_error": 0.29212746174350646,
+              "absolute_standardized_error": 0.29212746174350646,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_exact_null": {
+        "candidate": {
+          "sigma_field_mm": 8,
+          "kappa_trail_per_s": 0
+        },
+        "candidate_index": 500,
+        "source": "exact_null_anchor",
+        "primary_loss": 0.0949545802651772,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.3378918568015968,
+            "simulation_contrast": 0,
+            "error": -0.3378918568015968,
+            "squared_error": 0.11417090689283078
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0,
+            "simulation_contrast": 0,
+            "error": 0,
+            "squared_error": 0
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.28631092326371843,
+            "simulation_contrast": 0,
+            "error": -0.28631092326371843,
+            "squared_error": 0.08197394478012286
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.4285714285714286,
+            "simulation_contrast": 0,
+            "error": -0.4285714285714286,
+            "squared_error": 0.18367346938775514
+          }
+        ],
+        "secondary_guard": {
+          "passed": true,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -6.739999999999998,
+              "simulation_contrast": 0,
+              "reference_sd": 9.961096796674175,
+              "standardized_error": 0.6766323164584004,
+              "absolute_standardized_error": 0.6766323164584004,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 7.447738811963063,
+              "simulation_contrast": 0,
+              "reference_sd": 18.727581447923175,
+              "standardized_error": -0.3976882350063944,
+              "absolute_standardized_error": 0.3976882350063944,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 2.8857142857142843,
+              "simulation_contrast": 0,
+              "reference_sd": 6.59123359928628,
+              "standardized_error": -0.43781095636282086,
+              "absolute_standardized_error": 0.43781095636282086,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 0.6343069408333974,
+              "simulation_contrast": 0,
+              "reference_sd": 20.772682530573455,
+              "standardized_error": -0.030535629661687543,
+              "absolute_standardized_error": 0.030535629661687543,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_relative_improvement_vs_exact_null": 0.7223653286274292
+    },
+    {
+      "held_out_colony": 21,
+      "training_colonies": [
+        0,
+        7,
+        16,
+        20,
+        27
+      ],
+      "fit_seed": 2250000,
+      "evaluation_seed": 2850000,
+      "selected_training_fit": {
+        "candidate": {
+          "sigma_field_mm": 6.727171322029715,
+          "kappa_trail_per_s": 13.037037037037035
+        },
+        "candidate_index": 14,
+        "source": "halton",
+        "loss": 0.002505272808867142,
+        "components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.2919038871180685,
+            "simulation_contrast": 0.27803290113960566,
+            "error": -0.013870985978462813,
+            "squared_error": 0.00019240425201471197
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.11333333333333336,
+            "simulation_contrast": 0.2,
+            "error": 0.08666666666666666,
+            "squared_error": 0.007511111111111109
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.24543670001237605,
+            "simulation_contrast": 0.2777177419450819,
+            "error": 0.03228104193270587,
+            "squared_error": 0.0010420656682611146
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.36904761904761907,
+            "simulation_contrast": 0.33333333333333337,
+            "error": -0.0357142857142857,
+            "squared_error": 0.0012755102040816315
+          }
+        ]
+      },
+      "training_top_candidates": [
+        {
+          "candidate": {
+            "sigma_field_mm": 6.727171322029715,
+            "kappa_trail_per_s": 13.037037037037035
+          },
+          "candidate_index": 14,
+          "source": "halton",
+          "loss": 0.002505272808867142,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.27803290113960566,
+              "error": -0.013870985978462813,
+              "squared_error": 0.00019240425201471197
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.2,
+              "error": 0.08666666666666666,
+              "squared_error": 0.007511111111111109
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.2777177419450819,
+              "error": 0.03228104193270587,
+              "squared_error": 0.0010420656682611146
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.33333333333333337,
+              "error": -0.0357142857142857,
+              "squared_error": 0.0012755102040816315
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 7.537376716129339,
+            "kappa_trail_per_s": 15.495198902606308
+          },
+          "candidate_index": 350,
+          "source": "halton",
+          "loss": 0.003965552812207429,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.2734989068189433,
+              "error": -0.018404980299125184,
+              "squared_error": 0.00033874329981118615
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.1833333333333334,
+              "error": 0.07000000000000005,
+              "squared_error": 0.004900000000000007
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.32196051495173594,
+              "error": 0.07652381493935989,
+              "squared_error": 0.0058558942528734
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.30000000000000004,
+              "error": -0.06904761904761902,
+              "squared_error": 0.004767573696145121
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 5.9073045837579965,
+            "kappa_trail_per_s": 11.456790123456791
+          },
+          "candidate_index": 38,
+          "source": "halton",
+          "loss": 0.00484827770886293,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.2751570589419081,
+              "error": -0.016746828176160355,
+              "squared_error": 0.0002804562539618384
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.1833333333333334,
+              "error": 0.07000000000000005,
+              "squared_error": 0.004900000000000007
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.2390869771378846,
+              "error": -0.0063497228744914536,
+              "squared_error": 0.000040318980582840007
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.25,
+              "error": -0.11904761904761907,
+              "squared_error": 0.014172335600907034
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 6.618767070624775,
+            "kappa_trail_per_s": 13.91495198902606
+          },
+          "candidate_index": 374,
+          "source": "halton",
+          "loss": 0.005215865781238774,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.30061659532869167,
+              "error": 0.008712708210623199,
+              "squared_error": 0.0000759112843634609
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.23333333333333334,
+              "error": 0.11999999999999998,
+              "squared_error": 0.014399999999999996
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.3058004943617709,
+              "error": 0.06036379434939487,
+              "squared_error": 0.0036437876682560363
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.31666666666666665,
+              "error": -0.05238095238095242,
+              "squared_error": 0.0027437641723356047
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 6.949335341094824,
+            "kappa_trail_per_s": 15.144032921810698
+          },
+          "candidate_index": 206,
+          "source": "halton",
+          "loss": 0.005439143867632836,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.32763952440977784,
+              "error": 0.035735637291709366,
+              "squared_error": 0.001277035772644609
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.21666666666666673,
+              "error": 0.10333333333333337,
+              "squared_error": 0.010677777777777786
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.3444119140099653,
+              "error": 0.09897521399758924,
+              "squared_error": 0.009796092985868586
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.3666666666666667,
+              "error": -0.0023809523809523725,
+              "squared_error": 0.000005668934240362771
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 8.445161426884457,
+            "kappa_trail_per_s": 15.868312757201645
+          },
+          "candidate_index": 161,
+          "source": "halton",
+          "loss": 0.005772527212712595,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.26574518630845745,
+              "error": -0.026158700809611024,
+              "squared_error": 0.0006842776280467444
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.23333333333333334,
+              "error": 0.11999999999999998,
+              "squared_error": 0.014399999999999996
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.30234238976883643,
+              "error": 0.056905689756460376,
+              "squared_error": 0.0032382575266585193
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.30000000000000004,
+              "error": -0.06904761904761902,
+              "squared_error": 0.004767573696145121
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 10.262960128630226,
+            "kappa_trail_per_s": 15.341563786008228
+          },
+          "candidate_index": 233,
+          "source": "halton",
+          "loss": 0.005900233667443504,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.21824584571491623,
+              "error": -0.07365804140315224,
+              "squared_error": 0.00542550706334849
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.16666666666666669,
+              "error": 0.05333333333333333,
+              "squared_error": 0.002844444444444444
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.21139778755803865,
+              "error": -0.034038912454337406,
+              "squared_error": 0.0011586475610740462
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.25,
+              "error": -0.11904761904761907,
+              "squared_error": 0.014172335600907034
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 7.296413541628214,
+            "kappa_trail_per_s": 14.266117969821673
+          },
+          "candidate_index": 494,
+          "source": "halton",
+          "loss": 0.006099196154009922,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.27801351733824187,
+              "error": -0.013890369779826606,
+              "squared_error": 0.00019294237262032022
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.2,
+              "error": 0.08666666666666666,
+              "squared_error": 0.007511111111111109
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.2956402410369017,
+              "error": 0.05020354102452562,
+              "squared_error": 0.002520395531401227
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.25,
+              "error": -0.11904761904761907,
+              "squared_error": 0.014172335600907034
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 9.934862496587872,
+            "kappa_trail_per_s": 13.234567901234566
+          },
+          "candidate_index": 41,
+          "source": "halton",
+          "loss": 0.006202534312996709,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.21321835884318263,
+              "error": -0.07868552827488584,
+              "squared_error": 0.006191412359897859
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.16666666666666669,
+              "error": 0.05333333333333333,
+              "squared_error": 0.002844444444444444
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.2054123968112271,
+              "error": -0.04002430320114894,
+              "squared_error": 0.0016019448467375014
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.25,
+              "error": -0.11904761904761907,
+              "squared_error": 0.014172335600907034
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.604756919811932,
+            "kappa_trail_per_s": 9.613168724279834
+          },
+          "candidate_index": 178,
+          "source": "halton",
+          "loss": 0.006231501539465098,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.2840676498100294,
+              "error": -0.007836237308039062,
+              "squared_error": 0.00006140661514790329
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.21666666666666673,
+              "error": 0.10333333333333337,
+              "squared_error": 0.010677777777777786
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.24163063064521126,
+              "error": -0.003806069367164794,
+              "squared_error": 0.000014486164027670214
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.25,
+              "error": -0.11904761904761907,
+              "squared_error": 0.014172335600907034
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 6.407171022730774,
+            "kappa_trail_per_s": 11.8079561042524
+          },
+          "candidate_index": 470,
+          "source": "halton",
+          "loss": 0.00624397404552903,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.2532763313477595,
+              "error": -0.03862755577030896,
+              "squared_error": 0.0014920880647883294
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.1833333333333334,
+              "error": 0.07000000000000005,
+              "squared_error": 0.004900000000000007
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.2582990781124407,
+              "error": 0.012862378100064631,
+              "squared_error": 0.00016544077038902223
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.2333333333333334,
+              "error": -0.13571428571428568,
+              "squared_error": 0.018418367346938764
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 9.77476826378206,
+            "kappa_trail_per_s": 12.532235939643344
+          },
+          "candidate_index": 329,
+          "source": "halton",
+          "loss": 0.006417456621560097,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.2919038871180685,
+              "simulation_contrast": 0.18864275894196458,
+              "error": -0.10326112817610389,
+              "squared_error": 0.010662860592201756
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.11333333333333336,
+              "simulation_contrast": 0.15000000000000008,
+              "error": 0.03666666666666672,
+              "squared_error": 0.0013444444444444485
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.24543670001237605,
+              "simulation_contrast": 0.18903934157101507,
+              "error": -0.056397358441360984,
+              "squared_error": 0.003180662039163351
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.36904761904761907,
+              "simulation_contrast": 0.2666666666666667,
+              "error": -0.10238095238095235,
+              "squared_error": 0.010481859410430833
+            }
+          ]
+        }
+      ],
+      "heldout_selected": {
+        "candidate": {
+          "sigma_field_mm": 6.727171322029715,
+          "kappa_trail_per_s": 13.037037037037035
+        },
+        "candidate_index": 14,
+        "source": "halton",
+        "primary_loss": 0.02661108958508731,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.25434759002797674,
+            "simulation_contrast": 0.2974862338352429,
+            "error": 0.043138643807266175,
+            "squared_error": 0.0018609425895301842
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.33333333333333337,
+            "simulation_contrast": 0.275,
+            "error": -0.05833333333333335,
+            "squared_error": 0.0034027777777777793
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.20090265570974772,
+            "simulation_contrast": 0.30664119160391096,
+            "error": 0.10573853589416324,
+            "squared_error": 0.011180637973041247
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": -0.08333333333333331,
+            "simulation_contrast": 0.21666666666666673,
+            "error": 0.30000000000000004,
+            "squared_error": 0.09000000000000002
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -4.729999999999999,
+              "simulation_contrast": 0.01566666666666805,
+              "reference_sd": 9.548674415157361,
+              "standardized_error": 0.4969974323486721,
+              "absolute_standardized_error": 0.4969974323486721,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 7.4559090351287125,
+              "simulation_contrast": 6.355415546892232,
+              "reference_sd": 18.295246738379923,
+              "standardized_error": -0.06015188010161438,
+              "absolute_standardized_error": 0.06015188010161438,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 10.82,
+              "simulation_contrast": 1.7336666666666645,
+              "reference_sd": 5.776922741705688,
+              "standardized_error": -1.5728673793291055,
+              "absolute_standardized_error": 1.5728673793291055,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 2.9405288709055526,
+              "simulation_contrast": 5.34906572331073,
+              "reference_sd": 19.30820699435443,
+              "standardized_error": 0.12474161133187639,
+              "absolute_standardized_error": 0.12474161133187639,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_exact_null": {
+        "candidate": {
+          "sigma_field_mm": 8,
+          "kappa_trail_per_s": 0
+        },
+        "candidate_index": 500,
+        "source": "exact_null_anchor",
+        "primary_loss": 0.05577753229495619,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.25434759002797674,
+            "simulation_contrast": 0,
+            "error": -0.25434759002797674,
+            "squared_error": 0.06469269655303973
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.33333333333333337,
+            "simulation_contrast": 0,
+            "error": -0.33333333333333337,
+            "squared_error": 0.11111111111111113
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.20090265570974772,
+            "simulation_contrast": 0,
+            "error": -0.20090265570974772,
+            "squared_error": 0.04036187707122943
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": -0.08333333333333331,
+            "simulation_contrast": 0,
+            "error": 0.08333333333333331,
+            "squared_error": 0.0069444444444444415
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -4.729999999999999,
+              "simulation_contrast": 0,
+              "reference_sd": 9.548674415157361,
+              "standardized_error": 0.49535671595333675,
+              "absolute_standardized_error": 0.49535671595333675,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": 7.4559090351287125,
+              "simulation_contrast": 0,
+              "reference_sd": 18.295246738379923,
+              "standardized_error": -0.4075325761793441,
+              "absolute_standardized_error": 0.4075325761793441,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 10.82,
+              "simulation_contrast": 0,
+              "reference_sd": 5.776922741705688,
+              "standardized_error": -1.8729694828505357,
+              "absolute_standardized_error": 1.8729694828505357,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": 2.9405288709055526,
+              "simulation_contrast": 0,
+              "reference_sd": 19.30820699435443,
+              "standardized_error": -0.1522942483351945,
+              "absolute_standardized_error": 0.1522942483351945,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_relative_improvement_vs_exact_null": 0.5229066527295314
+    },
+    {
+      "held_out_colony": 27,
+      "training_colonies": [
+        0,
+        7,
+        16,
+        20,
+        21
+      ],
+      "fit_seed": 2260000,
+      "evaluation_seed": 2860000,
+      "selected_training_fit": {
+        "candidate": {
+          "sigma_field_mm": 2.9696903317455052,
+          "kappa_trail_per_s": 8.51577503429355
+        },
+        "candidate_index": 292,
+        "source": "halton",
+        "loss": 0.0047812206241415285,
+        "components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.29236722498706,
+            "simulation_contrast": 0.3188883248645096,
+            "error": 0.02652109987744955,
+            "squared_error": 0.0007033687387096545
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.24666666666666667,
+            "simulation_contrast": 0.25000000000000006,
+            "error": 0.0033333333333333826,
+            "squared_error": 0.000011111111111111439
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.27995784377510796,
+            "simulation_contrast": 0.3450582819137127,
+            "error": 0.06510043813860472,
+            "squared_error": 0.0042380670458383
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.3190476190476191,
+            "simulation_contrast": 0.19999999999999996,
+            "error": -0.11904761904761912,
+            "squared_error": 0.014172335600907048
+          }
+        ]
+      },
+      "training_top_candidates": [
+        {
+          "candidate": {
+            "sigma_field_mm": 2.9696903317455052,
+            "kappa_trail_per_s": 8.51577503429355
+          },
+          "candidate_index": 292,
+          "source": "halton",
+          "loss": 0.0047812206241415285,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.3188883248645096,
+              "error": 0.02652109987744955,
+              "squared_error": 0.0007033687387096545
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.25000000000000006,
+              "error": 0.0033333333333333826,
+              "squared_error": 0.000011111111111111439
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.3450582819137127,
+              "error": 0.06510043813860472,
+              "squared_error": 0.0042380670458383
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.11904761904761912,
+              "squared_error": 0.014172335600907048
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.524394700788501,
+            "kappa_trail_per_s": 6.672153635116598
+          },
+          "candidate_index": 424,
+          "source": "halton",
+          "loss": 0.0055296815579713235,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.25401535166822775,
+              "error": -0.038351873318832275,
+              "squared_error": 0.001470866187063759
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.2,
+              "error": -0.04666666666666666,
+              "squared_error": 0.002177777777777777
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.2727665351247316,
+              "error": -0.007191308650376371,
+              "squared_error": 0.00005171492010497803
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.18333333333333335,
+              "error": -0.13571428571428573,
+              "squared_error": 0.01841836734693878
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 3.914288248350801,
+            "kappa_trail_per_s": 9.74485596707819
+          },
+          "candidate_index": 124,
+          "source": "halton",
+          "loss": 0.005716039856807167,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.31972557277162605,
+              "error": 0.02735834778456603,
+              "squared_error": 0.000748479193501269
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.3166666666666667,
+              "error": 0.07000000000000003,
+              "squared_error": 0.004900000000000005
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.3351243610915051,
+              "error": 0.05516651731639716,
+              "squared_error": 0.0030433446328203472
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.11904761904761912,
+              "squared_error": 0.014172335600907048
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.629760294535004,
+            "kappa_trail_per_s": 11.017832647462274
+          },
+          "candidate_index": 434,
+          "source": "halton",
+          "loss": 0.005748311601697593,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.3472205786500726,
+              "error": 0.05485335366301258,
+              "squared_error": 0.003008890408079536
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.25000000000000006,
+              "error": 0.0033333333333333826,
+              "squared_error": 0.000011111111111111439
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.35612154435939336,
+              "error": 0.0761637005842854,
+              "squared_error": 0.005800909286692676
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.11904761904761912,
+              "squared_error": 0.014172335600907048
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.2530432372164837,
+            "kappa_trail_per_s": 6.847736625514403
+          },
+          "candidate_index": 208,
+          "source": "halton",
+          "loss": 0.00606293671158288,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.290325988114717,
+              "error": -0.002041236872343033,
+              "squared_error": 0.000004166647969012767
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.26666666666666666,
+              "error": 0.01999999999999999,
+              "squared_error": 0.0003999999999999996
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.35364103623732235,
+              "error": 0.07368319246221439,
+              "squared_error": 0.005429212851423727
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.18333333333333335,
+              "error": -0.13571428571428573,
+              "squared_error": 0.01841836734693878
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.443692065945515,
+            "kappa_trail_per_s": 7.198902606310013
+          },
+          "candidate_index": 328,
+          "source": "halton",
+          "loss": 0.006183317460403212,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.30315154723110094,
+              "error": 0.010784322244040911,
+              "squared_error": 0.0001163016062633156
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.3166666666666667,
+              "error": 0.07000000000000003,
+              "squared_error": 0.004900000000000005
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.3544201337912126,
+              "error": 0.07446229001610466,
+              "squared_error": 0.005544632634442479
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.11904761904761912,
+              "squared_error": 0.014172335600907048
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.327449717555155,
+            "kappa_trail_per_s": 7.374485596707818
+          },
+          "candidate_index": 112,
+          "source": "halton",
+          "loss": 0.0063736930517650885,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.33029080353381346,
+              "error": 0.037923578546753434,
+              "squared_error": 0.0014381978097917773
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.25000000000000006,
+              "error": 0.0033333333333333826,
+              "squared_error": 0.000011111111111111439
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.39642073003389267,
+              "error": 0.1164628862587847,
+              "squared_error": 0.013563603875726624
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.21666666666666667,
+              "error": -0.1023809523809524,
+              "squared_error": 0.010481859410430843
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4.860989439921875,
+            "kappa_trail_per_s": 12.246913580246913
+          },
+          "candidate_index": 74,
+          "source": "halton",
+          "loss": 0.006644241733612749,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.3768770870253706,
+              "error": 0.08450986203831057,
+              "squared_error": 0.007141916781734286
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.2833333333333334,
+              "error": 0.03666666666666671,
+              "squared_error": 0.0013444444444444476
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.3953832829647733,
+              "error": 0.11542543918966536,
+              "squared_error": 0.013323032012127135
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.25,
+              "error": -0.06904761904761908,
+              "squared_error": 0.004767573696145129
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 7.537376716129339,
+            "kappa_trail_per_s": 15.495198902606308
+          },
+          "candidate_index": 350,
+          "source": "halton",
+          "loss": 0.0068047226774021015,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.3260142379076192,
+              "error": 0.03364701292055916,
+              "squared_error": 0.0011321214784762751
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.2833333333333334,
+              "error": 0.03666666666666671,
+              "squared_error": 0.0013444444444444476
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.3189754056948587,
+              "error": 0.039017561919750754,
+              "squared_error": 0.001522370138161584
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.16666666666666663,
+              "error": -0.15238095238095245,
+              "squared_error": 0.0232199546485261
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 3.1690765305049875,
+            "kappa_trail_per_s": 9.569272976680383
+          },
+          "candidate_index": 340,
+          "source": "halton",
+          "loss": 0.006858937569822819,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.32703931849193946,
+              "error": 0.03467209350487943,
+              "squared_error": 0.0012021540680111024
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.2833333333333334,
+              "error": 0.03666666666666671,
+              "squared_error": 0.0013444444444444476
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.42877110795038276,
+              "error": 0.1488132641752748,
+              "squared_error": 0.022145387594500125
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.2666666666666667,
+              "error": -0.05238095238095236,
+              "squared_error": 0.002743764172335599
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 4,
+            "kappa_trail_per_s": 10.666666666666666
+          },
+          "candidate_index": 2,
+          "source": "halton",
+          "loss": 0.007258900605874955,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.35165633137488994,
+              "error": 0.059289106387829915,
+              "squared_error": 0.003515198136267414
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.2833333333333334,
+              "error": 0.03666666666666671,
+              "squared_error": 0.0013444444444444476
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.37997596334291883,
+              "error": 0.10001811956781087,
+              "squared_error": 0.010003624241880912
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.11904761904761912,
+              "squared_error": 0.014172335600907048
+            }
+          ]
+        },
+        {
+          "candidate": {
+            "sigma_field_mm": 2.6938835724658916,
+            "kappa_trail_per_s": 8.252400548696844
+          },
+          "candidate_index": 472,
+          "source": "halton",
+          "loss": 0.007576172442931692,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.29236722498706,
+              "simulation_contrast": 0.34775823047716226,
+              "error": 0.05539100549010223,
+              "squared_error": 0.0030681634892045354
+            },
+            {
+              "path_length": "s",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.24666666666666667,
+              "simulation_contrast": 0.2833333333333334,
+              "error": 0.03666666666666671,
+              "squared_error": 0.0013444444444444476
+            },
+            {
+              "path_length": "l",
+              "metric": "middle_zone_fraction",
+              "reference_contrast": 0.27995784377510796,
+              "simulation_contrast": 0.38821562057276227,
+              "error": 0.1082577767976543,
+              "squared_error": 0.01171974623717074
+            },
+            {
+              "path_length": "l",
+              "metric": "trail_axis_exit",
+              "reference_contrast": 0.3190476190476191,
+              "simulation_contrast": 0.19999999999999996,
+              "error": -0.11904761904761912,
+              "squared_error": 0.014172335600907048
+            }
+          ]
+        }
+      ],
+      "heldout_selected": {
+        "candidate": {
+          "sigma_field_mm": 2.9696903317455052,
+          "kappa_trail_per_s": 8.51577503429355
+        },
+        "candidate_index": 292,
+        "source": "halton",
+        "primary_loss": 0.1290092119813706,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.25203090068301903,
+            "simulation_contrast": 0.3459203775326842,
+            "error": 0.09388947684966514,
+            "squared_error": 0.008815233863103808
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": -0.33333333333333337,
+            "simulation_contrast": 0.26666666666666666,
+            "error": 0.6000000000000001,
+            "squared_error": 0.3600000000000001
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.02829693689608806,
+            "simulation_contrast": 0.38488096572791064,
+            "error": 0.3565840288318226,
+            "squared_error": 0.1271521696179341
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.16666666666666663,
+            "simulation_contrast": 0.3083333333333333,
+            "error": 0.14166666666666666,
+            "squared_error": 0.020069444444444442
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 7.419999999999998,
+              "simulation_contrast": 0.0009999999999994458,
+              "reference_sd": 9.666931930393421,
+              "standardized_error": -0.767461698646518,
+              "absolute_standardized_error": 0.767461698646518,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": -25.675015008804024,
+              "simulation_contrast": 3.9124458856888964,
+              "reference_sd": 17.113985893184488,
+              "standardized_error": 1.7288468670688748,
+              "absolute_standardized_error": 1.7288468670688748,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -1.956666666666667,
+              "simulation_contrast": -0.9623333333333282,
+              "reference_sd": 6.484215669926674,
+              "standardized_error": 0.15334673982930355,
+              "absolute_standardized_error": 0.15334673982930355,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": -11.888274526093909,
+              "simulation_contrast": 7.011127807933661,
+              "reference_sd": 20.25105283817503,
+              "standardized_error": 0.9332552971468486,
+              "absolute_standardized_error": 0.9332552971468486,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_exact_null": {
+        "candidate": {
+          "sigma_field_mm": 8,
+          "kappa_trail_per_s": 0
+        },
+        "candidate_index": 500,
+        "source": "exact_null_anchor",
+        "primary_loss": 0.05080229510642097,
+        "primary_components": [
+          {
+            "path_length": "s",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.25203090068301903,
+            "simulation_contrast": 0,
+            "error": -0.25203090068301903,
+            "squared_error": 0.06351957489909381
+          },
+          {
+            "path_length": "s",
+            "metric": "trail_axis_exit",
+            "reference_contrast": -0.33333333333333337,
+            "simulation_contrast": 0,
+            "error": 0.33333333333333337,
+            "squared_error": 0.11111111111111113
+          },
+          {
+            "path_length": "l",
+            "metric": "middle_zone_fraction",
+            "reference_contrast": 0.02829693689608806,
+            "simulation_contrast": 0,
+            "error": -0.02829693689608806,
+            "squared_error": 0.0008007166377011897
+          },
+          {
+            "path_length": "l",
+            "metric": "trail_axis_exit",
+            "reference_contrast": 0.16666666666666663,
+            "simulation_contrast": 0,
+            "error": -0.16666666666666663,
+            "squared_error": 0.027777777777777766
+          }
+        ],
+        "secondary_guard": {
+          "passed": false,
+          "components": [
+            {
+              "path_length": "s",
+              "metric": "time_to_exit_s",
+              "reference_contrast": 7.419999999999998,
+              "simulation_contrast": 0,
+              "reference_sd": 9.666931930393421,
+              "standardized_error": -0.767565144083726,
+              "absolute_standardized_error": 0.767565144083726,
+              "passed": true
+            },
+            {
+              "path_length": "s",
+              "metric": "beeline_mm",
+              "reference_contrast": -25.675015008804024,
+              "simulation_contrast": 0,
+              "reference_sd": 17.113985893184488,
+              "standardized_error": 1.500235840385313,
+              "absolute_standardized_error": 1.500235840385313,
+              "passed": false
+            },
+            {
+              "path_length": "l",
+              "metric": "time_to_exit_s",
+              "reference_contrast": -1.956666666666667,
+              "simulation_contrast": 0,
+              "reference_sd": 6.484215669926674,
+              "standardized_error": 0.30175841863828595,
+              "absolute_standardized_error": 0.30175841863828595,
+              "passed": true
+            },
+            {
+              "path_length": "l",
+              "metric": "beeline_mm",
+              "reference_contrast": -11.888274526093909,
+              "simulation_contrast": 0,
+              "reference_sd": 20.25105283817503,
+              "standardized_error": 0.587044763602782,
+              "absolute_standardized_error": 0.587044763602782,
+              "passed": true
+            }
+          ]
+        }
+      },
+      "heldout_relative_improvement_vs_exact_null": -1.5394366870851268
+    }
+  ],
+  "internal_cv": {
+    "P1_wins_vs_exact_null": 4,
+    "total_folds": 6,
+    "median_relative_improvement_vs_exact_null": 0.26132694328143546,
+    "P1_survival_guard_passed": false,
+    "canonical_promotion": false
+  },
+  "final_all_data_fit": null,
+  "promotion": {
+    "mechanism_survives_internal_development": false,
+    "fixed_parameter_pair_eligible_for_future_v0_4_freeze": false,
+    "reason": "failed_primary_survival_guard"
+  }
+}
