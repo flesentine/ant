@@ -117,16 +117,22 @@
 - final all-data fit, identifiability checks and secondary exit-time/beeline guards are frozen in advance
 - canonical locomotion unchanged; Y-maze remains locked
 
-### v0.3.3e — estimator implementation + qualification — in progress
+### v0.3.3e — estimator implementation + qualification — complete
 - frozen estimator implemented in `tools/run-p1-estimation.js`
 - qualification hash-verifies the response target but does not parse response outcomes
 - synthetic fixtures verify equal-weight colony contrasts, fold isolation, Halton mapping, exact null and CRN seed pairing
 - low-volume reference-free simulation verifies candidate wiring and exact DCM/kappa=0 canonical identity
 - semantic target loader is itself blocked without a matching active high-resolution authorization
-- high-resolution CLI path checks qualification + authorization before target parsing
-- permanent regression requires unauthorized high-resolution mode to fail without writing a report
-- full code + real Chromium exact-head audit required before a later authorization artifact
-- high-resolution response search remains unauthorized; canonical locomotion unchanged; Y-maze remains locked
+- exact-head full regression + standalone qualification + 8/8 real Chromium parity passed
+- qualified estimator merged to main; canonical locomotion unchanged; Y-maze remained locked
+
+### v0.3.3f — high-resolution authorization freeze — in progress
+- permanent estimator qualification report frozen from the successful v0.3.3e audit
+- authorization pins exact policy, estimator, qualification report, audit run/job/artifact and one-shot frozen execution contract
+- authorization is effective only after merge to main
+- review-branch high-resolution execution and semantic response-target loading remain blocked
+- canonical promotion remains unauthorized; Y-maze remains locked
+- after merge, permanent main test/deploy must pass before the one official 102-row response-estimation execution
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
