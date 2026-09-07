@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "id": "P2_reference_free_reachability_result_v1",
+  "status": "reference_free_reachability_passed",
+  "mechanism_id": "P2_trial_level_transient_trail_engagement_v1",
+  "model_id": "lasius_niger_painted_trail_p2_v1",
+  "mechanism_freeze_git_blob_sha": "70f51e5cab5db0024947ed71cf760590089f8aea",
+  "reachability_execution_policy_git_blob_sha": "8431ada87724953128104077f4ce1c11b569b1cf",
+  "implementation_authorization_git_blob_sha": "462997ea7399d98efca5a6b19a0e38160fbddbaf",
+  "runtime_git_blob_sha": "f91a2f7ede1b8119acc1fd57ac94a9718d074e15",
+  "model_git_blob_sha": "7d3eecc44cb2eaf727249083a6fcfa21986fd475",
+  "zero_experiment_git_blob_sha": "322b27e3bd92ed7ba7b6f2056b6d7f9dd34a4333",
+  "nominal_experiment_git_blob_sha": "cacfd5514232cd240cd86de126b03f45fb81b8ba",
+  "p1_component_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+  "canonical_model_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+  "execution_repo_commit": "e92484e909ddf9968071bda29d19b6a332c1486c",
+  "fit_performed": false,
+  "parameter_search_performed": false,
+  "candidate_ranking_performed": false,
+  "reference_targets_accessed": false,
+  "reference_outcomes_accessed": false,
+  "p1_official_result_used_for_tuning": false,
+  "ymaze_accessed": false,
+  "canonical_model_updated": false,
+  "candidate_B_implemented": false,
+  "physics_dt_s": 0.02,
+  "engineering_values": {
+    "sigma_field_mm": 8,
+    "kappa_trail_per_s": 4,
+    "p_lapse": 0.2,
+    "sensor_forward_offset_mm": 2,
+    "sensor_lateral_half_separation_mm": 1.5
+  },
+  "identity_panel": {
+    "seeds": [
+      730001,
+      730002,
+      730003,
+      730004,
+      730005,
+      730006,
+      730007,
+      730008
+    ],
+    "fixed_time_s": 8,
+    "rows": [
+      {
+        "seed": 730001,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      },
+      {
+        "seed": 730002,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      },
+      {
+        "seed": 730003,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      },
+      {
+        "seed": 730004,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      },
+      {
+        "seed": 730005,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      },
+      {
+        "seed": 730006,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      },
+      {
+        "seed": 730007,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      },
+      {
+        "seed": 730008,
+        "zero_dose_canonical_identity": true,
+        "zero_kappa_canonical_identity": true,
+        "all_lapse_canonical_identity": true,
+        "always_engaged_nested_p1_identity": true
+      }
+    ]
+  },
+  "invariance_panel": {
+    "local_steering_sign": true,
+    "on_trail_zero_steering": true,
+    "endpoint_reversal": true,
+    "translation": true,
+    "rotation": true
+  },
+  "stochastic_engagement_panel": {
+    "trials": 400,
+    "lapses": 75,
+    "engaged": 325,
+    "observed_lapse_fraction": 0.1875,
+    "mean_central_zone_fraction": 0.3105365527822391,
+    "trail_axis_exit_rate": 0.4825,
+    "mean_moving_speed_mm_s": 23.628478016068925,
+    "mean_time_to_exit_s": 9.353299999999999,
+    "mean_steering_samples": 381.61,
+    "response_seed_namespace_unique_for_ant_ids_0_to_7": true,
+    "all_trials_exact_component_identity": true,
+    "all_trials_exactly_one_response_draw": true,
+    "all_trials_engagement_state_fixed": true
+  },
+  "structural_checks": {
+    "exact_zero_dose_canonical_identity": true,
+    "exact_zero_kappa_canonical_identity": true,
+    "exact_all_lapse_canonical_identity": true,
+    "exact_always_engaged_nested_p1_identity": true,
+    "stochastic_exact_component_identity": true,
+    "stochastic_exact_one_response_draw": true,
+    "stochastic_engagement_fixed_within_trial": true,
+    "response_seed_namespace_unique": true,
+    "stochastic_panel_non_degenerate": true,
+    "local_steering_sign": true,
+    "on_trail_zero_steering": true,
+    "endpoint_reversal_invariant": true,
+    "translation_invariant": true,
+    "rotation_invariant": true,
+    "overall_pass": true
+  },
+  "interpretation": "Reference-free implementation/reachability qualification only. The observed lapse fraction and behavioral summaries are descriptive consequences of the pre-frozen RNG/seeds and engineering p_lapse=0.20 anchor; they are not fitted evidence.",
+  "restrictions": [
+    "No response target or reference outcome file was loaded.",
+    "No P1 failed-fold outcome was used for tuning.",
+    "No parameter search, ranking, fitting, or adaptive refinement was performed.",
+    "Candidate B relative/Weber transduction was not implemented.",
+    "The Y-maze was not loaded.",
+    "Canonical locomotion files were not modified.",
+    "Reachability may not retune sigma, kappa, p_lapse, sensors, seeds, dt, or trial count."
+  ]
+}

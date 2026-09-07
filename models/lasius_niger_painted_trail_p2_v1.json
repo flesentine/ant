@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "id": "lasius_niger_painted_trail_p2_v1",
+  "species": "Lasius niger",
+  "status": "mechanism_demo_not_fitted",
+  "movement": {
+    "base_speed_mm_s": 24,
+    "speed_sd_mm_s": 2,
+    "angular_sigma_rad_sqrt_s": 0.7,
+    "speed_reversion_rate_s": 2,
+    "speed_noise_sigma_sqrt_s": 0.07,
+    "pause_rate_s": 0.008,
+    "pause_min_s": 0.1,
+    "pause_max_s": 0.5
+  },
+  "painted_trail_response": {
+    "enabled": true,
+    "mechanism_id": "P2_trial_level_transient_trail_engagement_v1",
+    "field": {
+      "type": "gaussian_distance_to_segment",
+      "sigma_field_mm": 8
+    },
+    "sensors": {
+      "type": "bilateral_body_frame_points",
+      "forward_offset_mm": 2,
+      "lateral_half_separation_mm": 1.5
+    },
+    "transduction": {
+      "type": "c_over_one_plus_c"
+    },
+    "steering": {
+      "type": "engagement_gated_right_minus_left_heading_drift",
+      "kappa_trail_per_s": 4
+    },
+    "engagement": {
+      "type": "trial_level_bernoulli_lapse",
+      "p_lapse": 0.2
+    }
+  },
+  "contacts": {
+    "enabled": false,
+    "radius_mm": 1.6,
+    "avoidance_turn_rad": 0.18
+  },
+  "provenance": {
+    "parameter_status": "ASSUMED_OR_LITERATURE_ANCHORED_ENGINEERING_REACHABILITY_NOT_FITTED",
+    "mechanism_freeze": "hypotheses/p2_painted_trail_mechanism_v1.json",
+    "mechanism_freeze_git_blob_sha": "70f51e5cab5db0024947ed71cf760590089f8aea",
+    "reachability_execution_freeze": "hypotheses/p2_reachability_execution_v1.json",
+    "reachability_execution_freeze_git_blob_sha": "8431ada87724953128104077f4ce1c11b569b1cf",
+    "implementation_authorization": "hypotheses/p2_implementation_authorization_v1.json",
+    "implementation_authorization_git_blob_sha": "462997ea7399d98efca5a6b19a0e38160fbddbaf",
+    "p1_component_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "note": "Baseline locomotion is parameter-identical to lasius_niger_locomotion_v1. P2 adds only the frozen transient per-trial engagement gate around the unchanged P1 local steering kernel. p_lapse=0.20 is an engineering/literature anchor only, not fitted Poissonnier evidence."
+  }
+}

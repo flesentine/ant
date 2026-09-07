@@ -136,20 +136,32 @@ assert.strictEqual(m.estimation_firewall.p1_official_result_rerun_authorized,fal
 assert.strictEqual(m.global_firewall.response_target_access,false);
 assert.strictEqual(m.global_firewall.Y_maze_access,false);
 
+const laterRuntime=fs.existsSync(path.join(root,'src','p2.js'));
+const laterModel=fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p2_v1.json'));
+if(laterRuntime||laterModel){
+  assert.strictEqual(blob('hypotheses/p2_reachability_execution_v1.json'),'8431ada87724953128104077f4ce1c11b569b1cf');
+  assert.strictEqual(blob('hypotheses/p2_implementation_authorization_v1.json'),'462997ea7399d98efca5a6b19a0e38160fbddbaf');
+  const a=read('hypotheses/p2_implementation_authorization_v1.json');
+  assert.strictEqual(a.mechanism_freeze.git_blob_sha,'70f51e5cab5db0024947ed71cf760590089f8aea');
+  assert.strictEqual(a.reachability_execution_policy.git_blob_sha,'8431ada87724953128104077f4ce1c11b569b1cf');
+  assert.strictEqual(a.still_forbidden.response_target_access,true);
+  assert.strictEqual(a.still_forbidden.parameter_search_or_ranking,true);
+  assert.strictEqual(a.still_forbidden.Y_maze_access,true);
+}
 for(const p of [
-  'src/p2.js',
-  'models/lasius_niger_painted_trail_p2_v1.json',
   'tools/run-p2-estimation.js',
   'hypotheses/p2_response_estimation_v1.json',
   'hypotheses/p2_highres_authorization_v1.json'
-])assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P2 mechanism-selection freeze');
+])assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before a later estimation gate');
 
 console.log('p2-mechanism-selection.test.js PASS '+JSON.stringify({
   mechanism_blob:blob('hypotheses/p2_painted_trail_mechanism_v1.json'),
   selected:'P2_candidate_A_transient_response_engagement',
   p_lapse_engineering_anchor:eng.p_lapse,
   candidate_B_selected:false,
-  implementation_authorized:false,
+  historical_mechanism_freeze_implementation_authorized:false,
+  later_runtime_present:laterRuntime,
+  later_model_present:laterModel,
   response_target_authorized:false,
   ymaze_authorized:false
 }));

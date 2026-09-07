@@ -976,3 +976,213 @@ At this mechanism-selection freeze:
 - Y-maze: locked
 
 A separate implementation + reference-free reachability gate is required after this mechanism record is audited and merged.
+
+
+## P2-v1 implementation and reference-free reachability
+
+v0.3.3k implements the already-frozen P2-v1 transient engagement mechanism and qualifies it **without loading response targets or Y-maze evidence**.
+
+Pre-implementation execution policy:
+
+`hypotheses/p2_reachability_execution_v1.json`
+
+Git blob:
+
+`8431ada87724953128104077f4ce1c11b569b1cf`
+
+Pre-implementation authorization:
+
+`hypotheses/p2_implementation_authorization_v1.json`
+
+Git blob:
+
+`462997ea7399d98efca5a6b19a0e38160fbddbaf`
+
+### Runtime
+
+Implementation:
+
+`src/p2.js`
+
+Current Git blob:
+
+`f91a2f7ede1b8119acc1fd57ac94a9718d074e15`
+
+The runtime extends the canonical integrity simulation directly.
+
+It uses the frozen P1 local-kernel helper functions for:
+
+- painted-trail apparatus parsing;
+- applied-dose ratio;
+- bilateral sensor geometry;
+- Gaussian field response;
+- saturating transduction;
+- local steering rate;
+- moving-step preview without biology-RNG mutation.
+
+It does **not** subclass the P1 simulation and does not reopen P1-v1.
+
+The only new structural state is the per-ant, per-trial engagement gate.
+
+### Dedicated response RNG
+
+For `0 < p_lapse < 1`, one response-only `core.RNG` draw is generated from the already-frozen namespaced seed.
+
+The response draw occurs after canonical ant initialization and never consumes `ant.rng`.
+
+Exact endpoints and null cases consume zero response draws:
+
+- zero applied dose
+- `kappa=0`
+- `p_lapse=1`
+- `p_lapse=0`
+
+### Engineering model
+
+`models/lasius_niger_painted_trail_p2_v1.json`
+
+Current Git blob:
+
+`7d3eecc44cb2eaf727249083a6fcfa21986fd475`
+
+Engineering-only values remain:
+
+- sigma = 8 mm
+- kappa = 4 s⁻¹
+- p_lapse = 0.20
+- forward sensor offset = 2 mm
+- lateral half separation = 1.5 mm
+
+These values remain unfitted and cannot be retuned from the reference-free reachability result.
+
+### Frozen execution panels
+
+Exact-identity panel:
+
+- eight seeds: 730001 through 730008
+- fixed 8 s
+- zero dose vs canonical
+- zero kappa vs canonical
+- all lapse vs canonical
+- always engaged vs frozen P1 local-kernel runtime
+
+Stochastic engagement panel:
+
+- 400 nominal-dose trials
+- seeds 731000 through 731399
+- one ant per trial
+- shared trial seeds for P2, P1 component, and canonical simulations
+- p_lapse = 0.20
+
+For every stochastic trial:
+
+- exactly one response-RNG draw must occur;
+- engagement state must remain fixed during the trial;
+- if engaged, P2 must be bit-exact to the same-seed P1-kernel trajectory;
+- if lapsed, P2 must be bit-exact to the same-seed canonical trajectory;
+- canonical biology RNG must remain isolated from the response draw.
+
+The observed lapse count is reported descriptively. It is **not** a fitting target or a pass threshold beyond requiring the fixed panel to contain both states.
+
+### Still locked
+
+This implementation/reachability gate does not authorize:
+
+- response-target loading;
+- P1 failed-fold tuning;
+- P2 parameter search/ranking;
+- P2 response-estimation policy;
+- Candidate B Weber-style transduction;
+- canonical model changes;
+- H2-H5 refit/combination;
+- Y-maze access.
+
+A successful reachability result qualifies implementation wiring only. It does not establish biological fit or authorize a fixed P2 parameter set for v0.4.
+
+
+### Frozen P2 reference-free reachability result
+
+The first frozen P2-v1 reference-free reachability execution completed successfully on **attempt 1**.
+
+Audit provenance:
+
+- tested head: `e92484e909ddf9968071bda29d19b6a332c1486c`
+- GitHub Actions run: `34089553046`
+- job: `101640096955`
+- artifact ID: `10006342916`
+- artifact digest: `sha256:1712b4b9a5ccfcc87659f90c44a5211c5bbaa23a5748d810f610e7363b97b4ee`
+
+Exact report:
+
+- file: `reports/p2_reference_free_reachability_v1.json`
+- Git blob: `78a5e0ac4a3dd536a0e2d06ece2e9e37cdb2aefa`
+- bytes: 5765
+- SHA-256: `de481a25ad36d6124bb51cb644bb55199fa655471fbadc082f7d3f04cb2ac37b`
+- status: `reference_free_reachability_passed`
+
+Result-freeze record:
+
+- file: `hypotheses/p2_reachability_result_freeze_v1.json`
+- Git blob: `8dddaf083d4af046051fc1b7412b9f22cda8618a`
+
+#### Exact identities
+
+All eight seeds 730001–730008 passed all four frozen identities:
+
+- zero dose P2 = canonical;
+- `kappa=0` P2 = canonical;
+- `p_lapse=1` P2 = canonical;
+- `p_lapse=0` P2 = frozen P1 local-kernel trajectory.
+
+The identities include canonical biology-RNG state. Endpoint/null cases use zero P2 response draws.
+
+#### 400-trial stochastic panel
+
+Frozen seeds: 731000–731399.
+
+Observed:
+
+- lapses: **75**
+- engaged: **325**
+- realized lapse fraction: **0.1875**
+- mean central-zone fraction: **0.3105365527822391**
+- trail-axis exit rate: **0.4825**
+- mean moving speed: **23.628478016068925 mm/s**
+- mean time to exit: **9.353299999999999 s**
+- mean steering samples: **381.61**
+
+Every trial satisfied the stronger structural mixture identity:
+
+- engaged P2 trial = exact same-seed P1 local-kernel trajectory;
+- lapsed P2 trial = exact same-seed canonical trajectory.
+
+Every intermediate-`p_lapse` trial consumed exactly one dedicated response-RNG draw, and engagement remained fixed within the trial.
+
+The 18.75% realized lapse fraction and all behavioral summaries are **descriptive only**. They do not estimate a Poissonnier-assay lapse probability and may not be used to retune `p_lapse`, sigma, kappa, sensors, seeds, dt, or trial count.
+
+#### Browser/firewall audit
+
+Real Chromium:
+
+- Node↔Chromium parity: **6/6**
+- browser exceptions: **0**
+- console errors: **0**
+- response-target requests: **0**
+- Y-maze requests: **0**
+- P2 estimation-surface requests: **0**
+
+#### Scientific consequence
+
+P2-v1 implementation is qualified and reference-free reachability passed.
+
+This does **not** authorize:
+
+- a biological fit claim;
+- promotion of the engineering values as fixed biological parameters;
+- a P2 parameter search;
+- a P2 estimator;
+- canonical locomotion changes;
+- Candidate B transduction;
+- Y-maze access.
+
+If development continues, the next gate is a separate prospective **P2 response-estimation policy freeze** before estimator implementation or semantic response-target access.

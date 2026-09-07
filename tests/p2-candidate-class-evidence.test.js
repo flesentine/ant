@@ -49,14 +49,22 @@ if(laterMechanismPresent){
   assert.strictEqual(m.estimation_firewall.raw_response_target_access_authorized,false);
   assert.strictEqual(m.global_firewall.Y_maze_access,false);
 }
+const laterImplementationPresent=fs.existsSync(path.join(root,'src','p2.js'))||fs.existsSync(path.join(root,'models','lasius_niger_painted_trail_p2_v1.json'));
+if(laterImplementationPresent){
+  assert.strictEqual(blob('hypotheses/p2_reachability_execution_v1.json'),'8431ada87724953128104077f4ce1c11b569b1cf');
+  assert.strictEqual(blob('hypotheses/p2_implementation_authorization_v1.json'),'462997ea7399d98efca5a6b19a0e38160fbddbaf');
+  const a=read('hypotheses/p2_implementation_authorization_v1.json');
+  assert.strictEqual(a.authorization.create_src_p2_js,true);
+  assert.strictEqual(a.authorization.create_p2_engineering_model,true);
+  assert.strictEqual(a.still_forbidden.response_target_access,true);
+  assert.strictEqual(a.still_forbidden.Y_maze_access,true);
+}
 const forbiddenPaths=[
   'hypotheses/p2_response_estimation_v1.json',
   'hypotheses/p2_highres_authorization_v1.json',
-  'models/lasius_niger_painted_trail_p2_v1.json',
-  'src/p2.js',
   'tools/run-p2-estimation.js'
 ];
-for(const p of forbiddenPaths)assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before later implementation/estimation gates');
+for(const p of forbiddenPaths)assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before later estimation gates');
 
 const neg=Object.fromEntries(e.negative_candidate_classes.map(x=>[x.class_id,x]));
 assert.match(neg.path_history_direction_recent_experience_modulation.status,/not_independently_supported/);
@@ -68,6 +76,7 @@ console.log('p2-candidate-class-evidence.test.js PASS '+JSON.stringify({
   plausible_classes:e.candidate_mechanism_classes.length,
   historical_selection_at_evidence_gate:false,
   later_mechanism_present:laterMechanismPresent,
-  implementation_authorized:false,
+  later_implementation_present:laterImplementationPresent,
+  historical_evidence_gate_implementation_authorized:false,
   ymaze_authorized:false
 }));

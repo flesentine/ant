@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "id": "P2_reference_free_reachability_execution_v1",
+  "status": "execution_policy_frozen_before_P2_runtime_implementation_or_execution",
+  "freeze_date_local": "2026-09-06",
+  "scientific_scope": "Reference-free engineering qualification of the already-selected P2-v1 transient trail-response engagement mechanism. This policy is frozen before P2 runtime implementation and before any P2 simulation execution.",
+  "mechanism_freeze": {
+    "file": "hypotheses/p2_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "70f51e5cab5db0024947ed71cf760590089f8aea"
+  },
+  "candidate_class_evidence": {
+    "file": "hypotheses/p2_painted_trail_candidate_class_evidence_v1.json",
+    "git_blob_sha": "f7eb9fe38f8955c0227501e2d257ff32a40eaf74"
+  },
+  "selection_main_checkpoint": {
+    "commit": "d1084ca3f57439da8581167d983b477e0ca66f9f",
+    "permanent_main_workflow_run_id": 34085099776,
+    "test_job_id": 101627509148,
+    "deploy_job_id": 101627631394,
+    "conclusion": "success"
+  },
+  "frozen_inputs": {
+    "canonical_model_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "integrity_runtime_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+    "p1_component_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "p1_engineering_model_git_blob_sha": "73873fd6763838423ca27648136bb0b9ff062817",
+    "open_arena_apparatus_git_blob_sha": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4",
+    "zero_dose_experiment_git_blob_sha": "6e47fa91143ed5d4d2b52bf2c555246b7d216297",
+    "nominal_dose_experiment_git_blob_sha": "8232d378195304f2a15aa76da8abf108d94f2c58"
+  },
+  "frozen_execution": {
+    "physics_dt_s": 0.02,
+    "engineering_values": {
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 4,
+      "p_lapse": 0.2,
+      "sensor_forward_offset_mm": 2,
+      "sensor_lateral_half_separation_mm": 1.5
+    },
+    "exact_identity_panel": {
+      "seeds": [730001, 730002, 730003, 730004, 730005, 730006, 730007, 730008],
+      "fixed_time_s": 8,
+      "cases": [
+        "zero_dose_canonical_identity",
+        "zero_kappa_canonical_identity",
+        "all_lapse_canonical_identity",
+        "always_engaged_nested_p1_identity"
+      ]
+    },
+    "stochastic_engagement_panel": {
+      "trials": 400,
+      "first_seed": 731000,
+      "last_seed": 731399,
+      "workers_per_trial": 1,
+      "dose": "nominal",
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 4,
+      "p_lapse": 0.2,
+      "common_trial_seeds_for_P2_P1_and_canonical": true,
+      "purpose": "Verify the dedicated response RNG, per-trial engagement state, exact mixture identity, canonical biology-RNG isolation, and reference-free behavioral reachability of the pre-frozen 20% engineering anchor."
+    }
+  },
+  "required_structural_checks": [
+    "For every exact-identity seed, zero dose P2 is bit-exact to canonical ant state and canonical biology RNG state, with zero response-RNG draws and zero trail steering evaluations.",
+    "For every exact-identity seed, kappa=0 P2 is bit-exact to canonical ant state and canonical biology RNG state, with zero response-RNG draws and zero trail steering evaluations.",
+    "For every exact-identity seed, p_lapse=1 P2 under nominal dose is bit-exact to canonical ant state and canonical biology RNG state, with deterministic disengagement and zero response-RNG draws.",
+    "For every exact-identity seed, p_lapse=0 P2 under nominal dose is bit-exact to the frozen P1 local-kernel trajectory and canonical biology RNG state, with deterministic engagement and zero response-RNG draws.",
+    "For every stochastic-panel seed at 0<p_lapse<1, exactly one dedicated response-RNG draw occurs and zero canonical biology RNG draws are added.",
+    "For every stochastic-panel seed, P2 ant trajectory is bit-exact to the same-seed P1 trajectory when engaged and bit-exact to the same-seed canonical trajectory when lapsed.",
+    "The P2 engagement state never changes within a simulation trial.",
+    "Distinct ant ids under the same world seed use distinct response-seed namespace values in the qualification panel.",
+    "Endpoint reversal, translation, rotation, local steering sign, and on-trail zero-steering invariances of the reused local kernel remain unchanged.",
+    "The 400-trial p_lapse=0.20 panel contains at least one engaged and at least one lapsed trial.",
+    "Observed lapse assignment count is reported descriptively but is not a fit statistic or pass threshold beyond non-degeneracy.",
+    "Mean moving speed remains a diagnostic only and may not be used to tune the P2 mechanism."
+  ],
+  "reference_firewall": {
+    "poissonnier2026_pheromone_response_targets_may_be_loaded": false,
+    "any_reference_outcomes_may_be_loaded": false,
+    "P1_official_result_may_be_used_for_tuning": false,
+    "candidate_ranking_or_parameter_search": false,
+    "fit_or_parameter_search": false,
+    "adaptive_refinement": false,
+    "ymaze_may_be_loaded": false,
+    "ymaze_fitting_or_ranking": false
+  },
+  "implementation_constraints": [
+    "P2 runtime must extend the canonical integrity Simulation directly.",
+    "P2 may call frozen P1 local-kernel helper functions but must not instantiate P1 Simulation as its base class.",
+    "P2 runtime may add only the frozen transient engagement state and diagnostics; no Candidate B relative/Weber transduction is authorized.",
+    "P2 response RNG must be separate from ant.rng and must use the exact namespaced seed rule frozen in the mechanism record.",
+    "No response RNG object or draw is required in exact bypass cases p_lapse=0, p_lapse=1, dose_ratio=0, or kappa=0.",
+    "No path-, treatment-, colony-, direction-, or experience-specific response parameter is allowed.",
+    "No speed, pause, angular-noise, contact, boundary, apparatus, observation, or scoring logic change is allowed.",
+    "No H2-H5 mechanism combination is allowed.",
+    "No canonical file may be modified."
+  ],
+  "result_rule": {
+    "pass": "All required structural checks pass on the exact frozen panels. This establishes implementation/reachability only, not biological fit.",
+    "fail": "Fix implementation defects only. Do not change the mechanism, engineering values, seeds, trial counts, dt, or pass checks in response to reachability outcomes.",
+    "parameter_promotion_authorized": false,
+    "response_estimation_policy_authorized": false,
+    "canonical_update_authorized": false,
+    "ymaze_unlock_authorized": false
+  }
+}
