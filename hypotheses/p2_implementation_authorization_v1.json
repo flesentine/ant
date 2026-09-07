@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "id": "P2_implementation_authorization_v1",
+  "status": "P2_v1_implementation_and_reference_free_reachability_authorized_against_exact_frozen_mechanism_and_execution_policy",
+  "freeze_date_local": "2026-09-06",
+  "mechanism_freeze": {
+    "file": "hypotheses/p2_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "70f51e5cab5db0024947ed71cf760590089f8aea"
+  },
+  "reachability_execution_policy": {
+    "file": "hypotheses/p2_reachability_execution_v1.json",
+    "git_blob_sha": "8431ada87724953128104077f4ce1c11b569b1cf"
+  },
+  "candidate_class_evidence_git_blob_sha": "f7eb9fe38f8955c0227501e2d257ff32a40eaf74",
+  "selection_checkpoint": {
+    "main_commit": "d1084ca3f57439da8581167d983b477e0ca66f9f",
+    "permanent_main_workflow_run_id": 34085099776,
+    "permanent_main_test_job_id": 101627509148,
+    "permanent_main_deploy_job_id": 101627631394,
+    "conclusion": "success"
+  },
+  "authorization": {
+    "create_src_p2_js": true,
+    "create_p2_engineering_model": true,
+    "create_p2_reference_free_experiments": true,
+    "create_reference_free_reachability_runner": true,
+    "run_exact_identity_panel": true,
+    "run_frozen_400_trial_stochastic_panel": true,
+    "run_node_chromium_parity_and_firewall": true,
+    "read_P1_component_runtime_for_exact_helper_reuse": true
+  },
+  "still_forbidden": {
+    "response_target_access": true,
+    "reference_outcome_access": true,
+    "P1_rerun_or_rescue": true,
+    "parameter_search_or_ranking": true,
+    "adaptive_retuning": true,
+    "P2_response_estimation_policy": true,
+    "Candidate_B_Weber_transduction": true,
+    "canonical_locomotion_update": true,
+    "H2_H3_H4_H5_refit_or_combination": true,
+    "Y_maze_access": true,
+    "Y_maze_fitting_or_ranking": true
+  },
+  "preimplementation_state": {
+    "src_p2_exists": false,
+    "P2_model_exists": false,
+    "P2_experiment_files_exist": false,
+    "P2_reachability_runner_exists": false,
+    "P2_simulation_has_been_executed": false
+  },
+  "implementation_rule": "Implement exactly the mechanism and engineering panel frozen by blobs 70f51e5cab5db0024947ed71cf760590089f8aea and 8431ada87724953128104077f4ce1c11b569b1cf. If qualification fails, correct code defects only; do not alter the frozen mechanism, p_lapse anchor, seeds, dt, trial count, identities, or firewall.",
+  "promotion_rule": {
+    "successful_reference_free_reachability_means": "implementation/reachability qualified only",
+    "biological_fit_claim_authorized": false,
+    "fixed_parameter_pair_authorized": false,
+    "response_estimation_authorized": false,
+    "canonical_update_authorized": false,
+    "ymaze_unlock_authorized": false
+  }
+}
