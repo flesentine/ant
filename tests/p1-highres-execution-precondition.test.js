@@ -17,7 +17,7 @@ assert.strictEqual(p.qualification_report_git_blob_sha,'2f737a1e7059f023fa8acfa2
 assert.strictEqual(p.response_target_git_blob_sha,'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed');
 assert.strictEqual(p.p1_runtime_git_blob_sha,'f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca');
 assert.strictEqual(p.p1_model_git_blob_sha,'73873fd6763838423ca27648136bb0b9ff062817');
-assert.strictEqual(p.canonical_locomotion_git_blob_sha,'2fde196d6c8a9353c1c8c206d4fcef223e92ad1');
+assert.strictEqual(p.canonical_locomotion_git_blob_sha,'2fde196d6c8a9353c1c8c206d4fcef223e92ad1d');
 assert.strictEqual(p.permanent_main_workflow.run_id,34081603983);
 assert.strictEqual(p.permanent_main_workflow.run_number,132);
 assert.strictEqual(p.permanent_main_workflow.main_commit,'a9b57636db9b12cfd88feb2c8560f9eafa84787b');
