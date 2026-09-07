@@ -106,7 +106,7 @@
 - no fitting, parameter search, model selection, canonical update, reference-target access, or Y-maze access occurred
 - engineering values remain non-biological and may not be retuned from the reachability outcome
 
-### v0.3.3d — response-estimation policy freeze — in progress / policy frozen on branch
+### v0.3.3d — response-estimation policy freeze — complete
 - exactly two estimated response parameters: shared `sigma_field_mm` (2–32 mm log) and `kappa_trail_per_s` (0–16 s⁻¹ linear)
 - no nuisance parameters; baseline locomotion, H2–H5, sensor geometry, transduction, apparatus and observation model remain fixed
 - primary objective is equal-weight error in pheromone-minus-DCM contrasts for middle-zone occupancy and trail-axis exits, separately for short and long path strata
@@ -115,8 +115,18 @@
 - 60 training trials and 120 held-out trials per treatment × path with matched pheromone/DCM common random numbers
 - survival requires >=5/6 held-out wins vs exact null plus positive median relative improvement
 - final all-data fit, identifiability checks and secondary exit-time/beeline guards are frozen in advance
-- estimator is not implemented and high-resolution response search remains unauthorized
 - canonical locomotion unchanged; Y-maze remains locked
+
+### v0.3.3e — estimator implementation + qualification — in progress
+- frozen estimator implemented in `tools/run-p1-estimation.js`
+- qualification hash-verifies the response target but does not parse response outcomes
+- synthetic fixtures verify equal-weight colony contrasts, fold isolation, Halton mapping, exact null and CRN seed pairing
+- low-volume reference-free simulation verifies candidate wiring and exact DCM/kappa=0 canonical identity
+- semantic target loader is itself blocked without a matching active high-resolution authorization
+- high-resolution CLI path checks qualification + authorization before target parsing
+- permanent regression requires unauthorized high-resolution mode to fail without writing a report
+- full code + real Chromium exact-head audit required before a later authorization artifact
+- high-resolution response search remains unauthorized; canonical locomotion unchanged; Y-maze remains locked
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
