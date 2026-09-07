@@ -37,15 +37,26 @@ assert.strictEqual(e.selection_firewall.p2_reference_target_search_authorized,fa
 assert.strictEqual(e.selection_firewall.new_simulation_authorized,false);
 assert.strictEqual(e.selection_firewall.ymaze_access_authorized,false);
 
+const laterMechanismPath=path.join(root,'hypotheses','p2_painted_trail_mechanism_v1.json');
+const laterMechanismPresent=fs.existsSync(laterMechanismPath);
+if(laterMechanismPresent){
+  const m=read('hypotheses/p2_painted_trail_mechanism_v1.json');
+  assert.strictEqual(m.selected_candidate_class.source_evidence_git_blob_sha,'f7eb9fe38f8955c0227501e2d257ff32a40eaf74');
+  assert.strictEqual(m.selected_candidate_class.class_id,'P2_candidate_A_transient_response_engagement');
+  assert.strictEqual(m.implementation_gate.implementation_authorized_by_this_record,false);
+  assert.strictEqual(m.implementation_gate.new_simulation_executed_at_this_freeze,false);
+  assert.strictEqual(m.estimation_firewall.p2_parameter_search_authorized,false);
+  assert.strictEqual(m.estimation_firewall.raw_response_target_access_authorized,false);
+  assert.strictEqual(m.global_firewall.Y_maze_access,false);
+}
 const forbiddenPaths=[
-  'hypotheses/p2_painted_trail_mechanism_v1.json',
   'hypotheses/p2_response_estimation_v1.json',
   'hypotheses/p2_highres_authorization_v1.json',
   'models/lasius_niger_painted_trail_p2_v1.json',
   'src/p2.js',
   'tools/run-p2-estimation.js'
 ];
-for(const p of forbiddenPaths)assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at evidence gate');
+for(const p of forbiddenPaths)assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist before later implementation/estimation gates');
 
 const neg=Object.fromEntries(e.negative_candidate_classes.map(x=>[x.class_id,x]));
 assert.match(neg.path_history_direction_recent_experience_modulation.status,/not_independently_supported/);
@@ -55,7 +66,8 @@ console.log('p2-candidate-class-evidence.test.js PASS '+JSON.stringify({
   evidence_blob:blob('hypotheses/p2_painted_trail_candidate_class_evidence_v1.json'),
   sources:e.independent_sources.length,
   plausible_classes:e.candidate_mechanism_classes.length,
-  selected:false,
+  historical_selection_at_evidence_gate:false,
+  later_mechanism_present:laterMechanismPresent,
   implementation_authorized:false,
   ymaze_authorized:false
 }));
