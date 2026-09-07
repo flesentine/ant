@@ -1,0 +1,141 @@
+name: P1 v0.3.3h materialize official result
+on:
+  push:
+    branches: [v0.3.3h-p1-response-result-freeze]
+    paths:
+      - '.github/workflows/p1-v033h-materialize-result.yml'
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v0.3.3h-p1-response-result-freeze
+          fetch-depth: 0
+      - name: Download exact official execution artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p1-result
+          curl -fL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/10004082907/zip" \
+            -o /tmp/p1-result/artifact.zip
+          unzip -q /tmp/p1-result/artifact.zip -d /tmp/p1-result/extracted
+      - name: Verify exact official bytes and frozen decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPORT=/tmp/p1-result/extracted/p1_response_estimation_500x60_v1.json
+          PROV=/tmp/p1-result/extracted/execution_provenance.json
+          test "$(sha256sum "$REPORT" | awk '{print $1}')" = "4e3de4c1fb35465a877fbc78b8ce178763b5bcb968af05d66085186a93a3facf"
+          test "$(wc -c < "$REPORT" | tr -d ' ')" = "174770"
+          test "$(git hash-object "$REPORT")" = "561aca4a14346ebb4f062f30d0438d3115784172"
+          test "$(sha256sum "$PROV" | awk '{print $1}')" = "96b86db1070c221a0e5040b2f05ebab40303c7ee3a0b486133a181f56e4d5e93"
+          test "$(git hash-object "$PROV")" = "6afe2727a88b7294d2bd09b8704755a5a355826a"
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('/tmp/p1-result/extracted/p1_response_estimation_500x60_v1.json','utf8'));
+          const p=JSON.parse(fs.readFileSync('/tmp/p1-result/extracted/execution_provenance.json','utf8'));
+          if(r.status!=='development_response_estimation_failed_primary_survival_guard')throw new Error('unexpected official result status');
+          if(r.internal_cv.P1_wins_vs_exact_null!==4||r.internal_cv.total_folds!==6||r.internal_cv.P1_survival_guard_passed!==false)throw new Error('official primary survival result drift');
+          if(Math.abs(r.internal_cv.median_relative_improvement_vs_exact_null-0.26132694328143546)>1e-15)throw new Error('official median improvement drift');
+          if(r.final_all_data_fit!==null)throw new Error('final all-data fit must not run after primary survival failure');
+          if(r.promotion.mechanism_survives_internal_development!==false||r.promotion.fixed_parameter_pair_eligible_for_future_v0_4_freeze!==false||r.promotion.reason!=='failed_primary_survival_guard')throw new Error('official promotion semantics drift');
+          if(r.ymaze_accessed!==false||r.canonical_locomotion_updated!==false||r.H2_H3_H4_H5_refit!==false||r.nuisance_parameters_estimated!==false)throw new Error('official firewall drift');
+          if(p.repo_commit!=='4da2101267093ead0e3f2569b28940f49f89a552'||p.github_run_id!==34081980126||p.github_run_attempt!==1)throw new Error('official execution provenance drift');
+          if(p.report_sha256!=='4e3de4c1fb35465a877fbc78b8ce178763b5bcb968af05d66085186a93a3facf'||p.report_status!==r.status)throw new Error('official report provenance mismatch');
+          NODE
+      - name: Materialize report, provenance, archive, and closure record
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/p1-result/extracted/p1_response_estimation_500x60_v1.json reports/p1_response_estimation_500x60_v1.json
+          cp /tmp/p1-result/extracted/execution_provenance.json reports/p1_response_estimation_execution_provenance_v1.json
+          mkdir -p hypotheses/archive
+          cp hypotheses/p1_highres_authorization_v1.json hypotheses/archive/p1_highres_authorization_v1.json
+          rm hypotheses/p1_highres_authorization_v1.json
+          cat > hypotheses/p1_response_estimation_result_freeze_v1.json <<'JSON'
+          {
+            "schema_version": 1,
+            "id": "P1_response_estimation_result_freeze_v1",
+            "status": "official_development_response_estimation_failed_primary_survival_guard_frozen_p1_v1_closed",
+            "freeze_date_local": "2026-09-06",
+            "scientific_scope": "Internal Poissonnier 2026 open-arena P1-v1 painted-trail response development estimation. This is the frozen result of the one authorized high-resolution execution and is not external validation.",
+            "official_execution": {
+              "repo_commit": "4da2101267093ead0e3f2569b28940f49f89a552",
+              "github_run_id": 34081980126,
+              "github_job_id": 101618864436,
+              "github_run_attempt": 1,
+              "artifact_id": 10004082907,
+              "artifact_digest": "sha256:e8ad929fca97a5c2d7b74147434ee81ef5ba8fd3b0ab1f44609e566f1769f3c7",
+              "report_file": "reports/p1_response_estimation_500x60_v1.json",
+              "report_git_blob_sha": "561aca4a14346ebb4f062f30d0438d3115784172",
+              "report_sha256": "4e3de4c1fb35465a877fbc78b8ce178763b5bcb968af05d66085186a93a3facf",
+              "report_bytes": 174770,
+              "execution_provenance_file": "reports/p1_response_estimation_execution_provenance_v1.json",
+              "execution_provenance_git_blob_sha": "6afe2727a88b7294d2bd09b8704755a5a355826a",
+              "execution_provenance_sha256": "96b86db1070c221a0e5040b2f05ebab40303c7ee3a0b486133a181f56e4d5e93"
+            },
+            "frozen_input_chain": {
+              "policy_git_blob_sha": "628d17f6eb69fd11216aff33d1356d184365aedd",
+              "estimator_git_blob_sha": "a307e74e8ba2366e2546eebe1a7cccac69a3ff9a",
+              "authorization_git_blob_sha": "7e77c5b1b9a6de9d665ff2be55c0780cc7d24d9c",
+              "execution_precondition_git_blob_sha": "18f2674ad3ee8da8f0a624a2a93b46f4bf673864",
+              "response_target_git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+              "p1_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+              "p1_model_git_blob_sha": "73873fd6763838423ca27648136bb0b9ff062817",
+              "canonical_locomotion_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+            },
+            "primary_survival_result": {
+              "heldout_wins_vs_exact_null": 4,
+              "folds_total": 6,
+              "required_minimum_wins": 5,
+              "median_relative_improvement_vs_exact_null": 0.26132694328143546,
+              "median_relative_improvement_strictly_positive": true,
+              "primary_survival_guard_passed": false,
+              "decision": "FAIL"
+            },
+            "heldout_fold_relative_improvements": [
+              {"held_out_colony": 0, "relative_improvement_vs_exact_null": -0.17101487420004152},
+              {"held_out_colony": 7, "relative_improvement_vs_exact_null": 0.3152748622799047},
+              {"held_out_colony": 16, "relative_improvement_vs_exact_null": 0.20737902428296626},
+              {"held_out_colony": 20, "relative_improvement_vs_exact_null": 0.7223653286274292},
+              {"held_out_colony": 21, "relative_improvement_vs_exact_null": 0.5229066527295314},
+              {"held_out_colony": 27, "relative_improvement_vs_exact_null": -1.5394366870851268}
+            ],
+            "downstream_frozen_consequences": {
+              "final_all_data_fit_executed": false,
+              "identifiability_evaluated": false,
+              "final_secondary_promotion_guards_evaluated": false,
+              "mechanism_survives_internal_development": false,
+              "fixed_parameter_pair_eligible_for_future_v0_4_freeze": false,
+              "canonical_locomotion_update_authorized": false,
+              "ymaze_unlock_authorized": false
+            },
+            "closure_rule": "P1-v1 response estimation is closed. The valid official execution may not be rerun or rescued by changing bounds, candidates, seeds, budgets, folds, weights, nuisance parameters, sensor geometry, transduction, apparatus, objective construction, or promotion thresholds. A future painted-trail hypothesis would require a new versioned mechanism and a new pre-search policy rather than retuning P1-v1.",
+            "rerun_authorized": false,
+            "canonical_locomotion_changed": false,
+            "ymaze_accessed": false
+          }
+          JSON
+      - name: Commit exact frozen result to result-freeze branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/p1_response_estimation_500x60_v1.json \
+                  reports/p1_response_estimation_execution_provenance_v1.json \
+                  hypotheses/archive/p1_highres_authorization_v1.json \
+                  hypotheses/p1_highres_authorization_v1.json \
+                  hypotheses/p1_response_estimation_result_freeze_v1.json
+          git commit -m "Freeze official P1 response-estimation failure"
+          git push origin HEAD:v0.3.3h-p1-response-result-freeze
