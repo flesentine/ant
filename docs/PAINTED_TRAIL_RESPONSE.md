@@ -845,3 +845,134 @@ At v0.3.3i:
 - Y-maze: **locked**
 
 A later mechanism-selection gate may choose, reject, or prospectively combine classes only by explicit independent biological rationale. If it does, it must freeze the exact equations, structural parameters, null identity, invariances, engineering-only reachability values, and a no-reference-search firewall **before** implementation.
+
+
+## P2-v1 mechanism selection freeze
+
+v0.3.3j prospectively selects the first post-P1 mechanism class **before any P2 implementation or new simulation**.
+
+Mechanism record:
+
+`hypotheses/p2_painted_trail_mechanism_v1.json`
+
+Git blob:
+
+`70f51e5cab5db0024947ed71cf760590089f8aea`
+
+### Selected class
+
+P2-v1 selects:
+
+**transient per-trial trail-response engagement/lapse**
+
+This is Candidate A from the independently frozen evidence gate.
+
+The selection is intentionally minimal:
+
+- it has direct *Lasius niger* support;
+- the cited evidence supports transient non-following but argues against a stable specialist pheromone-ignoring caste;
+- Candidate B relative/Weber bilateral sensing currently has cross-species support only;
+- P2-v1 therefore does **not** combine A+B.
+
+Candidate B remains available only for a later independently justified versioned hypothesis if needed.
+
+### Exact P2 state
+
+For each ant in an active non-null painted-trail simulation:
+
+`E ~ Bernoulli(1 - p_lapse)`
+
+is drawn exactly once from a dedicated P2 response RNG.
+
+Equivalently, for one response-RNG uniform variate `U`:
+
+`engaged = (U >= p_lapse)`
+
+The state:
+
+- is fixed for that ant during one simulation trial;
+- is discarded at the end of that trial;
+- is redrawn for another trial/seed;
+- is not a persistent phenotype, caste, memory state, or ant identity.
+
+### Engaged response
+
+When `engaged = true`, P2 reuses the previously frozen local P1 egocentric steering kernel **unchanged as a component**:
+
+`C(p) = dose_ratio * exp(-d(p,segment)^2 / (2*sigma_field_mm^2))`
+
+`T(C) = C / (1 + C)`
+
+`omega_trail = engaged * kappa_trail_per_s * (T(C_right) - T(C_left))`
+
+The bilateral sensor geometry remains:
+
+- forward offset: 2 mm
+- lateral half separation: 1.5 mm
+
+This component reuse does **not** promote or reopen P1-v1. The failed P1-v1 result remains permanently closed.
+
+### Dedicated response RNG
+
+P2 engagement must never consume canonical biology RNG draws.
+
+A separate response seed is frozen as:
+
+`hash32((world_seed >>> 0) XOR Math.imul(ant_id + 1, 0x27d4eb2d) XOR 0x6c8e9cf5)`
+
+using the exact same hash32 arithmetic specified in the mechanism record, then a separate `core.RNG`.
+
+For `0 < p_lapse < 1`, exactly one response-RNG `next()` draw is used per ant.
+
+### Exact identities
+
+The future implementation must prove:
+
+1. **dose ratio = 0**  
+   exact canonical trajectory and canonical biology RNG state; no P2 response draw.
+
+2. **kappa = 0**  
+   exact canonical trajectory and canonical biology RNG state; no P2 response draw.
+
+3. **p_lapse = 1**  
+   every ant deterministically lapses; exact canonical trajectory and canonical biology RNG state; no response draw.
+
+4. **p_lapse = 0**  
+   every ant deterministically engages; for the same sigma/kappa/apparatus/protocol/seed/dt, trajectory is exactly identical to the frozen P1 local-kernel runtime. This is a nested implementation identity only, not a reopening of P1-v1.
+
+### Reference-free engineering values
+
+The implementation/reachability stage is pre-frozen to use:
+
+- `sigma_field_mm = 8`
+- `kappa_trail_per_s = 4`
+- `p_lapse = 0.20`
+- sensor forward offset = 2 mm
+- sensor lateral half separation = 1.5 mm
+
+The 0.20 lapse value is a literature-motivated *L. niger* engineering anchor only. It is **not** asserted to be the Poissonnier open-arena lapse probability and is not fitted evidence.
+
+The next implementation PR must exercise exactly this reference-free panel:
+
+- zero-dose canonical identity
+- zero-kappa canonical identity
+- always-engaged nested P1 identity
+- 20% lapse stochastic reachability
+- all-lapse canonical identity
+
+Reachability outcomes may not be used to retune these engineering values.
+
+### Still locked
+
+At this mechanism-selection freeze:
+
+- `src/p2.js`: absent
+- P2 model: absent
+- P2 estimator: absent
+- P2 estimation policy: absent
+- response-target access: not authorized
+- new P2 simulation: not authorized
+- canonical locomotion changes: not authorized
+- Y-maze: locked
+
+A separate implementation + reference-free reachability gate is required after this mechanism record is audited and merged.
