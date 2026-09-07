@@ -154,7 +154,6 @@ function stochasticPanel(policy){
     const sim2=new p2.Simulation(p2b,seed),sim1=new p1.Simulation(p1b,seed),base=new integrity.Simulation(baseb,seed);
     const ant2=sim2.ants[0],initialBiology=ant2.rng.state,initialP1=sim1.ants[0].rng.state,initialBase=base.ants[0].rng.state;
     if(initialBiology!==initialP1||initialBiology!==initialBase)throw new Error(`seed ${seed}: P2 response setup perturbed canonical biology RNG`);
-    if(ant2.p2ResponseDraws!==1||ant2.p2ResponseSeed!==p2.responseSeed?.unexpected){} // no-op: explicit checks below
     const expectedSeed=p2.responseSeed(seed,0),expectedU=new core.RNG(expectedSeed).next();
     if(ant2.p2ResponseSeed!==expectedSeed||!same(ant2.p2ResponseU,expectedU)||ant2.p2ResponseDraws!==1)throw new Error(`seed ${seed}: dedicated response RNG mismatch`);
     const engagedBefore=ant2.p2Engaged;
@@ -229,7 +228,7 @@ function runP2Reachability({root=path.resolve(__dirname,'..')}={}){
     candidate_B_implemented:false,
     physics_dt_s:policy.frozen_execution.physics_dt_s,
     engineering_values:clone(policy.frozen_execution.engineering_values),
-    identity_panel:{seeds:policy.frozen_execution.exact_identity_panel.seeds,fixed_time_s:policy.frozen_execution.exact_identity_panel.fixed_time_s,rows},
+    identity_panel:{seeds:policy.frozen_execution.exact_identity_panel.seeds,fixed_time_s:policy.frozen_execution.exact_identity_panel.fixed_time_s,rows:identity},
     invariance_panel:invariances,
     stochastic_engagement_panel:stochastic,
     structural_checks:checks,
