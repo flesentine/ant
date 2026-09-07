@@ -175,17 +175,19 @@
 - no P2 runtime/model exists; no new simulation, response-target search, estimation policy, canonical update, or Y-maze access authorized
 - final audit run 34085033098 passed full suite + pure specification checks + real Chromium with zero response-target, Y-maze, or P2 executable-surface requests
 
-### v0.3.3k — P2 implementation + reference-free reachability — in progress
+### v0.3.3k — P2 implementation + reference-free reachability — complete / PASS
 - P2 reachability execution policy frozen before runtime implementation at blob `8431ada87724953128104077f4ce1c11b569b1cf`
 - implementation authorization frozen before runtime implementation at blob `462997ea7399d98efca5a6b19a0e38160fbddbaf`
 - isolated `src/p2.js` implements only the frozen transient per-trial engagement gate over canonical integrity runtime
 - P2 uses a dedicated namespaced response RNG and adds zero canonical biology RNG draws
 - engineering P2 model freezes sigma=8 mm, kappa=4 s^-1, p_lapse=0.20, and unchanged bilateral sensor geometry
-- exact identity panel: zero dose -> canonical, kappa=0 -> canonical, p_lapse=1 -> canonical, p_lapse=0 -> frozen P1-kernel identity
-- stochastic panel pre-frozen to 400 nominal-dose trials on seeds 731000-731399 with no lapse-count tuning threshold beyond non-degeneracy
-- every stochastic P2 trial must be exactly the same-seed P1 trajectory if engaged or exactly canonical if lapsed
-- Candidate B Weber transduction remains absent; no estimation policy/search, response-target access, canonical update, or Y-maze access authorized
-- exact report freeze + full-suite + real Chromium audit required before merge
+- all eight exact-identity seeds passed: zero dose -> canonical, kappa=0 -> canonical, p_lapse=1 -> canonical, p_lapse=0 -> frozen P1-kernel identity
+- first frozen 400-trial reference-free execution passed on run 34089553046: 75 lapses / 325 engaged (18.75% realized lapse fraction)
+- every stochastic P2 trial was exactly the same-seed P1 trajectory if engaged or exactly canonical if lapsed; exactly one response draw per intermediate-p_lapse trial
+- descriptive engineering summaries: central-zone fraction 0.31054, trail-axis exit rate 0.4825, mean moving speed 23.6285 mm/s, mean exit time 9.3533 s
+- exact 5765-byte report frozen at `reports/p2_reference_free_reachability_v1.json`, blob `78a5e0ac4a3dd536a0e2d06ece2e9e37cdb2aefa`, SHA-256 `de481a25ad36d6124bb51cb644bb55199fa655471fbadc082f7d3f04cb2ac37b`
+- Chromium parity 6/6 with zero exceptions, console errors, response-target requests, Y-maze requests, or P2 estimation-surface requests
+- Candidate B Weber transduction remains absent; no estimation policy/search, biological fit claim, canonical update, or Y-maze access authorized
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
