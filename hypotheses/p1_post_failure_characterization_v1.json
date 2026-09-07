@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "id": "P1_post_failure_characterization_v1",
+  "status": "posthoc_descriptive_characterization_frozen_no_rescue_no_p2_authorization",
+  "freeze_date_local": "2026-09-06",
+  "scope": "Descriptive characterization of the already-frozen official P1-v1 development result only. This record does not reopen P1-v1, authorize a rerun, select P2, or create new fit evidence.",
+  "frozen_inputs": {
+    "official_report": {
+      "file": "reports/p1_response_estimation_500x60_v1.json",
+      "git_blob_sha": "561aca4a14346ebb4f062f30d0438d3115784172",
+      "sha256": "4e3de4c1fb35465a877fbc78b8ce178763b5bcb968af05d66085186a93a3facf"
+    },
+    "result_freeze": {
+      "file": "hypotheses/p1_response_estimation_result_freeze_v1.json",
+      "git_blob_sha": "1d99ebfaa378aeb1b98963f63b3a513a616a6617"
+    },
+    "response_estimation_policy": {
+      "file": "hypotheses/p1_response_estimation_v1.json",
+      "git_blob_sha": "628d17f6eb69fd11216aff33d1356d184365aedd"
+    }
+  },
+  "analysis_firewall": {
+    "raw_102_row_target_semantics_reloaded": false,
+    "new_simulation_run": false,
+    "candidate_reranking": false,
+    "new_objective_or_weighting": false,
+    "new_fold_definition": false,
+    "new_parameter_search": false,
+    "inferential_significance_test": false,
+    "p2_mechanism_selected": false,
+    "p2_implementation_authorized": false,
+    "ymaze_accessed": false,
+    "rule": "Only quantities already recorded in the immutable official P1 report may be summarized. No new target-row access, simulation, search, or model comparison is permitted."
+  },
+  "frozen_primary_outcome": {
+    "heldout_wins_vs_exact_null": 4,
+    "folds_total": 6,
+    "required_minimum_wins": 5,
+    "median_relative_improvement_vs_exact_null": 0.26132694328143546,
+    "primary_survival_guard_passed": false,
+    "final_all_data_fit_executed": false
+  },
+  "fold_descriptors": [
+    {
+      "held_out_colony": 0,
+      "selected_sigma_field_mm": 2.2530432372164837,
+      "selected_kappa_trail_per_s": 6.847736625514403,
+      "heldout_relative_improvement_vs_exact_null": -0.17101487420004152,
+      "notable_recorded_component": "Long-path trail-axis reference contrast was 0 while selected P1 simulation contrast was +0.2833333333333333."
+    },
+    {
+      "held_out_colony": 7,
+      "selected_sigma_field_mm": 10.097578803154006,
+      "selected_kappa_trail_per_s": 12.00548696844993,
+      "heldout_relative_improvement_vs_exact_null": 0.3152748622799047
+    },
+    {
+      "held_out_colony": 16,
+      "selected_sigma_field_mm": 2.82842712474619,
+      "selected_kappa_trail_per_s": 7.111111111111111,
+      "heldout_relative_improvement_vs_exact_null": 0.20737902428296626
+    },
+    {
+      "held_out_colony": 20,
+      "selected_sigma_field_mm": 8.724061861322062,
+      "selected_kappa_trail_per_s": 14.814814814814813,
+      "heldout_relative_improvement_vs_exact_null": 0.7223653286274292
+    },
+    {
+      "held_out_colony": 21,
+      "selected_sigma_field_mm": 6.727171322029715,
+      "selected_kappa_trail_per_s": 13.037037037037035,
+      "heldout_relative_improvement_vs_exact_null": 0.5229066527295314,
+      "notable_recorded_component": "Long-path trail-axis reference contrast was -0.08333333333333331 while selected P1 simulation contrast was +0.21666666666666673."
+    },
+    {
+      "held_out_colony": 27,
+      "selected_sigma_field_mm": 2.9696903317455052,
+      "selected_kappa_trail_per_s": 8.51577503429355,
+      "heldout_relative_improvement_vs_exact_null": -1.5394366870851268,
+      "notable_recorded_component": "Short-path trail-axis reference contrast was -0.33333333333333337 while selected P1 simulation contrast was +0.26666666666666666."
+    }
+  ],
+  "selected_candidate_dispersion_descriptors": {
+    "sigma_field_mm_min": 2.2530432372164837,
+    "sigma_field_mm_max": 10.097578803154006,
+    "sigma_max_to_min_ratio": 4.481751009638427,
+    "sigma_normalized_coordinate_span_under_frozen_log_bounds": 0.541015625,
+    "kappa_trail_per_s_min": 6.847736625514403,
+    "kappa_trail_per_s_max": 14.814814814814813,
+    "kappa_range_per_s": 7.96707818930041,
+    "kappa_normalized_coordinate_span_under_frozen_linear_bounds": 0.4979423868312756,
+    "interpretation_limit": "These are descriptive LOCO selected-candidate spreads only. They are not the frozen final identifiability test because final all-data fitting was never authorized after the survival failure."
+  },
+  "recorded_reference_contrast_heterogeneity": {
+    "trail_axis_exit": {
+      "short_path_by_colony": {
+        "0": 0.15000000000000002,
+        "7": 0.6666666666666667,
+        "16": 0.08333333333333337,
+        "20": 0,
+        "21": 0.33333333333333337,
+        "27": -0.33333333333333337
+      },
+      "long_path_by_colony": {
+        "0": 0,
+        "7": 0.75,
+        "16": 0.5,
+        "20": 0.4285714285714286,
+        "21": -0.08333333333333331,
+        "27": 0.16666666666666663
+      },
+      "descriptive_fact": "The recorded held-out trail-axis treatment contrasts vary strongly in magnitude and include zero and negative values. This is a property of the already-frozen development report, not a new target analysis."
+    }
+  },
+  "conclusions_allowed": [
+    "P1-v1 failed its preregistered robustness requirement despite a positive median relative improvement.",
+    "The recorded held-out treatment-response surface is heterogeneous across colonies and paths.",
+    "A single shared always-engaged deterministic attractive P1 response did not generalize sufficiently under the frozen test.",
+    "The official result does not identify why generalization failed."
+  ],
+  "conclusions_forbidden": [
+    "Colony 27 is an outlier that may be removed or downweighted.",
+    "P1-v1 should be rerun with altered seeds, bounds, budgets, folds, weights, or nuisance parameters.",
+    "Colony-specific or path-specific response parameters are justified by this failure.",
+    "The observed heterogeneity proves a specific stochastic, sensory, learning, or colony mechanism.",
+    "A P2 mechanism is selected by this characterization."
+  ],
+  "unresolved_explanations": [
+    "finite-sample variation in colony-level treatment contrasts",
+    "transient within-individual response lapses or behavioral noise",
+    "unmodeled sensory response structure",
+    "unmodeled environmental or assay variation",
+    "true biological heterogeneity not represented by P1-v1"
+  ],
+  "next_gate": "An independently grounded P2 evidence gate may compare plausible mechanism classes, but it must not use the P1 failure pattern to tune a replacement mechanism or reopen P1-v1."
+}
