@@ -63,16 +63,27 @@ assert.strictEqual(q.ymaze_accessed,false);
 assert.strictEqual(q.estimator_git_blob_sha,'a307e74e8ba2366e2546eebe1a7cccac69a3ff9a');
 assert(Object.values(q.checks).every(Boolean),JSON.stringify(q.checks));
 
-assert.ok(!fs.existsSync(path.join(root,'hypotheses','p1_highres_authorization_v1.json')),'active P1 high-resolution authorization must not exist during estimator qualification');
-assert.throws(()=>est.assertHighResolutionAuthorized(root,null,{branchName:'main'}),/missing post-qualification authorization artifact/);
-assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/,'semantic target loader must be authorization-gated');
-
-const tmp=path.join(os.tmpdir(),'p1-estimation-highres-should-not-exist-'+process.pid+'.json');
-try{fs.rmSync(tmp,{force:true});}catch(_){}
-const high=spawnSync(process.execPath,[path.join(root,'tools','run-p1-estimation.js'),'--mode','highres','--out',tmp],{cwd:root,encoding:'utf8'});
-assert.notStrictEqual(high.status,0,'high-resolution mode must fail without authorization');
-assert.match((high.stderr||'')+(high.stdout||''),/missing post-qualification authorization artifact/);
-assert.strictEqual(fs.existsSync(tmp),false,'unauthorized high-resolution mode must not write a report');
+const authPath=path.join(root,'hypotheses','p1_highres_authorization_v1.json');
+const hasAuth=fs.existsSync(authPath);
+if(!hasAuth){
+  assert.throws(()=>est.assertHighResolutionAuthorized(root,null,{branchName:'main'}),/missing post-qualification authorization artifact/);
+  assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/,'semantic target loader must be authorization-gated');
+  const tmp=path.join(os.tmpdir(),'p1-estimation-highres-should-not-exist-'+process.pid+'.json');
+  try{fs.rmSync(tmp,{force:true});}catch(_){}
+  const high=spawnSync(process.execPath,[path.join(root,'tools','run-p1-estimation.js'),'--mode','highres','--out',tmp],{cwd:root,encoding:'utf8'});
+  assert.notStrictEqual(high.status,0,'high-resolution mode must fail without authorization');
+  assert.match((high.stderr||'')+(high.stdout||''),/missing post-qualification authorization artifact/);
+  assert.strictEqual(fs.existsSync(tmp),false,'unauthorized high-resolution mode must not write a report');
+}else{
+  const a=readJson(authPath);
+  assert.strictEqual(a.policy_git_blob_sha,'628d17f6eb69fd11216aff33d1356d184365aedd');
+  assert.strictEqual(a.estimator_git_blob_sha,'a307e74e8ba2366e2546eebe1a7cccac69a3ff9a');
+  assert.strictEqual(a.effective_when_merged_to_main,true);
+  assert.strictEqual(a.canonical_promotion_authorized,false);
+  assert.strictEqual(a.ymaze_access_authorized,false);
+  assert.throws(()=>est.assertHighResolutionAuthorized(root,null,{branchName:'authorization-review'}),/not effective until merged to main/);
+  assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/,'semantic target loader must remain blocked on authorization review branch');
+}
 
 const source=fs.readFileSync(path.join(root,'tools','run-p1-estimation.js'),'utf8');
 const preflightPos=source.indexOf('const preflight=highResolutionPreflight');
@@ -87,7 +98,7 @@ console.log('p1-estimation.test.js PASS '+JSON.stringify({
   estimator_blob:blob('tools/run-p1-estimation.js'),
   policy_blob:blob('hypotheses/p1_response_estimation_v1.json'),
   qualification:q.status,
-  highres_authorized:false,
+  highres_authorization_file_present:hasAuth,
   response_outcomes_accessed:false,
   ymaze_accessed:false
 }));
