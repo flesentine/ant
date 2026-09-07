@@ -1,0 +1,118 @@
+name: P1 v0.3.3g official high-resolution response execution
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/p1-v033g-official-highres.yml'
+permissions:
+  contents: read
+concurrency:
+  group: p1-v033g-official-highres
+  cancel-in-progress: false
+jobs:
+  official:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Checkout exact main commit
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen authorization and execution precondition
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REF_NAME" = "main"
+          test "$(git hash-object hypotheses/p1_response_estimation_v1.json)" = "628d17f6eb69fd11216aff33d1356d184365aedd"
+          test "$(git hash-object tools/run-p1-estimation.js)" = "a307e74e8ba2366e2546eebe1a7cccac69a3ff9a"
+          test "$(git hash-object reports/p1_estimator_qualification_v1.json)" = "2f737a1e7059f023fa8acfa2a1f1bbc1e688ddb3"
+          test "$(git hash-object hypotheses/p1_highres_authorization_v1.json)" = "7e77c5b1b9a6de9d665ff2be55c0780cc7d24d9c"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_painted_trail_p1_v1.json)" = "73873fd6763838423ca27648136bb0b9ff062817"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test ! -e reports/p1_response_estimation_500x60_v1.json
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process');
+          const p=JSON.parse(fs.readFileSync('hypotheses/p1_highres_execution_precondition_v1.json','utf8'));
+          const a=JSON.parse(fs.readFileSync('hypotheses/p1_highres_authorization_v1.json','utf8'));
+          const blob=f=>cp.execFileSync('git',['hash-object',f],{encoding:'utf8'}).trim();
+          if(p.id!=='P1_high_resolution_execution_precondition_v1'||p.status!=='authorization_merged_and_permanent_main_ci_green_before_official_execution')throw new Error('invalid P1 execution precondition status');
+          if(p.authorization_main_commit!=='a9b57636db9b12cfd88feb2c8560f9eafa84787b')throw new Error('authorization main commit mismatch');
+          if(p.permanent_main_workflow.run_id!==34081603983||p.permanent_main_workflow.conclusion!=='success')throw new Error('permanent main workflow precondition mismatch');
+          if(p.permanent_main_workflow.test_job_id!==101617791536||p.permanent_main_workflow.test_job_conclusion!=='success')throw new Error('permanent main test precondition mismatch');
+          if(p.permanent_main_workflow.deploy_job_id!==101617919613||p.permanent_main_workflow.deploy_job_conclusion!=='success')throw new Error('permanent main deploy precondition mismatch');
+          if(p.policy_git_blob_sha!=='628d17f6eb69fd11216aff33d1356d184365aedd'||p.estimator_git_blob_sha!=='a307e74e8ba2366e2546eebe1a7cccac69a3ff9a'||p.authorization_git_blob_sha!=='7e77c5b1b9a6de9d665ff2be55c0780cc7d24d9c')throw new Error('precondition scientific pin mismatch');
+          if(p.execution_workflow_git_blob_sha!==blob('.github/workflows/p1-v033g-official-highres.yml'))throw new Error('execution workflow blob mismatch');
+          if(a.effective_when_merged_to_main!==true||a.high_resolution_response_search_authorized!==true||a.canonical_promotion_authorized!==false||a.ymaze_access_authorized!==false)throw new Error('authorization semantics drift');
+          NODE
+      - name: Re-run reference-free qualification before target access
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p1-official
+          node tools/run-p1-estimation.js --mode qualification --trials 2 --out /tmp/p1-official/pre_reference_qualification.json
+          node - <<'NODE'
+          const q=require('/tmp/p1-official/pre_reference_qualification.json');
+          if(q.status!=='passed'||q.scientific_evidence!==false||q.reference_outcomes_accessed!==false||q.response_target_semantics_loaded!==false||q.ymaze_accessed!==false)throw new Error('pre-reference qualification firewall failed');
+          if(q.policy_git_blob_sha!=='628d17f6eb69fd11216aff33d1356d184365aedd'||q.estimator_git_blob_sha!=='a307e74e8ba2366e2546eebe1a7cccac69a3ff9a')throw new Error('pre-reference qualification pin drift');
+          NODE
+      - name: Execute one official frozen P1 high-resolution response search
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/run-p1-estimation.js --mode highres --out /tmp/p1-official/p1_response_estimation_500x60_v1.json
+      - name: Validate and fingerprint official result
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs'),crypto=require('crypto'),cp=require('child_process');
+          const file='/tmp/p1-official/p1_response_estimation_500x60_v1.json';
+          const r=JSON.parse(fs.readFileSync(file,'utf8'));
+          const allowed=new Set([
+            'development_response_estimation_failed_primary_survival_guard',
+            'development_response_estimation_survived_but_parameter_pair_not_eligible',
+            'development_response_estimation_passed_and_parameter_pair_eligible_for_future_freeze'
+          ]);
+          if(!allowed.has(r.status))throw new Error('unexpected official P1 result status '+r.status);
+          if(r.execution_class!=='frozen_high_resolution_response_search'||r.scientific_evidence!==true||r.reference_outcomes_accessed!==true||r.ymaze_accessed!==false)throw new Error('official P1 result execution semantics invalid');
+          if(r.canonical_locomotion_updated!==false||r.H2_H3_H4_H5_refit!==false||r.nuisance_parameters_estimated!==false)throw new Error('official P1 result firewall invalid');
+          if(r.policy_git_blob_sha!=='628d17f6eb69fd11216aff33d1356d184365aedd'||r.estimator_git_blob_sha!=='a307e74e8ba2366e2546eebe1a7cccac69a3ff9a'||r.response_target_git_blob_sha!=='81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed')throw new Error('official P1 result pin mismatch');
+          if(!r.pre_reference_qualification||r.pre_reference_qualification.status!=='passed'||r.pre_reference_qualification.reference_outcomes_accessed!==false||r.pre_reference_qualification.ymaze_accessed!==false)throw new Error('embedded pre-reference qualification invalid');
+          if(!r.high_resolution_authorization||r.high_resolution_authorization.id!=='P1_high_resolution_authorization_v1')throw new Error('official P1 authorization provenance missing');
+          if(!r.internal_cv||r.internal_cv.total_folds!==6||!Array.isArray(r.folds)||r.folds.length!==6)throw new Error('official P1 LOCO fold structure invalid');
+          const bytes=fs.readFileSync(file),sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+          const meta={
+            schema_version:1,
+            id:'P1_official_high_resolution_execution_provenance_v1',
+            status:'official_execution_completed',
+            repo_commit:cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
+            github_run_id:Number(process.env.GITHUB_RUN_ID),
+            github_run_attempt:Number(process.env.GITHUB_RUN_ATTEMPT),
+            report_file:'p1_response_estimation_500x60_v1.json',
+            report_sha256:sha256,
+            report_bytes:bytes.length,
+            report_status:r.status,
+            policy_git_blob_sha:r.policy_git_blob_sha,
+            estimator_git_blob_sha:r.estimator_git_blob_sha,
+            authorization_git_blob_sha:cp.execFileSync('git',['hash-object','hypotheses/p1_highres_authorization_v1.json'],{encoding:'utf8'}).trim(),
+            response_target_git_blob_sha:r.response_target_git_blob_sha,
+            reference_outcomes_accessed:true,
+            ymaze_accessed:false,
+            canonical_locomotion_updated:false
+          };
+          fs.writeFileSync('/tmp/p1-official/execution_provenance.json',JSON.stringify(meta,null,2)+'\n');
+          console.log(JSON.stringify({status:r.status,report_sha256:sha256,folds:r.folds.length,internal_cv:r.internal_cv}));
+          NODE
+          cp hypotheses/p1_highres_authorization_v1.json /tmp/p1-official/
+          cp hypotheses/p1_highres_execution_precondition_v1.json /tmp/p1-official/
+      - name: Upload immutable official P1 execution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-v033g-official-highres
+          path: /tmp/p1-official
+          retention-days: 90
