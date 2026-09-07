@@ -976,3 +976,125 @@ At this mechanism-selection freeze:
 - Y-maze: locked
 
 A separate implementation + reference-free reachability gate is required after this mechanism record is audited and merged.
+
+
+## P2-v1 implementation and reference-free reachability
+
+v0.3.3k implements the already-frozen P2-v1 transient engagement mechanism and qualifies it **without loading response targets or Y-maze evidence**.
+
+Pre-implementation execution policy:
+
+`hypotheses/p2_reachability_execution_v1.json`
+
+Git blob:
+
+`8431ada87724953128104077f4ce1c11b569b1cf`
+
+Pre-implementation authorization:
+
+`hypotheses/p2_implementation_authorization_v1.json`
+
+Git blob:
+
+`462997ea7399d98efca5a6b19a0e38160fbddbaf`
+
+### Runtime
+
+Implementation:
+
+`src/p2.js`
+
+Current Git blob:
+
+`f91a2f7ede1b8119acc1fd57ac94a9718d074e15`
+
+The runtime extends the canonical integrity simulation directly.
+
+It uses the frozen P1 local-kernel helper functions for:
+
+- painted-trail apparatus parsing;
+- applied-dose ratio;
+- bilateral sensor geometry;
+- Gaussian field response;
+- saturating transduction;
+- local steering rate;
+- moving-step preview without biology-RNG mutation.
+
+It does **not** subclass the P1 simulation and does not reopen P1-v1.
+
+The only new structural state is the per-ant, per-trial engagement gate.
+
+### Dedicated response RNG
+
+For `0 < p_lapse < 1`, one response-only `core.RNG` draw is generated from the already-frozen namespaced seed.
+
+The response draw occurs after canonical ant initialization and never consumes `ant.rng`.
+
+Exact endpoints and null cases consume zero response draws:
+
+- zero applied dose
+- `kappa=0`
+- `p_lapse=1`
+- `p_lapse=0`
+
+### Engineering model
+
+`models/lasius_niger_painted_trail_p2_v1.json`
+
+Current Git blob:
+
+`7d3eecc44cb2eaf727249083a6fcfa21986fd475`
+
+Engineering-only values remain:
+
+- sigma = 8 mm
+- kappa = 4 s⁻¹
+- p_lapse = 0.20
+- forward sensor offset = 2 mm
+- lateral half separation = 1.5 mm
+
+These values remain unfitted and cannot be retuned from the reference-free reachability result.
+
+### Frozen execution panels
+
+Exact-identity panel:
+
+- eight seeds: 730001 through 730008
+- fixed 8 s
+- zero dose vs canonical
+- zero kappa vs canonical
+- all lapse vs canonical
+- always engaged vs frozen P1 local-kernel runtime
+
+Stochastic engagement panel:
+
+- 400 nominal-dose trials
+- seeds 731000 through 731399
+- one ant per trial
+- shared trial seeds for P2, P1 component, and canonical simulations
+- p_lapse = 0.20
+
+For every stochastic trial:
+
+- exactly one response-RNG draw must occur;
+- engagement state must remain fixed during the trial;
+- if engaged, P2 must be bit-exact to the same-seed P1-kernel trajectory;
+- if lapsed, P2 must be bit-exact to the same-seed canonical trajectory;
+- canonical biology RNG must remain isolated from the response draw.
+
+The observed lapse count is reported descriptively. It is **not** a fitting target or a pass threshold beyond requiring the fixed panel to contain both states.
+
+### Still locked
+
+This implementation/reachability gate does not authorize:
+
+- response-target loading;
+- P1 failed-fold tuning;
+- P2 parameter search/ranking;
+- P2 response-estimation policy;
+- Candidate B Weber-style transduction;
+- canonical model changes;
+- H2-H5 refit/combination;
+- Y-maze access.
+
+A successful reachability result qualifies implementation wiring only. It does not establish biological fit or authorize a fixed P2 parameter set for v0.4.
