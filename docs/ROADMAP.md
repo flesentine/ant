@@ -201,6 +201,16 @@
 - final audit run 34090954537 passed full suite + policy-math checks + real Chromium with zero response-target, Y-maze, or P2-estimator-surface requests
 - no estimator exists; no high-resolution search, target semantic access, P1-result semantic access, Candidate B transduction, canonical update, H2-H5 combination, or Y-maze access authorized
 
+### v0.3.3m — P2 estimator implementation + reference-free qualification — in progress
+- implement `tools/run-p2-estimation.js` against exact policy blob `eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce`
+- estimator implements 999-candidate 3D P2 Halton panel + exact canonical null and separately ranked 999-candidate projected p_lapse=0 benchmark + same null
+- standalone qualification must prove exact null/endpoints, nested P1 identity, response-RNG common random numbers, equal-colony contrasts, fold isolation, primary-only ranking, sample-SD guards, dual 5/6 survival math, 3-parameter identifiability, and final primary increment logic
+- response-target file may be hash-verified only; semantic loading must remain blocked behind absent post-qualification high-res authorization
+- P1 official response-result semantics must not be loaded by the P2 estimator
+- real Chromium parity/firewall qualification required with zero response-target/Y-maze/estimator-authorization network access
+- no high-resolution search, canonical update, Candidate B implementation, or Y-maze access authorized in this phase
+- exact qualification report must be frozen before merge
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
