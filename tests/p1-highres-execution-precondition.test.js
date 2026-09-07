@@ -48,7 +48,9 @@ if(fs.existsSync(workflowPath)){
   assert.ok(!/--(?:candidates|trials|eval-trials|seed|final-trials|final-seed|dt)\b/.test(highresLines[0]),'official highres invocation must not override frozen execution parameters');
 }
 
-assert.strictEqual(blob('hypotheses/p1_highres_authorization_v1.json'),p.authorization_git_blob_sha);
+const archivedAuth='hypotheses/archive/p1_highres_authorization_v1.json';
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p1_highres_authorization_v1.json')),'active authorization must be retired after official execution');
+assert.strictEqual(blob(archivedAuth),p.authorization_git_blob_sha);
 assert.strictEqual(blob('hypotheses/p1_response_estimation_v1.json'),p.policy_git_blob_sha);
 assert.strictEqual(blob('tools/run-p1-estimation.js'),p.estimator_git_blob_sha);
 assert.strictEqual(blob('reference/poissonnier2026_pheromone_response_targets.json'),p.response_target_git_blob_sha);
@@ -56,6 +58,7 @@ assert.strictEqual(blob('reference/poissonnier2026_pheromone_response_targets.js
 console.log('p1-highres-execution-precondition.test.js PASS '+JSON.stringify({
   precondition_blob:blob('hypotheses/p1_highres_execution_precondition_v1.json'),
   workflow_blob:fs.existsSync(workflowPath)?blob(p.execution_workflow_file):null,
+  execution_workflow_retired:!fs.existsSync(workflowPath),
   permanent_main_run:p.permanent_main_workflow.run_id,
   main_only:true,
   manual_dispatch:false,
