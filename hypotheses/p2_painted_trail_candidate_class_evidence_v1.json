@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "id": "P2_painted_trail_candidate_class_evidence_v1",
+  "status": "candidate_class_evidence_frozen_no_mechanism_selected_no_implementation_authorized",
+  "freeze_date_local": "2026-09-06",
+  "scientific_scope": "Independent evidence gate for possible future painted-trail response mechanism classes after P1-v1 closure. This record does not select P2, fit any parameter, authorize implementation, reopen P1-v1, or unlock Y-maze validation.",
+  "p1_dependency_boundary": {
+    "p1_result_freeze_file": "hypotheses/p1_response_estimation_result_freeze_v1.json",
+    "p1_result_freeze_git_blob_sha": "1d99ebfaa378aeb1b98963f63b3a513a616a6617",
+    "p1_official_report_git_blob_sha": "561aca4a14346ebb4f062f30d0438d3115784172",
+    "p1_closed": true,
+    "p1_rerun_authorized": false,
+    "rule": "The P1 failure pattern may motivate asking which independently supported mechanism classes exist, but it may not determine a new mechanism's form, parameters, folds, weights, or promotion criteria."
+  },
+  "independent_sources": [
+    {
+      "source_id": "koch_czaczkes_2021_lasius_niger_lapses",
+      "species": "Lasius niger",
+      "title": "No specialist pheromone-ignoring ants in Lasius niger",
+      "journal": "Ecological Entomology",
+      "year": 2021,
+      "doi": "10.1111/een.12995",
+      "url": "https://doi.org/10.1111/een.12995",
+      "evidence_relevant_to_future_mechanism": [
+        "Published synthesis/experiment reports a characteristic pheromone non-following or lapse rate around 20% in Lasius niger.",
+        "Ignoring a trail was not repeatable at the individual level one hour later.",
+        "The evidence argues against a stable specialist pheromone-ignoring caste in Lasius niger."
+      ],
+      "allowed_inference": "A future Lasius niger response model may independently consider transient stochastic engagement/lapse behavior as a mechanism class.",
+      "forbidden_inference": "The source does not identify the exact stochastic process, its probability in the Poissonnier open-arena assay, a fitted lapse parameter, or colony-specific lapse rates."
+    },
+    {
+      "source_id": "perna_et_al_2012_linepithema_weber",
+      "species": "Linepithema humile",
+      "title": "Individual rules for trail pattern formation in Argentine ants",
+      "journal": "PLoS Computational Biology",
+      "year": 2012,
+      "pubmed_id": "22829756",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3400603/",
+      "evidence_relevant_to_future_mechanism": [
+        "Turning responded to local pheromone concentration while speed was largely unaffected.",
+        "Reported turning response followed a Weber-like relative bilateral rule: side-to-side difference divided by their sum predicted turn magnitude.",
+        "The reported response was local rather than a long temporal integration of pheromone concentration."
+      ],
+      "allowed_inference": "Relative/normalized bilateral sensing is an independently documented ant trail-response mechanism class worth considering in a future evidence comparison.",
+      "forbidden_inference": "This cross-species result may not be assumed to hold in Lasius niger, may not set P2 parameters, and may not override the existing P1-v1 closure."
+    },
+    {
+      "source_id": "poissonnier_et_al_2026_lasius_niger_context",
+      "species": "Lasius niger",
+      "title": "Pheromone trail following is not modulated by previous visit to food location, distance travelled, or travel direction in the ant Lasius niger",
+      "journal": "Insectes Sociaux",
+      "year": 2026,
+      "doi": "10.1007/s00040-026-01106-9",
+      "url": "https://doi.org/10.1007/s00040-026-01106-9",
+      "evidence_relevant_to_future_mechanism": [
+        "Open-arena trail following was robust and was not significantly modulated by prior path distance.",
+        "Binary trail-following behavior was not significantly modulated by travel direction or recent food experience.",
+        "The study explicitly reports no detected context modulation across the tested variables."
+      ],
+      "allowed_inference": "Future painted-trail mechanism design should not add path-history, travel-direction, or recent-food-experience response modifiers without new independent evidence.",
+      "forbidden_inference": "A near-threshold or null interaction cannot be repurposed as authorization to add context-specific P2 parameters."
+    }
+  ],
+  "candidate_mechanism_classes": [
+    {
+      "class_id": "P2_candidate_A_transient_response_engagement",
+      "description": "A stochastic, transient trail-response engagement/lapse state that changes whether or how strongly an otherwise shared local trail response is expressed on a given encounter.",
+      "independent_evidence_strength": "direct_species_support_for_transient_nonfollowing_class_only",
+      "species_support": ["Lasius niger"],
+      "source_ids": ["koch_czaczkes_2021_lasius_niger_lapses"],
+      "must_preserve_if_ever_frozen": [
+        "No stable specialist ant identity parameter unless independently supported.",
+        "No colony-specific or path-specific lapse probability derived from the P1 failed folds.",
+        "No P1 rerun or rescue.",
+        "Baseline locomotion, canonical speed/pause process, H2-H5 state, apparatus, and observation semantics remain separately frozen unless an independent gate changes them."
+      ],
+      "status": "plausible_class_not_selected"
+    },
+    {
+      "class_id": "P2_candidate_B_relative_bilateral_transduction",
+      "description": "A local bilateral steering response based on relative left-right pheromone contrast, such as a Weber-like difference-over-sum form, rather than P1's fixed saturating absolute transduction difference.",
+      "independent_evidence_strength": "cross_species_mechanistic_support_only",
+      "species_support": ["Linepithema humile"],
+      "source_ids": ["perna_et_al_2012_linepithema_weber"],
+      "must_preserve_if_ever_frozen": [
+        "Cross-species evidence cannot set Lasius niger parameters.",
+        "Any exact transduction equation, epsilon/regularization rule, sensor geometry, and parameter surface must be frozen before implementation and before target-ranked search.",
+        "No addition of speed modulation merely because the source reports turning; the same source reports speed largely unaffected.",
+        "No P1 failed-fold tuning."
+      ],
+      "status": "plausible_class_not_selected"
+    }
+  ],
+  "negative_candidate_classes": [
+    {
+      "class_id": "path_history_direction_recent_experience_modulation",
+      "status": "not_independently_supported_by_current_lasius_niger_evidence",
+      "source_ids": ["poissonnier_et_al_2026_lasius_niger_context"],
+      "rule": "Do not create short-vs-long, inward-vs-outward, naive-vs-experienced, or recent-food-specific response parameters from the P1 failure."
+    },
+    {
+      "class_id": "stable_specialist_pheromone_ignorer_identity",
+      "status": "contradicted_by_current_lasius_niger_repeatability_evidence",
+      "source_ids": ["koch_czaczkes_2021_lasius_niger_lapses"],
+      "rule": "Do not model a persistent ant caste/identity that always ignores pheromone based on the cited evidence."
+    }
+  ],
+  "selection_firewall": {
+    "candidate_class_selected": false,
+    "p2_hypothesis_record_exists": false,
+    "p2_runtime_authorized": false,
+    "p2_parameter_policy_authorized": false,
+    "p2_reference_target_search_authorized": false,
+    "new_simulation_authorized": false,
+    "ymaze_access_authorized": false,
+    "rule": "A later P2 mechanism-selection gate must choose, reject, or combine candidate classes using explicit independent biological rationale before implementation. It may inspect this evidence record and the frozen P1 closure, but may not tune the mechanism against P1 fold outcomes."
+  },
+  "next_gate": "Create a separate P2 mechanism-selection/freeze record only if one mechanism can be specified prospectively from independent evidence. That later gate must freeze exact equations, structural parameters, null identity, invariances, engineering-only reachability values, and a no-reference-search firewall before any implementation."
+}
