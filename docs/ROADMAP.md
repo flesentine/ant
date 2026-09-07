@@ -133,13 +133,25 @@
 - permanent main Test and deploy ANTLAB run 34081603983 passed, including test and deploy jobs
 - canonical promotion remains unauthorized; Y-maze remains locked
 
-### v0.3.3g — official high-resolution response execution — in progress
-- execution precondition freezes the green authorization main commit and permanent CI provenance
-- exact main-only workflow is path-triggered by its own addition and has no PR or manual-dispatch trigger
-- official command has zero CLI parameter overrides and delegates all budgets/seeds to the frozen policy
-- review branch cannot execute the official response search
-- after merge, exactly one frozen 102-row P1 response-estimation execution is authorized
-- result must be frozen before interpretation or any later main change
+### v0.3.3g — official high-resolution response execution — complete / FAIL
+- one official frozen response-estimation execution completed successfully on attempt 1 at main commit `4da2101267093ead0e3f2569b28940f49f89a552`
+- run 34081980126 / job 101618864436 / artifact 10004082907
+- exact report SHA-256 `4e3de4c1fb35465a877fbc78b8ce178763b5bcb968af05d66085186a93a3facf`
+- P1 beat its exact null in 4/6 held-out colonies; frozen survival requirement was >=5/6
+- median relative held-out improvement was positive (+26.13%), but the 4/6 win count failed the conjunctive primary survival guard
+- losses occurred for held-out colonies 0 (−17.10%) and 27 (−153.94%)
+- final all-data fit was not executed because the primary survival guard failed
+- no identifiability or final secondary promotion guard was evaluated
+- canonical locomotion unchanged; Y-maze untouched
+
+### v0.3.3h — response-estimation result freeze / P1-v1 closure — in progress
+- exact 174770-byte official report materialized without reserialization
+- exact execution provenance frozen from the official Actions artifact
+- active high-resolution authorization retired to archive
+- official execution workflow and one-time result materializer retired
+- result-freeze record closes P1-v1 with rerun/retuning explicitly unauthorized
+- permanent regression pins 4/6 failure, positive median, absent final fit, no fixed pair, no canonical update, and no Y-maze unlock
+- final code + Chromium/firewall audit required before merge
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
