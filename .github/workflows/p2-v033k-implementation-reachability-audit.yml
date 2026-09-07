@@ -1,0 +1,121 @@
+name: P2 v0.3.3k implementation reachability audit
+on:
+  push:
+    branches: [v0.3.3k-p2-implementation-reachability]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact P2 implementation chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p2_painted_trail_mechanism_v1.json)" = "70f51e5cab5db0024947ed71cf760590089f8aea"
+          test "$(git hash-object hypotheses/p2_reachability_execution_v1.json)" = "8431ada87724953128104077f4ce1c11b569b1cf"
+          test "$(git hash-object hypotheses/p2_implementation_authorization_v1.json)" = "462997ea7399d98efca5a6b19a0e38160fbddbaf"
+          test "$(git hash-object src/p2.js)" = "f91a2f7ede1b8119acc1fd57ac94a9718d074e15"
+          test "$(git hash-object models/lasius_niger_painted_trail_p2_v1.json)" = "7d3eecc44cb2eaf727249083a6fcfa21986fd475"
+          test "$(git hash-object experiments/open_arena_p2_zero_dose_reachability.json)" = "322b27e3bd92ed7ba7b6f2056b6d7f9dd34a4333"
+          test "$(git hash-object experiments/open_arena_p2_nominal_dose_reachability.json)" = "cacfd5514232cd240cd86de126b03f45fb81b8ba"
+          test "$(git hash-object tools/run-p2-reachability.js)" = "88f4a3ee0459ff2e1b33db0195635d1c5c46ca23"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_painted_trail_p1_v1.json)" = "73873fd6763838423ca27648136bb0b9ff062817"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test ! -e hypotheses/p2_response_estimation_v1.json
+          test ! -e hypotheses/p2_highres_authorization_v1.json
+          test ! -e tools/run-p2-estimation.js
+      - name: Run full H0-H5 plus P1/P2 suite
+        run: ./tests/run-tests.sh
+      - name: Run frozen reference-free P2 reachability
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p2-v033k-audit
+          node tools/run-p2-reachability.js --out /tmp/p2-v033k-audit/p2_reference_free_reachability_v1.json
+          node - <<'NODE'
+          const r=require('/tmp/p2-v033k-audit/p2_reference_free_reachability_v1.json');
+          if(r.status!=='reference_free_reachability_passed'||r.structural_checks.overall_pass!==true)throw new Error('P2 reachability did not pass');
+          if(r.fit_performed!==false||r.parameter_search_performed!==false||r.candidate_ranking_performed!==false)throw new Error('P2 reachability search firewall failed');
+          if(r.reference_targets_accessed!==false||r.reference_outcomes_accessed!==false||r.p1_official_result_used_for_tuning!==false||r.ymaze_accessed!==false)throw new Error('P2 reachability reference firewall failed');
+          if(r.candidate_B_implemented!==false||r.canonical_model_updated!==false)throw new Error('P2 reachability structural firewall failed');
+          if(r.identity_panel.rows.length!==8)throw new Error('P2 identity panel size drift');
+          if(r.stochastic_engagement_panel.trials!==400||r.stochastic_engagement_panel.lapses<=0||r.stochastic_engagement_panel.engaged<=0)throw new Error('P2 stochastic panel invalid');
+          if(r.stochastic_engagement_panel.all_trials_exact_component_identity!==true||r.stochastic_engagement_panel.all_trials_exactly_one_response_draw!==true||r.stochastic_engagement_panel.all_trials_engagement_state_fixed!==true)throw new Error('P2 stochastic identity failed');
+          console.log(JSON.stringify({status:r.status,lapses:r.stochastic_engagement_panel.lapses,engaged:r.stochastic_engagement_panel.engaged,lapse_fraction:r.stochastic_engagement_panel.observed_lapse_fraction,central_zone:r.stochastic_engagement_panel.mean_central_zone_fraction,trail_axis_exit_rate:r.stochastic_engagement_panel.trail_axis_exit_rate,mean_speed:r.stochastic_engagement_panel.mean_moving_speed_mm_s}));
+          NODE
+      - name: Build Node P2 parity panel
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs'),p2=require('./src/p2.js');
+          const {loadBundle}=require('./tools/load-bundle.js');
+          const cases=[
+            {name:'zero',experiment:'open_arena_p2_zero_dose_reachability.json',model:'lasius_niger_painted_trail_p2_v1',seed:88001,mutate:null},
+            {name:'k0',experiment:'open_arena_p2_nominal_dose_reachability.json',model:'lasius_niger_painted_trail_p2_v1',seed:88002,mutate:'k0'},
+            {name:'all_lapse',experiment:'open_arena_p2_nominal_dose_reachability.json',model:'lasius_niger_painted_trail_p2_v1',seed:88003,mutate:'p1'},
+            {name:'always_engaged',experiment:'open_arena_p2_nominal_dose_reachability.json',model:'lasius_niger_painted_trail_p2_v1',seed:88004,mutate:'p0'},
+            {name:'mid_a',experiment:'open_arena_p2_nominal_dose_reachability.json',model:'lasius_niger_painted_trail_p2_v1',seed:731000,mutate:null},
+            {name:'mid_b',experiment:'open_arena_p2_nominal_dose_reachability.json',model:'lasius_niger_painted_trail_p2_v1',seed:731001,mutate:null}
+          ];
+          const out=[];
+          for(const c of cases){
+            const b=loadBundle(c.experiment,{modelId:c.model});
+            if(c.mutate==='k0')b.model.painted_trail_response.steering.kappa_trail_per_s=0;
+            if(c.mutate==='p1')b.model.painted_trail_response.engagement.p_lapse=1;
+            if(c.mutate==='p0')b.model.painted_trail_response.engagement.p_lapse=0;
+            const sim=new p2.Simulation(b,c.seed);
+            for(let i=0;i<100&&!sim.allFinished();i++)sim.step(.02);
+            const a=sim.ants[0];
+            out.push({...c,result:{x:a.x,y:a.y,heading:a.heading,rng_state:a.rng.state,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,distanceTravelled:a.distanceTravelled,movingTime:a.movingTime,finished:a.finished,outcome:a.outcome,engaged:a.p2Engaged,response_seed:a.p2ResponseSeed,response_u:a.p2ResponseU,response_draws:a.p2ResponseDraws,steering_samples:a.p2SteeringSamples,last_omega:a.p2LastOmega}});
+          }
+          fs.writeFileSync('/tmp/p2-v033k-audit/node-parity.json',JSON.stringify(out,null,2));
+          NODE
+      - name: Real Chromium P2 parity and firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p2-v033k-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p2-v033k-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p2-v033k-chrome --remote-debugging-port=9222 about:blank >/tmp/p2-v033k-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p2-v033k-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const refs=JSON.parse(fs.readFileSync('/tmp/p2-v033k-audit/node-parity.json','utf8'));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+          for(const src of ['./src/p1.js','./src/p2.js']){
+            const expression="new Promise((resolve,reject)=>{const s=document.createElement('script');s.src="+JSON.stringify(src)+";s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})";
+            await evalv(expression);
+          }
+          const expression="(async()=>{const refs="+JSON.stringify(refs)+",cache={};async function j(p){if(!cache[p])cache[p]=await(await fetch(p)).json();return JSON.parse(JSON.stringify(cache[p]));}async function bundle(c){const experiment=await j('./experiments/'+c.experiment),model=await j('./models/'+c.model+'.json'),apparatus=await j('./apparatus/'+experiment.apparatus+'.json'),state=await j('./states/'+experiment.state+'.json'),observation=await j('./observations/'+experiment.observation+'.json'),scoring=await j('./scoring/'+experiment.scoring+'.json');experiment.model=c.model;if(c.mutate==='k0')model.painted_trail_response.steering.kappa_trail_per_s=0;if(c.mutate==='p1')model.painted_trail_response.engagement.p_lapse=1;if(c.mutate==='p0')model.painted_trail_response.engagement.p_lapse=0;return{experiment,model,apparatus,state,observation,scoring};}const out=[];for(const c of refs){const b=await bundle(c),sim=new AntLabP2.Simulation(b,c.seed);for(let i=0;i<100&&!sim.allFinished();i++)sim.step(.02);const a=sim.ants[0];out.push({...c,result:{x:a.x,y:a.y,heading:a.heading,rng_state:a.rng.state,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,distanceTravelled:a.distanceTravelled,movingTime:a.movingTime,finished:a.finished,outcome:a.outcome,engaged:a.p2Engaged,response_seed:a.p2ResponseSeed,response_u:a.p2ResponseU,response_draws:a.p2ResponseDraws,steering_samples:a.p2SteeringSamples,last_omega:a.p2LastOmega}});}return out;})()";
+          const browser=await evalv(expression);
+          const numeric=['x','y','heading','speedFactor','pauseRemaining','distanceTravelled','movingTime','response_u','last_omega'],near=(a,b,t=1e-12)=>a===b||(Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=t);
+          let matched=0;
+          for(let i=0;i<refs.length;i++){const a=refs[i],b=browser[i];for(const k of numeric){const x=a.result[k],y=b.result[k];if(x==null||y==null){if(x!==y)throw new Error('null mismatch '+i+' '+k);}else if(!near(x,y))throw new Error('numeric mismatch '+i+' '+k+' '+x+' '+y);}for(const k of ['rng_state','finished','outcome','engaged','response_seed','response_draws','steering_samples'])if(a.result[k]!==b.result[k])throw new Error('exact mismatch '+i+' '+k);matched++;}
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json')),yreq=requests.filter(u=>/y[_-]?maze/i.test(u)),p2Estimator=requests.filter(u=>/run-p2-estimation|p2_response_estimation|p2_highres_authorization/.test(u));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p2Estimator.length)throw new Error('browser firewall failure');
+          const out={status:'passed',parity_cases:matched,exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,p2_estimation_surface_requests:p2Estimator.length};
+          fs.writeFileSync('/tmp/p2-v033k-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p2-v033k-browser.mjs
+      - name: Upload P2 implementation/reachability audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-v033k-implementation-reachability-audit
+          path: /tmp/p2-v033k-audit
+          retention-days: 30
