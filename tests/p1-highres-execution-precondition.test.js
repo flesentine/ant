@@ -42,8 +42,10 @@ if(fs.existsSync(workflowPath)){
   assert.ok(!/\bpull_request\s*:/.test(y),'official workflow must not run on PR events');
   assert.ok(!/\bworkflow_dispatch\s*:/.test(y),'official workflow must not be manually rerunnable');
   assert.match(y,/cancel-in-progress:\s*false/);
-  assert.match(y,/node tools\/run-p1-estimation\.js --mode highres --out \/tmp\/p1-official\/p1_response_estimation_500x60_v1\.json/);
-  assert.ok(!/--(?:candidates|trials|eval-trials|seed|final-trials|final-seed|dt)\b/.test(y),'official highres invocation must not override frozen execution parameters');
+  const highresLines=y.split(/\r?\n/).filter(line=>line.includes('node tools/run-p1-estimation.js --mode highres'));
+  assert.deepStrictEqual(highresLines.length,1,'official workflow must contain exactly one highres invocation');
+  assert.match(highresLines[0],/node tools\/run-p1-estimation\.js --mode highres --out \/tmp\/p1-official\/p1_response_estimation_500x60_v1\.json/);
+  assert.ok(!/--(?:candidates|trials|eval-trials|seed|final-trials|final-seed|dt)\b/.test(highresLines[0]),'official highres invocation must not override frozen execution parameters');
 }
 
 assert.strictEqual(blob('hypotheses/p1_highres_authorization_v1.json'),p.authorization_git_blob_sha);
