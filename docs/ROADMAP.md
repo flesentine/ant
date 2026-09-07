@@ -189,7 +189,7 @@
 - Chromium parity 6/6 with zero exceptions, console errors, response-target requests, Y-maze requests, or P2 estimation-surface requests
 - Candidate B Weber transduction remains absent; no estimation policy/search, biological fit claim, canonical update, or Y-maze access authorized
 
-### v0.3.3l — P2 response-estimation policy freeze — in progress
+### v0.3.3l — P2 response-estimation policy freeze — complete
 - P2 estimation policy frozen before estimator implementation or semantic response-target access at blob `eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce`
 - active parameters: sigma_field_mm [2,32] log, kappa_trail_per_s [0,16] linear, p_lapse [0,1] linear; no nuisance parameters
 - 3D deterministic Halton panel: 999 P2 candidates + exact canonical null; p_lapse uses prime 5 and its full mathematical domain to avoid target-informed narrowing
@@ -198,8 +198,8 @@
 - P2 must pass both 5/6 heldout guards: versus exact canonical null and versus the separately selected no-lapse nested benchmark; both median relative improvements must be strictly positive
 - fresh P2-only seed streams: fit 4210000, heldout 4810000, final fit 5210000, independent final check 5610000
 - final promotion additionally requires 3-parameter identifiability, no-lapse submodel outside the near-best tolerance, final primary improvement over both comparators, and all four secondary standardized errors <=1
+- final audit run 34090954537 passed full suite + policy-math checks + real Chromium with zero response-target, Y-maze, or P2-estimator-surface requests
 - no estimator exists; no high-resolution search, target semantic access, P1-result semantic access, Candidate B transduction, canonical update, H2-H5 combination, or Y-maze access authorized
-- exact-head full-suite + real Chromium policy/firewall audit required before merge
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
