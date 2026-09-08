@@ -53,6 +53,8 @@ node tests/p2-highres-execution-precondition.test.js
 node tests/p2-response-estimation-result-freeze.test.js
 node tests/p3-candidate-class-decision.test.js
 node tests/p3-mechanism-selection.test.js
+node tests/p3-implementation.test.js
+node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
 node --check src/h3.js
