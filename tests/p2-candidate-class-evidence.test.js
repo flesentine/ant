@@ -75,9 +75,19 @@ const laterEstimatorPresent=fs.existsSync(laterEstimatorPath);
 if(laterEstimatorPresent){
   assert.strictEqual(blob('tools/run-p2-estimation.js'),'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
   assert.strictEqual(blob('hypotheses/p2_response_estimation_v1.json'),'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
-  assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')),'highres authorization must remain absent during estimator qualification');
 }
-assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')),'highres authorization must remain absent before later authorization gate');
+const laterAuthorizationPath=path.join(root,'hypotheses','p2_highres_authorization_v1.json');
+const laterAuthorizationPresent=fs.existsSync(laterAuthorizationPath);
+if(laterAuthorizationPresent){
+  assert.strictEqual(blob('hypotheses/p2_highres_authorization_v1.json'),'de361b15b9600bd92a35baf30fa71c2a7c61003c');
+  const a=read('hypotheses/p2_highres_authorization_v1.json');
+  assert.strictEqual(a.policy_git_blob_sha,'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
+  assert.strictEqual(a.estimator_git_blob_sha,'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
+  assert.strictEqual(a.effective_when_merged_to_main,true);
+  assert.strictEqual(a.P1_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.Candidate_B_authorized,false);
+  assert.strictEqual(a.ymaze_access_authorized,false);
+}
 
 const neg=Object.fromEntries(e.negative_candidate_classes.map(x=>[x.class_id,x]));
 assert.match(neg.path_history_direction_recent_experience_modulation.status,/not_independently_supported/);
