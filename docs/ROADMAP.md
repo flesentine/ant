@@ -223,7 +223,7 @@
 - no CLI search overrides, adaptive refinement, P1-result semantic access, Candidate B, canonical update, H2-H5 combination, or Y-maze access
 - this authorization PR does not run the 102-row official search; a later separate one-shot main-only execution gate is required
 
-### v0.3.3o — P2 one-shot official high-resolution execution gate — complete / awaiting main-triggered official run
+### v0.3.3o — P2 one-shot official high-resolution execution gate — complete / official run completed
 - one-shot main-only workflow frozen at `.github/workflows/p2-v033o-official-highres.yml`, blob `467aa7fc56bd7e843a68ad03e7d57c4a174efc2f`
 - execution precondition frozen at `hypotheses/p2_highres_execution_precondition_v1.json`, blob `a0bf279649df4be906f74dc96b53f6c2106071bf`
 - precondition pins merged authorization commit `a2f5c3dc2a10aad30e796c3f866a382b31cc6210` and green permanent main CI run `34189072667` (#140), test job `101943216663`, deploy job `101943352041`
@@ -233,9 +233,9 @@
 - workflow reruns the permanent regression suite immediately before target-ranked execution, validates frozen authorization/policy/estimator/qualification/target/runtime blobs, then uploads exact report + execution provenance as artifact `p2-v033o-official-highres`
 - preflight run `34189867216` / job `101945542552` / artifact `10041808494` passed full suite, review-branch rejection, and Chromium with zero target/Y-maze/P1-result/official-result requests
 - no high-resolution CLI overrides, P1-result semantic access, Candidate B, canonical promotion, H2-H5 refit, or Y-maze access
-- merging the clean workflow head to main is the one event authorized to trigger the official search
+- corrected attempt 2 completed successfully on main commit `23ab4e76f4db825262e4390ff725f789e4c50b41`; official run `34190528101` / job `101947484122` / artifact `10042834346`
 
-### v0.3.3o.1 — P2 official execution attempt-1 invalidation + preflight repair — complete / retry authorized
+### v0.3.3o.1 — P2 official execution attempt-1 invalidation + preflight repair — complete / retry consumed
 - official workflow attempt 1 run `34189985353` / job `101945889831` failed in the first shell precondition before the permanent regression suite, response-target semantic loading, candidate search, result validation, or artifact upload
 - formal invalidation record: `hypotheses/p2_highres_execution_attempt1_invalidation_v1.json`, blob `fb96cc76ee07541290cfcf6e9c10645a87686a12`
 - root cause: escaped GITHUB_REF variable caused a literal-text comparison instead of environment expansion; scientific procedure was never entered
@@ -245,7 +245,21 @@
 - retry precondition frozen at blob `15f45456934c102b412fa83ea39b424b9a3b3979`; scientific authorization/policy/estimator/target/search settings remain byte-identical
 - corrected retry audit run `34190384959` / job `101947061512` / artifact `10041990180` passed full suite, review-branch rejection, and Chromium with zero target/Y-maze/P1-result/official-result requests
 - one corrected retry is authorized by the original rerun policy because attempt 1 was formally invalidated for a genuine execution-gate implementation defect
-- next valid official attempt number is 2
+- authorized attempt 2 was consumed by the valid official run; no further rerun is authorized after the scientific failure
+
+### v0.3.3p — P2 response-estimation result freeze / P2-v1 closure — complete
+- exact 332793-byte official report materialized without reserialization at `reports/p2_response_estimation_1000x60_v1.json`, blob `cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72`, SHA-256 `bb11e17b1f0919682a57cdc4a396adde807239476216953c2f06e99cf61688c4`
+- exact 2000-byte execution provenance materialized at `reports/p2_response_estimation_execution_provenance_v1.json`, blob `4a9a705c0ab8e9b64534a35f90f1017bf70c4a06`, SHA-256 `e3a4106aa6c82b439640aa196182141513d4179798b0a03e97534bec28ef3cbd`
+- official valid execution: run `34190528101` / job `101947484122` / artifact `10042834346`, digest `sha256:228f3ff98dde77b7a0083bbe20a06c6827c033bdee662bfb044ca7d2136334a4`
+- P2 beat exact canonical null in 4/6 heldout colonies; frozen requirement was >=5/6; median relative improvement remained positive at +38.01%
+- P2 beat the separately selected no-lapse benchmark in 4/6 heldout colonies; frozen requirement was >=5/6; median relative improvement remained positive at +9.29%
+- both precommitted survival guards failed, so P2-v1 dual survival failed and the mechanism did not survive internal development
+- final all-data fit, identifiability, final primary increment, and final secondary promotion checks were not executed because the dual survival gate failed
+- no fixed sigma/kappa/p_lapse triple is eligible; canonical locomotion unchanged; Candidate B absent; Y-maze untouched
+- result-freeze record `hypotheses/p2_response_estimation_result_freeze_v1.json`, blob `088316e1746594f9b3f700cb277a83eb53fdd9f6`, permanently closes P2-v1 and forbids rerun/retuning/rescue from the observed target outcomes
+- active P2 high-resolution authorization retired to `hypotheses/archive/p2_highres_authorization_v1.json`; official execution workflow and one-time materializer retired
+- permanent result regression pins exact report/provenance hashes, all six fold outcomes, both 4/6 failures, absent final fit, no promotion, and no rerun path
+- next painted-trail mechanism must be independently motivated and versioned; P2-v1 may not be reopened
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model

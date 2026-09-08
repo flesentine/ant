@@ -1828,3 +1828,145 @@ All scientific bytes remain unchanged:
 - promotion guards.
 
 The original authorization rerun rule permits this retry because attempt 1 was formally invalidated for a genuine execution-gate implementation error before scientific execution.
+
+
+## P2-v1 official high-resolution result and closure
+
+The valid official P2-v1 target-ranked execution completed successfully on the corrected second workflow attempt.
+
+Official execution:
+
+- main commit: `23ab4e76f4db825262e4390ff725f789e4c50b41`
+- GitHub Actions run: `34190528101`
+- run number: `2`
+- job: `101947484122`
+- artifact ID: `10042834346`
+- artifact digest: `sha256:228f3ff98dde77b7a0083bbe20a06c6827c033bdee662bfb044ca7d2136334a4`
+
+Permanent main CI on the same commit also passed:
+
+- Test and deploy ANTLAB #142
+- run: `34190528147`
+- test job: `101947484681` — success
+- deploy job: `101947626365` — success
+
+### Exact official bytes
+
+Report:
+
+`reports/p2_response_estimation_1000x60_v1.json`
+
+- bytes: **332793**
+- Git blob: `cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72`
+- SHA-256: `bb11e17b1f0919682a57cdc4a396adde807239476216953c2f06e99cf61688c4`
+
+Execution provenance:
+
+`reports/p2_response_estimation_execution_provenance_v1.json`
+
+- bytes: **2000**
+- Git blob: `4a9a705c0ab8e9b64534a35f90f1017bf70c4a06`
+- SHA-256: `e3a4106aa6c82b439640aa196182141513d4179798b0a03e97534bec28ef3cbd`
+
+The exact bytes were materialized from the official Actions artifact without reserialization.
+
+### Frozen dual-survival outcome
+
+P2-v1 failed **both** precommitted heldout survival guards.
+
+Against exact canonical null:
+
+- heldout wins: **4/6**
+- required: **5/6**
+- median relative improvement: **+38.01%**
+- guard: **FAIL**
+
+Against the separately selected projected no-lapse benchmark:
+
+- heldout wins: **4/6**
+- required: **5/6**
+- median relative improvement: **+9.29%**
+- guard: **FAIL**
+
+Both medians were positive, but the frozen decision rule was conjunctive: each comparator required at least 5 of 6 heldout wins as well as a positive median.
+
+Therefore:
+
+- dual survival: **FAIL**
+- P2 mechanism survives internal development: **false**
+- fixed parameter triple eligible: **false**
+
+### Heldout fold pattern
+
+Relative improvement versus exact null / no-lapse benchmark:
+
+- colony 0: **−107.16% / −171.55%**
+- colony 7: **+44.78% / +18.43%**
+- colony 16: **+58.17% / +43.90%**
+- colony 20: **+58.35% / +0.15%**
+- colony 21: **+31.24% / −16.15%**
+- colony 27: **−36.23% / +44.72%**
+
+No colony is removed, downweighted, or treated as an outlier after seeing these outcomes.
+
+### Downstream gates not executed
+
+Because dual survival failed, the frozen policy correctly stopped before:
+
+- final all-data P2 fit;
+- final all-data no-lapse fit;
+- three-parameter identifiability evaluation;
+- independent final primary increment guard;
+- independent final secondary promotion guards.
+
+No `sigma_field_mm / kappa_trail_per_s / p_lapse` triple is eligible for promotion.
+
+### Firewalls remained clean
+
+The official provenance records:
+
+- P1 official result semantics loaded: **false**
+- Y-maze accessed: **false**
+- Candidate B implemented: **false**
+- canonical locomotion updated: **false**
+- nuisance parameters estimated: **false**
+- H2/H3/H4/H5 refit: **false**
+
+### P2-v1 result freeze
+
+Closure record:
+
+`hypotheses/p2_response_estimation_result_freeze_v1.json`
+
+Git blob:
+
+`088316e1746594f9b3f700cb277a83eb53fdd9f6`
+
+The closure permanently forbids rescue of P2-v1 by changing:
+
+- p_lapse, sigma, or kappa bounds/scales;
+- Halton candidates or candidate counts;
+- no-lapse comparator construction;
+- seeds or trial budgets;
+- folds or colony weights;
+- objectives or secondary guards;
+- identifiability or promotion thresholds;
+- response RNG;
+- nuisance parameters;
+- sensor geometry or transduction;
+- apparatus or runtime.
+
+A scientifically unfavorable valid official result is not grounds for another run.
+
+### Execution surfaces retired
+
+After exact result materialization:
+
+- active `hypotheses/p2_highres_authorization_v1.json`: **retired**
+- historical authorization preserved at `hypotheses/archive/p2_highres_authorization_v1.json`
+- official one-shot high-resolution workflow: **retired**
+- one-time result materializer: **retired**
+
+The estimator therefore cannot pass its active high-resolution authorization gate for P2-v1 anymore.
+
+P2-v1 is permanently closed. Canonical locomotion remains unchanged and Y-maze remains locked.
