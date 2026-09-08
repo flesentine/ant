@@ -123,8 +123,12 @@ if(laterPolicyPresent){
   assert.strictEqual(p3policy.estimator_implementation_gate.high_resolution_response_search_authorized,false);
   assert.strictEqual(p3policy.estimator_implementation_gate.response_target_semantic_access_authorized,false);
 }
-for(const p of ['tools/run-p3-estimation.js','hypotheses/p3_highres_authorization_v1.json'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent after reachability/policy freeze');
+const laterEstimatorPresent=fs.existsSync(path.join(root,'tools','run-p3-estimation.js'));
+if(laterEstimatorPresent){
+  assert.strictEqual(blob('tools/run-p3-estimation.js'),'48e0d7c0e5dc58751c2f6fa351362700afc6a001');
+  assert.strictEqual(blob('tools/p3-estimation-core.js'),'9a10133c384f93eed48d04a97abb1a1c592e08de');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')),'P3 high-resolution authorization must remain absent after estimator implementation');
 
 console.log('p3-reachability-result.test.js PASS '+JSON.stringify({
   freeze_blob:blob(freezeRel),report_blob:blob(reportRel),report_sha256:sha256(reportRel),
