@@ -212,16 +212,16 @@
 - P1 official response-result semantics were not loaded by the P2 estimator
 - no high-resolution search, canonical update, Candidate B implementation, or Y-maze access authorized in this phase
 
-### v0.3.3n — P2 post-qualification high-resolution authorization freeze — in progress
+### v0.3.3n — P2 post-qualification high-resolution authorization freeze — complete
 - high-resolution authorization frozen at `hypotheses/p2_highres_authorization_v1.json`, blob `de361b15b9600bd92a35baf30fa71c2a7c61003c`
 - authorization pins exact policy `eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce`, estimator `38d66d28e94d2f532e9c8a20bd6553d6d11be8a6`, qualification report `9f4d15875b35773b41696987abd1cc4721435bc2`, and qualification freeze `1d46b594cb154a93c2e321fb67d399acdd821993`
 - authorization is effective only after merge to main and only after permanent main test/deploy succeeds on a commit containing the exact authorization, policy, estimator, and qualification freeze
 - authorizes exactly one frozen official P2 high-resolution response search; review-branch highres must still reject before semantic target parsing
 - frozen execution: 999 3D P2 Halton candidates + exact null, 999 projected no-lapse candidates + same null, 60/120 LOCO trials, fresh 4210000/4810000 seeds, 120 final-fit + 240 final-check with 5210000/5610000 seeds
 - dual 5/6 survival guards remain mandatory versus exact canonical null and separately selected no-lapse benchmark
+- authorization audit run `34188977874` / job `101942942275` / artifact `10041510303` passed full suite, reference-free qualification, review-branch highres rejection, and Chromium/firewall with zero target, Y-maze, P1-result, or official-P2-result requests
 - no CLI search overrides, adaptive refinement, P1-result semantic access, Candidate B, canonical update, H2-H5 combination, or Y-maze access
-- this authorization PR must not itself run the 102-row official search; a later separate one-shot main-only execution gate is required
-- exact-head full-suite + review-branch rejection + real Chromium authorization/firewall audit required before merge
+- this authorization PR does not run the 102-row official search; a later separate one-shot main-only execution gate is required
 
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
