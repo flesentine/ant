@@ -312,6 +312,19 @@
 - no estimator exists; no high-resolution search, response-target semantics, canonical update, P1/P2 rescue, H2-H5 combination, or Y-maze access is authorized
 - next gate: P3 estimator implementation + synthetic/reference-free qualification
 
+### v0.3.3u — P3 estimator implementation + synthetic/reference-free qualification — complete / PASS
+- exact estimator split into `tools/p3-estimation-core.js`, blob `410ef81dfe761e3c218d072ca311632329ac1617`, and gated executable `tools/run-p3-estimation.js`, blob `5bf27bf439dca18629cdfd36f56fe767a23062ff`
+- frozen P3 2D Halton panel and separately ranked absolute-transduction structural benchmark are implemented without changing P3 runtime/model/policy or reading response-target semantics
+- structural comparator reuses only pinned P1 runtime equations at the same sigma/kappa coordinates; P1/P2 official result semantics and P2 lapse structure remain forbidden
+- permanent regression proves exact zero-dose/zero-kappa identities for both P3 and absolute comparator, no response RNG, CRN pairing, equal-colony LOCO objective, both 5/6 survival calculations, secondary-guard math, two-parameter identifiability, and final-increment logic
+- exact qualification report `reports/p3_estimator_qualification_v1.json`, blob `63e1d7360bc1ef4b232bbf37f347b9fa27e7d461`, SHA-256 `4912618de22e74d67197529bb6625c850bfa8912bcf55e99280732dbcc64e604`, 3508 bytes; all 22/22 checks passed
+- qualification freeze `hypotheses/p3_estimator_qualification_result_freeze_v1.json`, blob `32d90d05add5b4e45dd69c711b416ed3378d15ab`
+- successful qualification audit run `34289538716` / job `102272761530` / artifact `10080797145`, digest `sha256:2f1b54a5c6122ae556a0bad6c07d5b0f462f66de299bbb0d247030fbd4f797c7`
+- real Chromium parity passed 10/10 with 0 exceptions, 0 console errors, and zero response-target, P1-result, P2-result, Y-maze, or P3-authorization requests
+- high-resolution mode is intentionally blocked before authorization and semantic target loading is downstream of that gate
+- canonical locomotion unchanged; no P3 parameter pair selected; no biological fit claim; no H2-H5 recombination; Y-maze untouched
+- next gate: separate post-qualification P3 high-resolution authorization freeze, main-only effective after merge + green permanent CI
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
