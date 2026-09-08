@@ -1,0 +1,98 @@
+name: P3 v0.3.3q candidate-class decision audit
+on:
+  push:
+    branches: [v0.3.3q-p3-candidate-class-decision]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify exact P3 decision chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p3_painted_trail_candidate_class_decision_v1.json)" = "e8da07f6f73934e0120fd41d4668ae4039108336"
+          test "$(git hash-object hypotheses/p2_response_estimation_result_freeze_v1.json)" = "088316e1746594f9b3f700cb277a83eb53fdd9f6"
+          test "$(git hash-object reports/p2_response_estimation_1000x60_v1.json)" = "cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72"
+          test "$(git hash-object hypotheses/p2_painted_trail_candidate_class_evidence_v1.json)" = "f7eb9fe38f8955c0227501e2d257ff32a40eaf74"
+          test ! -e src/p3.js
+          test ! -e models/lasius_niger_painted_trail_p3_v1.json
+          test ! -e hypotheses/p3_painted_trail_mechanism_v1.json
+          test ! -e hypotheses/p3_response_estimation_v1.json
+          test ! -e tools/run-p3-estimation.js
+          test ! -e hypotheses/p3_highres_authorization_v1.json
+
+      - name: Run full permanent regression suite
+        run: ./tests/run-tests.sh
+
+      - name: Verify P3 selection semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p3-v033q-audit
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=require('./hypotheses/p3_painted_trail_candidate_class_decision_v1.json');
+          if(d.selected_next_candidate_class.class_id!=='P3_candidate_relative_bilateral_transduction')throw new Error('P3 class drift');
+          if(d.selected_next_candidate_class.selection_strength!=='cross_species_mechanistic_support_only')throw new Error('evidence strength drift');
+          if(d.p2_closure_boundary.p2_v1_closed!==true||d.p2_closure_boundary.p2_rerun_authorized!==false||d.p2_closure_boundary.p2_official_fold_outcomes_used_to_select_or_parameterize_P3!==false)throw new Error('P2 closure boundary drift');
+          if(d.explicit_nonselections.carry_forward_P2_transient_lapse_state!==false||d.explicit_nonselections.combined_P2_lapse_plus_relative_transduction!==false)throw new Error('P2 lapse carry-forward drift');
+          if(d.selection_firewall.P3_executable_mechanism_exists!==false||d.selection_firewall.P3_runtime_authorized!==false||d.selection_firewall.P3_model_authorized!==false||d.selection_firewall.new_simulation_authorized!==false)throw new Error('P3 executable firewall drift');
+          if(d.selection_firewall.response_target_semantic_access_authorized!==false||d.selection_firewall.Y_maze_access_authorized!==false)throw new Error('P3 target/Y-maze firewall drift');
+          const out={status:'passed',selected_class:d.selected_next_candidate_class.class_id,evidence_strength:d.selected_next_candidate_class.selection_strength,p2_outcomes_used:false,p3_runtime:false,response_target_access:false,ymaze:false};
+          fs.writeFileSync('/tmp/p3-v033q-audit/decision.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out));
+          NODE
+
+      - name: Real Chromium P3 decision firewall audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p3-v033q-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p3-v033q-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p3-v033q-chrome --remote-debugging-port=9222 about:blank >/tmp/p3-v033q-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p3-v033q-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');
+          await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+
+          const state=await evalv("(async()=>{const d=await(await fetch('./hypotheses/p3_painted_trail_candidate_class_decision_v1.json')).json();const f=await(await fetch('./hypotheses/p2_response_estimation_result_freeze_v1.json')).json();const p3js=await fetch('./src/p3.js');const p3model=await fetch('./models/lasius_niger_painted_trail_p3_v1.json');const mech=await fetch('./hypotheses/p3_painted_trail_mechanism_v1.json');const est=await fetch('./tools/run-p3-estimation.js');return{selected:d.selected_next_candidate_class.class_id,strength:d.selected_next_candidate_class.selection_strength,p2closed:d.p2_closure_boundary.p2_v1_closed,p2rerun:d.p2_closure_boundary.p2_rerun_authorized,p2used:d.p2_closure_boundary.p2_official_fold_outcomes_used_to_select_or_parameterize_P3,lapse:d.explicit_nonselections.carry_forward_P2_transient_lapse_state,combo:d.explicit_nonselections.combined_P2_lapse_plus_relative_transduction,runtime:d.selection_firewall.P3_runtime_authorized,target:d.selection_firewall.response_target_semantic_access_authorized,ymaze:d.selection_firewall.Y_maze_access_authorized,closure:f.status,p3js:p3js.status,p3model:p3model.status,mech:mech.status,est:est.status};})()");
+          if(state.selected!=='P3_candidate_relative_bilateral_transduction'||state.strength!=='cross_species_mechanistic_support_only'||state.p2closed!==true||state.p2rerun!==false||state.p2used!==false)throw new Error('browser P3 decision drift');
+          if(state.lapse!==false||state.combo!==false||state.runtime!==false||state.target!==false||state.ymaze!==false)throw new Error('browser P3 firewall drift');
+          if(state.closure!=='official_development_response_estimation_failed_dual_primary_survival_guard_frozen_p2_v1_closed')throw new Error('browser P2 closure drift');
+          if(state.p3js!==404||state.p3model!==404||state.mech!==404||state.est!==404)throw new Error('P3 executable surface unexpectedly exists');
+
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p3ExecutableReq=requests.filter(u=>/\/src\/p3\.js|lasius_niger_painted_trail_p3_v1|p3_painted_trail_mechanism_v1|run-p3-estimation/.test(u));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length)throw new Error('browser P3 network firewall failure');
+
+          const out={status:'passed',exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,p3_executable_probe_requests:p3ExecutableReq.length,p3_js_status:state.p3js,p3_model_status:state.p3model,p3_mechanism_status:state.mech,p3_estimator_status:state.est,selected_class:state.selected};
+          fs.writeFileSync('/tmp/p3-v033q-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p3-v033q-browser.mjs
+
+      - name: Upload P3 candidate-class decision audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-v033q-candidate-class-decision-audit
+          path: /tmp/p3-v033q-audit
+          retention-days: 30
