@@ -112,12 +112,24 @@ assert.strictEqual(freeze.promotion_consequence.Y_maze_unlock_authorized,false);
 assert.match(freeze.retuning_rule,/Do not alter sigma, kappa, sector radius/);
 assert.match(freeze.next_gate,/freeze a separate prospective P3 response-estimation policy/i);
 
-for(const p of ['hypotheses/p3_response_estimation_v1.json','tools/run-p3-estimation.js','hypotheses/p3_highres_authorization_v1.json'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent after reachability freeze');
+const laterPolicyRel='hypotheses/p3_response_estimation_v1.json';
+const laterPolicyPresent=fs.existsSync(path.join(root,laterPolicyRel));
+if(laterPolicyPresent){
+  assert.strictEqual(blob(laterPolicyRel),'d86eb9936e993d188f2a28faab838ba158c40f3b');
+  const p3policy=read(laterPolicyRel);
+  assert.strictEqual(p3policy.frozen_inputs.reachability_result_freeze.git_blob_sha,'b3fa56386f71b0cea1dd8cfec032148c42af1b6d');
+  assert.strictEqual(p3policy.frozen_inputs.reachability_report.git_blob_sha,'a18d5cd360be79bf1a05d3fe3e2c26fd1d6c86f6');
+  assert.strictEqual(p3policy.estimator_implementation_gate.estimator_status,'not_implemented_at_policy_freeze');
+  assert.strictEqual(p3policy.estimator_implementation_gate.high_resolution_response_search_authorized,false);
+  assert.strictEqual(p3policy.estimator_implementation_gate.response_target_semantic_access_authorized,false);
+}
+for(const p of ['tools/run-p3-estimation.js','hypotheses/p3_highres_authorization_v1.json'])
+  assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent after reachability/policy freeze');
 
 console.log('p3-reachability-result.test.js PASS '+JSON.stringify({
   freeze_blob:blob(freezeRel),report_blob:blob(reportRel),report_sha256:sha256(reportRel),
   official_run:freeze.successful_execution_audit.github_run_id,trials:report.nominal_reachability_panel.trials,
   central_zone:report.nominal_reachability_panel.mean_central_zone_fraction,trail_axis:report.nominal_reachability_panel.trail_axis_exit_rate,
+  later_policy_present:laterPolicyPresent,
   chromium_parity:true,implementation_qualified:true,biological_fit:false,ymaze:false
 }));
