@@ -261,6 +261,17 @@
 - permanent result regression pins exact report/provenance hashes, all six fold outcomes, both 4/6 failures, absent final fit, no promotion, and no rerun path
 - next painted-trail mechanism must be independently motivated and versioned; P2-v1 may not be reopened
 
+### v0.3.3q — P3 independent candidate-class decision — complete
+- P2-v1 closure remains pinned at `hypotheses/p2_response_estimation_result_freeze_v1.json`, blob `088316e1746594f9b3f700cb277a83eb53fdd9f6`; P2 rerun/rescue remains forbidden
+- next candidate class selected prospectively as `P3_candidate_relative_bilateral_transduction`, historical Candidate B, in `hypotheses/p3_painted_trail_candidate_class_decision_v1.json`
+- selection is based on independent pre-existing evidence for local Weber-like relative bilateral trail response in `Linepithema humile`, not on P2 target-ranked fold outcomes
+- direct `Lasius niger` 2026 evidence continues to argue against path-length, travel-direction, or recent-food-experience response modifiers
+- P3 does not inherit P2 transient lapse state; no A+B combined mechanism is selected
+- cross-species evidence cannot establish that `Lasius niger` uses the same exact transduction and cannot set P3 parameter values, bounds, sensor spacing, epsilon/regularization, or gain
+- exact P3 equation, sensor geometry, field form, null identities, structural parameters, engineering reachability values, and estimation policy remain deliberately unfrozen
+- no P3 runtime/model/estimator exists; no simulation, response-target semantic access, canonical change, H2-H5 refit, or Y-maze access authorized
+- next gate: a separate P3 mechanism-selection/freeze before any P3 implementation
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions

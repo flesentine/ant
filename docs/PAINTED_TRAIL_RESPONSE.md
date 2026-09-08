@@ -1970,3 +1970,96 @@ After exact result materialization:
 The estimator therefore cannot pass its active high-resolution authorization gate for P2-v1 anymore.
 
 P2-v1 is permanently closed. Canonical locomotion remains unchanged and Y-maze remains locked.
+
+
+## P3 candidate-class decision
+
+After P2-v1 was permanently closed, the next painted-trail development class was selected from independent evidence rather than from P2 target-ranked fold behavior.
+
+Decision record:
+
+`hypotheses/p3_painted_trail_candidate_class_decision_v1.json`
+
+Git blob:
+
+`e8da07f6f73934e0120fd41d4668ae4039108336`
+
+### Selected class
+
+`P3_candidate_relative_bilateral_transduction`
+
+Historical alias:
+
+`P2_candidate_B_relative_bilateral_transduction`
+
+The class changes the **sensory transduction structure** rather than retuning P2's transient engagement probability.
+
+The motivating empirical mechanism class comes from Perna et al. (2012), where Argentine-ant turning was related to a local relative left-right pheromone signal, approximately a difference-over-sum Weber-type response, while speed was largely unaffected.
+
+This evidence is **cross-species only**.
+
+It does **not** establish that `Lasius niger` implements the same exact equation.
+
+It therefore cannot set:
+
+- P3 gain;
+- epsilon or denominator regularization;
+- sensor spacing;
+- field width;
+- parameter bounds;
+- search values;
+- promotion thresholds.
+
+### Independence from P2 failure
+
+P2-v1 closure is used only to establish that P2 is closed.
+
+The P2 official fold outcomes are not permitted to select or parameterize P3.
+
+P3 does not carry forward:
+
+- the P2 transient lapse state;
+- a combined lapse + relative-transduction mechanism;
+- colony-specific response parameters;
+- path-specific response parameters;
+- travel-direction response parameters;
+- recent-food-experience response parameters;
+- stable specialist ignorer identity;
+- pheromone-driven speed modulation.
+
+### Lasius niger context constraint
+
+The 2026 `Lasius niger` painted-trail study did not detect significant modulation by path distance, travel direction, or recent food experience.
+
+Accordingly, P3 remains a shared response class across those variables unless a later independent evidence gate supports otherwise.
+
+### Deliberately not frozen yet
+
+This candidate-class gate does **not** define:
+
+- exact relative transduction equation;
+- denominator regularization;
+- sensor or antenna geometry;
+- field representation;
+- steering gain;
+- parameter surface or bounds;
+- null identities;
+- engineering-only reachability values;
+- estimation folds, seeds, budgets, or promotion rules.
+
+### Current firewall
+
+At the P3 candidate-class decision:
+
+- P3 executable mechanism: **absent**
+- P3 runtime: **absent**
+- P3 model: **absent**
+- P3 estimator: **absent**
+- new simulation: **not authorized**
+- response-target semantic access: **not authorized**
+- P2 rerun/rescue: **not authorized**
+- canonical locomotion change: **not authorized**
+- H2-H5 refit: **not authorized**
+- Y-maze access: **not authorized**
+
+The next gate is a separate P3 mechanism-selection/freeze that must define the exact relative transduction, zero-signal behavior, sensor geometry, null identities, invariances, and reference-free engineering panel before any implementation.
