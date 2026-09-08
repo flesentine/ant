@@ -75,14 +75,27 @@ assert.strictEqual(d.selection_firewall.canonical_locomotion_change_authorized,f
 assert.strictEqual(d.selection_firewall.H2_H3_H4_H5_refit_authorized,false);
 assert.strictEqual(d.selection_firewall.Y_maze_access_authorized,false);
 
+const laterMechanismRel='hypotheses/p3_painted_trail_mechanism_v1.json';
+const laterMechanismPresent=fs.existsSync(path.join(root,laterMechanismRel));
+if(laterMechanismPresent){
+  assert.strictEqual(blob(laterMechanismRel),'5d00ce0058ff388c9f57d7dce56ce465d82c5765');
+  const m=read(laterMechanismRel);
+  assert.strictEqual(m.candidate_class_input.decision_git_blob_sha,'e8da07f6f73934e0120fd41d4668ae4039108336');
+  assert.strictEqual(m.candidate_class_input.selected_class_id,'P3_candidate_relative_bilateral_transduction');
+  assert.strictEqual(m.implementation_gate.src_p3_exists_at_this_freeze,false);
+  assert.strictEqual(m.implementation_gate.p3_model_exists_at_this_freeze,false);
+  assert.strictEqual(m.implementation_gate.new_simulation_executed_at_this_freeze,false);
+  assert.strictEqual(m.implementation_gate.implementation_authorized_by_this_record,false);
+  assert.strictEqual(m.estimation_firewall.response_target_semantic_access_authorized,false);
+  assert.strictEqual(m.global_firewall.Y_maze_access,false);
+}
 for(const p of [
   'src/p3.js',
   'models/lasius_niger_painted_trail_p3_v1.json',
-  'hypotheses/p3_painted_trail_mechanism_v1.json',
   'hypotheses/p3_response_estimation_v1.json',
   'tools/run-p3-estimation.js',
   'hypotheses/p3_highres_authorization_v1.json'
-]) assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P3 candidate-class decision gate');
+]) assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P3 candidate-class/mechanism-freeze stage');
 
 assert.match(d.next_gate,/separate P3 mechanism-selection\/freeze record/i);
 
@@ -92,6 +105,7 @@ console.log('p3-candidate-class-decision.test.js PASS '+JSON.stringify({
   evidence_strength:d.selected_next_candidate_class.selection_strength,
   p2_closed:d.p2_closure_boundary.p2_v1_closed,
   p2_outcomes_used_for_selection:false,
+  later_mechanism_present:laterMechanismPresent,
   p3_runtime:false,
   response_target_access:false,
   ymaze:false
