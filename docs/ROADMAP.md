@@ -235,6 +235,18 @@
 - no high-resolution CLI overrides, P1-result semantic access, Candidate B, canonical promotion, H2-H5 refit, or Y-maze access
 - merging the clean workflow head to main is the one event authorized to trigger the official search
 
+### v0.3.3o.1 — P2 official execution attempt-1 invalidation + preflight repair — complete / retry authorized
+- official workflow attempt 1 run `34189985353` / job `101945889831` failed in the first shell precondition before the permanent regression suite, response-target semantic loading, candidate search, result validation, or artifact upload
+- formal invalidation record: `hypotheses/p2_highres_execution_attempt1_invalidation_v1.json`, blob `fb96cc76ee07541290cfcf6e9c10645a87686a12`
+- root cause: escaped GITHUB_REF variable caused a literal-text comparison instead of environment expansion; scientific procedure was never entered
+- attempt 1 produced zero official artifacts and is not a scientific execution
+- permanent main CI #141 on the attempt-1 merge commit `c219890bef7dcd97f560bd26d3d0b504bcd7b202` passed: run `34189985287`, test `101945889690`, deploy `101946056177`
+- corrected official workflow changes only the shell expansion and is frozen at blob `89bd53ec3142cc248cc93313ac1b75f472b7029d`
+- retry precondition frozen at blob `15f45456934c102b412fa83ea39b424b9a3b3979`; scientific authorization/policy/estimator/target/search settings remain byte-identical
+- corrected retry audit run `34190384959` / job `101947061512` / artifact `10041990180` passed full suite, review-branch rejection, and Chromium with zero target/Y-maze/P1-result/official-result requests
+- one corrected retry is authorized by the original rerun policy because attempt 1 was formally invalidated for a genuine execution-gate implementation defect
+- next valid official attempt number is 2
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions

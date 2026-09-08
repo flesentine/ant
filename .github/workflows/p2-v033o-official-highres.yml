@@ -23,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          test "\${GITHUB_REF}" = "refs/heads/main"
+          test "${GITHUB_REF}" = "refs/heads/main"
           git merge-base --is-ancestor a2f5c3dc2a10aad30e796c3f866a382b31cc6210 HEAD
 
           test "$(git hash-object hypotheses/p2_highres_authorization_v1.json)" = "de361b15b9600bd92a35baf30fa71c2a7c61003c"
