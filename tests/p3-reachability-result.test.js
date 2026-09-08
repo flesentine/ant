@@ -125,8 +125,8 @@ if(laterPolicyPresent){
 }
 const laterEstimatorPresent=fs.existsSync(path.join(root,'tools','run-p3-estimation.js'));
 if(laterEstimatorPresent){
-  assert.strictEqual(blob('tools/run-p3-estimation.js'),'48e0d7c0e5dc58751c2f6fa351362700afc6a001');
-  assert.strictEqual(blob('tools/p3-estimation-core.js'),'9a10133c384f93eed48d04a97abb1a1c592e08de');
+  assert.strictEqual(blob('tools/run-p3-estimation.js'),'462de97b21f0968b754dc365902ae97a0eba0b18');
+  assert.strictEqual(blob('tools/p3-estimation-core.js'),'a661ef821dd6b7e3a34d2dc2fdd7058dd2c2e5d3');
 }
 assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')),'P3 high-resolution authorization must remain absent after estimator implementation');
 
