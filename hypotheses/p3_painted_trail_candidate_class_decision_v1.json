@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "id": "P3_painted_trail_candidate_class_decision_v1",
+  "status": "next_independent_candidate_class_selected_no_mechanism_equation_no_implementation_authorized",
+  "freeze_date_local": "2026-09-08",
+  "species": "Lasius niger",
+  "scientific_scope": "Prospective candidate-class decision after permanent P2-v1 closure. This record selects only the next independently motivated painted-trail response class for internal development. It does not define an executable P3 mechanism, set P3 parameters, authorize simulation, access the response target, or unlock Y-maze validation.",
+  "p2_closure_boundary": {
+    "p2_result_freeze_file": "hypotheses/p2_response_estimation_result_freeze_v1.json",
+    "p2_result_freeze_git_blob_sha": "088316e1746594f9b3f700cb277a83eb53fdd9f6",
+    "p2_official_report_git_blob_sha": "cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72",
+    "p2_v1_closed": true,
+    "p2_rerun_authorized": false,
+    "p2_official_fold_outcomes_used_to_select_or_parameterize_P3": false,
+    "rule": "P2-v1 closure is used only to establish that P2 is closed. P2 target-ranked fold outcomes may not choose P3 equations, sensor geometry, parameter values, bounds, seeds, budgets, folds, weights, objectives, or promotion thresholds."
+  },
+  "independent_evidence_inputs": [
+    {
+      "source_id": "perna_et_al_2012_linepithema_weber",
+      "species": "Linepithema humile",
+      "title": "Individual rules for trail pattern formation in Argentine ants",
+      "journal": "PLoS Computational Biology",
+      "year": 2012,
+      "doi": "10.1371/journal.pcbi.1002592",
+      "pubmed_id": "22829756",
+      "evidence": [
+        "Individual turning responded to local pheromone concentration.",
+        "Moving speed was largely unaffected by pheromone concentration.",
+        "The reported turning response followed a Weber-like relative bilateral rule based on side-to-side difference divided by their sum.",
+        "The reported response was local rather than a long temporal integration of pheromone concentration."
+      ],
+      "allowed_inference": "Relative or normalized bilateral pheromone transduction is a biologically documented ant trail-response class suitable for a separate development hypothesis.",
+      "limits": [
+        "This is cross-species evidence and does not establish that Lasius niger uses the same exact rule.",
+        "It cannot set Lasius niger parameter values, sensor spacing, regularization constants, gains, or search bounds."
+      ]
+    },
+    {
+      "source_id": "poissonnier_et_al_2026_lasius_niger_context",
+      "species": "Lasius niger",
+      "title": "Pheromone trail following is not modulated by previous visit to food location, distance travelled, or travel direction in the ant Lasius niger",
+      "journal": "Insectes Sociaux",
+      "year": 2026,
+      "doi": "10.1007/s00040-026-01106-9",
+      "evidence": [
+        "Painted-trail following was robust in Lasius niger.",
+        "No significant modulation was detected for prior path distance, travel direction, or recent food experience across the tested conditions."
+      ],
+      "allowed_inference": "A next trail-response class should remain shared across those context variables unless new independent evidence supports context-specific modulation.",
+      "limits": [
+        "This source does not identify a Weber-like transduction equation.",
+        "It cannot be used to fit P3 parameters before a prospective estimation policy exists."
+      ]
+    },
+    {
+      "source_id": "frozen_p2_candidate_evidence_record",
+      "file": "hypotheses/p2_painted_trail_candidate_class_evidence_v1.json",
+      "git_blob_sha": "f7eb9fe38f8955c0227501e2d257ff32a40eaf74",
+      "role": "Preserves the pre-P2 independent evidence comparison in which relative/Weber bilateral transduction was already recorded as a plausible but unselected future class."
+    }
+  ],
+  "selected_next_candidate_class": {
+    "class_id": "P3_candidate_relative_bilateral_transduction",
+    "historical_alias": "P2_candidate_B_relative_bilateral_transduction",
+    "description": "A local painted-trail steering response whose sensory transduction depends on normalized or relative left-right pheromone contrast rather than the P1/P2 fixed saturating absolute-transduction difference.",
+    "selection_strength": "cross_species_mechanistic_support_only",
+    "selection_rationale": [
+      "The class was independently documented before P2-v1 outcomes existed.",
+      "It changes the sensory transduction structure rather than retuning P2's transient engagement probability.",
+      "The cited empirical mechanism changes turning while leaving speed largely unaffected, matching the project firewall against inventing pheromone-driven speed changes.",
+      "It does not require path-length, travel-direction, recent-experience, colony-specific, or stable-specialist response parameters."
+    ],
+    "biological_claim_limit": "Selection for internal model development is not a claim that Lasius niger has been shown to implement Weber-law transduction."
+  },
+  "explicit_nonselections": {
+    "carry_forward_P2_transient_lapse_state": false,
+    "combined_P2_lapse_plus_relative_transduction": false,
+    "stable_specialist_ignorer_identity": false,
+    "path_length_specific_response": false,
+    "travel_direction_specific_response": false,
+    "recent_food_experience_specific_response": false,
+    "colony_specific_response": false,
+    "pheromone_driven_speed_modulation": false
+  },
+  "mechanism_details_deliberately_not_frozen_here": [
+    "exact relative-transduction equation",
+    "difference-over-sum regularization or epsilon rule",
+    "sensor or antenna geometry",
+    "field representation",
+    "steering gain",
+    "parameter surface and bounds",
+    "null identities",
+    "engineering-only reachability values",
+    "estimation objective, folds, seeds, budgets, and promotion rules"
+  ],
+  "next_mechanism_freeze_requirements": [
+    "Freeze the exact transduction equation before implementation.",
+    "Define behavior at zero or near-zero bilateral concentration without using target-ranked outcomes.",
+    "Freeze sensor geometry and any engineering-only values before simulation.",
+    "Preserve canonical speed, pauses, angular-noise amplitude, contacts, and biology RNG unless independently changed by a separate gate.",
+    "Define exact canonical or nested null identities.",
+    "Prove rotation, translation, endpoint reversal, local steering sign, and zero-signal invariances reference-free.",
+    "Do not include P2 transient engagement in P3-v1 unless a later independent evidence gate separately authorizes a combined mechanism.",
+    "Do not access response-target semantics or Y-maze before later qualification/authorization gates."
+  ],
+  "selection_firewall": {
+    "P3_executable_mechanism_exists": false,
+    "P3_runtime_authorized": false,
+    "P3_model_authorized": false,
+    "new_simulation_authorized": false,
+    "P3_parameter_estimation_policy_authorized": false,
+    "response_target_semantic_access_authorized": false,
+    "candidate_ranking_against_response_target_authorized": false,
+    "P2_rerun_or_rescue_authorized": false,
+    "canonical_locomotion_change_authorized": false,
+    "H2_H3_H4_H5_refit_authorized": false,
+    "Y_maze_access_authorized": false
+  },
+  "next_gate": "Create a separate P3 mechanism-selection/freeze record that specifies the exact relative bilateral transduction, null identities, invariances, structural parameters, and reference-free engineering reachability panel before any P3 implementation or simulation."
+}
