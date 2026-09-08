@@ -285,6 +285,20 @@
 - P3 estimation bounds/panel/objective/folds/seeds/budgets remain unfrozen; no P3 runtime/model/estimator exists and no simulation/target/Y-maze access is authorized
 - next gate: separate P3 implementation + reference-free reachability
 
+### v0.3.3s — P3 implementation + reference-free reachability — complete / PASS
+- P3 runtime implemented at `src/p3.js`, blob `4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8`
+- engineering model `lasius_niger_painted_trail_p3_v1`, blob `9107de0c71641c4037bbedbb498b9fa868c1ef00`
+- execution policy `55494a3190964d24ded2ae0d1faf3b355cc7835f` and implementation authorization `128afcbdb10d3254240c5074e1e997cee7d7fe51` were frozen before runtime implementation/execution
+- exact zero-dose and zero-kappa canonical identities passed for eight frozen seeds
+- 4x8 sector geometry, zero/equal signal, positive scale invariance, left-right antisymmetry, endpoint reversal, translation, rotation, reflection, and centered-trail symmetry all passed
+- frozen 400-trial nominal panel passed with all finite states and active steering
+- descriptive engineering summaries: central-zone fraction 0.9027742, trail-axis exit rate 1.0, mean moving speed 23.9693 mm/s, mean exit time 10.2215 s, mean steering samples 507.475
+- exact report: `reports/p3_reference_free_reachability_v1.json`, blob `a18d5cd360be79bf1a05d3fe3e2c26fd1d6c86f6`, SHA-256 `6f5fb55db24015e8822ebc6bdad0c8e76d00d19514e77e0e4af58a4157634887`
+- result freeze: `hypotheses/p3_reachability_result_freeze_v1.json`, blob `b3fa56386f71b0cea1dd8cfec032148c42af1b6d`
+- successful audit run `34255291743` / job `102159425630` / artifact `10067590240`; Node↔Chromium numeric parity passed with zero target/Y-maze/P1-result/P2-result/P3-estimation requests
+- biological fit remains false; no P3 parameter set promoted; no response-estimation policy/search, canonical update, or Y-maze access authorized
+- next gate: prospective P3 response-estimation policy freeze
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
