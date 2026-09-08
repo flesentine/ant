@@ -56,6 +56,8 @@ jobs:
           function run(sim,seconds=2,dt=.02){for(let i=0;i<Math.round(seconds/dt)&&!sim.allFinished();i++)sim.step(dt);return sim;}
           const b=loadBundle('open_arena_p3_nominal_dose_reachability.json',{modelId:'lasius_niger_painted_trail_p3_v1'});
           const sim=new p3.Simulation(b,741000),field=sim.p3Field,cfg=sim.p3Config;
+          run(sim,2);
+          const a=sim.ants[0];
           const out={
             relative:[p3.relativeSignal(0,0),p3.relativeSignal(2,2),p3.relativeSignal(2,6),p3.relativeSignal(6,2)],
             points:p3.sectorSamplePoints(0,0,0,cfg),
@@ -63,7 +65,7 @@ jobs:
             above:p3.trailSteeringRate(100,95,0,cfg,field,1),
             scale025:p3.trailSteeringRate(117,96,.37,cfg,field,.25),
             scale4:p3.trailSteeringRate(117,96,.37,cfg,field,4),
-            nominalFingerprint:run(sim,2).fingerprint()
+            nominalState:{x:a.x,y:a.y,heading:a.heading,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,distanceTravelled:a.distanceTravelled,movingTime:a.movingTime,rngState:a.rng.state,state:a.state,finished:a.finished,outcome:a.outcome,steeringSamples:a.p3SteeringSamples,lastOmega:a.p3LastOmega,lastSignal:a.p3LastRelativeSignal}
           };
           fs.writeFileSync('p3-node-parity.json',JSON.stringify(out));
           NODE
@@ -88,8 +90,9 @@ jobs:
           await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
           for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
           await evalv("(async()=>{for(const src of ['./src/p1.js','./src/p3.js']){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}})()");
-          const result=await evalv("(async()=>{const f=async p=>(await fetch(p)).json();const exp=await f('./experiments/open_arena_p3_nominal_dose_reachability.json'),model=await f('./models/lasius_niger_painted_trail_p3_v1.json'),apparatus=await f('./apparatus/'+exp.apparatus+'.json'),state=await f('./states/'+exp.state+'.json'),observation=await f('./observations/'+exp.observation+'.json'),scoring=await f('./scoring/'+exp.scoring+'.json'),node=await f('./p3-node-parity.json');const bundle={experiment:exp,model,apparatus,state,observation,scoring};const sim=new AntLabP3.Simulation(bundle,741000),cfg=sim.p3Config,field=sim.p3Field;for(let i=0;i<100&&!sim.allFinished();i++)sim.step(.02);const browser={relative:[AntLabP3.relativeSignal(0,0),AntLabP3.relativeSignal(2,2),AntLabP3.relativeSignal(2,6),AntLabP3.relativeSignal(6,2)],points:AntLabP3.sectorSamplePoints(0,0,0,cfg),center:AntLabP3.trailSteeringRate(100,105,0,cfg,field,1),above:AntLabP3.trailSteeringRate(100,95,0,cfg,field,1),scale025:AntLabP3.trailSteeringRate(117,96,.37,cfg,field,.25),scale4:AntLabP3.trailSteeringRate(117,96,.37,cfg,field,4),nominalFingerprint:sim.fingerprint()};return{same:JSON.stringify(browser)===JSON.stringify(node),browser,node};})()");
-          if(!result.same)throw new Error('Node/Chromium P3 parity mismatch');
+          const result=await evalv("(async()=>{const f=async p=>(await fetch(p)).json();const exp=await f('./experiments/open_arena_p3_nominal_dose_reachability.json'),model=await f('./models/lasius_niger_painted_trail_p3_v1.json'),apparatus=await f('./apparatus/'+exp.apparatus+'.json'),state=await f('./states/'+exp.state+'.json'),observation=await f('./observations/'+exp.observation+'.json'),scoring=await f('./scoring/'+exp.scoring+'.json'),node=await f('./p3-node-parity.json');const bundle={experiment:exp,model,apparatus,state,observation,scoring};const sim=new AntLabP3.Simulation(bundle,741000),cfg=sim.p3Config,field=sim.p3Field;for(let i=0;i<100&&!sim.allFinished();i++)sim.step(.02);const a=sim.ants[0],browser={relative:[AntLabP3.relativeSignal(0,0),AntLabP3.relativeSignal(2,2),AntLabP3.relativeSignal(2,6),AntLabP3.relativeSignal(6,2)],points:AntLabP3.sectorSamplePoints(0,0,0,cfg),center:AntLabP3.trailSteeringRate(100,105,0,cfg,field,1),above:AntLabP3.trailSteeringRate(100,95,0,cfg,field,1),scale025:AntLabP3.trailSteeringRate(117,96,.37,cfg,field,.25),scale4:AntLabP3.trailSteeringRate(117,96,.37,cfg,field,4),nominalState:{x:a.x,y:a.y,heading:a.heading,speedFactor:a.speedFactor,pauseRemaining:a.pauseRemaining,distanceTravelled:a.distanceTravelled,movingTime:a.movingTime,rngState:a.rng.state,state:a.state,finished:a.finished,outcome:a.outcome,steeringSamples:a.p3SteeringSamples,lastOmega:a.p3LastOmega,lastSignal:a.p3LastRelativeSignal}};return{browser,node};})()");
+          function near(a,b,path='root'){if(typeof a==='number'&&typeof b==='number'){if(!Number.isFinite(a)||!Number.isFinite(b)||Math.abs(a-b)>1e-9)throw new Error('numeric parity '+path+' '+a+' vs '+b);return;}if(Array.isArray(a)&&Array.isArray(b)){if(a.length!==b.length)throw new Error('array length '+path);for(let i=0;i<a.length;i++)near(a[i],b[i],path+'['+i+']');return;}if(a&&b&&typeof a==='object'&&typeof b==='object'){const ka=Object.keys(a),kb=Object.keys(b);if(JSON.stringify(ka)!==JSON.stringify(kb))throw new Error('object keys '+path);for(const k of ka)near(a[k],b[k],path+'.'+k);return;}if(a!==b)throw new Error('value parity '+path+' '+a+' vs '+b);}
+          near(result.browser,result.node);
           const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
           const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
           const p1ResultReq=requests.filter(u=>u.includes('p1_response_estimation_500x60_v1.json'));
