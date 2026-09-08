@@ -1,0 +1,98 @@
+name: P3 v0.3.3t response-estimation policy audit
+on:
+  push:
+    branches: [v0.3.3t-p3-response-estimation-policy]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+
+      - name: Verify exact P3 policy chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p3_response_estimation_v1.json)" = "d86eb9936e993d188f2a28faab838ba158c40f3b"
+          test "$(git hash-object hypotheses/p3_painted_trail_mechanism_v1.json)" = "5d00ce0058ff388c9f57d7dce56ce465d82c5765"
+          test "$(git hash-object hypotheses/p3_reachability_result_freeze_v1.json)" = "b3fa56386f71b0cea1dd8cfec032148c42af1b6d"
+          test "$(git hash-object reports/p3_reference_free_reachability_v1.json)" = "a18d5cd360be79bf1a05d3fe3e2c26fd1d6c86f6"
+          test "$(git hash-object src/p3.js)" = "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object hypotheses/p1_response_estimation_result_freeze_v1.json)" = "1d99ebfaa378aeb1b98963f63b3a513a616a6617"
+          test "$(git hash-object hypotheses/p2_response_estimation_result_freeze_v1.json)" = "088316e1746594f9b3f700cb277a83eb53fdd9f6"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test ! -e tools/run-p3-estimation.js
+          test ! -e hypotheses/p3_highres_authorization_v1.json
+
+      - name: Run full permanent regression suite
+        run: ./tests/run-tests.sh
+
+      - name: Recheck policy mathematics independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p3-v033t-audit
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=require('./hypotheses/p3_response_estimation_v1.json');
+          function halton(index,base){let f=1,r=0,i=index;while(i>0){f/=base;r+=f*(i%base);i=Math.floor(i/base);}return r;}
+          const sigma=i=>2*Math.exp(Math.log(16)*halton(i,2)),kappa=i=>16*halton(i,3);
+          if(Math.abs(sigma(1)-8)>1e-12||Math.abs(kappa(1)-16/3)>1e-12||Math.abs(sigma(2)-4)>1e-12||Math.abs(kappa(2)-32/3)>1e-12)throw new Error('Halton sanity drift');
+          if(p.search_protocol.candidate_budget_per_fold_total!==1000||p.search_protocol.absolute_transduction_benchmark_panel.candidate_budget_per_fold_total!==1000)throw new Error('candidate count drift');
+          if(p.cross_validation_and_survival.canonical_null_survival_guard.minimum_heldout_fold_wins!==5||p.cross_validation_and_survival.structural_increment_survival_guard.minimum_heldout_fold_wins_vs_selected_absolute_benchmark!==5)throw new Error('survival drift');
+          if(p.search_protocol.root_fit_seed!==6210000||p.search_protocol.root_evaluation_seed!==6810000||p.final_all_data_fit.fit_seed!==7210000||p.final_all_data_fit.final_check_seed!==7610000)throw new Error('seed drift');
+          if(p.estimator_implementation_gate.estimator_status!=='not_implemented_at_policy_freeze'||p.estimator_implementation_gate.response_target_semantic_access_authorized!==false)throw new Error('estimator gate drift');
+          if(p.global_firewalls.P1_official_result_semantic_access!==false||p.global_firewalls.P2_official_result_semantic_access!==false||p.global_firewalls.Y_maze_access!==false)throw new Error('firewall drift');
+          const out={status:'passed',first:{sigma:sigma(1),kappa:kappa(1)},second:{sigma:sigma(2),kappa:kappa(2)},p3_candidates:1000,absolute_candidates:1000,fit_seed:6210000,eval_seed:6810000,final_fit_seed:7210000,final_check_seed:7610000,dual_5_of_6:true,estimator_exists:false,target_semantics:false,ymaze:false};
+          fs.writeFileSync('/tmp/p3-v033t-audit/policy.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out));
+          NODE
+
+      - name: Real Chromium P3 policy firewall audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p3-v033t-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p3-v033t-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p3-v033t-chrome --remote-debugging-port=9222 about:blank >/tmp/p3-v033t-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p3-v033t-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+          const state=await evalv("(async()=>{const p=await(await fetch('./hypotheses/p3_response_estimation_v1.json')).json();const m=await(await fetch('./hypotheses/p3_painted_trail_mechanism_v1.json')).json();const r=await(await fetch('./hypotheses/p3_reachability_result_freeze_v1.json')).json();const est=await fetch('./tools/run-p3-estimation.js');const auth=await fetch('./hypotheses/p3_highres_authorization_v1.json');return{id:p.id,status:p.status,params:p.response_parameter_surface.estimated_parameter_names_exact,p3Count:p.search_protocol.candidate_budget_per_fold_total,absCount:p.search_protocol.absolute_transduction_benchmark_panel.candidate_budget_per_fold_total,fit:p.search_protocol.root_fit_seed,eval:p.search_protocol.root_evaluation_seed,finalFit:p.final_all_data_fit.fit_seed,finalCheck:p.final_all_data_fit.final_check_seed,nullWins:p.cross_validation_and_survival.canonical_null_survival_guard.minimum_heldout_fold_wins,absWins:p.cross_validation_and_survival.structural_increment_survival_guard.minimum_heldout_fold_wins_vs_selected_absolute_benchmark,target:p.estimator_implementation_gate.response_target_semantic_access_authorized,p1:p.global_firewalls.P1_official_result_semantic_access,p2:p.global_firewalls.P2_official_result_semantic_access,ymaze:p.global_firewalls.Y_maze_access,mechanism:m.mechanism.mechanism_id,reach:r.status,estStatus:est.status,authStatus:auth.status};})()");
+          if(state.id!=='P3_response_estimation_v1'||state.status!=='development_response_estimation_policy_frozen_before_estimator_implementation_or_response_target_semantic_access')throw new Error('browser policy drift');
+          if(JSON.stringify(state.params)!=='["sigma_field_mm","kappa_trail_per_s"]'||state.p3Count!==1000||state.absCount!==1000)throw new Error('browser panel drift');
+          if(state.fit!==6210000||state.eval!==6810000||state.finalFit!==7210000||state.finalCheck!==7610000||state.nullWins!==5||state.absWins!==5)throw new Error('browser seed/survival drift');
+          if(state.target!==false||state.p1!==false||state.p2!==false||state.ymaze!==false)throw new Error('browser firewall drift');
+          if(state.mechanism!=='P3_local_sector_weber_steering_v1'||state.reach!=='reference_free_reachability_passed_frozen_P3_v1_implementation_qualified_only')throw new Error('browser input chain drift');
+          if(state.estStatus!==404||state.authStatus!==404)throw new Error('P3 estimator/highres authorization unexpectedly exists');
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p1Req=requests.filter(u=>u.includes('p1_response_estimation_500x60_v1.json'));
+          const p2Req=requests.filter(u=>u.includes('p2_response_estimation_1000x60_v1.json'));
+          const p3EstReq=requests.filter(u=>u.includes('run-p3-estimation')||u.includes('p3_highres_authorization'));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p1Req.length||p2Req.length)throw new Error('browser policy network firewall failure');
+          const out={status:'passed',exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,p1_result_requests:p1Req.length,p2_result_requests:p2Req.length,p3_estimator_probe_requests:p3EstReq.length,p3_estimator_status:state.estStatus,p3_highres_authorization_status:state.authStatus};
+          fs.writeFileSync('/tmp/p3-v033t-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p3-v033t-browser.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p3-v033t-response-estimation-policy-audit
+          path: /tmp/p3-v033t-audit
+          retention-days: 30
