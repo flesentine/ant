@@ -1,0 +1,140 @@
+name: P3 v0.3.3u estimator qualification audit
+on:
+  push:
+    branches: [v0.3.3u-p3-estimator-qualification]
+permissions:
+  contents: read
+concurrency:
+  group: p3-v033u-estimator-qualification-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact P3 estimator chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p3_response_estimation_v1.json)" = "d86eb9936e993d188f2a28faab838ba158c40f3b"
+          test "$(git hash-object tools/p3-estimation-core.js)" = "410ef81dfe761e3c218d072ca311632329ac1617"
+          test "$(git hash-object tools/run-p3-estimation.js)" = "5bf27bf439dca18629cdfd36f56fe767a23062ff"
+          test "$(git hash-object src/p3.js)" = "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_painted_trail_p3_v1.json)" = "9107de0c71641c4037bbedbb498b9fa868c1ef00"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test ! -e hypotheses/p3_highres_authorization_v1.json
+      - name: Run full permanent suite
+        run: ./tests/run-tests.sh
+      - name: Run standalone reference-free estimator qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p3-v033u-audit
+          node tools/run-p3-estimation.js --mode qualification --trials 2 --out /tmp/p3-v033u-audit/qualification.json
+          node - <<'NODE'
+          const q=require('/tmp/p3-v033u-audit/qualification.json');
+          if(q.status!=='passed'||q.scientific_evidence!==false||q.reference_outcomes_accessed!==false||q.response_target_semantics_loaded!==false||q.response_target_hash_verified_only!==true||q.P1_official_result_semantics_loaded!==false||q.P2_official_result_semantics_loaded!==false||q.ymaze_accessed!==false)throw new Error('P3 qualification firewall/status failed');
+          if(q.policy_git_blob_sha!=='d86eb9936e993d188f2a28faab838ba158c40f3b'||q.estimator_git_blob_sha!=='5bf27bf439dca18629cdfd36f56fe767a23062ff'||q.estimator_core_git_blob_sha!=='410ef81dfe761e3c218d072ca311632329ac1617')throw new Error('P3 qualification provenance drift');
+          if(Object.keys(q.checks).length!==22)throw new Error('P3 qualification check-count drift');
+          for(const [k,v] of Object.entries(q.checks))if(v!==true)throw new Error('P3 qualification check failed: '+k);
+          console.log(JSON.stringify({status:q.status,checks:Object.keys(q.checks).length,target_semantics:q.response_target_semantics_loaded,P1_results:q.P1_official_result_semantics_loaded,P2_results:q.P2_official_result_semantics_loaded,ymaze:q.ymaze_accessed}));
+          NODE
+      - name: Prove highres rejects before semantic target access
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/p3-v033u-audit/unauthorized.json
+          set +e
+          node tools/run-p3-estimation.js --mode highres --out /tmp/p3-v033u-audit/unauthorized.json >/tmp/p3-v033u-highres.log 2>&1
+          code=$?
+          set -e
+          test "$code" -ne 0
+          grep -q "missing post-qualification authorization artifact" /tmp/p3-v033u-highres.log
+          test ! -e /tmp/p3-v033u-audit/unauthorized.json
+          node - <<'NODE'
+          const run=require('./tools/run-p3-estimation.js'),policy=require('./hypotheses/p3_response_estimation_v1.json');
+          let blocked=false;
+          try{run.loadReferenceTarget(process.cwd(),policy,{branchName:'main'});}catch(e){blocked=/missing post-qualification authorization artifact/.test(String(e));}
+          if(!blocked)throw new Error('P3 semantic target loader was not authorization-blocked');
+          NODE
+      - name: Build Node estimator-wiring parity panel
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs'),est=require('./tools/p3-estimation-core.js'),p3=require('./src/p3.js'),p1=require('./src/p1.js');
+          const {loadBundle}=require('./tools/load-bundle.js'),policy=require('./hypotheses/p3_response_estimation_v1.json'),base=require('./models/lasius_niger_painted_trail_p3_v1.json');
+          const specs=[
+            {mechanism:'P3',candidate:est.nullAnchor(policy)},
+            {mechanism:'P3',candidate:est.p3Candidate(0,policy)},
+            {mechanism:'P3',candidate:est.p3Candidate(1,policy)},
+            {mechanism:'absolute',candidate:est.absoluteCandidate(0,policy)},
+            {mechanism:'absolute',candidate:est.absoluteCandidate(1,policy)}
+          ];
+          const out=[];let seed=993100;
+          for(const spec of specs)for(const treatment of ['dcm_control','pheromone']){
+            const b=loadBundle(est.conditionExperiment(treatment),{modelId:base.id});
+            b.model=spec.mechanism==='P3'?est.configuredP3Model(base,spec.candidate):est.configuredAbsoluteModel(base,spec.candidate);
+            b.observation.record_trajectories=false;
+            const Sim=spec.mechanism==='P3'?p3.Simulation:p1.Simulation,sim=new Sim(b,seed++);
+            for(let i=0;i<120&&!sim.allFinished();i++)sim.step(.02);
+            const a=sim.ants[0],isP3=spec.mechanism==='P3';
+            out.push({mechanism:spec.mechanism,candidate:spec.candidate,treatment,seed:seed-1,result:{
+              x:a.x,y:a.y,heading:a.heading,rng_state:a.rng.state,finished:a.finished,outcome:a.outcome,
+              steering_samples:isP3?a.p3SteeringSamples:a.p1SteeringSamples,
+              last_omega:isP3?a.p3LastOmega:a.p1LastOmega,
+              relative_signal:isP3?a.p3LastRelativeSignal:null,
+              left_response:isP3?null:a.p1LastLeftResponse,
+              right_response:isP3?null:a.p1LastRightResponse
+            }});
+          }
+          fs.writeFileSync('/tmp/p3-v033u-audit/node-parity.json',JSON.stringify(out,null,2));
+          NODE
+      - name: Real Chromium estimator-wiring parity and firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p3-v033u-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p3-v033u-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p3-v033u-chrome --remote-debugging-port=9222 about:blank >/tmp/p3-v033u-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p3-v033u-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const refs=JSON.parse(fs.readFileSync('/tmp/p3-v033u-audit/node-parity.json','utf8'));
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+          for(const src of ['./src/p1.js','./src/p3.js']){
+            await evalv("new Promise((resolve,reject)=>{const s=document.createElement('script');s.src="+JSON.stringify(src)+";s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})");
+          }
+          const expression="(async()=>{const refs="+JSON.stringify(refs)+",cache={};async function j(p){if(!cache[p])cache[p]=await(await fetch(p)).json();return JSON.parse(JSON.stringify(cache[p]));}async function bundle(r){const expName=r.treatment==='dcm_control'?'open_arena_p3_zero_dose_reachability.json':'open_arena_p3_nominal_dose_reachability.json';const experiment=await j('./experiments/'+expName),model=await j('./models/lasius_niger_painted_trail_p3_v1.json'),apparatus=await j('./apparatus/'+experiment.apparatus+'.json'),state=await j('./states/'+experiment.state+'.json'),observation=await j('./observations/'+experiment.observation+'.json'),scoring=await j('./scoring/'+experiment.scoring+'.json');if(r.mechanism==='P3'){model.painted_trail_response.field.sigma_field_mm=r.candidate.sigma_field_mm;model.painted_trail_response.steering.kappa_trail_per_s=r.candidate.kappa_trail_per_s;}else{model.painted_trail_response={enabled:true,mechanism_id:'P1_egocentric_painted_trail_gradient_steering_v1',field:{type:'gaussian_distance_to_segment',sigma_field_mm:r.candidate.sigma_field_mm},sensors:{type:'bilateral_body_frame_points',forward_offset_mm:2,lateral_half_separation_mm:1.5},transduction:{type:'c_over_one_plus_c'},steering:{type:'right_minus_left_heading_drift',kappa_trail_per_s:r.candidate.kappa_trail_per_s}};}observation.record_trajectories=false;return{experiment,model,apparatus,state,observation,scoring};}const out=[];for(const r of refs){const b=await bundle(r),Sim=r.mechanism==='P3'?AntLabP3.Simulation:AntLabP1.Simulation,sim=new Sim(b,r.seed);for(let i=0;i<120&&!sim.allFinished();i++)sim.step(.02);const a=sim.ants[0],isP3=r.mechanism==='P3';out.push({...r,result:{x:a.x,y:a.y,heading:a.heading,rng_state:a.rng.state,finished:a.finished,outcome:a.outcome,steering_samples:isP3?a.p3SteeringSamples:a.p1SteeringSamples,last_omega:isP3?a.p3LastOmega:a.p1LastOmega,relative_signal:isP3?a.p3LastRelativeSignal:null,left_response:isP3?null:a.p1LastLeftResponse,right_response:isP3?null:a.p1LastRightResponse}});}return out;})()";
+          const browser=await evalv(expression),numeric=['x','y','heading','last_omega','relative_signal','left_response','right_response'],near=(a,b,t=1e-12)=>a===b||(Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=t);
+          let matched=0;
+          for(let i=0;i<refs.length;i++){const a=refs[i],b=browser[i];if(a.mechanism!==b.mechanism||a.treatment!==b.treatment||a.seed!==b.seed)throw new Error('case identity mismatch '+i);for(const k of numeric){const x=a.result[k],y=b.result[k];if(x==null||y==null){if(x!==y)throw new Error('null mismatch '+i+' '+k);}else if(!near(x,y))throw new Error('numeric mismatch '+i+' '+k+' '+x+' '+y);}for(const k of ['rng_state','finished','outcome','steering_samples'])if(a.result[k]!==b.result[k])throw new Error('exact mismatch '+i+' '+k);matched++;}
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p1ResultReq=requests.filter(u=>/p1_response_estimation_(?:500x60|result_freeze)/i.test(u));
+          const p2ResultReq=requests.filter(u=>/p2_response_estimation_(?:1000x60|result_freeze)/i.test(u));
+          const authReq=requests.filter(u=>/p3_highres_authorization/i.test(u));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p1ResultReq.length||p2ResultReq.length||authReq.length)throw new Error('browser P3 estimator firewall failure');
+          const out={status:'passed',parity_cases:matched,exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,P1_official_result_requests:p1ResultReq.length,P2_official_result_requests:p2ResultReq.length,p3_authorization_requests:authReq.length};
+          fs.writeFileSync('/tmp/p3-v033u-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p3-v033u-browser.mjs
+      - name: Upload P3 estimator qualification audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-v033u-estimator-qualification-audit
+          path: /tmp/p3-v033u-audit
+          retention-days: 30
