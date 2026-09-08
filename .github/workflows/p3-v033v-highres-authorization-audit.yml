@@ -1,0 +1,100 @@
+name: P3 v0.3.3v highres authorization audit
+on:
+  push:
+    branches: [v0.3.3v-p3-highres-authorization]
+permissions:
+  contents: read
+concurrency:
+  group: p3-v033v-highres-authorization-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact authorization chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p3_highres_authorization_v1.json)" = "04d2c7b454143fd7073b274bff0ec9b355ec058d"
+          test "$(git hash-object hypotheses/p3_response_estimation_v1.json)" = "d86eb9936e993d188f2a28faab838ba158c40f3b"
+          test "$(git hash-object tools/p3-estimation-core.js)" = "410ef81dfe761e3c218d072ca311632329ac1617"
+          test "$(git hash-object tools/run-p3-estimation.js)" = "5bf27bf439dca18629cdfd36f56fe767a23062ff"
+          test "$(git hash-object reports/p3_estimator_qualification_v1.json)" = "63e1d7360bc1ef4b232bbf37f347b9fa27e7d461"
+          test "$(git hash-object hypotheses/p3_estimator_qualification_result_freeze_v1.json)" = "32d90d05add5b4e45dd69c711b416ed3378d15ab"
+          test ! -e reports/p3_response_estimation_1000x60_v1.json
+      - name: Run permanent suite
+        run: ./tests/run-tests.sh
+      - name: Re-run reference-free P3 qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p3-v033v-audit
+          node tools/run-p3-estimation.js --mode qualification --trials 2 --out /tmp/p3-v033v-audit/qualification.json
+          node - <<'NODE'
+          const q=require('/tmp/p3-v033v-audit/qualification.json');
+          if(q.status!=='passed'||Object.keys(q.checks).length!==22) throw new Error('P3 qualification did not remain 22/22');
+          for(const [k,v] of Object.entries(q.checks)) if(v!==true) throw new Error('P3 qualification failed: '+k);
+          if(q.reference_outcomes_accessed!==false||q.response_target_semantics_loaded!==false||q.P1_official_result_semantics_loaded!==false||q.P2_official_result_semantics_loaded!==false||q.ymaze_accessed!==false) throw new Error('P3 qualification firewall changed');
+          NODE
+      - name: Prove review-branch highres remains ineffective
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/p3-v033v-audit/unauthorized-review.json
+          set +e
+          node tools/run-p3-estimation.js --mode highres --out /tmp/p3-v033v-audit/unauthorized-review.json >/tmp/p3-v033v-review.log 2>&1
+          code=$?
+          set -e
+          test "$code" -ne 0
+          grep -q "not effective until merged to main" /tmp/p3-v033v-review.log
+          test ! -e /tmp/p3-v033v-audit/unauthorized-review.json
+          node - <<'NODE'
+          const run=require('./tools/run-p3-estimation.js');
+          const a=require('./hypotheses/p3_highres_authorization_v1.json');
+          let blocked=false;
+          try{run.assertHighResolutionAuthorized(process.cwd(),null,{branchName:'authorization-review'});}catch(e){blocked=/not effective until merged to main/.test(String(e));}
+          if(!blocked) throw new Error('review-branch authorization unexpectedly effective');
+          if(run.assertAuthorizationEffective(a,process.cwd(),{branchName:'main'})!=='main') throw new Error('main effectiveness contract changed');
+          NODE
+      - name: Chromium authorization inspection firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p3-v033v-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p3-v033v-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p3-v033v-chrome --remote-debugging-port=9222 about:blank >/tmp/p3-v033v-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p3-v033v-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'"))break;await new Promise(r=>setTimeout(r,50));}
+          const auth=await evalv("(async()=>await(await fetch('./hypotheses/p3_highres_authorization_v1.json')).json())()");
+          if(auth.id!=='P3_high_resolution_authorization_v1'||auth.high_resolution_response_search_authorized!==true||auth.effective_when_merged_to_main!==true) throw new Error('authorization identity/status mismatch');
+          if(auth.P1_official_result_semantic_access_authorized!==false||auth.P2_official_result_semantic_access_authorized!==false||auth.P2_lapse_structure_authorized!==false||auth.canonical_promotion_authorized!==false||auth.ymaze_access_authorized!==false) throw new Error('authorization firewall mismatch');
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p1req=requests.filter(u=>/p1_response_estimation_(?:500x60|result_freeze)/i.test(u));
+          const p2req=requests.filter(u=>/p2_response_estimation_(?:1000x60|result_freeze)/i.test(u));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p1req.length||p2req.length) throw new Error('Chromium authorization firewall failed');
+          const out={status:'passed',authorization_loaded:true,exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,P1_official_result_requests:p1req.length,P2_official_result_requests:p2req.length};
+          fs.writeFileSync('/tmp/p3-v033v-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p3-v033v-browser.mjs
+      - name: Upload authorization audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-v033v-highres-authorization-audit
+          path: /tmp/p3-v033v-audit
+          retention-days: 30
