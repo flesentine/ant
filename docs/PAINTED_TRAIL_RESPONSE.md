@@ -2525,3 +2525,65 @@ Still **not authorized**:
 
 The next gate is a separate post-qualification P3 high-resolution authorization freeze. It must pin the exact policy, estimator/core, qualification report, qualification freeze, and audit provenance; it becomes effective only after merge to `main` and green permanent main CI.
 
+
+
+## P3-v1 high-resolution authorization freeze
+
+v0.3.3v freezes the post-qualification authorization for exactly one future high-resolution P3-v1 response-estimation execution. This gate does **not** execute the response search.
+
+Authorization record:
+
+`hypotheses/p3_highres_authorization_v1.json`
+
+Git blob:
+
+`04d2c7b454143fd7073b274bff0ec9b355ec058d`
+
+### Preconditions pinned by the authorization
+
+The authorization pins the already-merged qualified estimator checkpoint and frozen scientific chain:
+
+- estimator merge on `main`: `b7553cf64b1ebe1a3ee4895ce4cf63b9c579a635`
+- permanent main workflow: run `34289965059` (#148)
+- permanent main test job: `102274091654` — success
+- permanent main deploy job: `102274263257` — success
+- P3 response-estimation policy: `d86eb9936e993d188f2a28faab838ba158c40f3b`
+- estimator core: `410ef81dfe761e3c218d072ca311632329ac1617`
+- gated estimator executable: `5bf27bf439dca18629cdfd36f56fe767a23062ff`
+- qualification report: `63e1d7360bc1ef4b232bbf37f347b9fa27e7d461`, SHA-256 `4912618de22e74d67197529bb6625c850bfa8912bcf55e99280732dbcc64e604`
+- qualification freeze: `32d90d05add5b4e45dd69c711b416ed3378d15ab`
+
+The frozen future command remains:
+
+`node tools/run-p3-estimation.js --mode highres --out reports/p3_response_estimation_1000x60_v1.json`
+
+No candidate counts, bounds, seeds, trial budgets, fold membership, objectives, comparator construction, secondary guards, identifiability thresholds, or promotion thresholds may be changed at execution time.
+
+### Authorization audit
+
+The first full v0.3.3v authorization audit passed on review-branch head `2c600147a596f7325e8d5b82fc98940cee72efad`:
+
+- run: `34290329837`
+- job: `102275214858`
+- artifact: `10081084208`
+- artifact digest: `sha256:5ba68afbad79e77399825003a220d3e951299b46ccd7bc12706b86a801dc4f14`
+- full permanent regression suite: PASS
+- fresh P3 synthetic/reference-free qualification: 22/22 PASS
+- review-branch high-resolution execution: correctly rejected before semantic target parsing
+- Chromium authorization inspection: PASS
+- browser exceptions: 0
+- console errors: 0
+- response-target requests: 0
+- P1 official-result requests: 0
+- P2 official-result requests: 0
+- Y-maze requests: 0
+
+### Effectiveness boundary
+
+The authorization has `effective_when_merged_to_main: true`. Therefore the file may be reviewed and audited on this branch, but the high-resolution search remains **ineffective on the review branch**. Semantic response-target access is authorized only through the frozen high-resolution estimator after this exact authorization has merged to `main` and a separate execution-precondition gate verifies green permanent main test/deploy on a commit containing the exact frozen chain.
+
+P1 runtime access is authorized only for the pinned absolute-transduction structural comparator. P1 official response-result semantics, P2 official response-result semantics, P2 lapse structure, canonical promotion, H2-H5 refit/recombination, and Y-maze access remain forbidden.
+
+### Next gate
+
+After this authorization freeze merges to `main` and permanent main CI is green, freeze a separate one-shot P3 execution precondition and main-only execution workflow. The official response search must run exactly once under the frozen procedure, and its complete result must be frozen before interpretation or any mechanism/model change.
