@@ -2063,3 +2063,133 @@ At the P3 candidate-class decision:
 - Y-maze access: **not authorized**
 
 The next gate is a separate P3 mechanism-selection/freeze that must define the exact relative transduction, zero-signal behavior, sensor geometry, null identities, invariances, and reference-free engineering panel before any implementation.
+
+
+## P3 relative-bilateral mechanism freeze
+
+Mechanism record:
+
+`hypotheses/p3_painted_trail_mechanism_v1.json`
+
+Git blob:
+
+`5d00ce0058ff388c9f57d7dce56ce465d82c5765`
+
+Mechanism id:
+
+`P3_local_sector_weber_steering_v1`
+
+This freeze defines P3-v1 before any implementation or simulation.
+
+### External field
+
+P3 reuses the already-frozen painted-line field representation unchanged:
+
+`C(p) = dose_ratio * exp(-d(p, segment)^2 / (2*sigma_field_mm^2))`
+
+This prevents the P3 comparison from changing the physical field model at the same time as the sensory/transduction mechanism.
+
+### Local sector sensors
+
+The digital sensor operator is fixed prospectively.
+
+For each ant:
+
+- front-left sector: 90°
+- front-right sector: 90°
+- radius: 10 mm
+- radial bins: 4
+- angular bins per sector: 8
+- samples per sector: 32
+
+Equal-area radial midpoint:
+
+`rho_i = 10 * sqrt((i+0.5)/4)`
+
+Angular midpoint:
+
+`alpha_j = (j+0.5)*(pi/2)/8`
+
+The left and right summaries are the arithmetic means of the Gaussian field at the corresponding deterministic sector samples.
+
+The 10 mm sector radius is a source-inspired engineering structure, not a fitted or anatomically claimed `Lasius niger` sensor dimension.
+
+### Relative transduction
+
+The P3 signal is frozen exactly as:
+
+`W(L,R) = 0` if `L+R <= 0`
+
+otherwise:
+
+`W(L,R) = (R-L)/(R+L)`
+
+There is:
+
+- no epsilon;
+- no regularization parameter;
+- no threshold parameter.
+
+Therefore the ideal operator is positively scale invariant and left-right antisymmetric.
+
+### Steering
+
+`omega_trail = kappa_trail_per_s * W(L,R)`
+
+Positive right-minus-left signal uses the same rightward steering sign convention as the previous painted-trail runtime.
+
+Steering occurs immediately before the unchanged canonical ant update and only on steps where the canonical ant will move.
+
+### No P2 stochastic structure
+
+P3-v1 does not include:
+
+- `p_lapse`;
+- trial-level engagement state;
+- combined lapse + Weber mechanism;
+- response RNG.
+
+Added canonical biology RNG draws: **0**.
+
+### Frozen identities and invariances
+
+P3 implementation must prove reference-free:
+
+- dose 0 → exact canonical bypass;
+- kappa 0 → exact canonical bypass;
+- zero/equal sector signal → zero steering;
+- positive global dose scaling → same ideal Weber signal;
+- painted-segment endpoint reversal → unchanged response;
+- rigid translation → unchanged response;
+- rigid rotation → covariant response;
+- left/right reflection → equal-magnitude sign reversal;
+- centered parallel trail → symmetric zero steering away from endpoint effects.
+
+### Engineering-only reachability values
+
+For the future reference-free implementation gate only:
+
+- sigma: 8 mm
+- kappa: 4 s⁻¹
+- sector radius: 10 mm
+- 4 × 8 samples per sector
+- nominal open-arena reachability: 400 trials
+
+These values are not fitted `Lasius niger` biology and may not be retuned from reachability outcomes.
+
+### Still locked
+
+At this freeze:
+
+- `src/p3.js`: absent
+- P3 model: absent
+- P3 estimator: absent
+- new simulation: unauthorized
+- response-target semantic access: unauthorized
+- P1/P2 official-result semantic access: unauthorized
+- P2 rerun/rescue: unauthorized
+- canonical locomotion change: unauthorized
+- H2-H5 refit: unauthorized
+- Y-maze access: unauthorized
+
+The next gate is a separate P3 implementation + reference-free reachability phase.
