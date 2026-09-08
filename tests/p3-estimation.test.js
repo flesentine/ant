@@ -9,8 +9,8 @@ const {readJson}=require('../tools/load-bundle.js');
 const root=path.resolve(__dirname,'..');
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
-assert.strictEqual(blob('tools/p3-estimation-core.js'),'9a10133c384f93eed48d04a97abb1a1c592e08de');
-assert.strictEqual(blob('tools/run-p3-estimation.js'),'48e0d7c0e5dc58751c2f6fa351362700afc6a001');
+assert.strictEqual(blob('tools/p3-estimation-core.js'),'a661ef821dd6b7e3a34d2dc2fdd7058dd2c2e5d3');
+assert.strictEqual(blob('tools/run-p3-estimation.js'),'462de97b21f0968b754dc365902ae97a0eba0b18');
 assert.strictEqual(blob('hypotheses/p3_response_estimation_v1.json'),'d86eb9936e993d188f2a28faab838ba158c40f3b');
 assert.strictEqual(blob('src/p3.js'),'4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8');
 assert.strictEqual(blob('src/p1.js'),'f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca');
@@ -21,7 +21,7 @@ const policy=readJson(path.join(root,'hypotheses','p3_response_estimation_v1.jso
 const base=readJson(path.join(root,'models','lasius_niger_painted_trail_p3_v1.json'));
 assert.strictEqual(est.assertPolicySemantics(policy),true);
 assert.strictEqual(run.POLICY_GIT_BLOB_SHA,'d86eb9936e993d188f2a28faab838ba158c40f3b');
-assert.strictEqual(run.CORE_GIT_BLOB_SHA,'9a10133c384f93eed48d04a97abb1a1c592e08de');
+assert.strictEqual(run.CORE_GIT_BLOB_SHA,'a661ef821dd6b7e3a34d2dc2fdd7058dd2c2e5d3');
 assert.deepStrictEqual(est.HALTON,[[2,'sigma_field_mm'],[3,'kappa_trail_per_s']]);
 
 const c0=est.p3Candidate(0,policy),c1=est.p3Candidate(1,policy),a0=est.absoluteCandidate(0,policy),n=est.nullAnchor(policy);
@@ -97,8 +97,8 @@ assert.strictEqual(q.P1_official_result_semantics_loaded,false);
 assert.strictEqual(q.P2_official_result_semantics_loaded,false);
 assert.strictEqual(q.ymaze_accessed,false);
 assert.strictEqual(q.policy_git_blob_sha,'d86eb9936e993d188f2a28faab838ba158c40f3b');
-assert.strictEqual(q.estimator_git_blob_sha,'48e0d7c0e5dc58751c2f6fa351362700afc6a001');
-assert.strictEqual(q.estimator_core_git_blob_sha,'9a10133c384f93eed48d04a97abb1a1c592e08de');
+assert.strictEqual(q.estimator_git_blob_sha,'462de97b21f0968b754dc365902ae97a0eba0b18');
+assert.strictEqual(q.estimator_core_git_blob_sha,'a661ef821dd6b7e3a34d2dc2fdd7058dd2c2e5d3');
 assert.strictEqual(q.response_target_git_blob_sha_verified,'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed');
 assert.strictEqual(Object.keys(q.checks).length,20);
 for(const [k,v] of Object.entries(q.checks))assert.strictEqual(v,true,k+' must remain true');
