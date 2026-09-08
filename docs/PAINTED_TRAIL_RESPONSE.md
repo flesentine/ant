@@ -1546,3 +1546,111 @@ Still **not authorized**:
 - Y-maze access.
 
 The next gate is a separate post-qualification high-resolution authorization freeze that must pin the exact policy, estimator, qualification report, and audit provenance before one official P2 response search can run.
+
+
+## P2-v1 high-resolution authorization freeze
+
+v0.3.3n authorizes the already-qualified P2 estimator for one frozen high-resolution development search, but **does not execute that search in the authorization PR**.
+
+Authorization:
+
+`hypotheses/p2_highres_authorization_v1.json`
+
+Git blob:
+
+`de361b15b9600bd92a35baf30fa71c2a7c61003c`
+
+### Exact qualification chain
+
+The authorization pins:
+
+- policy: `eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce`
+- estimator: `38d66d28e94d2f532e9c8a20bd6553d6d11be8a6`
+- qualification report: `9f4d15875b35773b41696987abd1cc4721435bc2`
+- qualification report SHA-256: `22cd65ffbf3adbfd88fb3998ba4ab41e142b52b2b19d8aa2460ab2d9c42596a2`
+- qualification freeze: `1d46b594cb154a93c2e321fb67d399acdd821993`
+- merged estimator main checkpoint: `0f105420d5503a974ae42a099ca026276851563a`
+- permanent estimator-checkpoint workflow: `34092350444`
+
+The estimator qualification passed 20/20 frozen checks and Chromium parity 10/10 before authorization existed.
+
+### Main-only effectiveness
+
+The authorization contains:
+
+`effective_when_merged_to_main = true`
+
+Therefore its presence on the review branch does **not** make the search executable.
+
+The estimator must reject:
+
+- high-resolution mode on the authorization review branch;
+- semantic target loading on the authorization review branch.
+
+Only after the exact authorization is merged to `main` may the authorization check succeed.
+
+A permanent main test/deploy success on that merged authorization commit is an additional execution precondition.
+
+### Frozen official execution
+
+Authorized CLI:
+
+`node tools/run-p2-estimation.js --mode highres --out reports/p2_response_estimation_1000x60_v1.json`
+
+The official execution is frozen to:
+
+- 6 leave-one-colony-out folds;
+- 999 3D P2 Halton candidates + exact canonical null;
+- 999 projected `p_lapse=0` no-lapse candidates + the same exact null;
+- 60 training trials/treatment × path × candidate;
+- 120 heldout evaluation trials/treatment × path;
+- fit root seed `4210000`;
+- evaluation root seed `4810000`;
+- 120 final all-data training trials/treatment × path × candidate;
+- final fit seed `5210000`;
+- 240 independent final-check trials/treatment × path;
+- final-check seed `5610000`;
+- physics dt `0.02`;
+- common random numbers for DCM/pheromone and the frozen P2 response RNG.
+
+No high-resolution CLI overrides are allowed for:
+
+- candidates;
+- training trials;
+- heldout trials;
+- fit seeds;
+- final trials;
+- final seeds;
+- dt.
+
+### Dual survival remains unchanged
+
+P2-v1 must still satisfy both heldout guards:
+
+1. beat exact canonical null in at least 5/6 folds with strictly positive median relative improvement;
+2. beat the separately selected no-lapse benchmark in at least 5/6 folds with strictly positive median relative improvement.
+
+Failure of either guard closes P2-v1 response estimation without retuning.
+
+### One-shot rule
+
+This authorization permits exactly one official frozen execution after merge and green permanent main CI.
+
+A repeat is allowed only if the first official execution is formally invalidated because of a genuine implementation or infrastructure failure. Any repeat must rerun the entire frozen procedure unchanged.
+
+Target-ranked scientific failure is **not** grounds for a rerun.
+
+### Still forbidden
+
+The authorization does not permit:
+
+- P1 official result semantic access;
+- P1 rescue or rerun;
+- adaptive P2 search/refinement;
+- bound/seed/budget/weight changes;
+- Candidate B relative/Weber transduction;
+- canonical locomotion promotion;
+- H2-H5 refit/combination;
+- Y-maze access.
+
+The next gate after this authorization merges is a **separate one-shot main-only execution trigger**. That separate gate must first verify the merged authorization commit has green permanent main CI.
