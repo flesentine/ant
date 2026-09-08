@@ -1,0 +1,126 @@
+name: P2 v0.3.3p result-freeze closure audit
+on:
+  push:
+    branches: [v0.3.3p-p2-result-freeze]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify exact frozen P2 result chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reports/p2_response_estimation_1000x60_v1.json)" = "cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72"
+          test "$(wc -c <reports/p2_response_estimation_1000x60_v1.json | tr -d ' ')" = "332793"
+          test "$(sha256sum reports/p2_response_estimation_1000x60_v1.json | awk '{print $1}')" = "bb11e17b1f0919682a57cdc4a396adde807239476216953c2f06e99cf61688c4"
+          test "$(git hash-object reports/p2_response_estimation_execution_provenance_v1.json)" = "4a9a705c0ab8e9b64534a35f90f1017bf70c4a06"
+          test "$(wc -c <reports/p2_response_estimation_execution_provenance_v1.json | tr -d ' ')" = "2000"
+          test "$(sha256sum reports/p2_response_estimation_execution_provenance_v1.json | awk '{print $1}')" = "e3a4106aa6c82b439640aa196182141513d4179798b0a03e97534bec28ef3cbd"
+          test "$(git hash-object hypotheses/p2_response_estimation_result_freeze_v1.json)" = "088316e1746594f9b3f700cb277a83eb53fdd9f6"
+          test "$(git hash-object hypotheses/archive/p2_highres_authorization_v1.json)" = "de361b15b9600bd92a35baf30fa71c2a7c61003c"
+          test "$(git hash-object hypotheses/p2_highres_execution_precondition_v1.json)" = "15f45456934c102b412fa83ea39b424b9a3b3979"
+          test "$(git hash-object hypotheses/p2_highres_execution_attempt1_invalidation_v1.json)" = "fb96cc76ee07541290cfcf6e9c10645a87686a12"
+          test "$(git hash-object tools/run-p2-estimation.js)" = "38d66d28e94d2f532e9c8a20bd6553d6d11be8a6"
+          test "$(git hash-object hypotheses/p2_response_estimation_v1.json)" = "eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test ! -e hypotheses/p2_highres_authorization_v1.json
+          test ! -e .github/workflows/p2-v033o-official-highres.yml
+          test ! -e .github/workflows/p2-v033p-materialize-result.yml
+
+      - name: Run full H0-H5 plus P1/P2 permanent suite
+        run: ./tests/run-tests.sh
+
+      - name: Verify frozen closure semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p2-v033p-audit
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=require('./reports/p2_response_estimation_1000x60_v1.json');
+          const p=require('./reports/p2_response_estimation_execution_provenance_v1.json');
+          const f=require('./hypotheses/p2_response_estimation_result_freeze_v1.json');
+
+          if(r.status!=='development_response_estimation_failed_dual_primary_survival_guard')throw new Error('official status drift');
+          if(r.internal_cv.P2_wins_vs_exact_null!==4||r.internal_cv.P2_wins_vs_selected_no_lapse!==4)throw new Error('heldout win-count drift');
+          if(r.internal_cv.canonical_null_survival_guard_passed!==false||r.internal_cv.structural_increment_survival_guard_passed!==false||r.internal_cv.P2_dual_survival_guard_passed!==false)throw new Error('survival decision drift');
+          if(Math.abs(r.internal_cv.median_relative_improvement_vs_exact_null-0.38010077026652644)>1e-15)throw new Error('null median drift');
+          if(Math.abs(r.internal_cv.median_relative_improvement_vs_no_lapse-0.09289481727992745)>1e-15)throw new Error('no-lapse median drift');
+          if(r.final_all_data_fit!==null)throw new Error('final fit must remain absent');
+          if(r.promotion.mechanism_survives_internal_development!==false||r.promotion.fixed_parameter_triple_eligible_for_future_freeze!==false)throw new Error('promotion drift');
+          if(p.github.run_id!==34190528101||p.report.git_blob_sha!=='cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72')throw new Error('execution provenance drift');
+          if(Object.values(p.firewalls).some(v=>v!==false))throw new Error('official provenance firewall drift');
+          if(f.rerun_authorized!==false||f.downstream_frozen_consequences.Y_maze_unlock_authorized!==false||f.downstream_frozen_consequences.Candidate_B_authorized!==false)throw new Error('closure firewall drift');
+          if(f.invalidated_preexecution_attempt.scientific_execution_started!==false||f.invalidated_preexecution_attempt.artifacts_uploaded!==0)throw new Error('attempt-1 invalidation drift');
+
+          const out={
+            status:'passed',
+            wins_vs_null:r.internal_cv.P2_wins_vs_exact_null,
+            wins_vs_no_lapse:r.internal_cv.P2_wins_vs_selected_no_lapse,
+            median_vs_null:r.internal_cv.median_relative_improvement_vs_exact_null,
+            median_vs_no_lapse:r.internal_cv.median_relative_improvement_vs_no_lapse,
+            final_fit_executed:r.final_all_data_fit!==null,
+            rerun_authorized:f.rerun_authorized,
+            active_authorization:fs.existsSync('hypotheses/p2_highres_authorization_v1.json'),
+            official_workflow:fs.existsSync('.github/workflows/p2-v033o-official-highres.yml'),
+            materializer:fs.existsSync('.github/workflows/p2-v033p-materialize-result.yml')
+          };
+          fs.writeFileSync('/tmp/p2-v033p-audit/closure.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out));
+          NODE
+
+      - name: Real Chromium frozen-result closure audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p2-v033p-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p2-v033p-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p2-v033p-chrome --remote-debugging-port=9222 about:blank >/tmp/p2-v033p-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p2-v033p-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');
+          await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+
+          const state=await evalv("(async()=>{const r=await(await fetch('./reports/p2_response_estimation_1000x60_v1.json')).json();const p=await(await fetch('./reports/p2_response_estimation_execution_provenance_v1.json')).json();const f=await(await fetch('./hypotheses/p2_response_estimation_result_freeze_v1.json')).json();const a=await(await fetch('./hypotheses/archive/p2_highres_authorization_v1.json')).json();const active=await fetch('./hypotheses/p2_highres_authorization_v1.json');const wf=await fetch('./.github/workflows/p2-v033o-official-highres.yml');const mat=await fetch('./.github/workflows/p2-v033p-materialize-result.yml');return{status:r.status,wNull:r.internal_cv.P2_wins_vs_exact_null,wNl:r.internal_cv.P2_wins_vs_selected_no_lapse,mNull:r.internal_cv.median_relative_improvement_vs_exact_null,mNl:r.internal_cv.median_relative_improvement_vs_no_lapse,dual:r.internal_cv.P2_dual_survival_guard_passed,finalFit:r.final_all_data_fit,promotion:r.promotion.mechanism_survives_internal_development,eligible:r.promotion.fixed_parameter_triple_eligible_for_future_freeze,run:p.github.run_id,reportBlob:p.report.git_blob_sha,P1:p.firewalls.P1_official_result_semantics_loaded,ymaze:p.firewalls.ymaze_accessed,candidateB:p.firewalls.Candidate_B_implemented,canonical:p.firewalls.canonical_locomotion_updated,rerun:f.rerun_authorized,closure:f.status,archive:a.id,activeStatus:active.status,wfStatus:wf.status,matStatus:mat.status};})()");
+          if(state.status!=='development_response_estimation_failed_dual_primary_survival_guard'||state.wNull!==4||state.wNl!==4||state.dual!==false||state.finalFit!==null||state.promotion!==false||state.eligible!==false)throw new Error('browser official-result drift');
+          if(Math.abs(state.mNull-0.38010077026652644)>1e-15||Math.abs(state.mNl-0.09289481727992745)>1e-15)throw new Error('browser median drift');
+          if(state.run!==34190528101||state.reportBlob!=='cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72')throw new Error('browser provenance drift');
+          if(state.P1!==false||state.ymaze!==false||state.candidateB!==false||state.canonical!==false||state.rerun!==false)throw new Error('browser firewall drift');
+          if(state.closure!=='official_development_response_estimation_failed_dual_primary_survival_guard_frozen_p2_v1_closed'||state.archive!=='P2_high_resolution_authorization_v1')throw new Error('browser closure/archive drift');
+          if(state.activeStatus!==404||state.wfStatus!==404||state.matStatus!==404)throw new Error('retired execution surface unexpectedly available');
+
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p1Req=requests.filter(u=>u.includes('p1_response_estimation_500x60_v1.json'));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p1Req.length)throw new Error('browser closure network firewall failure');
+
+          const out={status:'passed',exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,p1_result_requests:p1Req.length,wins_vs_null:state.wNull,wins_vs_no_lapse:state.wNl,active_authorization_status:state.activeStatus,official_workflow_status:state.wfStatus,materializer_status:state.matStatus,rerun_authorized:state.rerun};
+          fs.writeFileSync('/tmp/p2-v033p-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p2-v033p-browser.mjs
+
+      - name: Upload P2 result-freeze closure audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-v033p-result-freeze-closure-audit
+          path: /tmp/p2-v033p-audit
+          retention-days: 30
