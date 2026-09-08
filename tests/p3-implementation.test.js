@@ -60,7 +60,18 @@ assert.strictEqual(auth.promotion_rule.response_estimation_policy_authorized,fal
 assert.strictEqual(auth.promotion_rule.canonical_locomotion_update_authorized,false);
 assert.strictEqual(auth.promotion_rule.Y_maze_unlock_authorized,false);
 
-for(const p of ['hypotheses/p3_response_estimation_v1.json','tools/run-p3-estimation.js','hypotheses/p3_highres_authorization_v1.json'])
+const laterPolicyRel='hypotheses/p3_response_estimation_v1.json';
+const laterPolicyPresent=fs.existsSync(path.join(root,laterPolicyRel));
+if(laterPolicyPresent){
+  assert.strictEqual(blob(laterPolicyRel),'d86eb9936e993d188f2a28faab838ba158c40f3b');
+  const p3policy=read(laterPolicyRel);
+  assert.strictEqual(p3policy.frozen_inputs.implementation_authorization.git_blob_sha,'128afcbdb10d3254240c5074e1e997cee7d7fe51');
+  assert.strictEqual(p3policy.frozen_inputs.p3_runtime.git_blob_sha,'4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8');
+  assert.strictEqual(p3policy.estimator_implementation_gate.estimator_status,'not_implemented_at_policy_freeze');
+  assert.strictEqual(p3policy.global_firewalls.response_target_semantic_access_during_this_policy_freeze,false);
+  assert.strictEqual(p3policy.global_firewalls.Y_maze_access,false);
+}
+for(const p of ['tools/run-p3-estimation.js','hypotheses/p3_highres_authorization_v1.json'])
   assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent');
 
 console.log('p3-implementation.test.js PASS '+JSON.stringify({
@@ -70,6 +81,7 @@ console.log('p3-implementation.test.js PASS '+JSON.stringify({
   model_blob:blob('models/lasius_niger_painted_trail_p3_v1.json'),
   runner_blob:blob('tools/run-p3-reachability.js'),
   trials:policy.frozen_execution.nominal_reachability_panel.trials,
+  later_policy_present:laterPolicyPresent,
   target_access:false,
   ymaze:false
 }));

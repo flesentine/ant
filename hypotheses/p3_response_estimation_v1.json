@@ -1,0 +1,418 @@
+{
+  "schema_version": 1,
+  "id": "P3_response_estimation_v1",
+  "status": "development_response_estimation_policy_frozen_before_estimator_implementation_or_response_target_semantic_access",
+  "freeze_date_local": "2026-09-08",
+  "scientific_scope": "Poissonnier 2026 open-arena Experiment 1 painted-trail response development for the already-frozen P3-v1 local-sector Weber steering mechanism only. This policy freezes all P3 estimation choices before a P3 estimator exists and before semantic access to the 102-row response target. It does not authorize Y-maze access, canonical locomotion changes, P1/P2 rerun or rescue, H2-H5 refit/combination, or cross-apparatus validation.",
+  "honesty_note": "The official P1-v1 and P2-v1 development failures and the successful P3-v1 reference-free reachability result are known before this policy. Their target-ranked outcomes may not shape P3 bounds, weights, folds, seeds, budgets, objective, comparator, survival thresholds, identifiability rules, or promotion rules. To prevent outcome-driven softening or rescue, the six-colony LOCO partition, primary observables, primary-objective construction, 5-of-6 robustness threshold, secondary guards, and simulation trial budgets retain the same meanings as the prior frozen response-estimation policies. The P3-specific structural comparator is chosen prospectively from the independently frozen mechanism distinction: relative/Weber sector transduction must add heldout predictive value beyond a separately selected frozen absolute-transduction local-kernel benchmark, not merely beyond canonical locomotion. This remains internal development, not blind preregistration or external validation.",
+  "frozen_inputs": {
+    "candidate_class_decision": {
+      "file": "hypotheses/p3_painted_trail_candidate_class_decision_v1.json",
+      "git_blob_sha": "e8da07f6f73934e0120fd41d4668ae4039108336"
+    },
+    "mechanism_freeze": {
+      "file": "hypotheses/p3_painted_trail_mechanism_v1.json",
+      "git_blob_sha": "5d00ce0058ff388c9f57d7dce56ce465d82c5765"
+    },
+    "reachability_execution_policy": {
+      "file": "hypotheses/p3_reachability_execution_v1.json",
+      "git_blob_sha": "55494a3190964d24ded2ae0d1faf3b355cc7835f"
+    },
+    "implementation_authorization": {
+      "file": "hypotheses/p3_implementation_authorization_v1.json",
+      "git_blob_sha": "128afcbdb10d3254240c5074e1e997cee7d7fe51"
+    },
+    "reachability_result_freeze": {
+      "file": "hypotheses/p3_reachability_result_freeze_v1.json",
+      "git_blob_sha": "b3fa56386f71b0cea1dd8cfec032148c42af1b6d"
+    },
+    "reachability_report": {
+      "file": "reports/p3_reference_free_reachability_v1.json",
+      "git_blob_sha": "a18d5cd360be79bf1a05d3fe3e2c26fd1d6c86f6",
+      "sha256": "6f5fb55db24015e8822ebc6bdad0c8e76d00d19514e77e0e4af58a4157634887",
+      "bytes": 5114,
+      "use_rule": "Implementation/reachability evidence only. The realized central-zone fraction, trail-axis exit rate, steering-sample count, and other behavioral summaries may not set or narrow P3 estimation bounds, weights, thresholds, folds, seeds, budgets, comparator definitions, or promotion rules."
+    },
+    "p3_runtime": {
+      "file": "src/p3.js",
+      "git_blob_sha": "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8"
+    },
+    "p3_engineering_model": {
+      "file": "models/lasius_niger_painted_trail_p3_v1.json",
+      "git_blob_sha": "9107de0c71641c4037bbedbb498b9fa868c1ef00"
+    },
+    "p3_zero_dose_experiment": {
+      "file": "experiments/open_arena_p3_zero_dose_reachability.json",
+      "git_blob_sha": "f2a97691e604bbb086216221da1c776cc74e9dbb"
+    },
+    "p3_nominal_dose_experiment": {
+      "file": "experiments/open_arena_p3_nominal_dose_reachability.json",
+      "git_blob_sha": "e3c3d7c4c58c885b99654e8797b8570ef91f7cde"
+    },
+    "p3_reachability_runner": {
+      "file": "tools/run-p3-reachability.js",
+      "git_blob_sha": "0e1795b7bbb3a568fbbd241cc809d600e1f8ca67"
+    },
+    "absolute_transduction_benchmark_runtime": {
+      "file": "src/p1.js",
+      "git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+      "use_rule": "Use only the frozen P1 absolute/saturating local-kernel mechanism as a structural benchmark under the new P3 procedure. Do not load or reuse P1 official fit results, fold selections, or target-ranked outcomes."
+    },
+    "p1_closure": {
+      "file": "hypotheses/p1_response_estimation_result_freeze_v1.json",
+      "git_blob_sha": "1d99ebfaa378aeb1b98963f63b3a513a616a6617",
+      "p1_v1_closed": true,
+      "p1_rerun_authorized": false,
+      "semantic_access_rule": "Closure metadata only; P1 official target-ranked result semantics may not be loaded by the P3 estimator."
+    },
+    "p2_closure": {
+      "file": "hypotheses/p2_response_estimation_result_freeze_v1.json",
+      "git_blob_sha": "088316e1746594f9b3f700cb277a83eb53fdd9f6",
+      "p2_v1_closed": true,
+      "p2_rerun_authorized": false,
+      "semantic_access_rule": "Closure metadata only; P2 official target-ranked result semantics may not be loaded by the P3 estimator."
+    },
+    "response_target": {
+      "file": "reference/poissonnier2026_pheromone_response_targets.json",
+      "git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+      "rows": 102,
+      "use_rule": "The path, blob, and row count are frozen metadata inherited from the audited response-target definition. This policy gate must not parse target rows or response semantics. Semantic loading is permitted only by a separately qualified and later authorized P3 estimator."
+    },
+    "apparatus": {
+      "file": "apparatus/poissonnier2026_open_arena_p1_v1.json",
+      "git_blob_sha": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4"
+    },
+    "canonical_locomotion_model": {
+      "file": "models/lasius_niger_locomotion_v1.json",
+      "git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+    },
+    "canonical_runtime": {
+      "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+      "integrity_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+    },
+    "main_checkpoint_before_policy": {
+      "commit": "fd52e93ca3215d1417616a726d6a0d84e5a771b2",
+      "permanent_main_workflow_run_id": 34257926135,
+      "permanent_main_workflow_run_number": 146,
+      "test_job_id": 102168317285,
+      "deploy_job_id": 102168597615,
+      "conclusion": "success"
+    }
+  },
+  "response_parameter_surface": {
+    "estimated_parameters": {
+      "sigma_field_mm": {
+        "role": "shared transverse spread of the frozen Gaussian painted-line field used by P3",
+        "bounds": [2, 32],
+        "scale": "log",
+        "provenance": "Prospectively retains the pre-target painted-trail field domain already frozen before P1/P2 target ranking: a factor-four interval below and above the engineering value 8 mm. It is not widened, narrowed, shifted, or recentered using P1, P2, or P3 reachability outcomes."
+      },
+      "kappa_trail_per_s": {
+        "role": "shared gain multiplying the frozen P3 Weber/Michelson relative bilateral signal",
+        "bounds": [0, 16],
+        "scale": "linear",
+        "nested_canonical_null_value": 0,
+        "provenance": "Prospectively retains the exact zero-gain canonical null and the pre-target gain domain up to four times the engineering value 4 s^-1. It is not altered using prior target-ranked failures or P3 reachability behavior."
+      }
+    },
+    "estimated_parameter_names_exact": [
+      "sigma_field_mm",
+      "kappa_trail_per_s"
+    ],
+    "nuisance_parameters": [],
+    "nuisance_policy": "None. Canonical angular diffusion, speed, pauses, entry state, H2-H5 mechanisms, P3 sector radius, sector angle, 4x8 quadrature, zero-epsilon Weber equation, apparatus, observation, scoring, boundary behavior, and canonical RNG are fixed. No locomotion, treatment, path, colony, direction, experience, threshold, epsilon, dose-amplitude, sensor-geometry, or apparatus-transition nuisance coordinate is allowed.",
+    "sharing_rule": "One sigma_field_mm and one kappa_trail_per_s pair is shared across short and long approach histories, all six colonies, and both treatment strata. Treatment-specific, path-specific, colony-specific, direction-specific, experience-specific, or fold-specific biological parameter definitions are forbidden.",
+    "fixed_structure": [
+      "front-left sector angle = 90 degrees",
+      "front-right sector angle = 90 degrees",
+      "sector_radius_mm = 10",
+      "radial_bins = 4",
+      "angular_bins_per_sector = 8",
+      "samples_per_sector = 32",
+      "W(L,R) = 0 if L+R <= 0; otherwise (R-L)/(R+L)",
+      "epsilon_or_regularization = 0",
+      "omega_trail = kappa_trail_per_s * W(L,R)",
+      "no p_lapse or response RNG",
+      "nominal pheromone dose ratio A = 1",
+      "DCM active-signal dose ratio A = 0",
+      "physics_dt_s = 0.02"
+    ]
+  },
+  "nested_models_and_comparators": {
+    "exact_canonical_null": {
+      "definition": "kappa_trail_per_s = 0 with sigma_field_mm = 8 bookkeeping value. Because the frozen P3 runtime exact-bypasses field, sector, and transduction evaluation under zero gain, sigma is inert and the trajectory plus canonical biology RNG state are bit-exact to canonical locomotion.",
+      "anchor": {
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 0
+      },
+      "required_bit_identity": true,
+      "positive_numeric_zero_required": true
+    },
+    "dcm_identity": "For every P3 candidate and every absolute-transduction benchmark candidate, DCM A=0 is an exact canonical bypass and is independent of sigma_field_mm and kappa_trail_per_s.",
+    "absolute_transduction_structural_benchmark": {
+      "runtime": "frozen src/p1.js absolute/saturating local-kernel mechanism",
+      "definition": "For each P3 Halton sigma/kappa coordinate, construct a benchmark candidate using the same sigma_field_mm and kappa_trail_per_s but the frozen P1 point-sensor absolute/saturating transduction: forward offset 2 mm, lateral half-separation 1.5 mm, T(C)=C/(1+C), omega=kappa*(T(C_R)-T(C_L)).",
+      "benchmark_panel_rule": "Use exactly the same 999 sigma/kappa Halton coordinates as the P3 panel plus the same exact canonical null in slot 1000. Rank this benchmark panel separately on the same training primary objective and the same common-random-number seed panel.",
+      "purpose": "Require the P3 relative-sector/Weber transduction structure to add heldout predictive value beyond a separately optimized frozen absolute-transduction trail-steering mechanism, not merely beyond canonical locomotion.",
+      "not_a_P1_rerun": true,
+      "P1_official_result_semantics_loaded": false,
+      "P1_official_fold_selections_reused": false
+    }
+  },
+  "reference_partition": {
+    "type": "leave_one_colony_out",
+    "colonies": [0, 7, 16, 20, 21, 27],
+    "folds": 6,
+    "all_colonies_have_all_four_treatment_by_path_cells": true,
+    "training_rule": "Within each training colony, compute the pheromone-minus-DCM treatment contrast separately for each path x metric. The fold training reference target is the equal-weight arithmetic mean of the five colony-level contrasts. Individual ant rows may estimate each colony cell summary but may not be pooled in a way that weights colonies by sample count.",
+    "heldout_rule": "The heldout reference target is the heldout colony's own within-path pheromone-minus-DCM contrast. The heldout colony is never used for P3 candidate ranking, absolute-benchmark ranking, scaling, bound changes, stopping, or search refinement in that fold.",
+    "colony_firewall": "Colony identity may define train/holdout membership and reporting only. It may not enter the P3 ant, sector geometry, response parameters, protocol biology, RNG, or treatment response.",
+    "colony_weighting_rule": "Each colony has weight 1/5 in a fold training target and 1/6 in the final all-data target, regardless of its number of ant rows."
+  },
+  "contrast_definition": {
+    "reason": "P3 response parameters must explain pheromone treatment response without absorbing unresolved short-versus-long baseline locomotion structure, prior P1/P2 target-ranked failures, or P3 reachability behavior.",
+    "paths": ["s", "l"],
+    "treatments": ["dcm_control", "pheromone"],
+    "reference_contrast": "Within each colony and path stratum, Delta_colony = reference pheromone summary - reference DCM summary. Fold Delta_ref is the equal-weight mean of the five training-colony Delta_colony values; heldout Delta_ref is the heldout colony's Delta_colony; final all-data Delta_ref is the equal-weight mean of all six colony-level contrasts.",
+    "simulation_contrast": "Within each path stratum and metric, Delta_sim = simulated nominal-pheromone summary - simulated DCM summary using matched common-random-number trial seeds.",
+    "forbidden_contrasts": [
+      "short minus long as a P3 fitting target",
+      "pooled pheromone minus DCM without retaining path stratum",
+      "treatment-specific baseline locomotion adjustment",
+      "colony-specific response adjustment",
+      "any contrast constructed from P1 or P2 official fold failures",
+      "any objective term constructed from P3 reachability summaries"
+    ]
+  },
+  "primary_fit_observables": [
+    {
+      "name": "middle_zone_fraction",
+      "reference_summary": "Within each colony x treatment x path cell, arithmetic mean middle-zone fraction; form the within-colony pheromone-minus-DCM contrast, then equal-weight colonies as frozen by reference_partition.",
+      "simulation_summary": "arithmetic mean across frozen simulation trials",
+      "contrast_range": [-1, 1],
+      "role": "primary"
+    },
+    {
+      "name": "trail_axis_exit",
+      "reference_summary": "Within each colony x treatment x path cell, trail-axis exit proportion; form the within-colony pheromone-minus-DCM contrast, then equal-weight colonies as frozen by reference_partition.",
+      "simulation_summary": "proportion exiting left or right across frozen simulation trials",
+      "contrast_range": [-1, 1],
+      "role": "primary"
+    }
+  ],
+  "primary_objective": {
+    "components": [
+      "short middle_zone_fraction treatment contrast error",
+      "long middle_zone_fraction treatment contrast error",
+      "short trail_axis_exit treatment contrast error",
+      "long trail_axis_exit treatment contrast error"
+    ],
+    "component_error": "Delta_sim - Delta_ref",
+    "aggregation": "Equal-weight arithmetic mean of the four squared component errors.",
+    "scaling": "No reference-derived scaling or fitted weights. All four primary contrasts are dimensionless and lie in [-1,1].",
+    "candidate_ranking_uses_only_primary_objective": true,
+    "same_objective_for_P3_and_absolute_benchmark": true,
+    "forbidden_after_freeze": [
+      "primary metric addition or removal",
+      "metric reweighting",
+      "path reweighting",
+      "reference-derived adaptive weights",
+      "secondary-guard inclusion in candidate ranking",
+      "alternate contrast definition",
+      "objective change motivated by a P1, P2, or later P3 heldout failure"
+    ]
+  },
+  "secondary_guard_observables": [
+    "time_to_exit_s",
+    "beeline_mm"
+  ],
+  "secondary_guard_policy": {
+    "ranking_use": false,
+    "selection_use": false,
+    "evaluation_stage": "Only after a fold candidate or final all-data P3 candidate has been selected from the primary objective.",
+    "contrast": "pheromone minus DCM within each path stratum",
+    "standardization": "For each path x secondary metric, divide contrast error by the pooled individual-row reference sample standard deviation across both treatments from the five training colonies for LOCO diagnostics. For the final all-data guard, use the pooled individual-row reference sample standard deviation across both treatments and all six colonies within that same path stratum. These scales standardize guards only; they never rank or select candidates. Heldout rows may not set LOCO scales.",
+    "sample_sd_denominator": "n-1",
+    "final_promotion_guard": "On the independent final-check simulation panel, the absolute standardized P3 contrast error must be <= 1.0 for each of the four secondary path x metric components.",
+    "purpose": "Prevent a primary-only P3 fit from producing a grossly incompatible exit-time or beeline treatment response without allowing those observables to tune selection."
+  },
+  "forbidden_fit_observables": [
+    "Average_Speed_Moving",
+    "Traveled_Dist_Moving",
+    "Straightness",
+    "Prop_time_moving",
+    "Average_Speed",
+    "Traveled_Dist",
+    "raw heading diagnostics",
+    "P1, P2, or P3 sensor/sector summaries",
+    "P1, P2, or P3 steering omega diagnostics",
+    "P3 relative signal W",
+    "P2 engaged/lapsed assignment or response RNG",
+    "P1 official heldout relative-improvement values",
+    "P2 official heldout relative-improvement values",
+    "P3 reference-free reachability summaries",
+    "any Y-maze quantity"
+  ],
+  "search_protocol": {
+    "method": "deterministic 2D Halton low-discrepancy panel plus exact canonical null",
+    "candidate_budget_per_fold_total": 1000,
+    "positive_P3_candidates": 999,
+    "exact_canonical_null_candidates": 1,
+    "halton_indexing": "starts at 1",
+    "halton_mapping": [
+      {
+        "prime": 2,
+        "parameter": "sigma_field_mm",
+        "mapping": "log-uniform over [2,32]"
+      },
+      {
+        "prime": 3,
+        "parameter": "kappa_trail_per_s",
+        "mapping": "linear over [0,16]"
+      }
+    ],
+    "P3_candidate_panel_rule": "Halton indices 1..999 define the 2D P3 candidates. The 1000th slot is the exact canonical null sigma=8, kappa=0. The panel is identical in every LOCO fold; only reference training rows and simulation seed streams differ.",
+    "first_candidate_sanity": {
+      "index": 1,
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 5.333333333333333
+    },
+    "second_candidate_sanity": {
+      "index": 2,
+      "sigma_field_mm": 4,
+      "kappa_trail_per_s": 10.666666666666666
+    },
+    "absolute_transduction_benchmark_panel": {
+      "candidate_budget_per_fold_total": 1000,
+      "positive_absolute_candidates": 999,
+      "exact_canonical_null_candidates": 1,
+      "rule": "For Halton indices 1..999, use the exact same sigma and kappa coordinates as the P3 candidate at that index, but evaluate the frozen absolute/saturating P1 local-kernel mechanism. Slot 1000 is the same exact canonical null. Rank this panel separately using the same primary objective.",
+      "tie_break": "lower Halton index; exact null is index 1000"
+    },
+    "training_trials_per_treatment_path_per_candidate": 60,
+    "heldout_evaluation_trials_per_treatment_path": 120,
+    "physics_dt_s": 0.02,
+    "root_fit_seed": 6210000,
+    "fold_fit_seed": "6210000 + fold_index * 10000",
+    "root_evaluation_seed": 6810000,
+    "fold_evaluation_seed": "6810000 + fold_index * 10000",
+    "trial_seed_pairing": {
+      "short_path_offset": 0,
+      "long_path_offset": 1000,
+      "rule": "Within a path stratum, pheromone and DCM use the exact same trial seed for a given trial index. Every P3 candidate, every absolute-transduction benchmark candidate, and the exact canonical null use the same frozen trial seeds. Short and long use disjoint named offsets."
+    },
+    "common_random_numbers": true,
+    "response_rng": "none in P3 and none in the absolute-transduction benchmark; canonical biology RNG remains the only stochastic stream and uses the same trial seeds across mechanisms.",
+    "allowed_exact_caching": [
+      "DCM A=0 canonical trajectories may be cached across all P3 and absolute-transduction candidates because both frozen runtimes exact-bypass trail-response evaluation.",
+      "Exact canonical kappa=0 trajectories may be cached across candidate panels.",
+      "Caching may reduce compute but may not alter logical trial counts, seeds, objective values, mechanism semantics, or report semantics."
+    ],
+    "search_firewall": [
+      "No local optimizer.",
+      "No adaptive second-stage search.",
+      "No candidate injection after viewing target-ranked results.",
+      "No bound widening or narrowing after target-ranked results.",
+      "No budget increase after target-ranked results.",
+      "No alternative favorable seeds.",
+      "No objective, comparator, survival, identifiability, or secondary-guard changes after target-ranked results.",
+      "No locomotion nuisance addition.",
+      "No treatment-specific, path-specific, colony-specific, direction-specific, or experience-specific response parameters.",
+      "No P2 lapse state or response RNG.",
+      "No sensor-radius, quadrature, epsilon, threshold, or dose-amplitude fitting.",
+      "No P1/P2 failed-fold-driven refinement."
+    ]
+  },
+  "cross_validation_and_survival": {
+    "P3_candidate_selection": "For each LOCO fold, choose the minimum training primary-objective candidate from the frozen 1000-slot P3 panel. Ties are broken by lower Halton index; the exact canonical null is index 1000.",
+    "absolute_benchmark_selection": "Separately choose the minimum training primary-objective candidate from the frozen 1000-slot absolute-transduction benchmark panel using the same tie-break.",
+    "matched_heldout_evaluation": "Evaluate the selected P3 candidate, selected absolute-transduction benchmark, and exact canonical null on the heldout colony using identical frozen evaluation trial seeds and the same heldout reference rows.",
+    "relative_improvement_vs_canonical_null": "(heldout_null_primary_loss - heldout_P3_primary_loss) / max(1e-12, heldout_null_primary_loss)",
+    "relative_improvement_vs_absolute_benchmark": "(heldout_absolute_primary_loss - heldout_P3_primary_loss) / max(1e-12, heldout_absolute_primary_loss)",
+    "canonical_null_survival_guard": {
+      "minimum_heldout_fold_wins": 5,
+      "folds_total": 6,
+      "median_relative_improvement_must_be_strictly_positive": true
+    },
+    "structural_increment_survival_guard": {
+      "minimum_heldout_fold_wins_vs_selected_absolute_benchmark": 5,
+      "folds_total": 6,
+      "median_relative_improvement_vs_absolute_benchmark_must_be_strictly_positive": true
+    },
+    "primary_survival_guard": "Both the canonical-null survival guard and the structural-increment survival guard must pass. P3-v1 does not survive internal development by merely outperforming canonical locomotion if the relative-sector/Weber structure fails to improve on the separately selected frozen absolute-transduction benchmark.",
+    "failure_rule": "Failure of either survival guard closes P3-v1 response estimation. Do not rescue it by changing bounds, sector geometry, epsilon rule, seeds, weights, budgets, nuisance policy, folds, comparator definition, objectives, thresholds, or mechanism structure."
+  },
+  "final_all_data_fit": {
+    "authorized_only_if_both_survival_guards_pass": true,
+    "reference_rows": "all 102 open-arena response-target rows, summarized as an equal-weight mean of the six colony-level within-path treatment contrasts",
+    "P3_candidate_panel": "the same frozen 999 2D Halton candidates plus exact canonical null; no new candidates",
+    "absolute_benchmark_panel": "the same frozen 999 absolute-transduction candidates at matching sigma/kappa coordinates plus exact canonical null; no new candidates",
+    "ranking_objective": "primary objective only",
+    "training_trials_per_treatment_path_per_candidate": 120,
+    "fit_seed": 7210000,
+    "final_check_trials_per_treatment_path": 240,
+    "final_check_seed": 7610000,
+    "final_check_rule": "After separately selecting the all-data P3 candidate and all-data absolute-transduction benchmark, rerun only selected P3, selected absolute benchmark, and exact canonical null on the independent final-check simulation seeds. Final-check results may evaluate frozen promotion/guard criteria but may not trigger refitting or alternate candidate selection.",
+    "final_primary_increment_guard": "On the independent final-check panel, selected P3 primary loss must be strictly lower than both selected absolute-transduction benchmark primary loss and exact canonical-null primary loss.",
+    "colony_weighting": "1/6 per colony regardless of ant-row count"
+  },
+  "identifiability_guards": {
+    "near_best_set_definition": "All all-data P3 candidates with primary loss <= best_loss + max(0.0004, 0.05 * best_loss).",
+    "normalized_coordinates": {
+      "sigma_field_mm": "log-scale position from 0 at 2 mm to 1 at 32 mm",
+      "kappa_trail_per_s": "linear position from 0 at 0 s^-1 to 1 at 16 s^-1"
+    },
+    "requirements_for_parameter_promotion": [
+      "The exact canonical null is not in the P3 near-best set.",
+      "The best all-data absolute-transduction benchmark loss is greater than best_P3_loss + max(0.0004, 0.05 * best_P3_loss), so the absolute-transduction comparator is not within the P3 near-best tolerance.",
+      "The selected sigma and kappa normalized coordinates are each at least 0.02 from an active search bound.",
+      "The P3 near-best normalized span is <= 0.60 for sigma_field_mm.",
+      "The P3 near-best normalized span is <= 0.60 for kappa_trail_per_s."
+    ],
+    "interpretation": "If P3 passes both LOCO survival guards but fails identifiability, report mechanism survival without claiming a sufficiently identified fixed sigma/kappa pair. Do not expand, narrow, or refine the search to rescue identifiability."
+  },
+  "promotion_rule": {
+    "P3_mechanism_survives_internal_development": "Requires both 5-of-6 heldout survival guards plus strictly positive medians versus the exact canonical null and versus the separately selected absolute-transduction benchmark.",
+    "fixed_P3_parameter_pair_eligible_for_future_freeze": "Additionally requires all identifiability guards, the independent final primary increment guard, and all four final secondary standardized guard errors <= 1.0.",
+    "engineering_sigma_8_kappa_4_promoted_automatically": false,
+    "sector_geometry_promoted_as_anatomical_estimate": false,
+    "canonical_locomotion_update_authorized": false,
+    "P1_or_P2_reopening_authorized": false,
+    "ymaze_unlock_authorized": false,
+    "next_gate_if_passed": "Freeze the exact P3 result and any eligible fixed sigma/kappa pair in a separate result record. A separate cross-apparatus validation authorization is still required before any Y-maze access.",
+    "next_gate_if_failed": "Freeze the failed P3 result and close P3-v1 without retuning."
+  },
+  "estimator_implementation_gate": {
+    "estimator_status": "not_implemented_at_policy_freeze",
+    "high_resolution_response_search_authorized": false,
+    "response_target_semantic_access_authorized": false,
+    "requirements_before_authorization": [
+      "Implement a separate P3 response estimator that pins this exact policy and every frozen input blob listed here.",
+      "Prove exact P3 canonical kappa=0 and DCM A=0 identities under estimator wiring.",
+      "Prove the frozen absolute-transduction comparator uses the exact P1 helper/runtime semantics at the same sigma/kappa Halton coordinates without loading P1 official fit results.",
+      "Prove exact 2D Halton mapping, exact 999+null P3 panel, exact 999+null absolute benchmark panel, and tie-breaking.",
+      "Pass synthetic/reference-free qualification of contrast construction, equal-colony weighting, fold isolation, primary ranking, sample-SD secondary guards, both survival comparators, identifiability logic, and final-check logic without target-ranked tuning.",
+      "Pass the full H0-H5 plus P1/P2/P3 permanent regression suite.",
+      "Demonstrate Node-to-real-Chromium parity for synthetic canonical-null, P3, and absolute-transduction benchmark cases.",
+      "Prove the estimator cannot load P1 or P2 official result semantics, Y-maze content, or write canonical model files.",
+      "Prove semantic response-target loading is blocked until a separate post-qualification authorization exists.",
+      "Record the exact qualified estimator executable blob and qualification report in a separate authorization artifact."
+    ],
+    "authorization_rule": "Only a later authorization artifact that pins this exact policy blob and the qualified estimator/audit may permit one frozen high-resolution P3 response search."
+  },
+  "global_firewalls": {
+    "response_target_semantic_access_during_this_policy_freeze": false,
+    "response_target_candidate_search_during_this_policy_freeze": false,
+    "P1_official_result_semantic_access": false,
+    "P2_official_result_semantic_access": false,
+    "P1_rerun_or_rescue": false,
+    "P2_rerun_or_rescue": false,
+    "P3_estimator_implementation_in_this_policy_PR": false,
+    "P3_parameter_search_in_this_policy_PR": false,
+    "P2_lapse_structure": false,
+    "canonical_locomotion_change": false,
+    "H2_H3_H4_H5_refit_or_combination": false,
+    "Y_maze_access": false,
+    "Y_maze_fitting_or_ranking": false
+  }
+}
