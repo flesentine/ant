@@ -182,8 +182,8 @@ assert.strictEqual(p.global_firewalls.Y_maze_fitting_or_ranking,false);
 
 const laterEstimatorPresent=fs.existsSync(path.join(root,'tools','run-p3-estimation.js'));
 if(laterEstimatorPresent){
-  assert.strictEqual(blob('tools/run-p3-estimation.js'),'462de97b21f0968b754dc365902ae97a0eba0b18');
-  assert.strictEqual(blob('tools/p3-estimation-core.js'),'a661ef821dd6b7e3a34d2dc2fdd7058dd2c2e5d3');
+  assert.strictEqual(blob('tools/run-p3-estimation.js'),'5bf27bf439dca18629cdfd36f56fe767a23062ff');
+  assert.strictEqual(blob('tools/p3-estimation-core.js'),'410ef81dfe761e3c218d072ca311632329ac1617');
 }
 assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')),'P3 high-resolution authorization must remain absent at estimator qualification');
 
