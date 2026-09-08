@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "id": "P3_reference_free_reachability_execution_v1",
+  "status": "execution_policy_frozen_before_P3_runtime_implementation_or_execution",
+  "freeze_date_local": "2026-09-08",
+  "scientific_scope": "Reference-free engineering qualification of the already-frozen P3-v1 local-sector Weber steering mechanism. This policy is frozen before P3 runtime implementation and before any P3 simulation execution.",
+  "mechanism_freeze": {
+    "file": "hypotheses/p3_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "5d00ce0058ff388c9f57d7dce56ce465d82c5765"
+  },
+  "candidate_class_decision": {
+    "file": "hypotheses/p3_painted_trail_candidate_class_decision_v1.json",
+    "git_blob_sha": "e8da07f6f73934e0120fd41d4668ae4039108336"
+  },
+  "selection_main_checkpoint": {
+    "commit": "e30a4462cce7a9594d248f328370a214b20cedc0",
+    "permanent_main_workflow_run_id": 34254197826,
+    "test_job_id": 102155754688,
+    "deploy_job_id": 102156006262,
+    "conclusion": "success"
+  },
+  "frozen_inputs": {
+    "canonical_model_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "integrity_runtime_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+    "p1_component_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "open_arena_apparatus_git_blob_sha": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4",
+    "zero_dose_template_experiment_git_blob_sha": "6e47fa91143ed5d4d2b52bf2c555246b7d216297",
+    "nominal_dose_template_experiment_git_blob_sha": "8232d378195304f2a15aa76da8abf108d94f2c58"
+  },
+  "frozen_execution": {
+    "physics_dt_s": 0.02,
+    "engineering_values": {
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 4,
+      "sector_radius_mm": 10,
+      "radial_bins": 4,
+      "angular_bins_per_sector": 8,
+      "samples_per_sector": 32
+    },
+    "exact_identity_panel": {
+      "seeds": [740001, 740002, 740003, 740004, 740005, 740006, 740007, 740008],
+      "fixed_time_s": 8,
+      "cases": [
+        "zero_dose_canonical_identity",
+        "zero_kappa_canonical_identity"
+      ]
+    },
+    "pure_invariance_panel": {
+      "cases": [
+        "zero_equal_signal",
+        "positive_scale_invariance",
+        "left_right_antisymmetry",
+        "endpoint_reversal",
+        "rigid_translation",
+        "rigid_rotation",
+        "left_right_reflection",
+        "centered_parallel_trail_zero_steering"
+      ],
+      "numeric_tolerance": 1e-10
+    },
+    "nominal_reachability_panel": {
+      "trials": 400,
+      "first_seed": 741000,
+      "last_seed": 741399,
+      "workers_per_trial": 1,
+      "dose": "nominal",
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 4,
+      "purpose": "Verify finite deterministic relative-sector steering, canonical biology-RNG isolation, structural invariances, and non-degenerate reference-free open-arena reachability without target outcomes."
+    }
+  },
+  "required_structural_checks": [
+    "For every exact-identity seed, zero-dose P3 is bit-exact to canonical ant state and biology RNG state with zero sector/steering evaluations.",
+    "For every exact-identity seed, kappa=0 P3 is bit-exact to canonical ant state and biology RNG state with zero sector/steering evaluations.",
+    "P3 adds zero RNG streams and zero biology RNG draws.",
+    "The deterministic sensor operator produces exactly 32 front-left and 32 front-right samples using the frozen 4x8 equal-area midpoint rule.",
+    "The pure relative transduction returns exactly zero for zero/equal signal, is left-right antisymmetric, and is positively scale invariant within frozen tolerance.",
+    "Endpoint reversal, rigid translation, and rigid rotation preserve local sector summaries and steering within frozen tolerance.",
+    "Left-right reflection swaps sector summaries and reverses steering sign with equal magnitude within frozen tolerance.",
+    "Centered parallel trail geometry away from endpoint effects yields equal sector summaries and zero steering within frozen tolerance.",
+    "Every nominal-panel trial completes without NaN/Infinity in ant state or P3 diagnostics.",
+    "At least one nominal-panel trial contains at least one P3 steering evaluation.",
+    "Mean moving speed and all open-arena summaries are descriptive diagnostics only and may not tune the mechanism."
+  ],
+  "reference_firewall": {
+    "poissonnier2026_pheromone_response_targets_may_be_loaded": false,
+    "any_reference_outcomes_may_be_loaded": false,
+    "P1_official_result_semantics_may_be_loaded": false,
+    "P2_official_result_semantics_may_be_loaded": false,
+    "candidate_ranking_or_parameter_search": false,
+    "fit_or_parameter_search": false,
+    "adaptive_refinement": false,
+    "ymaze_may_be_loaded": false,
+    "ymaze_fitting_or_ranking": false
+  },
+  "implementation_constraints": [
+    "P3 runtime must extend canonical integrity.Simulation directly.",
+    "P3 may reuse frozen P1 helpers for apparatus, field concentration, distance-to-segment, and moving-step preview only; it must not instantiate P1 or P2 Simulation as a base.",
+    "P3 runtime may implement only the frozen local-sector Weber steering mechanism.",
+    "No response RNG or p_lapse state is allowed.",
+    "No treatment-, path-, colony-, direction-, or experience-specific response parameter is allowed.",
+    "No speed, pause, angular-noise, contact, boundary, apparatus, observation, or scoring change is allowed.",
+    "No H2-H5 mechanism combination is allowed.",
+    "No canonical file may be modified."
+  ],
+  "result_rule": {
+    "pass": "All frozen structural checks pass on the exact panels. This establishes implementation/reachability only, not biological fit.",
+    "fail": "Fix implementation defects only. Do not change the P3 mechanism, sector geometry, engineering values, seeds, trial counts, dt, invariances, or pass checks in response to reachability outcomes.",
+    "parameter_promotion_authorized": false,
+    "response_estimation_policy_authorized": false,
+    "canonical_update_authorized": false,
+    "ymaze_unlock_authorized": false
+  }
+}
