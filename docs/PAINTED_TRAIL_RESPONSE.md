@@ -2413,3 +2413,115 @@ At the policy freeze:
 - Y-maze access: unauthorized
 
 The next gate is a separate P3 estimator implementation + synthetic/reference-free qualification.
+
+## P3-v1 estimator implementation + reference-free qualification
+
+v0.3.3u implements the frozen P3 response estimator and qualifies its engineering/statistical wiring without semantic response-target access.
+
+Estimator:
+
+`tools/run-p3-estimation.js`
+
+Git blob:
+
+`5bf27bf439dca18629cdfd36f56fe767a23062ff`
+
+Estimator core:
+
+`tools/p3-estimation-core.js`
+
+Git blob:
+
+`410ef81dfe761e3c218d072ca311632329ac1617`
+
+The executable contains the already-frozen future high-resolution procedure, but that path remains authorization-gated and cannot load the response-target semantics without a separate later authorization artifact.
+
+### P3-specific comparator implementation
+
+The estimator ranks two independent 1000-point panels:
+
+1. P3 Weber/relative transduction: 999 2D Halton sigma/kappa candidates + exact canonical null.
+2. Frozen absolute-transduction structural benchmark: the same 999 sigma/kappa coordinates + the same exact null, ranked separately.
+
+The structural benchmark uses the pinned P1 runtime implementation only for the already-frozen absolute-transduction equations. It preserves the P3 experiment/model identity and changes only the painted-trail response mechanism fields. No P1 official result/fold-selection semantics are loaded, and no P2 result semantics or lapse structure are used.
+
+### Frozen P3 estimator qualification result
+
+The first complete reference-free P3 estimator qualification audit passed.
+
+Qualification audit:
+
+- tested head: `7dae80bff4cab045c4f9277f2c3c4c75d370d7f0`
+- GitHub Actions run: `34289538716`
+- job: `102272761530`
+- artifact ID: `10080797145`
+- artifact digest: `sha256:2f1b54a5c6122ae556a0bad6c07d5b0f462f66de299bbb0d247030fbd4f797c7`
+
+Exact qualification report:
+
+- file: `reports/p3_estimator_qualification_v1.json`
+- Git blob: `63e1d7360bc1ef4b232bbf37f347b9fa27e7d461`
+- bytes: 3508
+- SHA-256: `4912618de22e74d67197529bb6625c850bfa8912bcf55e99280732dbcc64e604`
+- status: `passed`
+
+Qualification-freeze record:
+
+- file: `hypotheses/p3_estimator_qualification_result_freeze_v1.json`
+- Git blob: `32d90d05add5b4e45dd69c711b416ed3378d15ab`
+
+All 22 frozen qualification checks passed:
+
+- no nuisance parameters;
+- exact 2D Halton mapping;
+- absolute comparator uses the exact same sigma/kappa coordinates;
+- exact canonical null;
+- P3 sigma/kappa parameter wiring;
+- frozen absolute-transduction comparator wiring;
+- exact P3 and absolute-comparator canonical identities at zero dose / zero kappa;
+- no response RNG;
+- treatment/path common-random-number pairing;
+- path not used as runtime biology;
+- equal-weight colony contrasts;
+- fold isolation;
+- primary objective excludes secondary guards;
+- n−1 sample-SD semantics;
+- both 5/6 survival-comparator calculations;
+- two-parameter identifiability + final-increment logic;
+- reference-free simulation smoke;
+- response-target semantics not loaded;
+- response-target Git blob verified only;
+- P1 official result semantics not loaded;
+- P2 official result semantics not loaded;
+- Y-maze not loaded.
+
+Real Chromium qualification:
+
+- parity cases: **10/10**
+- browser exceptions: **0**
+- console errors: **0**
+- response-target requests: **0**
+- P1 official-result requests: **0**
+- P2 official-result requests: **0**
+- Y-maze requests: **0**
+- P3 high-resolution authorization requests: **0**
+
+The browser sidecar is blob `a45402a54766ba358d529ee9ac34c260ab152d63`, SHA-256 `2bfc3d06fcc8822ab577a38722798cfd792b92c61b0d3e07e3ffac9e521936b1`. The Node parity sidecar is blob `37cf6cb85986af7a91a03182dcb2b1d76d2e27a7`, SHA-256 `3b97516614f96c1cab7dd83195cfbda9e261d9a4c106606397cea5415ab84fef`.
+
+### Qualification consequence
+
+The P3 estimator and its structural comparator are now reference-free qualified.
+
+Still **not authorized**:
+
+- semantic response-target access;
+- high-resolution P3 response search;
+- P1 official result semantic access;
+- P2 official result semantic access;
+- P1/P2 rescue or rerun;
+- canonical model updates;
+- H2-H5 refit/combination;
+- Y-maze access.
+
+The next gate is a separate post-qualification P3 high-resolution authorization freeze. It must pin the exact policy, estimator/core, qualification report, qualification freeze, and audit provenance; it becomes effective only after merge to `main` and green permanent main CI.
+
