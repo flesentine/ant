@@ -18,8 +18,8 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object hypotheses/p3_response_estimation_v1.json)" = "d86eb9936e993d188f2a28faab838ba158c40f3b"
-          test "$(git hash-object tools/p3-estimation-core.js)" = "9a10133c384f93eed48d04a97abb1a1c592e08de"
-          test "$(git hash-object tools/run-p3-estimation.js)" = "48e0d7c0e5dc58751c2f6fa351362700afc6a001"
+          test "$(git hash-object tools/p3-estimation-core.js)" = "a661ef821dd6b7e3a34d2dc2fdd7058dd2c2e5d3"
+          test "$(git hash-object tools/run-p3-estimation.js)" = "462de97b21f0968b754dc365902ae97a0eba0b18"
           test ! -e hypotheses/p3_highres_authorization_v1.json
       - name: Run permanent suite
         run: ./tests/run-tests.sh
