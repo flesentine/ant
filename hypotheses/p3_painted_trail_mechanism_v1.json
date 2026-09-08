@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "id": "P3_painted_trail_mechanism_v1",
+  "status": "prospective_relative_bilateral_mechanism_frozen_before_implementation_or_new_simulation",
+  "freeze_date_local": "2026-09-08",
+  "species": "Lasius niger",
+  "scientific_scope": "Prospective P3-v1 painted-trail mechanism freeze after permanent P2-v1 closure. This record defines the exact relative bilateral sensory/transduction structure before implementation, simulation, parameter estimation, response-target semantic access, or Y-maze access. The selected mechanism class is supported mechanistically in Linepithema humile and is not claimed as established Lasius niger physiology.",
+  "candidate_class_input": {
+    "decision_file": "hypotheses/p3_painted_trail_candidate_class_decision_v1.json",
+    "decision_git_blob_sha": "e8da07f6f73934e0120fd41d4668ae4039108336",
+    "selected_class_id": "P3_candidate_relative_bilateral_transduction",
+    "historical_alias": "P2_candidate_B_relative_bilateral_transduction",
+    "evidence_strength": "cross_species_mechanistic_support_only"
+  },
+  "independent_evidence_basis": {
+    "perna_et_al_2012": {
+      "species": "Linepithema humile",
+      "doi": "10.1371/journal.pcbi.1002592",
+      "pubmed_id": "22829756",
+      "frozen_relevant_facts": [
+        "Turning responded to local pheromone concentration while moving speed was largely unaffected.",
+        "The reported response followed a Weber-like relative bilateral rule in which left-right pheromone difference divided by their sum determined turning magnitude.",
+        "Experimental analysis used front-left and front-right local sectors and reported robustness to tested sector-size changes.",
+        "The source does not establish that Lasius niger uses the same exact geometry, gain, field representation, or equation constants."
+      ]
+    },
+    "poissonnier_et_al_2026": {
+      "species": "Lasius niger",
+      "doi": "10.1007/s00040-026-01106-9",
+      "frozen_relevant_fact": "No tested modulation by prior path distance, travel direction, or recent food experience is used to create any P3 context-specific response parameter."
+    }
+  },
+  "p2_closure_boundary": {
+    "p2_result_freeze_file": "hypotheses/p2_response_estimation_result_freeze_v1.json",
+    "p2_result_freeze_git_blob_sha": "088316e1746594f9b3f700cb277a83eb53fdd9f6",
+    "p2_official_report_git_blob_sha": "cb3060cdbec1ab0832b1e2799c9e37e6ae8e5a72",
+    "p2_v1_closed": true,
+    "p2_rerun_or_rescue_authorized": false,
+    "p2_fold_outcomes_used_to_choose_P3_mechanism_details": false,
+    "rule": "P2 target-ranked outcomes may not determine this P3 equation, sector geometry, quadrature, parameter values, bounds, seeds, budgets, folds, weights, objective, or promotion criteria."
+  },
+  "mechanism": {
+    "mechanism_id": "P3_local_sector_weber_steering_v1",
+    "concept": "Each moving ant senses the painted-trail scalar field in deterministic front-left and front-right local sectors. The two nonnegative sector summaries are transformed only through a scale-invariant Weber/Michelson contrast. Steering is toward the side with larger local pheromone summary. P3-v1 contains no transient lapse state and no response RNG.",
+    "field": {
+      "type": "gaussian_distance_to_segment",
+      "equation": "C(p) = dose_ratio * exp(-d(p, segment)^2 / (2*sigma_field_mm^2))",
+      "source_component": "Reuse the already frozen P1/P2 painted-line field representation unchanged so P3-v1 isolates the relative bilateral sensing/transduction class rather than changing the physical external-field model at the same time.",
+      "dose_ratio_definition": "applied_hindgut_equivalents_per_cm / nominal_dose_hindgut_equivalents_per_cm",
+      "sigma_field_mm_role": "shared field-width structural parameter; no biological value or estimation bound is selected by this gate"
+    },
+    "sector_sensors": {
+      "type": "deterministic_equal_area_front_quadrant_sector_means",
+      "source_geometry_status": "source-inspired engineering geometry for P3-v1 structure; not a Lasius niger anatomical estimate",
+      "radius_mm": 10,
+      "left_sector": "the 90-degree front-left quadrant relative to instantaneous heading",
+      "right_sector": "the 90-degree front-right quadrant relative to instantaneous heading",
+      "basis_definition": {
+        "forward": "u=(cos(heading), sin(heading))",
+        "right": "r=(-sin(heading), cos(heading))",
+        "left": "l=(sin(heading), -cos(heading))"
+      },
+      "digital_operator": {
+        "radial_bins": 4,
+        "angular_bins_per_sector": 8,
+        "samples_per_sector": 32,
+        "radial_midpoint_rule": "rho_i = radius_mm * sqrt((i + 0.5)/4), i=0..3",
+        "angular_midpoint_rule": "alpha_j = (j + 0.5) * (pi/2) / 8, j=0..7",
+        "right_sample_point": "p_R(i,j)=position + rho_i*(cos(alpha_j)*u + sin(alpha_j)*r)",
+        "left_sample_point": "p_L(i,j)=position + rho_i*(cos(alpha_j)*u + sin(alpha_j)*l)",
+        "sector_summary": "R = arithmetic mean of C(p_R(i,j)) over 32 samples; L = arithmetic mean of C(p_L(i,j)) over 32 samples",
+        "weighting": "equal weights; sqrt radial transform makes radial bins equal-area under the polar midpoint approximation",
+        "reason_for_freeze": "Fixes one deterministic, rotation-covariant digital implementation of local sector sensing before any simulation or target-ranked outcome is observed."
+      }
+    },
+    "relative_transduction": {
+      "type": "piecewise_weber_michelson_right_minus_left",
+      "equation": "W(L,R) = 0 if L+R <= 0; otherwise (R-L)/(R+L)",
+      "epsilon_or_regularization": 0,
+      "threshold_parameter": null,
+      "range": [-1, 1],
+      "zero_signal_rule": "When both sector summaries are zero, the relative signal is exactly zero rather than introducing an epsilon or threshold parameter.",
+      "equal_signal_rule": "When L == R, W == 0.",
+      "positive_scale_invariance": "For any finite a>0 in exact arithmetic, W(aL,aR)=W(L,R).",
+      "left_right_antisymmetry": "W(R,L) = -W(L,R)."
+    },
+    "steering": {
+      "type": "relative_right_minus_left_heading_drift",
+      "equation": "omega_trail = kappa_trail_per_s * W(L,R)",
+      "sign_convention": "Positive W means the right sector has more pheromone and uses the same positive rightward steering sign convention as the frozen P1/P2 local response code.",
+      "kappa_trail_per_s_role": "shared steering-gain structural parameter; no biological value or estimation bound is selected by this gate"
+    },
+    "canonical_update_order": "When active, apply omega_trail*dt to heading immediately before the unchanged canonical Ant.update step, matching the previously audited painted-trail update ordering.",
+    "moving_step_rule": "Evaluate painted-trail steering only when the ant is not finished, is not already paused, and a preview of the canonical pause hazard indicates the ant will move; preview the hazard by cloning canonical biology RNG state without mutation.",
+    "stochastic_structure": {
+      "P2_transient_lapse_state_present": false,
+      "response_rng_present": false,
+      "biology_rng_draws_added": 0
+    },
+    "speed_pause_noise_effects": {
+      "base_speed_changed": false,
+      "speed_process_changed": false,
+      "pause_process_changed": false,
+      "angular_noise_amplitude_changed": false,
+      "contact_process_changed": false,
+      "boundary_logic_changed": false
+    }
+  },
+  "exact_and_structural_identities": [
+    {
+      "case": "DCM_or_zero_dose",
+      "condition": "dose_ratio == 0",
+      "required_identity": "Exact canonical locomotion trajectory and canonical biology RNG state. P3 must bypass field, sector, and transduction evaluation and add no heading increment."
+    },
+    {
+      "case": "zero_steering_gain",
+      "condition": "kappa_trail_per_s == 0",
+      "required_identity": "Exact canonical locomotion trajectory and canonical biology RNG state. P3 must bypass field, sector, and transduction evaluation and add no heading increment."
+    },
+    {
+      "case": "zero_or_equal_sector_signal",
+      "condition": "L+R <= 0 or L == R",
+      "required_identity": "Local P3 steering rate is exactly zero."
+    },
+    {
+      "case": "positive_global_dose_scale",
+      "condition": "same geometry and sigma with every local concentration multiplied by the same finite positive scalar",
+      "required_identity": "The ideal relative transduction W is unchanged; this is a structural Weber/Michelson invariance rather than a claim about an unknown biological detection threshold."
+    },
+    {
+      "case": "trail_segment_endpoint_reversal",
+      "condition": "swap painted-line endpoints a and b",
+      "required_identity": "Distance field, sector summaries, and P3 steering are unchanged."
+    },
+    {
+      "case": "rigid_translation",
+      "condition": "translate ant position and trail segment by the same vector",
+      "required_identity": "Sector summaries and P3 steering are unchanged."
+    },
+    {
+      "case": "rigid_rotation",
+      "condition": "rotate ant position, heading, and trail segment by the same angle around the same origin",
+      "required_identity": "Sector summaries and P3 steering are unchanged within floating-point tolerance of the deterministic implementation."
+    },
+    {
+      "case": "left_right_reflection",
+      "condition": "reflect the local field across the ant forward axis, swapping left and right sector summaries",
+      "required_identity": "P3 steering changes sign with equal magnitude."
+    },
+    {
+      "case": "centered_parallel_trail_symmetry",
+      "condition": "ant lies on the painted line centerline and heading is parallel to the line away from endpoint asymmetry",
+      "required_identity": "Left and right sector summaries are equal within implementation tolerance and P3 steering is zero within the same tolerance."
+    }
+  ],
+  "invariances_and_forbidden_inputs": [
+    "No p_lapse or other P2 transient-engagement parameter.",
+    "No combined P2 lapse plus P3 relative-transduction mechanism in P3-v1.",
+    "No treatment-specific response parameter.",
+    "No short-vs-long path-specific response parameter.",
+    "No colony-specific response parameter.",
+    "No inward-vs-outward travel-direction response parameter.",
+    "No recent-food-experience response parameter.",
+    "No persistent specialist/ignorer ant identity.",
+    "No trail bearing, target direction, arena goal, or future path knowledge.",
+    "No painted-trail-driven speed modulation.",
+    "No change to canonical pause, speed noise, angular noise, contacts, or boundary logic.",
+    "No H2, H3, H4, or H5 mechanism combination in P3-v1.",
+    "No P1 or P2 official result semantics may be used for P3 implementation tuning.",
+    "No Y-maze geometry, outcomes, or treatment labels."
+  ],
+  "structural_parameters": {
+    "sigma_field_mm": {
+      "role": "shared Gaussian field width",
+      "future_estimation_status": "not_decided_by_this_gate"
+    },
+    "kappa_trail_per_s": {
+      "role": "shared relative steering gain",
+      "future_estimation_status": "not_decided_by_this_gate"
+    },
+    "fixed_sensor_structure": {
+      "radius_mm": 10,
+      "sector_angle_deg_each": 90,
+      "radial_bins": 4,
+      "angular_bins_per_sector": 8,
+      "estimated_in_P3_v1": false
+    }
+  },
+  "engineering_only_reachability_values": {
+    "parameter_status": "ASSUMED_FOR_REFERENCE_FREE_ENGINEERING_REACHABILITY_ONLY_NOT_FITTED_NOT_LASIUS_NIGER_ESTIMATES",
+    "sigma_field_mm": 8,
+    "kappa_trail_per_s": 4,
+    "sector_radius_mm": 10,
+    "radial_bins": 4,
+    "angular_bins_per_sector": 8,
+    "value_rationale": "sigma=8 mm and kappa=4 s^-1 reuse pre-target engineering values already frozen before P2 target-ranked outcomes, solely to isolate the new relative bilateral operator during reference-free implementation reachability. Sector radius follows the source-inspired 1 cm local experimental analysis geometry as an engineering structure, not a fitted Lasius niger value.",
+    "planned_reference_free_panel": [
+      {
+        "name": "zero_dose_canonical_identity",
+        "dose": "zero",
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 4
+      },
+      {
+        "name": "zero_kappa_canonical_identity",
+        "dose": "nominal",
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 0
+      },
+      {
+        "name": "centerline_parallel_zero_steering",
+        "dose": "nominal",
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 4
+      },
+      {
+        "name": "left_right_sign_pair",
+        "dose": "nominal",
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 4
+      },
+      {
+        "name": "positive_dose_scale_invariance",
+        "dose_ratios": [0.25, 1, 4],
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 4
+      },
+      {
+        "name": "endpoint_reversal_translation_rotation_covariance",
+        "dose": "nominal",
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 4
+      },
+      {
+        "name": "nominal_reference_free_open_arena_reachability",
+        "dose": "nominal",
+        "sigma_field_mm": 8,
+        "kappa_trail_per_s": 4,
+        "trial_count": 400
+      }
+    ],
+    "retuning_from_reachability_forbidden": true
+  },
+  "implementation_gate": {
+    "src_p3_exists_at_this_freeze": false,
+    "p3_model_exists_at_this_freeze": false,
+    "new_simulation_executed_at_this_freeze": false,
+    "implementation_authorized_by_this_record": false,
+    "next_step": "A separate P3 implementation + reference-free reachability gate may implement exactly this frozen mechanism after this record is audited and merged. It may not access the response target, P1/P2 official result semantics, or Y-maze."
+  },
+  "estimation_firewall": {
+    "p3_response_estimation_policy_exists": false,
+    "p3_parameter_search_authorized": false,
+    "response_target_semantic_access_authorized": false,
+    "candidate_ranking_against_response_target_authorized": false,
+    "P1_result_semantic_access_authorized": false,
+    "P2_result_semantic_access_authorized": false,
+    "adaptive_tuning_authorized": false,
+    "rule": "No P3 estimation bounds, candidate panel, objective, folds, seeds, trial budget, comparator, identifiability rule, or promotion threshold is selected by this mechanism freeze."
+  },
+  "global_firewall": {
+    "canonical_locomotion_change": false,
+    "H2_H3_H4_H5_refit": false,
+    "P1_rerun_or_rescue": false,
+    "P2_rerun_or_rescue": false,
+    "response_target_access": false,
+    "Y_maze_access": false,
+    "Y_maze_fitting_or_ranking": false
+  }
+}
