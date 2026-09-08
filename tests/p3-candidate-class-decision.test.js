@@ -97,11 +97,24 @@ if(laterRuntime){
   assert.strictEqual(blob('models/lasius_niger_painted_trail_p3_v1.json'),'9107de0c71641c4037bbedbb498b9fa868c1ef00');
   assert.strictEqual(blob('tools/run-p3-reachability.js'),'0e1795b7bbb3a568fbbd241cc809d600e1f8ca67');
 }
+const laterPolicyRel='hypotheses/p3_response_estimation_v1.json';
+const laterPolicyPresent=fs.existsSync(path.join(root,laterPolicyRel));
+if(laterPolicyPresent){
+  assert.strictEqual(blob(laterPolicyRel),'d86eb9936e993d188f2a28faab838ba158c40f3b');
+  const p=read(laterPolicyRel);
+  assert.strictEqual(p.id,'P3_response_estimation_v1');
+  assert.strictEqual(p.frozen_inputs.mechanism_freeze.git_blob_sha,'5d00ce0058ff388c9f57d7dce56ce465d82c5765');
+  assert.strictEqual(p.frozen_inputs.reachability_result_freeze.git_blob_sha,'b3fa56386f71b0cea1dd8cfec032148c42af1b6d');
+  assert.strictEqual(p.estimator_implementation_gate.estimator_status,'not_implemented_at_policy_freeze');
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantic_access_authorized,false);
+  assert.strictEqual(p.global_firewalls.P1_official_result_semantic_access,false);
+  assert.strictEqual(p.global_firewalls.P2_official_result_semantic_access,false);
+  assert.strictEqual(p.global_firewalls.Y_maze_access,false);
+}
 for(const p of [
-  'hypotheses/p3_response_estimation_v1.json',
   'tools/run-p3-estimation.js',
   'hypotheses/p3_highres_authorization_v1.json'
-]) assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P3 implementation/reachability stage');
+]) assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P3 response-policy stage');
 
 assert.match(d.next_gate,/separate P3 mechanism-selection\/freeze record/i);
 
@@ -113,6 +126,7 @@ console.log('p3-candidate-class-decision.test.js PASS '+JSON.stringify({
   p2_outcomes_used_for_selection:false,
   later_mechanism_present:laterMechanismPresent,
   later_runtime_present:laterRuntime,
+  later_policy_present:laterPolicyPresent,
   p3_runtime_at_candidate_freeze:false,
   response_target_access:false,
   ymaze:false
