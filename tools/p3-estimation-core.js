@@ -31,7 +31,7 @@ function configuredP3Model(base,c){
   r.field.sigma_field_mm=c.sigma_field_mm;r.steering.kappa_trail_per_s=c.kappa_trail_per_s;return m;
 }
 function configuredAbsoluteModel(base,c){
-  const m=clone(base);m.id='lasius_niger_p3_absolute_transduction_benchmark_v1';m.status='structural_benchmark_not_fitted';
+  const m=clone(base);
   m.painted_trail_response={enabled:true,mechanism_id:'P1_egocentric_painted_trail_gradient_steering_v1',field:{type:'gaussian_distance_to_segment',sigma_field_mm:c.sigma_field_mm},sensors:{type:'bilateral_body_frame_points',forward_offset_mm:2,lateral_half_separation_mm:1.5},transduction:{type:'c_over_one_plus_c'},steering:{type:'right_minus_left_heading_drift',kappa_trail_per_s:c.kappa_trail_per_s}};
   return m;
 }
