@@ -1654,3 +1654,100 @@ The authorization does not permit:
 - Y-maze access.
 
 The next gate after this authorization merges is a **separate one-shot main-only execution trigger**. That separate gate must first verify the merged authorization commit has green permanent main CI.
+
+
+## P2-v1 one-shot official high-resolution execution gate
+
+v0.3.3o creates the main-only workflow that will perform the single authorized P2 high-resolution response search.
+
+Workflow:
+
+`.github/workflows/p2-v033o-official-highres.yml`
+
+Git blob:
+
+`467aa7fc56bd7e843a68ad03e7d57c4a174efc2f`
+
+Execution precondition:
+
+`hypotheses/p2_highres_execution_precondition_v1.json`
+
+Git blob:
+
+`a0bf279649df4be906f74dc96b53f6c2106071bf`
+
+### Green authorization checkpoint
+
+The execution precondition pins the already-merged authorization:
+
+- main commit: `a2f5c3dc2a10aad30e796c3f866a382b31cc6210`
+- authorization blob: `de361b15b9600bd92a35baf30fa71c2a7c61003c`
+- permanent main workflow: **Test and deploy ANTLAB #140**
+- run: `34189072667`
+- test job: `101943216663` — success
+- deploy job: `101943352041` — success
+
+### One-shot trigger design
+
+The official workflow has exactly one trigger:
+
+- push to `main`
+- only when `.github/workflows/p2-v033o-official-highres.yml` changes
+
+It has:
+
+- no `pull_request` trigger
+- no `workflow_dispatch` trigger
+
+Therefore:
+
+- the execution-gate review branch cannot run the official search;
+- opening or updating its PR cannot run the official search;
+- later unrelated pushes to main cannot rerun the official search.
+
+The intended official event is the first merge that adds this exact workflow file to `main`.
+
+### Exact official command
+
+`node tools/run-p2-estimation.js --mode highres --out reports/p2_response_estimation_1000x60_v1.json`
+
+No high-resolution search overrides are passed.
+
+### Immediate pre-execution checks
+
+Before response-target execution, the workflow verifies:
+
+- it is running on `refs/heads/main`;
+- the green authorization checkpoint is an ancestor;
+- exact authorization blob;
+- exact P2 policy blob;
+- exact estimator blob;
+- exact qualification report and qualification-freeze blobs;
+- exact P2 runtime/model;
+- exact response-target blob;
+- exact canonical model and runtime;
+- exact execution-precondition record;
+- exact execution-workflow blob;
+- permanent main CI run/job IDs and success conclusions;
+- no official P2 result already exists in the checked-out repository.
+
+It then reruns the full permanent regression suite.
+
+### Official artifact
+
+If the frozen search completes, the workflow validates the returned report and uploads:
+
+- `p2_response_estimation_1000x60_v1.json`
+- `p2_response_estimation_execution_provenance_v1.json`
+
+under artifact:
+
+`p2-v033o-official-highres`
+
+The provenance includes the GitHub run/attempt/commit, workflow and precondition blobs, exact command, report bytes/blob/SHA-256/status, and the remaining firewalls.
+
+### Interpretation firewall
+
+The workflow records the official output but does not change code, tune the model, promote canonical locomotion, or unlock Y-maze.
+
+After execution, the exact artifact must be frozen in a separate result PR **before** interpretation-driven changes.
