@@ -1,0 +1,42 @@
+name: P3 v0.3.3s materialize reachability result
+on:
+  push:
+    branches: [v0.3.3s-p3-implementation-reachability]
+    paths:
+      - '.github/workflows/p3-v033s-materialize-result.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v0.3.3s-p3-implementation-reachability
+          fetch-depth: 0
+      - name: Download exact P3 reachability artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/${GITHUB_REPOSITORY}/actions/artifacts/10067590240 --jq .digest)" = "sha256:65296a0e2f6b729cdab0b3fe7209aea708d8066d6fd1dd36eb2741ac3332e31f"
+          mkdir -p /tmp/p3reach
+          gh run download 34255291743 -n p3-v033s-implementation-reachability-audit -D /tmp/p3reach
+          test -s /tmp/p3reach/p3_reference_free_reachability_v1.json
+          cp /tmp/p3reach/p3_reference_free_reachability_v1.json reports/p3_reference_free_reachability_v1.json
+          echo "bytes=$(wc -c <reports/p3_reference_free_reachability_v1.json | tr -d ' ')"
+          echo "sha256=$(sha256sum reports/p3_reference_free_reachability_v1.json | awk '{print $1}')"
+          echo "blob=$(git hash-object reports/p3_reference_free_reachability_v1.json)"
+      - name: Commit exact report bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/p3_reference_free_reachability_v1.json
+          git diff --cached --quiet && { echo "No report bytes to commit"; exit 1; }
+          git commit -m "Materialize exact P3 reachability report"
+          git push origin HEAD:v0.3.3s-p3-implementation-reachability
