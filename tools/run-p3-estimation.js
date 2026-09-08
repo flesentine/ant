@@ -13,7 +13,7 @@ const POLICY_FILE='hypotheses/p3_response_estimation_v1.json';
 const POLICY_GIT_BLOB_SHA='d86eb9936e993d188f2a28faab838ba158c40f3b';
 const AUTHORIZATION_FILE='hypotheses/p3_highres_authorization_v1.json';
 const RESPONSE_TARGET_FILE='reference/poissonnier2026_pheromone_response_targets.json';
-const CORE_GIT_BLOB_SHA='9a10133c384f93eed48d04a97abb1a1c592e08de';
+const CORE_GIT_BLOB_SHA='a661ef821dd6b7e3a34d2dc2fdd7058dd2c2e5d3';
 
 const FROZEN_RUNTIME_BLOBS=Object.freeze({
   'tools/p3-estimation-core.js':CORE_GIT_BLOB_SHA,
