@@ -299,6 +299,19 @@
 - biological fit remains false; no P3 parameter set promoted; no response-estimation policy/search, canonical update, or Y-maze access authorized
 - next gate: prospective P3 response-estimation policy freeze
 
+### v0.3.3t — P3 response-estimation policy freeze — complete
+- prospective P3 policy frozen before estimator implementation or response-target semantic access at `hypotheses/p3_response_estimation_v1.json`, blob `d86eb9936e993d188f2a28faab838ba158c40f3b`
+- estimated surface is exactly two shared parameters: sigma_field_mm [2,32] log and kappa_trail_per_s [0,16] linear; no nuisance parameters
+- fixed P3 structure remains 10 mm 90° left/right sectors, 4×8 deterministic quadrature, zero-epsilon Weber signal, no lapse state and no response RNG
+- deterministic 2D Halton panel: 999 P3 candidates + exact canonical null, with the same 999 sigma/kappa coordinates also evaluated as a separately ranked frozen absolute-transduction P1 benchmark + the same null
+- six-colony LOCO partition, equal-colony weighting, primary metrics/objective, 5/6 robustness threshold, secondary guards, and 60/120 trial budgets retain prior frozen meanings rather than being softened after P1/P2 failures
+- P3 must pass both heldout guards: >=5/6 wins with positive median improvement versus exact canonical null and versus the separately selected absolute-transduction benchmark
+- fresh P3-only seed streams: fit 6210000, heldout 6810000, final fit 7210000, independent final check 7610000
+- final promotion additionally requires two-parameter identifiability, absolute-transduction comparator outside the near-best tolerance, independent final primary improvement over both comparators, and all four secondary standardized errors <=1
+- P1/P2 official target-ranked result semantics are forbidden; P1 runtime may be used only as the frozen structural comparator under the P3 procedure
+- no estimator exists; no high-resolution search, response-target semantics, canonical update, P1/P2 rescue, H2-H5 combination, or Y-maze access is authorized
+- next gate: P3 estimator implementation + synthetic/reference-free qualification
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
