@@ -17,7 +17,7 @@
   "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
   "integrity_runtime_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
   "execution_workflow_file": ".github/workflows/p2-v033o-official-highres.yml",
-  "execution_workflow_git_blob_sha": "467aa7fc56bd7e843a68ad03e7d57c4a174efc2f",
+  "execution_workflow_git_blob_sha": "89bd53ec3142cc248cc93313ac1b75f472b7029d",
   "permanent_main_workflow": {
     "name": "Test and deploy ANTLAB",
     "workflow_file": ".github/workflows/pages.yml",
@@ -38,9 +38,35 @@
   "official_output_artifact_name": "p2-v033o-official-highres",
   "official_report_filename": "p2_response_estimation_1000x60_v1.json",
   "official_provenance_filename": "p2_response_estimation_execution_provenance_v1.json",
-  "rerun_policy": "No rerun is authorized unless the first official execution is formally invalidated for a genuine implementation or infrastructure error; any valid rerun must repeat the complete frozen procedure unchanged.",
+  "rerun_policy": "Attempt 1 was formally invalidated before scientific execution by hypotheses/p2_highres_execution_attempt1_invalidation_v1.json because of an execution-gate shell escaping defect. One corrected retry is authorized with the complete frozen scientific procedure unchanged. Any further rerun requires a new formal invalidation for a genuine implementation or infrastructure error.",
   "P1_official_result_semantic_access_authorized": false,
   "candidate_B_authorized": false,
   "canonical_promotion_authorized": false,
-  "ymaze_access_authorized": false
+  "ymaze_access_authorized": false,
+  "invalidated_preexecution_attempt": {
+    "record_file": "hypotheses/p2_highres_execution_attempt1_invalidation_v1.json",
+    "record_git_blob_sha": "fb96cc76ee07541290cfcf6e9c10645a87686a12",
+    "workflow_run_id": 34189985353,
+    "workflow_run_number": 1,
+    "workflow_run_attempt": 1,
+    "workflow_job_id": 101945889831,
+    "head_sha": "c219890bef7dcd97f560bd26d3d0b504bcd7b202",
+    "conclusion": "failure",
+    "failure_step": "Verify one-shot main-only execution preconditions",
+    "official_high_resolution_step_started": false,
+    "response_target_semantics_loaded": false,
+    "official_report_generated": false,
+    "workflow_artifacts_uploaded": 0
+  },
+  "retry_execution_gate_main_checkpoint": {
+    "main_commit": "c219890bef7dcd97f560bd26d3d0b504bcd7b202",
+    "permanent_main_workflow_run_id": 34189985287,
+    "permanent_main_workflow_run_number": 141,
+    "conclusion": "success",
+    "test_job_id": 101945889690,
+    "test_job_conclusion": "success",
+    "deploy_job_id": 101946056177,
+    "deploy_job_conclusion": "success"
+  },
+  "authorized_next_valid_attempt_number": 2
 }
