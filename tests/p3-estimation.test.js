@@ -103,9 +103,18 @@ assert.strictEqual(q.response_target_git_blob_sha_verified,'81910c5bd3ec7b1f7728
 assert.strictEqual(Object.keys(q.checks).length,22);
 for(const [k,v] of Object.entries(q.checks))assert.strictEqual(v,true,k+' must remain true');
 
-assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')));
-assert.throws(()=>run.assertHighResolutionAuthorized(root),/missing post-qualification authorization artifact/);
-assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
+const highresAuthRel='hypotheses/p3_highres_authorization_v1.json';
+const highresAuthPresent=fs.existsSync(path.join(root,highresAuthRel));
+if(highresAuthPresent){
+  assert.strictEqual(blob(highresAuthRel),'04d2c7b454143fd7073b274bff0ec9b355ec058d');
+  assert.throws(()=>run.assertHighResolutionAuthorized(root,null,{branchName:'authorization-review'}),/not effective until merged to main/);
+  assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
+  const a=readJson(path.join(root,highresAuthRel));
+  assert.strictEqual(run.assertAuthorizationEffective(a,root,{branchName:'main'}),'main');
+}else{
+  assert.throws(()=>run.assertHighResolutionAuthorized(root),/missing post-qualification authorization artifact/);
+  assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
+}
 
 const source=fs.readFileSync(path.join(root,'tools','run-p3-estimation.js'),'utf8');
 const coreSource=fs.readFileSync(path.join(root,'tools','p3-estimation-core.js'),'utf8');
@@ -129,6 +138,6 @@ console.log('p3-estimation.test.js PASS '+JSON.stringify({
   target_semantics:false,
   P1_result_semantics:false,
   P2_result_semantics:false,
-  highres_authorized:false,
+  highres_authorization_present:highresAuthPresent,
   ymaze:false
 }));
