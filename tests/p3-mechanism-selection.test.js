@@ -152,10 +152,12 @@ if(laterPolicyPresent){
   assert.strictEqual(p.global_firewalls.P2_official_result_semantic_access,false);
   assert.strictEqual(p.global_firewalls.Y_maze_access,false);
 }
-for(const p of [
-  'tools/run-p3-estimation.js',
-  'hypotheses/p3_highres_authorization_v1.json'
-]) assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P3 response-policy stage');
+const laterEstimatorPresent=fs.existsSync(path.join(root,'tools','run-p3-estimation.js'));
+if(laterEstimatorPresent){
+  assert.strictEqual(blob('tools/run-p3-estimation.js'),'48e0d7c0e5dc58751c2f6fa351362700afc6a001');
+  assert.strictEqual(blob('tools/p3-estimation-core.js'),'9a10133c384f93eed48d04a97abb1a1c592e08de');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')),'P3 high-resolution authorization must remain absent at the estimator-qualification stage');
 
 console.log('p3-mechanism-selection.test.js PASS '+JSON.stringify({
   mechanism_blob:blob(rel),
