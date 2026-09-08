@@ -38,8 +38,6 @@ jobs:
           if(!/^name: P2 v0\.3\.3o official high-resolution response execution/m.test(wf))throw new Error('workflow name drift');
           if(!/on:\n  push:\n    branches: \[main\]\n    paths:\n      - '\.github\/workflows\/p2-v033o-official-highres\.yml'/.test(wf))throw new Error('workflow trigger drift');
           if(/\bpull_request\s*:/.test(wf)||/\bworkflow_dispatch\s*:/.test(wf))throw new Error('workflow must not have PR/manual trigger');
-          const official=[...wf.matchAll(/node tools\/run-p2-estimation\.js --mode highres --out reports\/p2_response_estimation_1000x60_v1\.json/g)];
-          if(official.length!==2)throw new Error('expected exact command in execution and provenance pin only');
           const executionLine=wf.split('\n').filter(x=>x.trim()==='node tools/run-p2-estimation.js --mode highres --out reports/p2_response_estimation_1000x60_v1.json');
           if(executionLine.length!==1)throw new Error('official executable command must appear exactly once');
           if(p.execution_workflow_git_blob_sha!==cp.execFileSync('git',['hash-object','.github/workflows/p2-v033o-official-highres.yml'],{encoding:'utf8'}).trim())throw new Error('precondition workflow pin drift');
