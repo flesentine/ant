@@ -55,6 +55,7 @@ node tests/p3-candidate-class-decision.test.js
 node tests/p3-mechanism-selection.test.js
 node tests/p3-implementation.test.js
 node tests/p3-reachability-result.test.js
+node tests/p3-response-estimation-policy.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
