@@ -71,8 +71,12 @@ if(laterPolicyPresent){
   assert.strictEqual(p3policy.global_firewalls.response_target_semantic_access_during_this_policy_freeze,false);
   assert.strictEqual(p3policy.global_firewalls.Y_maze_access,false);
 }
-for(const p of ['tools/run-p3-estimation.js','hypotheses/p3_highres_authorization_v1.json'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must remain absent');
+const laterEstimatorPresent=fs.existsSync(path.join(root,'tools','run-p3-estimation.js'));
+if(laterEstimatorPresent){
+  assert.strictEqual(blob('tools/run-p3-estimation.js'),'5bf27bf439dca18629cdfd36f56fe767a23062ff');
+  assert.strictEqual(blob('tools/p3-estimation-core.js'),'410ef81dfe761e3c218d072ca311632329ac1617');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')),'P3 high-resolution authorization must remain absent');
 
 console.log('p3-implementation.test.js PASS '+JSON.stringify({
   policy_blob:blob('hypotheses/p3_reachability_execution_v1.json'),

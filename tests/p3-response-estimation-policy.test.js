@@ -180,8 +180,12 @@ assert.strictEqual(p.global_firewalls.H2_H3_H4_H5_refit_or_combination,false);
 assert.strictEqual(p.global_firewalls.Y_maze_access,false);
 assert.strictEqual(p.global_firewalls.Y_maze_fitting_or_ranking,false);
 
-for(const absent of ['tools/run-p3-estimation.js','hypotheses/p3_highres_authorization_v1.json'])
-  assert.ok(!fs.existsSync(path.join(root,absent)),absent+' must be absent at policy freeze');
+const laterEstimatorPresent=fs.existsSync(path.join(root,'tools','run-p3-estimation.js'));
+if(laterEstimatorPresent){
+  assert.strictEqual(blob('tools/run-p3-estimation.js'),'5bf27bf439dca18629cdfd36f56fe767a23062ff');
+  assert.strictEqual(blob('tools/p3-estimation-core.js'),'410ef81dfe761e3c218d072ca311632329ac1617');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')),'P3 high-resolution authorization must remain absent at estimator qualification');
 
 console.log('p3-response-estimation-policy.test.js PASS '+JSON.stringify({
   policy_blob:blob(rel),
@@ -191,7 +195,7 @@ console.log('p3-response-estimation-policy.test.js PASS '+JSON.stringify({
   fit_seed:p.search_protocol.root_fit_seed,
   eval_seed:p.search_protocol.root_evaluation_seed,
   dual_survival:true,
-  estimator_exists:false,
+  estimator_exists:laterEstimatorPresent,
   target_semantics_authorized:false,
   p1_result_semantics:false,
   p2_result_semantics:false,
