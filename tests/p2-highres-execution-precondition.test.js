@@ -10,8 +10,8 @@ const auth=read('hypotheses/p2_highres_authorization_v1.json');
 const workflowRel='.github/workflows/p2-v033o-official-highres.yml';
 const workflow=fs.readFileSync(path.join(root,workflowRel),'utf8');
 
-assert.strictEqual(blob('hypotheses/p2_highres_execution_precondition_v1.json'),'a0bf279649df4be906f74dc96b53f6c2106071bf');
-assert.strictEqual(blob(workflowRel),'467aa7fc56bd7e843a68ad03e7d57c4a174efc2f');
+assert.strictEqual(blob('hypotheses/p2_highres_execution_precondition_v1.json'),'15f45456934c102b412fa83ea39b424b9a3b3979');
+assert.strictEqual(blob(workflowRel),'89bd53ec3142cc248cc93313ac1b75f472b7029d');
 assert.strictEqual(blob('hypotheses/p2_highres_authorization_v1.json'),'de361b15b9600bd92a35baf30fa71c2a7c61003c');
 assert.strictEqual(blob('hypotheses/p2_response_estimation_v1.json'),'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
 assert.strictEqual(blob('tools/run-p2-estimation.js'),'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
@@ -29,7 +29,7 @@ assert.strictEqual(pre.qualification_report_git_blob_sha,'9f4d15875b35773b416969
 assert.strictEqual(pre.qualification_result_freeze_git_blob_sha,'1d46b594cb154a93c2e321fb67d399acdd821993');
 assert.strictEqual(pre.response_target_git_blob_sha,'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed');
 assert.strictEqual(pre.execution_workflow_file,workflowRel);
-assert.strictEqual(pre.execution_workflow_git_blob_sha,'467aa7fc56bd7e843a68ad03e7d57c4a174efc2f');
+assert.strictEqual(pre.execution_workflow_git_blob_sha,'89bd53ec3142cc248cc93313ac1b75f472b7029d');
 
 assert.strictEqual(pre.permanent_main_workflow.name,'Test and deploy ANTLAB');
 assert.strictEqual(pre.permanent_main_workflow.main_commit,'a2f5c3dc2a10aad30e796c3f866a382b31cc6210');
@@ -52,6 +52,35 @@ assert.strictEqual(pre.P1_official_result_semantic_access_authorized,false);
 assert.strictEqual(pre.candidate_B_authorized,false);
 assert.strictEqual(pre.canonical_promotion_authorized,false);
 assert.strictEqual(pre.ymaze_access_authorized,false);
+assert.strictEqual(pre.invalidated_preexecution_attempt.record_file,'hypotheses/p2_highres_execution_attempt1_invalidation_v1.json');
+assert.strictEqual(pre.invalidated_preexecution_attempt.record_git_blob_sha,'fb96cc76ee07541290cfcf6e9c10645a87686a12');
+assert.strictEqual(pre.invalidated_preexecution_attempt.workflow_run_id,34189985353);
+assert.strictEqual(pre.invalidated_preexecution_attempt.workflow_job_id,101945889831);
+assert.strictEqual(pre.invalidated_preexecution_attempt.head_sha,'c219890bef7dcd97f560bd26d3d0b504bcd7b202');
+assert.strictEqual(pre.invalidated_preexecution_attempt.official_high_resolution_step_started,false);
+assert.strictEqual(pre.invalidated_preexecution_attempt.response_target_semantics_loaded,false);
+assert.strictEqual(pre.invalidated_preexecution_attempt.official_report_generated,false);
+assert.strictEqual(pre.invalidated_preexecution_attempt.workflow_artifacts_uploaded,0);
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.main_commit,'c219890bef7dcd97f560bd26d3d0b504bcd7b202');
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.permanent_main_workflow_run_id,34189985287);
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.permanent_main_workflow_run_number,141);
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.conclusion,'success');
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.test_job_id,101945889690);
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.test_job_conclusion,'success');
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.deploy_job_id,101946056177);
+assert.strictEqual(pre.retry_execution_gate_main_checkpoint.deploy_job_conclusion,'success');
+assert.strictEqual(pre.authorized_next_valid_attempt_number,2);
+const invalid=read('hypotheses/p2_highres_execution_attempt1_invalidation_v1.json');
+assert.strictEqual(blob('hypotheses/p2_highres_execution_attempt1_invalidation_v1.json'),'fb96cc76ee07541290cfcf6e9c10645a87686a12');
+assert.strictEqual(invalid.status,'official_attempt_1_invalidated_before_scientific_execution');
+assert.strictEqual(invalid.workflow.run_id,34189985353);
+assert.strictEqual(invalid.failure_point.official_high_resolution_step_started,false);
+assert.strictEqual(invalid.evidence.response_target_semantics_loaded,false);
+assert.strictEqual(invalid.evidence.candidate_search_started,false);
+assert.strictEqual(invalid.evidence.official_report_generated,false);
+assert.strictEqual(invalid.evidence.workflow_artifacts_uploaded,0);
+assert.strictEqual(invalid.rerun_authorization.authorized,true);
+assert.strictEqual(invalid.rerun_authorization.scientific_changes_allowed,false);
 
 assert.strictEqual(auth.effective_when_merged_to_main,true);
 assert.strictEqual(auth.high_resolution_response_search_authorized,true);
@@ -66,7 +95,7 @@ assert.ok(!/\bpull_request\s*:/.test(workflow),'official workflow must not have 
 assert.ok(!/\bworkflow_dispatch\s*:/.test(workflow),'official workflow must not have workflow_dispatch trigger');
 assert.match(workflow,/node tools\/run-p2-estimation\.js --mode highres --out reports\/p2_response_estimation_1000x60_v1\.json/);
 assert.match(workflow,/git merge-base --is-ancestor a2f5c3dc2a10aad30e796c3f866a382b31cc6210 HEAD/);
-assert.match(workflow,/test "\\\$\{GITHUB_REF\}" = "refs\/heads\/main"/);
+assert.match(workflow,/test "\$\{GITHUB_REF\}" = "refs\/heads\/main"/);
 assert.match(workflow,/Run permanent regression suite before official search/);
 assert.match(workflow,/p2-v033o-official-highres/);
 
@@ -83,6 +112,9 @@ console.log('p2-highres-execution-precondition.test.js PASS '+JSON.stringify({
   workflow_blob:blob(workflowRel),
   authorization_main_commit:pre.authorization_main_commit,
   authorization_ci_run:pre.permanent_main_workflow.run_id,
+  invalidated_attempt_run:pre.invalidated_preexecution_attempt.workflow_run_id,
+  retry_main_ci_run:pre.retry_execution_gate_main_checkpoint.permanent_main_workflow_run_id,
+  authorized_next_attempt:pre.authorized_next_valid_attempt_number,
   main_only:true,
   manual_trigger:false,
   pull_request_trigger:false,
