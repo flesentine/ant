@@ -272,6 +272,19 @@
 - no P3 runtime/model/estimator exists; no simulation, response-target semantic access, canonical change, H2-H5 refit, or Y-maze access authorized
 - next gate: a separate P3 mechanism-selection/freeze before any P3 implementation
 
+### v0.3.3r — P3 relative-bilateral mechanism freeze — complete
+- exact P3 mechanism frozen prospectively at `hypotheses/p3_painted_trail_mechanism_v1.json`, blob `5d00ce0058ff388c9f57d7dce56ce465d82c5765`
+- mechanism id: `P3_local_sector_weber_steering_v1`
+- external field remains the already-frozen Gaussian distance-to-painted-segment field so P3 isolates the sensory/transduction structure
+- source-inspired sensor operator uses deterministic 90° front-left and front-right sectors of radius 10 mm with 4 equal-area radial bins × 8 angular bins = 32 fixed samples per sector
+- relative signal frozen exactly as `W=0` when `L+R<=0`, otherwise `W=(R-L)/(R+L)`
+- no epsilon, detection-threshold parameter, P2 lapse state, or response RNG is introduced
+- steering frozen as `omega_trail = kappa_trail_per_s * W`; canonical speed/pause/angular-noise/contact/boundary processes remain unchanged
+- exact/structural guards include zero-dose and zero-kappa canonical bypass, equal/zero signal, positive scale invariance, endpoint reversal, translation/rotation covariance, left-right antisymmetry, and centered-trail symmetry
+- engineering-only reference-free values freeze sigma=8 mm, kappa=4 s^-1 and the fixed sector operator solely for implementation reachability; retuning from reachability is forbidden
+- P3 estimation bounds/panel/objective/folds/seeds/budgets remain unfrozen; no P3 runtime/model/estimator exists and no simulation/target/Y-maze access is authorized
+- next gate: separate P3 implementation + reference-free reachability
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
