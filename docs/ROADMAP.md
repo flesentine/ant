@@ -223,6 +223,17 @@
 - no CLI search overrides, adaptive refinement, P1-result semantic access, Candidate B, canonical update, H2-H5 combination, or Y-maze access
 - this authorization PR does not run the 102-row official search; a later separate one-shot main-only execution gate is required
 
+### v0.3.3o — P2 one-shot official high-resolution execution gate — in progress
+- one-shot main-only workflow frozen at `.github/workflows/p2-v033o-official-highres.yml`, blob `467aa7fc56bd7e843a68ad03e7d57c4a174efc2f`
+- execution precondition frozen at `hypotheses/p2_highres_execution_precondition_v1.json`, blob `a0bf279649df4be906f74dc96b53f6c2106071bf`
+- precondition pins merged authorization commit `a2f5c3dc2a10aad30e796c3f866a382b31cc6210` and green permanent main CI run `34189072667` (#140), test job `101943216663`, deploy job `101943352041`
+- workflow has only a push-to-main path trigger on its own workflow file; no pull_request or workflow_dispatch trigger
+- review-branch commits cannot execute the official 102-row search and unrelated later main commits cannot retrigger it
+- official command frozen exactly: `node tools/run-p2-estimation.js --mode highres --out reports/p2_response_estimation_1000x60_v1.json`
+- workflow reruns the permanent regression suite immediately before target-ranked execution, validates frozen authorization/policy/estimator/qualification/target/runtime blobs, then uploads exact report + execution provenance as artifact `p2-v033o-official-highres`
+- no high-resolution CLI overrides, P1-result semantic access, Candidate B, canonical promotion, H2-H5 refit, or Y-maze access
+- branch-only preflight audit required before merge; merging the clean workflow head to main is the one event authorized to trigger the official search
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
