@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "id": "P3_implementation_authorization_v1",
+  "status": "P3_v1_implementation_and_reference_free_reachability_authorized_against_exact_frozen_mechanism_and_execution_policy",
+  "freeze_date_local": "2026-09-08",
+  "mechanism_freeze": {
+    "file": "hypotheses/p3_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "5d00ce0058ff388c9f57d7dce56ce465d82c5765"
+  },
+  "reachability_execution_policy": {
+    "file": "hypotheses/p3_reachability_execution_v1.json",
+    "git_blob_sha": "55494a3190964d24ded2ae0d1faf3b355cc7835f"
+  },
+  "candidate_class_decision_git_blob_sha": "e8da07f6f73934e0120fd41d4668ae4039108336",
+  "selection_checkpoint": {
+    "main_commit": "e30a4462cce7a9594d248f328370a214b20cedc0",
+    "permanent_main_workflow_run_id": 34254197826,
+    "permanent_main_test_job_id": 102155754688,
+    "permanent_main_deploy_job_id": 102156006262,
+    "conclusion": "success"
+  },
+  "authorization": {
+    "create_src_p3_js": true,
+    "create_p3_engineering_model": true,
+    "create_p3_reference_free_experiments": true,
+    "create_reference_free_reachability_runner": true,
+    "run_exact_identity_panel": true,
+    "run_pure_invariance_panel": true,
+    "run_frozen_400_trial_nominal_panel": true,
+    "run_node_chromium_parity_and_firewall": true,
+    "read_P1_helpers_for_field_apparatus_and_moving_step_preview": true
+  },
+  "still_forbidden": {
+    "response_target_access": true,
+    "reference_outcome_access": true,
+    "P1_official_result_semantic_access": true,
+    "P2_official_result_semantic_access": true,
+    "P1_rerun_or_rescue": true,
+    "P2_rerun_or_rescue": true,
+    "parameter_search_or_ranking": true,
+    "adaptive_retuning": true,
+    "P3_response_estimation_policy": true,
+    "canonical_locomotion_update": true,
+    "H2_H3_H4_H5_refit_or_combination": true,
+    "Y_maze_access": true,
+    "Y_maze_fitting_or_ranking": true
+  },
+  "preimplementation_state": {
+    "src_p3_exists": false,
+    "P3_model_exists": false,
+    "P3_experiment_files_exist": false,
+    "P3_reachability_runner_exists": false,
+    "P3_simulation_has_been_executed": false
+  },
+  "implementation_rule": "Implement exactly mechanism blob 5d00ce0058ff388c9f57d7dce56ce465d82c5765 and execution-policy blob 55494a3190964d24ded2ae0d1faf3b355cc7835f. If qualification fails, correct code defects only; do not alter the frozen equation, sector geometry, sigma/kappa engineering values, seeds, dt, trial count, identities, invariances, or firewalls.",
+  "promotion_rule": {
+    "successful_reference_free_reachability_means": "implementation/reachability qualified only",
+    "biological_fit_claim_authorized": false,
+    "fixed_parameter_pair_promoted": false,
+    "response_estimation_policy_authorized": false,
+    "canonical_locomotion_update_authorized": false,
+    "Y_maze_unlock_authorized": false
+  }
+}
