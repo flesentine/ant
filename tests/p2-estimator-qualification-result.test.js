@@ -63,7 +63,17 @@ assert.strictEqual(f.qualification_consequence.Candidate_B_authorized,false);
 assert.strictEqual(f.qualification_consequence.Y_maze_access_authorized,false);
 assert.match(f.next_gate,/separate post-qualification authorization freeze/i);
 
-assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')),'P2 highres authorization must remain absent after qualification freeze');
+const laterAuthorizationPath=path.join(root,'hypotheses','p2_highres_authorization_v1.json');
+const laterAuthorizationPresent=fs.existsSync(laterAuthorizationPath);
+if(laterAuthorizationPresent){
+  assert.strictEqual(blob('hypotheses/p2_highres_authorization_v1.json'),'de361b15b9600bd92a35baf30fa71c2a7c61003c');
+  const a=read('hypotheses/p2_highres_authorization_v1.json');
+  assert.strictEqual(a.qualification_report.git_blob_sha,'9f4d15875b35773b41696987abd1cc4721435bc2');
+  assert.strictEqual(a.qualification_result_freeze.git_blob_sha,'1d46b594cb154a93c2e321fb67d399acdd821993');
+  assert.strictEqual(a.estimator_git_blob_sha,'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
+  assert.strictEqual(a.high_resolution_response_search_authorized,true);
+  assert.strictEqual(a.ymaze_access_authorized,false);
+}
 
 console.log('p2-estimator-qualification-result.test.js PASS '+JSON.stringify({
   freeze_blob:blob(freezeRel),
