@@ -77,9 +77,25 @@ assert.strictEqual(q.checks.response_target_semantics_not_loaded,true);
 assert.strictEqual(q.checks.P1_official_result_semantics_not_loaded,true);
 assert.strictEqual(q.checks.ymaze_not_loaded,true);
 
-assert.ok(!fs.existsSync(path.join(root,'hypotheses','p2_highres_authorization_v1.json')));
-assert.throws(()=>est.assertHighResolutionAuthorized(root),/missing post-qualification authorization artifact/);
-assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
+const authorizationPath=path.join(root,'hypotheses','p2_highres_authorization_v1.json');
+const laterAuthorizationPresent=fs.existsSync(authorizationPath);
+if(laterAuthorizationPresent){
+  assert.strictEqual(blob('hypotheses/p2_highres_authorization_v1.json'),'de361b15b9600bd92a35baf30fa71c2a7c61003c');
+  const a=readJson(authorizationPath);
+  assert.strictEqual(a.policy_git_blob_sha,'eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce');
+  assert.strictEqual(a.estimator_git_blob_sha,'38d66d28e94d2f532e9c8a20bd6553d6d11be8a6');
+  assert.strictEqual(a.effective_when_merged_to_main,true);
+  assert.strictEqual(a.high_resolution_response_search_authorized,true);
+  assert.strictEqual(a.P1_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.Candidate_B_authorized,false);
+  assert.strictEqual(a.ymaze_access_authorized,false);
+  assert.throws(()=>est.assertHighResolutionAuthorized(root,null,{branchName:'authorization-review'}),/not effective until merged to main/);
+  assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
+  assert.strictEqual(est.assertHighResolutionAuthorized(root,null,{branchName:'main'}).id,'P2_high_resolution_authorization_v1');
+}else{
+  assert.throws(()=>est.assertHighResolutionAuthorized(root),/missing post-qualification authorization artifact/);
+  assert.throws(()=>est.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
+}
 
 const source=fs.readFileSync(path.join(root,'tools','run-p2-estimation.js'),'utf8');
 assert.ok(!source.includes('p1_response_estimation_500x60_v1.json'),'P2 estimator must not load P1 official result semantics');
@@ -114,6 +130,7 @@ console.log('p2-estimation.test.js PASS '+JSON.stringify({
   no_lapse_candidates:1000,
   dual_survival:true,
   target_semantics_loaded:false,
+  later_authorization_present:laterAuthorizationPresent,
   P1_result_semantics_loaded:false,
   ymaze:false
 }));
