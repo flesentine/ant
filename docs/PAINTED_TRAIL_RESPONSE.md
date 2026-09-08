@@ -2193,3 +2193,71 @@ At this freeze:
 - Y-maze access: unauthorized
 
 The next gate is a separate P3 implementation + reference-free reachability phase.
+
+
+## P3 implementation and reference-free reachability
+
+P3-v1 was implemented only after the mechanism and execution policy were frozen.
+
+Runtime:
+- `src/p3.js`
+- blob `4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8`
+
+Engineering model:
+- `models/lasius_niger_painted_trail_p3_v1.json`
+- blob `9107de0c71641c4037bbedbb498b9fa868c1ef00`
+
+The implementation uses the frozen 10 mm front-left/front-right sectors, 4 × 8 deterministic samples per sector, pure `(R-L)/(R+L)` transduction with zero epsilon, and no P2 lapse state or response RNG.
+
+Reference-free qualification passed:
+
+- exact zero-dose canonical identity: pass
+- exact zero-kappa canonical identity: pass
+- positive scale invariance: pass
+- left/right antisymmetry: pass
+- endpoint reversal: pass
+- rigid translation/rotation: pass
+- left/right reflection: pass
+- centered parallel trail zero steering: pass
+- 400 nominal trials finite: pass
+- active steering reached: pass
+
+Descriptive 400-trial engineering results:
+
+- mean central-zone fraction: 0.9027742126801778
+- trail-axis exit rate: 1
+- mean moving speed: 23.969301623687233 mm/s
+- mean time to exit: 10.221499999999999 s
+- mean steering samples: 507.475
+
+Exact report:
+
+`reports/p3_reference_free_reachability_v1.json`
+
+- blob `a18d5cd360be79bf1a05d3fe3e2c26fd1d6c86f6`
+- SHA-256 `6f5fb55db24015e8822ebc6bdad0c8e76d00d19514e77e0e4af58a4157634887`
+- bytes 5114
+
+Result freeze:
+
+`hypotheses/p3_reachability_result_freeze_v1.json`
+
+blob:
+
+`b3fa56386f71b0cea1dd8cfec032148c42af1b6d`
+
+Successful audit:
+
+- run `34255291743`
+- job `102159425630`
+- artifact `10067590240`
+- artifact digest `sha256:65296a0e2f6b729cdab0b3fe7209aea708d8066d6fd1dd36eb2741ac3332e31f`
+- Node/Chromium numeric parity: pass
+- browser exceptions: 0
+- console errors: 0
+- response-target requests: 0
+- Y-maze requests: 0
+- P1/P2 official-result requests: 0
+- P3 estimation-surface requests: 0
+
+The reachability outcome is not biological fit. No P3 parameter set is promoted, no response-estimation policy/search is authorized, canonical locomotion remains unchanged, and Y-maze remains locked.
