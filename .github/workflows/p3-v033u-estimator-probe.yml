@@ -4,6 +4,9 @@ on:
     branches: [v0.3.3u-p3-estimator-qualification]
 permissions:
   contents: read
+concurrency:
+  group: p3-v033u-estimator-probe
+  cancel-in-progress: true
 jobs:
   probe:
     runs-on: ubuntu-24.04
