@@ -1,0 +1,136 @@
+name: P2 v0.3.3o.1 corrected execution-gate audit
+on:
+  push:
+    branches: [v0.3.3o1-p2-official-highres-preflight-fix]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify corrected execution-gate chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object .github/workflows/p2-v033o-official-highres.yml)" = "89bd53ec3142cc248cc93313ac1b75f472b7029d"
+          test "$(git hash-object hypotheses/p2_highres_execution_precondition_v1.json)" = "15f45456934c102b412fa83ea39b424b9a3b3979"
+          test "$(git hash-object hypotheses/p2_highres_execution_attempt1_invalidation_v1.json)" = "fb96cc76ee07541290cfcf6e9c10645a87686a12"
+          test "$(git hash-object hypotheses/p2_highres_authorization_v1.json)" = "de361b15b9600bd92a35baf30fa71c2a7c61003c"
+          test "$(git hash-object hypotheses/p2_response_estimation_v1.json)" = "eaa74df19f3fdc1a59dec5f0b3b2efefba3f89ce"
+          test "$(git hash-object tools/run-p2-estimation.js)" = "38d66d28e94d2f532e9c8a20bd6553d6d11be8a6"
+          test "$(git hash-object reports/p2_estimator_qualification_v1.json)" = "9f4d15875b35773b41696987abd1cc4721435bc2"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test ! -e reports/p2_response_estimation_1000x60_v1.json
+
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process');
+          const wf=fs.readFileSync('.github/workflows/p2-v033o-official-highres.yml','utf8');
+          const p=JSON.parse(fs.readFileSync('hypotheses/p2_highres_execution_precondition_v1.json','utf8'));
+          const i=JSON.parse(fs.readFileSync('hypotheses/p2_highres_execution_attempt1_invalidation_v1.json','utf8'));
+
+          const good='test "$'+'{GITHUB_REF}" = "refs/heads/main"';
+          const bad='test "\\$'+'{GITHUB_REF}" = "refs/heads/main"';
+          if(!wf.includes(good))throw new Error('corrected GITHUB_REF expansion missing');
+          if(wf.includes(bad))throw new Error('escaped GITHUB_REF defect still present');
+          if(!/on:\n  push:\n    branches: \[main\]\n    paths:\n      - '\.github\/workflows\/p2-v033o-official-highres\.yml'/.test(wf))throw new Error('official trigger drift');
+          if(/\bpull_request\s*:/.test(wf)||/\bworkflow_dispatch\s*:/.test(wf))throw new Error('official workflow must remain main-push-only');
+          const executionLine=wf.split('\n').filter(x=>x.trim()==='node tools/run-p2-estimation.js --mode highres --out reports/p2_response_estimation_1000x60_v1.json');
+          if(executionLine.length!==1)throw new Error('official executable command count drift');
+
+          const workflowBlob=cp.execFileSync('git',['hash-object','.github/workflows/p2-v033o-official-highres.yml'],{encoding:'utf8'}).trim();
+          if(p.execution_workflow_git_blob_sha!==workflowBlob)throw new Error('retry precondition workflow pin drift');
+          if(p.invalidated_preexecution_attempt.record_git_blob_sha!=='fb96cc76ee07541290cfcf6e9c10645a87686a12')throw new Error('attempt-1 invalidation pin drift');
+          if(p.invalidated_preexecution_attempt.official_high_resolution_step_started!==false||p.invalidated_preexecution_attempt.response_target_semantics_loaded!==false||p.invalidated_preexecution_attempt.official_report_generated!==false)throw new Error('attempt-1 nonexecution evidence drift');
+          if(p.retry_execution_gate_main_checkpoint.permanent_main_workflow_run_id!==34189985287||p.retry_execution_gate_main_checkpoint.conclusion!=='success')throw new Error('retry main checkpoint drift');
+          if(p.authorized_next_valid_attempt_number!==2)throw new Error('retry attempt number drift');
+          if(p.official_execution_still_unrun_at_freeze!==true)throw new Error('scientific execution must still be unrun');
+          if(i.status!=='official_attempt_1_invalidated_before_scientific_execution'||i.rerun_authorization.authorized!==true||i.rerun_authorization.scientific_changes_allowed!==false)throw new Error('attempt-1 invalidation semantics drift');
+          if(i.evidence.candidate_search_started!==false||i.evidence.response_target_semantics_loaded!==false||i.evidence.workflow_artifacts_uploaded!==0)throw new Error('attempt-1 evidence drift');
+
+          console.log(JSON.stringify({
+            corrected_GITHUB_REF:true,
+            workflow_blob:workflowBlob,
+            invalidated_attempt_1:true,
+            retry_main_ci:34189985287,
+            authorized_next_attempt:2,
+            official_search_executed:false
+          }));
+          NODE
+
+      - name: Run full permanent regression suite
+        run: ./tests/run-tests.sh
+
+      - name: Prove retry review branch cannot execute highres
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p2-v033o1-audit
+          rm -f /tmp/p2-v033o1-audit/review-result.json
+          set +e
+          node tools/run-p2-estimation.js --mode highres --out /tmp/p2-v033o1-audit/review-result.json >/tmp/p2-v033o1-review.log 2>&1
+          code=$?
+          set -e
+          test "$code" -ne 0
+          grep -q "not effective until merged to main" /tmp/p2-v033o1-review.log
+          test ! -e /tmp/p2-v033o1-audit/review-result.json
+          node - <<'NODE'
+          const fs=require('fs'),est=require('./tools/run-p2-estimation.js');
+          const p=require('./hypotheses/p2_response_estimation_v1.json');
+          let blocked=false;
+          try{est.loadReferenceTarget(process.cwd(),p,{branchName:'v0.3.3o1-p2-official-highres-preflight-fix'});}catch(e){blocked=/not effective until merged to main/.test(String(e));}
+          if(!blocked)throw new Error('retry review branch target loader was not blocked');
+          const out={status:'passed',review_branch_highres_rejected:true,target_semantics_blocked:true,official_search_executed:false};
+          fs.writeFileSync('/tmp/p2-v033o1-audit/review.json',JSON.stringify(out,null,2));
+          console.log(JSON.stringify(out));
+          NODE
+
+      - name: Real Chromium retry-gate firewall check
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p2-v033o1-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p2-v033o1-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p2-v033o1-chrome --remote-debugging-port=9222 about:blank >/tmp/p2-v033o1-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p2-v033o1-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'&&!!globalThis.AntLabIntegrity"))break;await new Promise(r=>setTimeout(r,50));}
+
+          const state=await evalv("(async()=>{const p=await(await fetch('./hypotheses/p2_highres_execution_precondition_v1.json')).json();const i=await(await fetch('./hypotheses/p2_highres_execution_attempt1_invalidation_v1.json')).json();const a=await(await fetch('./hypotheses/p2_highres_authorization_v1.json')).json();return{workflow:p.execution_workflow_git_blob_sha,invalid:p.invalidated_preexecution_attempt.record_git_blob_sha,retryRun:p.retry_execution_gate_main_checkpoint.permanent_main_workflow_run_id,next:p.authorized_next_valid_attempt_number,unrun:p.official_execution_still_unrun_at_freeze,invalidStatus:i.status,searchStarted:i.evidence.candidate_search_started,targetLoaded:i.evidence.response_target_semantics_loaded,artifacts:i.evidence.workflow_artifacts_uploaded,P1:a.P1_official_result_semantic_access_authorized,candidateB:a.Candidate_B_authorized,canonical:a.canonical_promotion_authorized,ymaze:a.ymaze_access_authorized};})()");
+          if(state.workflow!=='89bd53ec3142cc248cc93313ac1b75f472b7029d'||state.invalid!=='fb96cc76ee07541290cfcf6e9c10645a87686a12'||state.retryRun!==34189985287||state.next!==2||state.unrun!==true)throw new Error('browser retry precondition drift');
+          if(state.invalidStatus!=='official_attempt_1_invalidated_before_scientific_execution'||state.searchStarted!==false||state.targetLoaded!==false||state.artifacts!==0)throw new Error('browser invalidation drift');
+          if(state.P1!==false||state.candidateB!==false||state.canonical!==false||state.ymaze!==false)throw new Error('browser scientific firewall drift');
+
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p1Req=requests.filter(u=>u.includes('p1_response_estimation_500x60_v1.json'));
+          const officialReq=requests.filter(u=>u.includes('p2_response_estimation_1000x60_v1.json'));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p1Req.length||officialReq.length)throw new Error('browser retry-gate firewall failure');
+
+          const out={status:'passed',exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,p1_result_requests:p1Req.length,official_p2_result_requests:officialReq.length,official_search_executed:false};
+          fs.writeFileSync('/tmp/p2-v033o1-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p2-v033o1-browser.mjs
+
+      - name: Upload corrected execution-gate audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-v033o1-corrected-execution-gate-audit
+          path: /tmp/p2-v033o1-audit
+          retention-days: 30
