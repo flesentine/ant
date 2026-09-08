@@ -2261,3 +2261,155 @@ Successful audit:
 - P3 estimation-surface requests: 0
 
 The reachability outcome is not biological fit. No P3 parameter set is promoted, no response-estimation policy/search is authorized, canonical locomotion remains unchanged, and Y-maze remains locked.
+
+
+## P3 response-estimation policy freeze
+
+Policy:
+
+`hypotheses/p3_response_estimation_v1.json`
+
+Git blob:
+
+`d86eb9936e993d188f2a28faab838ba158c40f3b`
+
+This gate freezes P3-v1 estimation before any P3 estimator exists and before semantic loading of the 102-row Poissonnier response target.
+
+### Estimated parameters
+
+Exactly two shared biological coordinates:
+
+- `sigma_field_mm`: [2,32], log scale
+- `kappa_trail_per_s`: [0,16], linear scale
+
+There are no nuisance parameters.
+
+The P3 sector radius, quadrature, Weber equation, epsilon rule, speed, pauses, angular noise, contacts, boundary behavior, apparatus, and scoring remain fixed.
+
+### Candidate panel
+
+P3 uses a deterministic 2D Halton panel:
+
+- indices 1..999: positive P3 candidates
+- index 1000: exact canonical null, sigma=8 and kappa=0
+
+Mapping:
+
+- prime 2 → sigma, log-uniform [2,32]
+- prime 3 → kappa, linear [0,16]
+
+Sanity points:
+
+- index 1: sigma=8, kappa=16/3
+- index 2: sigma=4, kappa=32/3
+
+### Structural comparator
+
+P3 must demonstrate value from the relative-sector/Weber transduction itself.
+
+For every P3 Halton sigma/kappa coordinate, a separate benchmark candidate uses the frozen P1 absolute/saturating local-kernel mechanism:
+
+- forward point offset: 2 mm
+- lateral half-separation: 1.5 mm
+- `T(C)=C/(1+C)`
+- `omega=kappa*(T(C_R)-T(C_L))`
+
+The benchmark receives the same 999 coordinates and same exact canonical null and is ranked separately.
+
+This is not a P1 rerun. P1 official fit results, fold selections, and target-ranked semantics remain inaccessible.
+
+### LOCO and objective
+
+The policy retains the same six colonies:
+
+`[0,7,16,20,21,27]`
+
+Each fold trains on five equal-weight colony-level pheromone-minus-DCM contrasts and evaluates on the heldout colony.
+
+Primary observables:
+
+- middle-zone fraction
+- trail-axis exit
+
+The four short/long × metric squared contrast errors are equally weighted.
+
+Secondary guard observables:
+
+- time to exit
+- beeline distance
+
+Secondary guards do not rank candidates.
+
+### Dual heldout survival
+
+P3 must pass both:
+
+1. versus exact canonical null:
+   - >=5/6 heldout wins
+   - strictly positive median relative improvement
+
+2. versus separately selected absolute-transduction benchmark:
+   - >=5/6 heldout wins
+   - strictly positive median relative improvement
+
+Failure of either closes P3-v1 without rescue or retuning.
+
+### Frozen search execution
+
+Per fold:
+
+- 999 P3 candidates + null
+- 999 absolute-transduction candidates + same null
+- 60 training trials per treatment × path × candidate
+- 120 heldout-evaluation trials per treatment × path
+- fit root seed: 6210000
+- heldout root seed: 6810000
+- short offset: 0
+- long offset: 1000
+
+P3 has no response RNG. Common random numbers use the unchanged canonical biology RNG trial seeds across P3, benchmark, and null.
+
+### Final all-data gate
+
+Only if both LOCO survival guards pass:
+
+- same frozen panels; no new candidates
+- 120 trials per treatment × path for all-data ranking
+- fit seed: 7210000
+- 240 independent final-check trials per treatment × path
+- final-check seed: 7610000
+
+On the final check, P3 primary loss must be strictly lower than both the selected absolute benchmark and exact canonical null.
+
+### Identifiability
+
+Near-best tolerance:
+
+`best_loss + max(0.0004, 0.05*best_loss)`
+
+A fixed sigma/kappa pair is eligible only if:
+
+- canonical null is outside the P3 near-best set
+- the best absolute-transduction benchmark is outside the P3 near-best tolerance
+- selected sigma and kappa are each >=0.02 normalized distance from an active bound
+- near-best normalized span <=0.60 for sigma
+- near-best normalized span <=0.60 for kappa
+- final primary increment passes
+- all four final secondary standardized errors are <=1
+
+### Current firewall
+
+At the policy freeze:
+
+- P3 estimator: absent
+- high-resolution P3 search: unauthorized
+- response-target semantic access: unauthorized
+- P1 official result semantic access: unauthorized
+- P2 official result semantic access: unauthorized
+- P1/P2 rerun or rescue: unauthorized
+- P2 lapse structure: absent
+- canonical locomotion change: unauthorized
+- H2-H5 refit/combination: unauthorized
+- Y-maze access: unauthorized
+
+The next gate is a separate P3 estimator implementation + synthetic/reference-free qualification.
