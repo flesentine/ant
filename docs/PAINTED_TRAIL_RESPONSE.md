@@ -1751,3 +1751,80 @@ The provenance includes the GitHub run/attempt/commit, workflow and precondition
 The workflow records the official output but does not change code, tune the model, promote canonical locomotion, or unlock Y-maze.
 
 After execution, the exact artifact must be frozen in a separate result PR **before** interpretation-driven changes.
+
+
+### Attempt 1 invalidation and corrected retry gate
+
+The first main-triggered workflow attempt did **not** begin the P2 scientific search.
+
+Attempt 1:
+
+- workflow run: `34189985353`
+- job: `101945889831`
+- main commit: `c219890bef7dcd97f560bd26d3d0b504bcd7b202`
+- conclusion: failure
+- failure step: `Verify one-shot main-only execution preconditions`
+
+Formal invalidation:
+
+`hypotheses/p2_highres_execution_attempt1_invalidation_v1.json`
+
+Git blob:
+
+`fb96cc76ee07541290cfcf6e9c10645a87686a12`
+
+The failure happened before:
+
+- permanent regression execution;
+- response-target semantic loading;
+- candidate search;
+- report generation;
+- provenance generation;
+- artifact upload.
+
+Attempt 1 uploaded **zero artifacts**.
+
+Root cause was an execution-gate shell escaping defect: the `GITHUB_REF` expression was escaped and therefore compared as literal text instead of expanding to `refs/heads/main`.
+
+No scientific input or algorithm was involved in the failure.
+
+Permanent main CI on that merge commit still passed:
+
+- workflow: **Test and deploy ANTLAB #141**
+- run: `34189985287`
+- test job: `101945889690` — success
+- deploy job: `101946056177` — success
+
+The corrected workflow changes only the shell expansion.
+
+Corrected official workflow blob:
+
+`89bd53ec3142cc248cc93313ac1b75f472b7029d`
+
+Updated execution-precondition blob:
+
+`15f45456934c102b412fa83ea39b424b9a3b3979`
+
+The updated precondition pins:
+
+- the formal attempt-1 invalidation;
+- the green #141 main checkpoint;
+- the corrected workflow blob;
+- authorized next valid attempt number: **2**.
+
+All scientific bytes remain unchanged:
+
+- authorization;
+- P2 response-estimation policy;
+- estimator;
+- qualification report/freeze;
+- response target;
+- P2 runtime/model;
+- candidate panels;
+- objectives;
+- comparators;
+- seeds;
+- trial counts;
+- promotion guards.
+
+The original authorization rerun rule permits this retry because attempt 1 was formally invalidated for a genuine execution-gate implementation error before scientific execution.
