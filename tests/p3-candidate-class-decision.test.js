@@ -89,13 +89,19 @@ if(laterMechanismPresent){
   assert.strictEqual(m.estimation_firewall.response_target_semantic_access_authorized,false);
   assert.strictEqual(m.global_firewall.Y_maze_access,false);
 }
+const laterRuntime=fs.existsSync(path.join(root,'src','p3.js'));
+if(laterRuntime){
+  assert.strictEqual(blob('hypotheses/p3_reachability_execution_v1.json'),'55494a3190964d24ded2ae0d1faf3b355cc7835f');
+  assert.strictEqual(blob('hypotheses/p3_implementation_authorization_v1.json'),'128afcbdb10d3254240c5074e1e997cee7d7fe51');
+  assert.strictEqual(blob('src/p3.js'),'4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8');
+  assert.strictEqual(blob('models/lasius_niger_painted_trail_p3_v1.json'),'9107de0c71641c4037bbedbb498b9fa868c1ef00');
+  assert.strictEqual(blob('tools/run-p3-reachability.js'),'0e1795b7bbb3a568fbbd241cc809d600e1f8ca67');
+}
 for(const p of [
-  'src/p3.js',
-  'models/lasius_niger_painted_trail_p3_v1.json',
   'hypotheses/p3_response_estimation_v1.json',
   'tools/run-p3-estimation.js',
   'hypotheses/p3_highres_authorization_v1.json'
-]) assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P3 candidate-class/mechanism-freeze stage');
+]) assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at P3 implementation/reachability stage');
 
 assert.match(d.next_gate,/separate P3 mechanism-selection\/freeze record/i);
 
@@ -106,7 +112,8 @@ console.log('p3-candidate-class-decision.test.js PASS '+JSON.stringify({
   p2_closed:d.p2_closure_boundary.p2_v1_closed,
   p2_outcomes_used_for_selection:false,
   later_mechanism_present:laterMechanismPresent,
-  p3_runtime:false,
+  later_runtime_present:laterRuntime,
+  p3_runtime_at_candidate_freeze:false,
   response_target_access:false,
   ymaze:false
 }));
