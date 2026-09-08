@@ -100,7 +100,7 @@ assert.strictEqual(q.policy_git_blob_sha,'d86eb9936e993d188f2a28faab838ba158c40f
 assert.strictEqual(q.estimator_git_blob_sha,'5bf27bf439dca18629cdfd36f56fe767a23062ff');
 assert.strictEqual(q.estimator_core_git_blob_sha,'410ef81dfe761e3c218d072ca311632329ac1617');
 assert.strictEqual(q.response_target_git_blob_sha_verified,'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed');
-assert.strictEqual(Object.keys(q.checks).length,20);
+assert.strictEqual(Object.keys(q.checks).length,22);
 for(const [k,v] of Object.entries(q.checks))assert.strictEqual(v,true,k+' must remain true');
 
 assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')));
