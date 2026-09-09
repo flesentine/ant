@@ -325,6 +325,19 @@
 - canonical locomotion unchanged; no P3 parameter pair selected; no biological fit claim; no H2-H5 recombination; Y-maze untouched
 - next gate: separate post-qualification P3 high-resolution authorization freeze, main-only effective after merge + green permanent CI
 
+
+### v0.3.3v — P3 high-resolution authorization freeze — complete / PASS
+- active authorization frozen at `hypotheses/p3_highres_authorization_v1.json`, blob `04d2c7b454143fd7073b274bff0ec9b355ec058d`
+- authorization pins qualified estimator merge `b7553cf64b1ebe1a3ee4895ce4cf63b9c579a635` and permanent main workflow #148, run `34289965059`; test job `102274091654` and deploy job `102274263257` both succeeded
+- exact frozen policy/core/runner/qualification chain remains unchanged: policy `d86eb9936e993d188f2a28faab838ba158c40f3b`, core `410ef81dfe761e3c218d072ca311632329ac1617`, runner `5bf27bf439dca18629cdfd36f56fe767a23062ff`, qualification `63e1d7360bc1ef4b232bbf37f347b9fa27e7d461`, qualification freeze `32d90d05add5b4e45dd69c711b416ed3378d15ab`
+- first full authorization audit passed at head `2c600147a596f7325e8d5b82fc98940cee72efad`: run `34290329837` / job `102275214858` / artifact `10081084208`, digest `sha256:5ba68afbad79e77399825003a220d3e951299b46ccd7bc12706b86a801dc4f14`
+- full permanent suite PASS; fresh reference-free P3 qualification remains 22/22 PASS
+- review-branch high-resolution execution is correctly blocked before response-target semantic parsing; Chromium audit has 0 exceptions, 0 console errors, and zero response-target, P1-result, P2-result, or Y-maze requests
+- authorization becomes effective only after this exact gate merges to `main`; this version does not execute the official search and no P3 scientific result exists yet
+- response-target semantics are authorized only through the frozen high-resolution runner after the separate execution-precondition gate confirms green permanent main CI
+- P1 official-result semantics, P2 official-result semantics/lapse state, canonical promotion, H2-H5 recombination, and Y-maze remain forbidden
+- next gate: separate main-only one-shot P3 execution precondition/workflow, followed by immediate result freeze before interpretation
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions

@@ -116,7 +116,9 @@ if(laterEstimatorPresent){
   assert.strictEqual(blob('tools/run-p3-estimation.js'),'5bf27bf439dca18629cdfd36f56fe767a23062ff');
   assert.strictEqual(blob('tools/p3-estimation-core.js'),'410ef81dfe761e3c218d072ca311632329ac1617');
 }
-assert.ok(!fs.existsSync(path.join(root,'hypotheses','p3_highres_authorization_v1.json')),'P3 high-resolution authorization must remain absent at the estimator-qualification stage');
+const laterHighresAuthorizationRel='hypotheses/p3_highres_authorization_v1.json';
+const laterHighresAuthorizationPresent=fs.existsSync(path.join(root,laterHighresAuthorizationRel));
+if(laterHighresAuthorizationPresent) assert.strictEqual(blob(laterHighresAuthorizationRel),'04d2c7b454143fd7073b274bff0ec9b355ec058d');
 
 assert.match(d.next_gate,/separate P3 mechanism-selection\/freeze record/i);
 
