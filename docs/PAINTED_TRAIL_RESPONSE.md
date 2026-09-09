@@ -2587,3 +2587,85 @@ P1 runtime access is authorized only for the pinned absolute-transduction struct
 ### Next gate
 
 After this authorization freeze merges to `main` and permanent main CI is green, freeze a separate one-shot P3 execution precondition and main-only execution workflow. The official response search must run exactly once under the frozen procedure, and its complete result must be frozen before interpretation or any mechanism/model change.
+
+
+## P3-v1 one-shot high-resolution execution gate
+
+v0.3.3w freezes the execution precondition and main-only workflow for the single official P3-v1 high-resolution response-estimation run. This review gate still does **not** execute the scientific search.
+
+Execution precondition:
+
+`hypotheses/p3_highres_execution_precondition_v1.json`
+
+Git blob:
+
+`9204d206c454891febdf64a94af48e4235cee326`
+
+Official one-shot workflow:
+
+`.github/workflows/p3-v033w-official-highres.yml`
+
+Git blob:
+
+`2f84786d5780f0fe4dce7cafdbe92ae399ccd768`
+
+### Authorization + permanent-main checkpoint
+
+The gate begins only after the v0.3.3v authorization merged to `main`:
+
+- authorization merge commit: `747866d75fb433baf1423552274417ae9445e917`
+- active authorization blob: `04d2c7b454143fd7073b274bff0ec9b355ec058d`
+- permanent main workflow: run `34299582530` (#149)
+- test job: `102303449269` — success
+- deploy job: `102303617940` — success
+
+The precondition also pins the policy, estimator/core, qualification report/freeze, P3 runtime/model, P1 structural-comparator runtime, apparatus, P3 reachability experiments, response target hash, canonical model, sim-core, integrity runtime, and bundle loader.
+
+### One-shot trigger contract
+
+The official workflow has exactly one trigger surface:
+
+- event: push
+- branch: `main`
+- path: `.github/workflows/p3-v033w-official-highres.yml`
+
+It has no `pull_request`, `workflow_dispatch`, or scheduled trigger. Therefore reviewing or updating this branch cannot consume the official search. Later unrelated commits to `main` also cannot rerun it.
+
+The exact authorized command remains:
+
+`node tools/run-p3-estimation.js --mode highres --out reports/p3_response_estimation_1000x60_v1.json`
+
+No CLI overrides are permitted. The frozen 999+null P3 panel, separately ranked 999+null absolute-transduction comparator, six LOCO colonies, 60/120 trial budgets, 120/240 final budgets, and seeds 6210000/6810000/7210000/7610000 remain unchanged.
+
+### First execution-gate audit
+
+Review-branch audit head:
+
+`6fdfe09ca10aed13c0598b6ef41736dc86208c03`
+
+- run: `34299914300`
+- job: `102304425159`
+- artifact: `10084534401`
+- artifact digest: `sha256:981321664395230c1f7d711c1e1175de34c8dc1c40281da9ac6454810bcd3e98`
+
+Passed:
+
+- exact execution precondition/workflow/blob chain
+- full permanent suite
+- fresh P3 synthetic/reference-free qualification: 22/22
+- review-branch high-resolution command rejected before semantic target access
+- main-only/no-manual/no-PR trigger regression
+- Chromium execution-gate firewall
+- browser exceptions: 0
+- console errors: 0
+- response-target requests: 0
+- P1 official-result requests: 0
+- P2 official-result requests: 0
+- Y-maze requests: 0
+- official-result requests: 0
+
+### Result boundary
+
+No official P3 high-resolution report exists yet. Merging the clean v0.3.3w gate to `main` is the action that will make the workflow path change on `main` and consume the single authorized scientific execution. The resulting report and provenance must be frozen exactly before any interpretation-driven mechanism/model change, promotion decision, or Y-maze work.
+
+A rerun is allowed only after a formal invalidation for a genuine implementation or infrastructure failure **before** a valid scientific result is produced; the frozen procedure itself may not change.
