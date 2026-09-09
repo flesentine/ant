@@ -2587,3 +2587,118 @@ P1 runtime access is authorized only for the pinned absolute-transduction struct
 ### Next gate
 
 After this authorization freeze merges to `main` and permanent main CI is green, freeze a separate one-shot P3 execution precondition and main-only execution workflow. The official response search must run exactly once under the frozen procedure, and its complete result must be frozen before interpretation or any mechanism/model change.
+
+
+## P3-v1 one-shot official execution gate
+
+v0.3.3w freezes the execution preconditions and a main-only one-shot workflow for the **single official P3-v1 high-resolution response-estimation execution**. This review gate does not itself run the scientific search.
+
+Execution precondition:
+
+`hypotheses/p3_highres_execution_precondition_v1.json`
+
+Git blob:
+
+`79d58ca1aa734ea6fd2f1e6694c958fa899a6a5f`
+
+Official execution workflow:
+
+`.github/workflows/p3-v033w-official-highres.yml`
+
+Git blob:
+
+`edadbf0756023423235c38992303a716d4d4985c`
+
+### Main authorization checkpoint
+
+The execution gate is anchored to the merged v0.3.3v authorization:
+
+- PR #30 merge commit: `747866d75fb433baf1423552274417ae9445e917`
+- permanent main workflow: run `34299582530` (#149) — success
+- test job: `102303449269` — success
+- deploy job: `102303617940` — success
+- authorization blob: `04d2c7b454143fd7073b274bff0ec9b355ec058d`
+- policy blob: `d86eb9936e993d188f2a28faab838ba158c40f3b`
+- estimator core blob: `410ef81dfe761e3c218d072ca311632329ac1617`
+- estimator runner blob: `5bf27bf439dca18629cdfd36f56fe767a23062ff`
+- qualification report blob: `63e1d7360bc1ef4b232bbf37f347b9fa27e7d461`
+- qualification-freeze blob: `32d90d05add5b4e45dd69c711b416ed3378d15ab`
+
+### One-shot trigger contract
+
+The official workflow has exactly one trigger surface:
+
+- event: push
+- branch: `main`
+- changed path: `.github/workflows/p3-v033w-official-highres.yml`
+
+It has **no** `pull_request` trigger and **no** `workflow_dispatch` trigger. Review-branch commits therefore cannot consume the official execution, and later unrelated main commits cannot rerun it.
+
+The runtime preflight additionally requires:
+
+`test "${GITHUB_REF}" = "refs/heads/main"`
+
+and:
+
+`test "${GITHUB_EVENT_NAME}" = "push"`
+
+The `GITHUB_REF` form is intentionally the corrected literal runtime expansion; it does not repeat the earlier P2 escaped-variable defect.
+
+The only authorized scientific command remains:
+
+`node tools/run-p3-estimation.js --mode highres --out reports/p3_response_estimation_1000x60_v1.json`
+
+No CLI overrides are authorized.
+
+### Frozen execution contract
+
+The gate preserves the previously frozen P3 procedure without change:
+
+- six LOCO folds over colonies `[0,7,16,20,21,27]`
+- P3 panel: 999 Halton candidates + one exact canonical null
+- separately ranked absolute-transduction panel: 999 candidates + one exact null
+- training: 60 trials per treatment × path × candidate
+- heldout evaluation: 120 trials per treatment × path
+- fit/evaluation roots: `6210000` / `6810000`
+- final all-data fit, only after dual survival: 120 trials, seed `7210000`
+- independent final check: 240 trials, seed `7610000`
+- `dt=0.02`
+- common biology RNG; no P3 or comparator response RNG
+- estimated surface remains exactly `sigma_field_mm` and `kappa_trail_per_s`
+
+The workflow validates but does not reinterpret the three legitimate frozen result classes:
+
+1. dual primary-survival failure;
+2. survival with no fixed parameter pair eligible;
+3. survival with a pair eligible for a later separate freeze.
+
+A failed heldout gate cannot be rescued by retuning or a favorable rerun.
+
+### Review-only execution-gate audit
+
+The first complete v0.3.3w review audit passed at head `5c63d869030149f2973b7af9e454b6cadac04cf6`:
+
+- run: `34374887096`
+- job: `102545064100`
+- artifact: `10113430499`
+- artifact digest: `sha256:2e43e6839796da440f1363465478d566d6c1be3b168a2db164b360b22e6e53c6`
+- exact gate/blob chain: PASS
+- full permanent regression suite: PASS
+- review-branch highres execution: correctly blocked before scientific execution
+- trigger/shell-safety audit: PASS
+- main-only: true
+- manual dispatch: false
+- pull-request trigger: false
+- corrected `GITHUB_REF`: true
+- Chromium execution-gate firewall: PASS
+- browser exceptions: 0
+- console errors: 0
+- response-target requests: 0
+- P1 official-result requests: 0
+- P2 official-result requests: 0
+- Y-maze requests: 0
+- official execution started: false
+
+### Boundary after merge
+
+Merging this gate is what intentionally changes the official workflow file on `main`; that main push is the one-shot trigger that may consume the authorized execution. The exact output and provenance must then be frozen before interpretation, the active authorization and execution workflow must be retired after a valid result, and no rerun is allowed unless a genuine implementation/infrastructure failure is formally invalidated **before** a valid scientific result exists.
