@@ -2702,3 +2702,38 @@ The first complete v0.3.3w review audit passed at head `5c63d869030149f2973b7af9
 ### Boundary after merge
 
 Merging this gate is what intentionally changes the official workflow file on `main`; that main push is the one-shot trigger that may consume the authorized execution. The exact output and provenance must then be frozen before interpretation, the active authorization and execution workflow must be retired after a valid result, and no rerun is allowed unless a genuine implementation/infrastructure failure is formally invalidated **before** a valid scientific result exists.
+
+
+## P3-v1 official high-resolution result — failed and frozen
+
+The one valid authorized P3-v1 high-resolution response-estimation execution completed on GitHub Actions run `34375376968` at exact execution head `3ba8debdd6fe0c2b84a4f7c00a8d5a11f1fd614f`.
+
+Exact official result:
+
+- report: `reports/p3_response_estimation_1000x60_v1.json`
+- report Git blob: `264d822c7e6180dc0c9a3da1b8045df3f0e2a03d`
+- report SHA-256: `55bffcd30c85e1a891879fd712f8332f119d191d5930fa4c4710ae9589c8e73b`
+- report bytes: 317685
+- execution provenance: `reports/p3_response_estimation_execution_provenance_v1.json`
+- artifact: `10116473125`
+- artifact digest: `sha256:03c55fbdef17515bbc48b2bb8561db8168c72c802f29d9ffc172869b9f305233`
+
+Frozen heldout result:
+
+- P3 vs exact canonical null: **4/6** heldout wins; median relative improvement **+20.97%**; required 5/6 + positive median -> **FAIL**
+- P3 vs separately selected absolute-transduction benchmark: **2/6** heldout wins; median relative improvement **-100.91%**; required 5/6 + positive median -> **FAIL**
+- dual primary-survival guard: **FAIL**
+
+Because dual survival failed, the frozen procedure correctly stopped before the all-data fit. Identifiability, final primary-increment, and final secondary promotion guards were therefore not evaluated.
+
+Frozen consequences:
+
+- P3-v1 mechanism survives internal development: **NO**
+- fixed sigma/kappa pair eligible for future freeze: **NO**
+- canonical locomotion promotion: **NO**
+- Y-maze unlock: **NO**
+- rerun or rescue retuning: **NOT AUTHORIZED**
+
+The exact closure record is `hypotheses/p3_response_estimation_result_freeze_v1.json`. The consumed authorization is preserved byte-for-byte at `hypotheses/archive/p3_highres_authorization_v1.json`; the active authorization path and the one-shot official execution workflow are retired.
+
+P3-v1 is permanently closed. A future painted-trail mechanism must be independently motivated and versioned with a new pre-search policy rather than retuning P3-v1 after seeing these target-ranked outcomes.
