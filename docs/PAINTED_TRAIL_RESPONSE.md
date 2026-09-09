@@ -2737,3 +2737,107 @@ Frozen consequences:
 The exact closure record is `hypotheses/p3_response_estimation_result_freeze_v1.json`. The consumed authorization is preserved byte-for-byte at `hypotheses/archive/p3_highres_authorization_v1.json`; the active authorization path and the one-shot official execution workflow are retired.
 
 P3-v1 is permanently closed. A future painted-trail mechanism must be independently motivated and versioned with a new pre-search policy rather than retuning P3-v1 after seeing these target-ranked outcomes.
+
+
+## P3-v1 post-failure characterization — why the frozen model lost
+
+v0.3.3y is a **descriptive postmortem only**. It does not reopen P3-v1, rerun any simulation, rerank candidates, alter the objective, access raw target rows again, or select a P4 mechanism.
+
+Frozen characterization record:
+
+`hypotheses/p3_post_failure_characterization_v1.json`
+
+### The strongest pattern: P3 collapsed toward very weak gain
+
+Across the six LOCO fits, selected P3 steering gains were:
+
+- minimum kappa: `0.1755829903978052 s^-1`
+- median kappa: `0.2633744855967078 s^-1`
+- maximum kappa: `0.4682213077274805 s^-1`
+
+Under the frozen `[0,16]` kappa range, those are only about **1.1% to 2.9%** of the full range. Only three distinct P3 Halton candidates were selected across the six folds: indices `108`, `648`, and `864`.
+
+The behavior was not limited to the single winners. Every recorded top-12 P3 training candidate in every fold had kappa below `1 s^-1`.
+
+By contrast, the separately ranked absolute-transduction comparator selected kappa values from about `4.13` to `15.34 s^-1`, with median about `7.35 s^-1`.
+
+This does **not** authorize a lower P3 search range or a rescue rerun. It is a descriptive property of the already-frozen result.
+
+### The absolute comparator fit the training summaries better in every fold
+
+Selected P3 training primary loss divided by selected absolute-comparator training loss was:
+
+- held out 0: **5.27x**
+- held out 7: **8.08x**
+- held out 16: **12.99x**
+- held out 20: **60.18x**
+- held out 21: **9.47x**
+- held out 27: **5.79x**
+
+So the heldout failure was not only a one-colony generalization accident. Before each heldout evaluation, the P3 relative-transduction structure already fit the five-colony training summaries substantially worse than the same-coordinate absolute-transduction comparator.
+
+Across the six selected P3 training fits, mean signed primary-component errors were:
+
+- short middle-zone fraction: `-0.1606`
+- short trail-axis exit: `+0.1472`
+- long middle-zone fraction: `-0.1190`
+- long trail-axis exit: `+0.0425`
+
+The recurring pattern was therefore **too little middle-zone treatment contrast while producing too much short-path trail-axis contrast**.
+
+### Why that pattern is structurally plausible for P3
+
+The frozen P3 mechanism uses:
+
+`W(L,R) = (R-L)/(R+L)`
+
+for nonzero bilateral signal and then:
+
+`omega_trail = kappa * W`
+
+The mechanism deliberately has:
+
+- no epsilon;
+- no detection threshold;
+- no sensory floor;
+- exact positive scale invariance: `W(aL,aR)=W(L,R)`.
+
+That means absolute concentration magnitude cannot by itself weaken the normalized steering signal once nonzero left/right field values exist. The observed low-kappa selections are therefore **consistent with** the optimizer having to suppress the overall gain because the relative signal is otherwise too aggressive.
+
+That is a model-behavior diagnosis, not proof that Weber-like sensing is biologically wrong in *Lasius niger*.
+
+### The clearest heldout failures
+
+Colony 27 was the strongest single failure:
+
+- observed short-path trail-axis contrast: `-0.33333333333333337`
+- selected P3 prediction: `+0.5583333333333333`
+- squared error from that endpoint alone: `0.7950694444444445`
+
+P3 therefore predicted strong attractive trail-axis following where the frozen colony-level contrast had the opposite sign.
+
+Other notable mismatches:
+
+- colony 0 long path: reference trail-axis contrast `0`, P3 `+0.2417`
+- colony 20 short path: reference `0`, P3 `+0.4`
+- colony 21 long path: reference `-0.0833`, P3 `+0.2917`
+
+Colonies 7 and 16 were the two folds where P3 beat both the null and the absolute comparator. Colony 7 had strong positive reference contrasts on all four primary endpoints, and P3 still under-reproduced all four; its relative response happened to generalize better than the alternatives there.
+
+### What this does and does not mean
+
+Allowed conclusion:
+
+**A single shared, always-attractive, scale-invariant P3-v1 response did not generalize sufficiently, and its frozen fit behavior repeatedly pushed the steering gain close to zero while still over-producing trail-axis following in several colony/path combinations.**
+
+Not allowed:
+
+- removing or downweighting colony 27;
+- changing P3's kappa bounds;
+- adding an epsilon, threshold, sensory floor, or different sector geometry as a P3 rescue;
+- promoting the absolute comparator simply because it fit these P3 training summaries better;
+- inventing colony-specific or path-specific response gains;
+- claiming Weber-like sensing is disproven biologically;
+- selecting P4 from this posthoc pattern.
+
+Any next candidate class has to come from a separate independent-evidence gate.
