@@ -338,6 +338,19 @@
 - P1 official-result semantics, P2 official-result semantics/lapse state, canonical promotion, H2-H5 recombination, and Y-maze remain forbidden
 - next gate: separate main-only one-shot P3 execution precondition/workflow, followed by immediate result freeze before interpretation
 
+
+### v0.3.3w — P3 one-shot official high-resolution execution gate — review-ready / PASS
+- authorization PR #30 merged to `main` at `747866d75fb433baf1423552274417ae9445e917`; permanent main workflow #149, run `34299582530`, test job `102303449269` and deploy job `102303617940` both succeeded
+- execution precondition frozen at `hypotheses/p3_highres_execution_precondition_v1.json`, blob `9204d206c454891febdf64a94af48e4235cee326`
+- official one-shot workflow frozen at `.github/workflows/p3-v033w-official-highres.yml`, blob `2f84786d5780f0fe4dce7cafdbe92ae399ccd768`
+- official workflow triggers only on a push to `main` changing that exact workflow file; no pull_request, workflow_dispatch, or schedule trigger exists
+- review-branch execution remains blocked before semantic response-target loading; no official P3 report exists yet and the one-shot scientific execution has not been consumed
+- exact high-resolution command remains `node tools/run-p3-estimation.js --mode highres --out reports/p3_response_estimation_1000x60_v1.json`; CLI overrides remain forbidden
+- all frozen P3 candidate/comparator panels, LOCO folds, trial budgets, seeds, RNG contract, objective, dual survival guards, secondary guards, identifiability, and final-increment rules remain unchanged
+- first execution-gate audit passed at head `6fdfe09ca10aed13c0598b6ef41736dc86208c03`: run `34299914300` / job `102304425159` / artifact `10084534401`, digest `sha256:981321664395230c1f7d711c1e1175de34c8dc1c40281da9ac6454810bcd3e98`
+- full permanent suite PASS; fresh P3 qualification remains 22/22 PASS; Chromium firewall has 0 exceptions, 0 console errors, and zero response-target, P1-result, P2-result, Y-maze, or official-result requests
+- next action after clean PR audit: merge this gate to `main`, which will consume the single official P3 response-estimation execution; freeze exact result/provenance before interpretation
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
