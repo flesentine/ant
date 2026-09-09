@@ -1,0 +1,110 @@
+name: P3 v0.3.3w execution-gate audit
+on:
+  push:
+    branches: [v0.3.3w-p3-official-highres-execution]
+permissions:
+  contents: read
+concurrency:
+  group: p3-v033w-execution-gate-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify exact frozen execution gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p3_highres_execution_precondition_v1.json)" = "9204d206c454891febdf64a94af48e4235cee326"
+          test "$(git hash-object .github/workflows/p3-v033w-official-highres.yml)" = "2f84786d5780f0fe4dce7cafdbe92ae399ccd768"
+          test "$(git hash-object hypotheses/p3_highres_authorization_v1.json)" = "04d2c7b454143fd7073b274bff0ec9b355ec058d"
+          test "$(git hash-object hypotheses/p3_response_estimation_v1.json)" = "d86eb9936e993d188f2a28faab838ba158c40f3b"
+          test "$(git hash-object tools/p3-estimation-core.js)" = "410ef81dfe761e3c218d072ca311632329ac1617"
+          test "$(git hash-object tools/run-p3-estimation.js)" = "5bf27bf439dca18629cdfd36f56fe767a23062ff"
+          test "$(git hash-object reports/p3_estimator_qualification_v1.json)" = "63e1d7360bc1ef4b232bbf37f347b9fa27e7d461"
+          test "$(git hash-object hypotheses/p3_estimator_qualification_result_freeze_v1.json)" = "32d90d05add5b4e45dd69c711b416ed3378d15ab"
+          test ! -e reports/p3_response_estimation_1000x60_v1.json
+
+      - name: Run permanent suite
+        run: ./tests/run-tests.sh
+
+      - name: Re-run reference-free P3 qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p3-v033w-audit
+          node tools/run-p3-estimation.js --mode qualification --trials 2 --out /tmp/p3-v033w-audit/qualification.json
+          node - <<'NODE'
+          const q=require('/tmp/p3-v033w-audit/qualification.json');
+          if(q.status!=='passed'||Object.keys(q.checks).length!==22)throw new Error('P3 qualification did not remain 22/22');
+          for(const [k,v] of Object.entries(q.checks))if(v!==true)throw new Error('P3 qualification failed: '+k);
+          if(q.reference_outcomes_accessed!==false||q.response_target_semantics_loaded!==false||q.P1_official_result_semantics_loaded!==false||q.P2_official_result_semantics_loaded!==false||q.ymaze_accessed!==false)throw new Error('P3 qualification firewall changed');
+          NODE
+
+      - name: Prove review branch cannot consume official execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/p3-v033w-audit/review-highres.json
+          set +e
+          node tools/run-p3-estimation.js --mode highres --out /tmp/p3-v033w-audit/review-highres.json >/tmp/p3-v033w-review.log 2>&1
+          code=$?
+          set -e
+          test "$code" -ne 0
+          grep -q "not effective until merged to main" /tmp/p3-v033w-review.log
+          test ! -e /tmp/p3-v033w-audit/review-highres.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const w=fs.readFileSync('.github/workflows/p3-v033w-official-highres.yml','utf8');
+          if(!/^on:\n  push:\n    branches: \[main\]\n    paths:\n      - '\.github\/workflows\/p3-v033w-official-highres\.yml'/m.test(w))throw new Error('official trigger drift');
+          if(/^\s*pull_request\s*:/m.test(w)||/^\s*workflow_dispatch\s*:/m.test(w)||/^\s*schedule\s*:/m.test(w))throw new Error('official workflow gained forbidden trigger');
+          NODE
+
+      - name: Chromium execution-gate inspection firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p3-v033w-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p3-v033w-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p3-v033w-chrome --remote-debugging-port=9222 about:blank >/tmp/p3-v033w-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p3-v033w-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'"))break;await new Promise(r=>setTimeout(r,50));}
+          const pre=await evalv("(async()=>await(await fetch('./hypotheses/p3_highres_execution_precondition_v1.json')).json())()");
+          if(pre.id!=='P3_high_resolution_execution_precondition_v1'||pre.official_execution_still_unrun_at_freeze!==true)throw new Error('precondition identity/status mismatch');
+          if(pre.execution_workflow_file!=='.github/workflows/p3-v033w-official-highres.yml')throw new Error('workflow path drift');
+          if(pre.P1_official_result_semantic_access_authorized!==false||pre.P2_official_result_semantic_access_authorized!==false||pre.P2_lapse_structure_authorized!==false||pre.canonical_promotion_authorized!==false||pre.H2_H3_H4_H5_refit_or_combination_authorized!==false||pre.ymaze_access_authorized!==false)throw new Error('precondition firewall mismatch');
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p1req=requests.filter(u=>/p1_response_estimation_(?:500x60|result_freeze)/i.test(u));
+          const p2req=requests.filter(u=>/p2_response_estimation_(?:1000x60|result_freeze)/i.test(u));
+          const officialReq=requests.filter(u=>u.includes('p3_response_estimation_1000x60_v1.json'));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p1req.length||p2req.length||officialReq.length)throw new Error('Chromium execution-gate firewall failed');
+          const out={status:'passed',precondition_loaded:true,exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,P1_official_result_requests:p1req.length,P2_official_result_requests:p2req.length,official_result_requests:officialReq.length};
+          fs.writeFileSync('/tmp/p3-v033w-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p3-v033w-browser.mjs
+
+      - name: Upload execution-gate audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-v033w-execution-gate-audit
+          path: /tmp/p3-v033w-audit
+          retention-days: 30
