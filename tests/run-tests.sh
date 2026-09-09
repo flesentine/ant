@@ -59,6 +59,7 @@ node tests/p3-response-estimation-policy.test.js
 node tests/p3-estimation.test.js
 node tests/p3-estimator-qualification-result.test.js
 node tests/p3-highres-authorization.test.js
+node tests/p3-highres-execution-precondition.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
