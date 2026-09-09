@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "id": "P3_official_high_resolution_execution_provenance_v1",
+  "status": "official_execution_completed_result_uninterpreted_at_provenance_write",
+  "github": {
+    "repository": "flesentine/ant",
+    "run_id": 34375376968,
+    "run_number": 1,
+    "run_attempt": 1,
+    "workflow": "P3 v0.3.3w official high-resolution response execution",
+    "event_name": "push",
+    "ref": "refs/heads/main",
+    "sha": "3ba8debdd6fe0c2b84a4f7c00a8d5a11f1fd614f"
+  },
+  "frozen_chain": {
+    "authorization_main_commit": "747866d75fb433baf1423552274417ae9445e917",
+    "authorization_git_blob_sha": "04d2c7b454143fd7073b274bff0ec9b355ec058d",
+    "policy_git_blob_sha": "d86eb9936e993d188f2a28faab838ba158c40f3b",
+    "estimator_git_blob_sha": "5bf27bf439dca18629cdfd36f56fe767a23062ff",
+    "estimator_core_git_blob_sha": "410ef81dfe761e3c218d072ca311632329ac1617",
+    "qualification_report_git_blob_sha": "63e1d7360bc1ef4b232bbf37f347b9fa27e7d461",
+    "qualification_result_freeze_git_blob_sha": "32d90d05add5b4e45dd69c711b416ed3378d15ab",
+    "execution_precondition_git_blob_sha": "79d58ca1aa734ea6fd2f1e6694c958fa899a6a5f",
+    "execution_workflow_git_blob_sha": "edadbf0756023423235c38992303a716d4d4985c",
+    "response_target_git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+  },
+  "command": "node tools/run-p3-estimation.js --mode highres --out reports/p3_response_estimation_1000x60_v1.json",
+  "cli_parameter_overrides": [],
+  "report": {
+    "file": "p3_response_estimation_1000x60_v1.json",
+    "bytes": 317685,
+    "git_blob_sha": "264d822c7e6180dc0c9a3da1b8045df3f0e2a03d",
+    "sha256": "55bffcd30c85e1a891879fd712f8332f119d191d5930fa4c4710ae9589c8e73b",
+    "status": "development_response_estimation_failed_dual_primary_survival_guard"
+  },
+  "frozen_outcome_summary": {
+    "P3_wins_vs_exact_null": 4,
+    "P3_wins_vs_selected_absolute_benchmark": 2,
+    "median_relative_improvement_vs_exact_null": 0.2096536795073778,
+    "median_relative_improvement_vs_absolute_benchmark": -1.0090708050960875,
+    "dual_survival_guard_passed": false,
+    "fixed_parameter_pair_eligible_for_future_freeze": false
+  },
+  "firewalls": {
+    "P1_official_result_semantics_loaded": false,
+    "P2_official_result_semantics_loaded": false,
+    "ymaze_accessed": false,
+    "canonical_locomotion_updated": false,
+    "nuisance_parameters_estimated": false,
+    "H2_H3_H4_H5_refit": false
+  },
+  "interpretation_performed": false,
+  "canonical_promotion_performed": false,
+  "ymaze_unlock_performed": false
+}
