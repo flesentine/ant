@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "id": "P3_response_estimation_result_freeze_v1",
+  "status": "official_development_response_estimation_failed_dual_primary_survival_guard_frozen_p3_v1_closed",
+  "freeze_date_local": "2026-09-09",
+  "scientific_scope": "Internal Poissonnier 2026 open-arena P3-v1 relative-sector Weber painted-trail response development estimation. This is the frozen result of the one valid authorized high-resolution scientific execution and is not external validation.",
+  "official_execution": {
+    "repo_commit": "3ba8debdd6fe0c2b84a4f7c00a8d5a11f1fd614f",
+    "github_run_id": 34375376968,
+    "github_run_number": 1,
+    "github_job_id": 102546729771,
+    "github_run_attempt": 1,
+    "artifact_id": 10116473125,
+    "artifact_name": "p3-v033w-official-highres",
+    "artifact_digest": "sha256:03c55fbdef17515bbc48b2bb8561db8168c72c802f29d9ffc172869b9f305233",
+    "report_file": "reports/p3_response_estimation_1000x60_v1.json",
+    "report_git_blob_sha": "264d822c7e6180dc0c9a3da1b8045df3f0e2a03d",
+    "report_sha256": "55bffcd30c85e1a891879fd712f8332f119d191d5930fa4c4710ae9589c8e73b",
+    "report_bytes": 317685,
+    "execution_provenance_file": "reports/p3_response_estimation_execution_provenance_v1.json",
+    "execution_provenance_git_blob_sha": "cd397bc5f7cd0f62ed12a0d741750d6700dbef10",
+    "execution_provenance_sha256": "668706dcd7de505fe956ed8de2db57b37753c5198fd281a66f92ea8ce8c65bed",
+    "execution_provenance_bytes": 2533
+  },
+  "materialization": {
+    "workflow_run_id": 34394877521,
+    "workflow_job_id": 102611978007,
+    "branch_commit_after_materialization": "589a71451ddf3ac88b54de717abb001c6d1a1246",
+    "report_git_blob_sha_verified": "264d822c7e6180dc0c9a3da1b8045df3f0e2a03d",
+    "provenance_git_blob_sha_verified": "cd397bc5f7cd0f62ed12a0d741750d6700dbef10",
+    "artifact_digest_verified": "sha256:03c55fbdef17515bbc48b2bb8561db8168c72c802f29d9ffc172869b9f305233"
+  },
+  "frozen_input_chain": {
+    "candidate_class_evidence_git_blob_sha": "e8da07f6f73934e0120fd41d4668ae4039108336",
+    "mechanism_git_blob_sha": "5d00ce0058ff388c9f57d7dce56ce465d82c5765",
+    "reachability_execution_policy_git_blob_sha": "55494a3190964d24ded2ae0d1faf3b355cc7835f",
+    "implementation_authorization_git_blob_sha": "128afcbdb10d3254240c5074e1e997cee7d7fe51",
+    "reachability_result_freeze_git_blob_sha": "b3fa56386f71b0cea1dd8cfec032148c42af1b6d",
+    "reachability_report_git_blob_sha": "a18d5cd360be79bf1a05d3fe3e2c26fd1d6c86f6",
+    "policy_git_blob_sha": "d86eb9936e993d188f2a28faab838ba158c40f3b",
+    "estimator_core_git_blob_sha": "410ef81dfe761e3c218d072ca311632329ac1617",
+    "estimator_git_blob_sha": "5bf27bf439dca18629cdfd36f56fe767a23062ff",
+    "qualification_report_git_blob_sha": "63e1d7360bc1ef4b232bbf37f347b9fa27e7d461",
+    "qualification_result_freeze_git_blob_sha": "32d90d05add5b4e45dd69c711b416ed3378d15ab",
+    "authorization_git_blob_sha": "04d2c7b454143fd7073b274bff0ec9b355ec058d",
+    "execution_precondition_git_blob_sha": "79d58ca1aa734ea6fd2f1e6694c958fa899a6a5f",
+    "execution_workflow_git_blob_sha": "edadbf0756023423235c38992303a716d4d4985c",
+    "response_target_git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+    "p3_runtime_git_blob_sha": "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8",
+    "p3_model_git_blob_sha": "9107de0c71641c4037bbedbb498b9fa868c1ef00",
+    "p1_absolute_comparator_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "canonical_locomotion_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "integrity_runtime_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+  },
+  "permanent_main_checkpoint_of_valid_execution_commit": {
+    "main_commit": "3ba8debdd6fe0c2b84a4f7c00a8d5a11f1fd614f",
+    "workflow_run_id": 34375376751,
+    "workflow_run_number": 150,
+    "conclusion": "success",
+    "test_job_id": 102546728256,
+    "test_job_conclusion": "success",
+    "deploy_job_id": 102547017012,
+    "deploy_job_conclusion": "success"
+  },
+  "dual_primary_survival_result": {
+    "folds_total": 6,
+    "required_minimum_wins_per_guard": 5,
+    "canonical_null_guard": {
+      "heldout_wins": 4,
+      "median_relative_improvement": 0.2096536795073778,
+      "median_relative_improvement_strictly_positive": true,
+      "guard_passed": false,
+      "decision": "FAIL"
+    },
+    "structural_increment_absolute_benchmark_guard": {
+      "heldout_wins": 2,
+      "median_relative_improvement": -1.0090708050960875,
+      "median_relative_improvement_strictly_positive": false,
+      "guard_passed": false,
+      "decision": "FAIL"
+    },
+    "dual_survival_guard_passed": false,
+    "decision": "FAIL"
+  },
+  "heldout_fold_results": [
+    {
+      "held_out_colony": 0,
+      "P3_primary_loss": 0.0314004351087724,
+      "selected_absolute_benchmark_primary_loss": 0.006409138732902495,
+      "exact_null_primary_loss": 0.028194375663801723,
+      "relative_improvement_vs_exact_null": -0.11371273062403295,
+      "relative_improvement_vs_absolute_benchmark": -3.8993221113427423,
+      "win_vs_exact_null": false,
+      "win_vs_absolute_benchmark": false
+    },
+    {
+      "held_out_colony": 7,
+      "P3_primary_loss": 0.24929899921720966,
+      "selected_absolute_benchmark_primary_loss": 0.3186614691917888,
+      "exact_null_primary_loss": 0.409731937626747,
+      "relative_improvement_vs_exact_null": 0.39155585317268266,
+      "relative_improvement_vs_absolute_benchmark": 0.2176682049150812,
+      "win_vs_exact_null": true,
+      "win_vs_absolute_benchmark": true
+    },
+    {
+      "held_out_colony": 16,
+      "P3_primary_loss": 0.039988991802023685,
+      "selected_absolute_benchmark_primary_loss": 0.04984574847556099,
+      "exact_null_primary_loss": 0.07230578220593327,
+      "relative_improvement_vs_exact_null": 0.446946142037002,
+      "relative_improvement_vs_absolute_benchmark": 0.19774518339051525,
+      "win_vs_exact_null": true,
+      "win_vs_absolute_benchmark": true
+    },
+    {
+      "held_out_colony": 20,
+      "P3_primary_loss": 0.07340642210998409,
+      "selected_absolute_benchmark_primary_loss": 0.03123753307361924,
+      "exact_null_primary_loss": 0.0949545802651772,
+      "relative_improvement_vs_exact_null": 0.22693121379733472,
+      "relative_improvement_vs_absolute_benchmark": -1.3499429976427098,
+      "win_vs_exact_null": true,
+      "win_vs_absolute_benchmark": false
+    },
+    {
+      "held_out_colony": 21,
+      "P3_primary_loss": 0.04504726564231232,
+      "selected_absolute_benchmark_primary_loss": 0.018098224475209475,
+      "exact_null_primary_loss": 0.05577753229495619,
+      "relative_improvement_vs_exact_null": 0.19237614521742083,
+      "relative_improvement_vs_absolute_benchmark": -1.4890433701945187,
+      "win_vs_exact_null": true,
+      "win_vs_absolute_benchmark": false
+    },
+    {
+      "held_out_colony": 27,
+      "P3_primary_loss": 0.2225809543607769,
+      "selected_absolute_benchmark_primary_loss": 0.1334259318323087,
+      "exact_null_primary_loss": 0.05080229510642097,
+      "relative_improvement_vs_exact_null": -3.381316904964882,
+      "relative_improvement_vs_absolute_benchmark": -0.6681986125494653,
+      "win_vs_exact_null": false,
+      "win_vs_absolute_benchmark": false
+    }
+  ],
+  "downstream_frozen_consequences": {
+    "final_all_data_fit_executed": false,
+    "identifiability_evaluated": false,
+    "final_primary_increment_guard_evaluated": false,
+    "final_secondary_promotion_guards_evaluated": false,
+    "mechanism_survives_internal_development": false,
+    "fixed_parameter_pair_eligible_for_future_freeze": false,
+    "canonical_locomotion_update_authorized": false,
+    "Y_maze_unlock_authorized": false
+  },
+  "firewalls_verified_in_official_provenance": {
+    "P1_official_result_semantics_loaded": false,
+    "P2_official_result_semantics_loaded": false,
+    "ymaze_accessed": false,
+    "canonical_locomotion_updated": false,
+    "nuisance_parameters_estimated": false,
+    "H2_H3_H4_H5_refit": false
+  },
+  "closure_rule": "P3-v1 response estimation is permanently closed. The valid official target-ranked execution may not be rerun or rescued by changing sigma/kappa bounds or scales, Halton candidates, the absolute-transduction comparator, seeds, trial budgets, folds, colony weights, objectives, secondary guards, identifiability thresholds, sensor geometry, Weber transduction, apparatus, runtime, or promotion thresholds. A future painted-trail hypothesis must be independently motivated and versioned as a new mechanism with a new pre-search policy; P3-v1 may not be retuned from these outcomes.",
+  "rerun_authorized": false,
+  "canonical_locomotion_changed": false,
+  "Y_maze_accessed": false
+}
