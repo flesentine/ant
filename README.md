@@ -13,7 +13,9 @@ H2  -> implemented; high-resolution LOCO not promoted
 H3  -> implemented; high-resolution LOCO not promoted
 H4  -> implemented; frozen high-resolution LOCO failed promotion
 H5  -> official frozen high-resolution LOCO failed promotion; result frozen; closed
-P1  -> implemented; frozen reference-free reachability PASS; response estimation not yet authorized
+P1  -> response estimation completed; frozen result closed
+P2  -> response estimation completed; frozen result closed
+P3  -> relative-sector Weber response estimation failed dual survival; frozen; closed
 ```
 
 H2 directly reduces continuous angular diffusion. H3 instead changes the timing of discrete reorientation events. H4 is a speed-side mechanism. H5 is now frozen as a fourth, distinct mechanism class: recent constrained travel creates a decaying commitment to the ant's own realized post-transition entry heading, producing deterministic circular restoring drift while leaving angular-noise amplitude, speed, pauses, and entry-state distribution unchanged.
