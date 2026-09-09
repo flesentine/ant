@@ -338,6 +338,21 @@
 - P1 official-result semantics, P2 official-result semantics/lapse state, canonical promotion, H2-H5 recombination, and Y-maze remain forbidden
 - next gate: separate main-only one-shot P3 execution precondition/workflow, followed by immediate result freeze before interpretation
 
+
+### v0.3.3w — P3 official high-resolution execution gate — review PASS / awaiting merge-triggered execution
+- execution precondition frozen at `hypotheses/p3_highres_execution_precondition_v1.json`, blob `79d58ca1aa734ea6fd2f1e6694c958fa899a6a5f`
+- one-shot main-only execution workflow frozen at `.github/workflows/p3-v033w-official-highres.yml`, blob `edadbf0756023423235c38992303a716d4d4985c`
+- execution gate anchors merged authorization commit `747866d75fb433baf1423552274417ae9445e917` and permanent main workflow #149, run `34299582530`; test job `102303449269` and deploy job `102303617940` both succeeded
+- trigger is only push to `main` changing the official workflow file; there is no `pull_request` or `workflow_dispatch` trigger
+- runtime guards require literal `${GITHUB_REF}` expansion to equal `refs/heads/main` and `${GITHUB_EVENT_NAME}` to equal `push`; this explicitly avoids the earlier P2 escaped-variable defect
+- exact scientific command remains `node tools/run-p3-estimation.js --mode highres --out reports/p3_response_estimation_1000x60_v1.json`; no CLI overrides are authorized
+- frozen P3/absolute-comparator panels, 60/120 LOCO budgets, 120/240 final-fit/check budgets, seeds, parameter bounds, dual 5/6 survival guards, identifiability, final increment, and secondary guards remain unchanged
+- first review audit passed at head `5c63d869030149f2973b7af9e454b6cadac04cf6`: run `34374887096` / job `102545064100` / artifact `10113430499`, digest `sha256:2e43e6839796da440f1363465478d566d6c1be3b168a2db164b360b22e6e53c6`
+- full permanent suite PASS; review-branch official execution correctly blocked; independent trigger/shell-safety audit PASS; Chromium firewall PASS with zero exceptions, console errors, response-target requests, P1-result requests, P2-result requests, or Y-maze requests
+- official P3 scientific execution has **not** started during review
+- after merge, the main push changing the official workflow is intended to consume the single authorized execution; exact report/provenance must be frozen before interpretation and the active authorization/workflow retired after a valid result
+- remaining post-execution branch: dual-survival failure closes P3-v1; survival without full promotion guards yields a limited result; full success only makes the selected pair eligible for a later separate freeze before v0.4 Y-maze validation
+
 ## v0.4 — locked cross-apparatus validation
 - frozen species model
 - four Y-maze protocol conditions
