@@ -1,0 +1,114 @@
+name: P3 v0.3.3w execution-gate audit
+on:
+  push:
+    branches: [v0.3.3w-p3-official-execution-gate]
+permissions:
+  contents: read
+concurrency:
+  group: p3-v033w-execution-gate-audit
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify exact frozen execution gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p3_highres_execution_precondition_v1.json)" = "79d58ca1aa734ea6fd2f1e6694c958fa899a6a5f"
+          test "$(git hash-object .github/workflows/p3-v033w-official-highres.yml)" = "edadbf0756023423235c38992303a716d4d4985c"
+          test "$(git hash-object hypotheses/p3_highres_authorization_v1.json)" = "04d2c7b454143fd7073b274bff0ec9b355ec058d"
+          test "$(git hash-object hypotheses/p3_response_estimation_v1.json)" = "d86eb9936e993d188f2a28faab838ba158c40f3b"
+          test "$(git hash-object tools/p3-estimation-core.js)" = "410ef81dfe761e3c218d072ca311632329ac1617"
+          test "$(git hash-object tools/run-p3-estimation.js)" = "5bf27bf439dca18629cdfd36f56fe767a23062ff"
+          test "$(git hash-object reports/p3_estimator_qualification_v1.json)" = "63e1d7360bc1ef4b232bbf37f347b9fa27e7d461"
+          test "$(git hash-object hypotheses/p3_estimator_qualification_result_freeze_v1.json)" = "32d90d05add5b4e45dd69c711b416ed3378d15ab"
+          test ! -e reports/p3_response_estimation_1000x60_v1.json
+          test ! -e reports/p3_response_estimation_execution_provenance_v1.json
+
+      - name: Run permanent suite
+        run: ./tests/run-tests.sh
+
+      - name: Prove review branch cannot consume official execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/p3-v033w-audit
+          set +e
+          node tools/run-p3-estimation.js --mode highres --out /tmp/p3-v033w-audit/review-branch-result.json >/tmp/p3-v033w-audit/review-block.log 2>&1
+          code=$?
+          set -e
+          test "$code" -ne 0
+          grep -q "not effective until merged to main" /tmp/p3-v033w-audit/review-block.log
+          test ! -e /tmp/p3-v033w-audit/review-branch-result.json
+
+      - name: Independent trigger and shell-safety audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const w=fs.readFileSync('.github/workflows/p3-v033w-official-highres.yml','utf8');
+          const p=JSON.parse(fs.readFileSync('hypotheses/p3_highres_execution_precondition_v1.json','utf8'));
+          const failures=[];
+          if(!/^on:\n  push:\n    branches: \[main\]\n    paths:\n      - '\.github\/workflows\/p3-v033w-official-highres\.yml'/m.test(w))failures.push('main/path trigger mismatch');
+          if(/^\s*pull_request:/m.test(w))failures.push('pull_request trigger present');
+          if(/^\s*workflow_dispatch:/m.test(w))failures.push('workflow_dispatch trigger present');
+          if(!w.includes('test "${GITHUB_REF}" = "refs/heads/main"'))failures.push('literal GITHUB_REF runtime check missing');
+          if(w.includes('test "\\${GITHUB_REF}"'))failures.push('escaped GITHUB_REF defect present');
+          if(!w.includes('test "${GITHUB_EVENT_NAME}" = "push"'))failures.push('push runtime check missing');
+          if(p.execution_workflow_git_blob_sha!=='edadbf0756023423235c38992303a716d4d4985c')failures.push('workflow pin mismatch');
+          if(p.permanent_main_workflow.run_id!==34299582530||p.permanent_main_workflow.test_job_id!==102303449269||p.permanent_main_workflow.deploy_job_id!==102303617940)failures.push('main CI checkpoint mismatch');
+          if(p.official_execution_still_unrun_at_freeze!==true||p.cli_parameter_overrides.length!==0)failures.push('execution freeze mismatch');
+          if(failures.length)throw new Error(failures.join('; '));
+          fs.writeFileSync('/tmp/p3-v033w-audit/gate.json',JSON.stringify({status:'passed',main_only:true,manual_dispatch:false,pull_request:false,corrected_GITHUB_REF:true,official_execution_started:false},null,2));
+          NODE
+
+      - name: Chromium execution-gate firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8080 >/tmp/p3-v033w-http.log 2>&1 &
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p /tmp/p3-v033w-chrome
+          "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/p3-v033w-chrome --remote-debugging-port=9222 about:blank >/tmp/p3-v033w-chrome.log 2>&1 &
+          for i in {1..100}; do curl -fsS http://127.0.0.1:9222/json/version >/dev/null 2>&1 && break; sleep .2; done
+          cat >/tmp/p3-v033w-browser.mjs <<'NODE'
+          import fs from 'node:fs';
+          const tabs=await (await fetch('http://127.0.0.1:9222/json/list')).json(),target=tabs.find(t=>t.type==='page')||tabs[0];
+          const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
+          let id=0;const pending=new Map(),exceptions=[],consoleErrors=[],requests=[];
+          ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')consoleErrors.push(m.params);if(m.method==='Network.requestWillBeSent')requests.push(m.params.request.url);};
+          const send=(method,params={})=>new Promise((resolve,reject)=>{const n=++id;pending.set(n,{resolve,reject});ws.send(JSON.stringify({id:n,method,params}));});
+          const evalv=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(r.exceptionDetails.text||'eval failed');return r.result.value;};
+          await send('Runtime.enable');await send('Network.enable');await send('Page.enable');await send('Page.navigate',{url:'http://127.0.0.1:8080/'});
+          for(let i=0;i<120;i++){if(await evalv("document.readyState==='complete'"))break;await new Promise(r=>setTimeout(r,50));}
+          const gate=await evalv("(async()=>await(await fetch('./hypotheses/p3_highres_execution_precondition_v1.json')).json())()");
+          const auth=await evalv("(async()=>await(await fetch('./hypotheses/p3_highres_authorization_v1.json')).json())()");
+          if(gate.id!=='P3_high_resolution_execution_precondition_v1'||gate.official_execution_still_unrun_at_freeze!==true)throw new Error('gate identity/status mismatch');
+          if(auth.id!=='P3_high_resolution_authorization_v1'||auth.effective_when_merged_to_main!==true)throw new Error('authorization identity mismatch');
+          const targetReq=requests.filter(u=>u.includes('poissonnier2026_pheromone_response_targets.json'));
+          const yreq=requests.filter(u=>/y[_-]?maze/i.test(u));
+          const p1req=requests.filter(u=>/p1_response_estimation_(?:500x60|result_freeze)/i.test(u));
+          const p2req=requests.filter(u=>/p2_response_estimation_(?:1000x60|result_freeze)/i.test(u));
+          if(exceptions.length||consoleErrors.length||targetReq.length||yreq.length||p1req.length||p2req.length)throw new Error('Chromium execution-gate firewall failed');
+          const out={status:'passed',exceptions:exceptions.length,console_errors:consoleErrors.length,response_target_requests:targetReq.length,ymaze_requests:yreq.length,P1_official_result_requests:p1req.length,P2_official_result_requests:p2req.length,official_execution_started:false};
+          fs.writeFileSync('/tmp/p3-v033w-audit/browser.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out));ws.close();
+          NODE
+          node /tmp/p3-v033w-browser.mjs
+
+      - name: Upload execution-gate audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-v033w-execution-gate-audit
+          path: /tmp/p3-v033w-audit
+          retention-days: 30
+          if-no-files-found: error
