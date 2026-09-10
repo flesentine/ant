@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "id": "lasius_niger_painted_trail_p4_v1",
+  "species": "Lasius niger",
+  "status": "mechanism_demo_not_fitted",
+  "movement": {
+    "base_speed_mm_s": 24,
+    "speed_sd_mm_s": 2,
+    "angular_sigma_rad_sqrt_s": 0.7,
+    "speed_reversion_rate_s": 2,
+    "speed_noise_sigma_sqrt_s": 0.07,
+    "pause_rate_s": 0.008,
+    "pause_min_s": 0.1,
+    "pause_max_s": 0.5
+  },
+  "painted_trail_response": {
+    "enabled": true,
+    "mechanism_id": "P4_local_sector_hard_detection_weber_steering_v1",
+    "field": {
+      "type": "gaussian_distance_to_segment",
+      "sigma_field_mm": 8
+    },
+    "sensors": {
+      "type": "deterministic_equal_area_front_quadrant_sector_means",
+      "radius_mm": 10,
+      "radial_bins": 4,
+      "angular_bins_per_sector": 8
+    },
+    "absolute_detection": {
+      "type": "hard_bilateral_sum_threshold",
+      "theta_detect": 0.25,
+      "boundary": "off_when_sum_less_than_or_equal_to_theta"
+    },
+    "transduction": {
+      "type": "hard_detection_gated_weber_michelson_right_minus_left",
+      "epsilon_or_regularization": 0
+    },
+    "steering": {
+      "type": "detection_gated_relative_right_minus_left_heading_drift",
+      "kappa_trail_per_s": 4
+    }
+  },
+  "contacts": {
+    "enabled": false,
+    "radius_mm": 1.6,
+    "avoidance_turn_rad": 0.18
+  },
+  "provenance": {
+    "parameter_status": "ASSUMED_ENGINEERING_REACHABILITY_NOT_FITTED",
+    "mechanism_freeze": "hypotheses/p4_painted_trail_mechanism_v1.json",
+    "mechanism_freeze_git_blob_sha": "609551836e540c341365db9cc987d2ca340cc053",
+    "reachability_execution_freeze": "hypotheses/p4_reachability_execution_v1.json",
+    "reachability_execution_freeze_git_blob_sha": "0d452f9c0d548ec962e0a6d9826648bf5e14a4ef",
+    "implementation_authorization": "hypotheses/p4_implementation_authorization_v1.json",
+    "implementation_authorization_git_blob_sha": "42f8d51b06a20c0c6001a42b6021a134f2694e0d",
+    "runtime_git_blob_sha": "bf7d5781bd69ec4568450ebbd3bdc284897b6f61",
+    "p1_helper_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "note": "Baseline locomotion is parameter-identical to lasius_niger_locomotion_v1. P4 adds only the frozen deterministic hard-detection-gated local-sector Weber steering layer. Geometry and sigma/kappa/theta values are engineering-only reachability values, not fitted Lasius niger biology."
+  }
+}
