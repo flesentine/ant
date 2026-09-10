@@ -1,0 +1,23 @@
+{
+  "schema_version": 4,
+  "model": "lasius_niger_painted_trail_p4_v1",
+  "state": "naive_outbound_v1",
+  "apparatus": "poissonnier2026_open_arena_p1_v1",
+  "observation": "poissonnier2026_tracking_25fps",
+  "scoring": "open_arena_first_border_v1",
+  "workers": 1,
+  "duration_s": 120,
+  "protocol": {
+    "entry_point": "center",
+    "entry_state": {"heading_rad":0,"position_jitter_mm":0.5,"heading_jitter_rad":0.08},
+    "entry_state_provenance": {"status":"assumed_engineering_reachability_only","fit_against_downstream_metrics":false},
+    "state_facts": {"recent_travel_mm":0,"travel_direction":"outbound"},
+    "apparatus_transition": "vertical_toothpick_through_central_hole",
+    "painted_trail": {"applied_hindgut_equivalents_per_cm":0}
+  },
+  "requested_metrics": ["central_zone_fraction","mean_moving_speed","total_distance","time_to_arena_edge","path_straightness","exit_coordinate"],
+  "calibration_role": "reference_free_mechanism_reachability_only",
+  "metadata": {"evidence_class":"engineering_reachability_not_reference_fit"},
+  "id": "open_arena_p4_zero_dose_reachability_v1",
+  "title": "P4 reachability — zero applied trail dose"
+}
