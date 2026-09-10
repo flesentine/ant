@@ -1,4 +1,5 @@
 name: P4 v0.3.4b mechanism-freeze audit
+# retry after updating historical P4 gate tests for later mechanism state
 
 on:
   push:
