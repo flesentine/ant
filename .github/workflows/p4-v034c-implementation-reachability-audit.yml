@@ -1,5 +1,4 @@
-name: P4 v0.3.4c implementation + reachability audit
-# retry after Chromium dependency-chain fix; frozen P4 mechanism/runtime/policy bytes unchanged
+name: P4 v0.3.4c final result-freeze code + Chromium audit
 
 on:
   push:
@@ -9,16 +8,16 @@ on:
       - .github/workflows/p4-v034c-implementation-reachability-audit.yml
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: p4-v034c-implementation-reachability-audit
+  group: p4-v034c-final-result-audit
   cancel-in-progress: false
 
 jobs:
-  qualify:
+  verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,11 +26,13 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Verify frozen provenance and implementation-only diff
+      - name: Verify exact frozen P4 implementation and result provenance
         shell: bash
         run: |
           set -euo pipefail
           git merge-base --is-ancestor b73c97b4c3fd70e67cf22c050cf695a5f07771c8 HEAD
+          test "$(git hash-object hypotheses/p4_painted_trail_candidate_class_evidence_v1.json)" = "262f332062f271bbf111d0572f83b2faaf2cfd74"
+          test "$(git hash-object hypotheses/p4_painted_trail_candidate_class_decision_v1.json)" = "ad7295ba6d466549c60c8ecac37e39d30006ec1c"
           test "$(git hash-object hypotheses/p4_painted_trail_mechanism_v1.json)" = "609551836e540c341365db9cc987d2ca340cc053"
           test "$(git hash-object hypotheses/p4_reachability_execution_v1.json)" = "0d452f9c0d548ec962e0a6d9826648bf5e14a4ef"
           test "$(git hash-object hypotheses/p4_implementation_authorization_v1.json)" = "42f8d51b06a20c0c6001a42b6021a134f2694e0d"
@@ -41,50 +42,47 @@ jobs:
           test "$(git hash-object experiments/open_arena_p4_low_dose_reachability.json)" = "3d21c82250b7c27a382606fb45b247d4eef20fb7"
           test "$(git hash-object experiments/open_arena_p4_nominal_dose_reachability.json)" = "d7605792f6f0eb871d7b3999940e08f750784b64"
           test "$(git hash-object tools/run-p4-reachability.js)" = "ba4e067a7f686933ed3271a64da2f79f0a558ab0"
+          test "$(git hash-object reports/p4_reference_free_reachability_v1.json)" = "f6e77596eb25cc7bca3bf0dde1da712511a1d0d0"
+          test "$(git hash-object hypotheses/p4_reachability_result_freeze_v1.json)" = "f2074ae3157f22208ff98ebc620c00006549cab6"
+          echo '7105d70ddb80d1d8f91f19fcba8a992560dfb22c5989c1c6d11c5479bd946713  reports/p4_reference_free_reachability_v1.json' | sha256sum -c -
+          test "$(wc -c < reports/p4_reference_free_reachability_v1.json | tr -d ' ')" = "5763"
           test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
           test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
           test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
           test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
-          git diff --name-only b73c97b4c3fd70e67cf22c050cf695a5f07771c8...HEAD | tee /tmp/changed.txt
-          test "$(grep -Ec '^(reference/|reports/|apparatus/|states/|observations/|scoring/)' /tmp/changed.txt || true)" = "0"
-          test "$(grep -Ec '^hypotheses/(p1_|p2_|p3_|p4_response_estimation)' /tmp/changed.txt || true)" = "0"
           test ! -e hypotheses/p4_response_estimation_v1.json
           test ! -e tools/run-p4-estimation.js
 
-      - name: Run permanent regression suite before P4 execution
-        run: ./tests/run-tests.sh
-
-      - name: Execute frozen P4 reference-free reachability panel
-        run: node tools/run-p4-reachability.js --out reports/p4_reference_free_reachability_v1.json
-
-      - name: Validate exact P4 reachability result
+      - name: Focused P4 code review
         shell: bash
         run: |
           set -euo pipefail
-          node - <<'NODE'
-          const fs=require('fs');
-          const r=JSON.parse(fs.readFileSync('reports/p4_reference_free_reachability_v1.json','utf8'));
-          if(r.id!=='P4_reference_free_reachability_report_v1')throw new Error('wrong report id');
-          if(r.status!=='reference_free_reachability_passed')throw new Error('reachability did not pass');
-          if(r.scientific_claim!=='implementation_and_reference_free_reachability_only_not_biological_fit')throw new Error('claim drift');
-          for(const [k,v] of Object.entries(r.checks))if(v!==true)throw new Error('failed check '+k);
-          if(r.nominal_panel.trials!==400)throw new Error('trial count drift');
-          if(r.engineering_values.theta_detect!==0.25)throw new Error('theta drift');
-          if(r.downstream_authorization.biological_fit_claim!==false||r.downstream_authorization.response_estimation_policy!==false||r.downstream_authorization.reserved_ymaze_unlock!==false)throw new Error('downstream prematurely authorized');
-          if(r.reference_firewall.poissonnier2026_pheromone_response_targets_may_be_loaded!==false||r.reference_firewall.P3_official_result_semantics_may_be_loaded!==false||r.reference_firewall.reserved_ymaze_may_be_loaded!==false)throw new Error('reference firewall drift');
-          console.log(JSON.stringify({status:r.status,trials:r.nominal_panel.trials,detected:r.nominal_panel.any_trial_with_detected_response,subthreshold:r.nominal_panel.any_trial_with_subthreshold_evaluation,central_zone:r.nominal_panel.mean_central_zone_fraction,trail_axis:r.nominal_panel.trail_axis_exit_rate}));
-          NODE
-          sha256sum reports/p4_reference_free_reachability_v1.json | tee /tmp/report.sha256
+          node --check src/p4.js
+          node --check tools/run-p4-reachability.js
+          node tests/p4-implementation.test.js
+          node tests/p4-reachability-result.test.js
+          grep -F 'class Simulation extends integrity.Simulation' src/p4.js
+          grep -F 'if(sum<=theta)return{signal:0,detected:false,sum};' src/p4.js
+          grep -F 'this.heading=core.normalizeAngle(this.heading+s.omega*dt);' src/p4.js
+          if grep -F 'Math.random' src/p4.js; then echo 'Unexpected response randomness' >&2; exit 1; fi
+          git diff --name-only b73c97b4c3fd70e67cf22c050cf695a5f07771c8...HEAD | tee /tmp/final-changed.txt
+          test "$(grep -Ec '^(reference/|apparatus/|states/|observations/|scoring/)' /tmp/final-changed.txt || true)" = "0"
+          test "$(grep -Ec '^hypotheses/(p1_|p2_|p3_|p4_response_estimation)' /tmp/final-changed.txt || true)" = "0"
+          test "$(grep -Ec '^src/(sim-core|integrity|measurement|h3|h5|p1|p2|app)\.js$' /tmp/final-changed.txt || true)" = "0"
 
-      - name: Fresh Chromium P4 parity and firewall audit
+      - name: Run complete permanent regression suite without rerunning P4 reachability
+        run: ./tests/run-tests.sh
+
+      - name: Fresh Chromium P4 runtime parity and canonical-app firewall
         shell: bash
         run: |
           set -euo pipefail
           CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME"
-          "$CHROME" --version | tee /tmp/chrome-version.txt
-          cat > p4-browser-audit.html <<'HTML'
-          <!doctype html><meta charset="utf-8"><title>P4 browser audit</title>
+          "$CHROME" --version | tee /tmp/final-chrome-version.txt
+
+          cat > p4-final-browser-audit.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>P4 final browser audit</title>
           <script src="src/sim-core.js"></script>
           <script src="src/measurement.js"></script>
           <script src="src/h3.js"></script>
@@ -94,55 +92,63 @@ jobs:
           <pre id="out">pending</pre><script>
           (()=>{try{
             const p=window.AntLabP4;if(!p)throw new Error('P4 missing');
-            const a=p.gatedRelativeSignal(.10,.15,.25),b=p.gatedRelativeSignal(.10,.16,.25),c=p.gatedRelativeSignal(.4,.4,.25),d=p.gatedRelativeSignal(.1,.4,.25),e=p.gatedRelativeSignal(.4,.1,.25),f=p.gatedRelativeSignal(.2,.6,.25),g=p.gatedRelativeSignal(.4,1.2,.25),h=p.gatedRelativeSignal(.02,.08,.25),i=p.gatedRelativeSignal(.08,.32,.25);
-            if(a.detected||a.signal!==0)throw new Error('threshold boundary');
-            if(!b.detected||!(b.signal>0))throw new Error('above threshold');
-            if(!c.detected||c.signal!==0)throw new Error('equal signal');
-            if(Math.abs(d.signal+e.signal)>1e-15)throw new Error('antisymmetry');
-            if(Math.abs(f.signal-g.signal)>1e-15)throw new Error('conditional scale');
-            if(h.detected||!i.detected)throw new Error('scale crossing');
-            document.getElementById('out').textContent=JSON.stringify({pass:true,browser:true,threshold_boundary_off:true,conditional_scale:true,global_scale_invariance:false});
+            const cases={
+              boundary:p.gatedRelativeSignal(.10,.15,.25),
+              above:p.gatedRelativeSignal(.10,.16,.25),
+              equal:p.gatedRelativeSignal(.40,.40,.25),
+              lr:p.gatedRelativeSignal(.10,.40,.25),
+              rl:p.gatedRelativeSignal(.40,.10,.25),
+              scale1:p.gatedRelativeSignal(.20,.60,.25),
+              scale2:p.gatedRelativeSignal(.40,1.20,.25),
+              below:p.gatedRelativeSignal(.02,.08,.25),
+              crossed:p.gatedRelativeSignal(.08,.32,.25)
+            };
+            if(cases.boundary.detected||cases.boundary.signal!==0)throw new Error('threshold boundary');
+            if(!cases.above.detected||!(cases.above.signal>0))throw new Error('above threshold');
+            if(!cases.equal.detected||cases.equal.signal!==0)throw new Error('equal signal');
+            if(Math.abs(cases.lr.signal+cases.rl.signal)>1e-15)throw new Error('antisymmetry');
+            if(Math.abs(cases.scale1.signal-cases.scale2.signal)>1e-15)throw new Error('conditional scale');
+            if(cases.below.detected||!cases.crossed.detected)throw new Error('scale crossing');
+            document.getElementById('out').textContent=JSON.stringify({pass:true,p4_loaded:true,threshold_boundary_off:true,antisymmetry:true,conditional_scale:true,scale_crossing:true,global_scale_invariance:false});
           }catch(err){document.getElementById('out').textContent=JSON.stringify({pass:false,error:String(err&&err.stack||err)});}})();
           </script>
           HTML
-          python3 -m http.server 8123 --bind 127.0.0.1 > /tmp/http.out 2>/tmp/http.log &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+
+          python3 -m http.server 8123 --bind 127.0.0.1 > /tmp/p4-http.out 2>/tmp/p4-http.log &
+          P4_SERVER=$!
+          trap 'kill ${P4_SERVER:-} ${APP_SERVER:-} 2>/dev/null || true' EXIT
           sleep 1
-          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=3000 --dump-dom http://127.0.0.1:8123/p4-browser-audit.html > /tmp/p4-browser-dom.txt 2>/tmp/p4-browser-stderr.txt
-          grep -F '"pass":true' /tmp/p4-browser-dom.txt
-          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2000 --dump-dom http://127.0.0.1:8123/index.html > /tmp/app-dom.txt 2>/tmp/app-stderr.txt
-          grep -F '<title>ANTLAB H5</title>' /tmp/app-dom.txt
-          if grep -E '/(reference/.*pheromone|p2\.js|p3\.js|neutral-y-maze|p4_response_estimation|run-p4-estimation|reports/p[1234])' /tmp/http.log; then
-            echo 'Forbidden browser request detected' >&2; exit 1
-          fi
-          grep -F 'GET /src/p4.js ' /tmp/http.log
-          echo '{"chromium_p4_parity":true,"app_smoke":true,"forbidden_requests":0}' > /tmp/chromium-result.json
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=3000 --dump-dom http://127.0.0.1:8123/p4-final-browser-audit.html > /tmp/final-p4-browser-dom.txt 2>/tmp/final-p4-browser-stderr.txt
+          grep -F '"pass":true' /tmp/final-p4-browser-dom.txt
+          grep -F 'GET /src/p4.js ' /tmp/p4-http.log
+          if grep -E '/(reference/.*pheromone|p2\.js|p3\.js|neutral-y-maze|p4_response_estimation|run-p4-estimation|reports/p[1234])' /tmp/p4-http.log; then echo 'Forbidden dedicated P4 browser request' >&2; exit 1; fi
+          kill "$P4_SERVER"
+          wait "$P4_SERVER" 2>/dev/null || true
+          unset P4_SERVER
 
-      - name: Commit exact P4 reachability report
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add reports/p4_reference_free_reachability_v1.json
-          git commit -m "Materialize exact P4 reference-free reachability report"
-          git push origin HEAD:v0.3.4c-p4-implementation-reachability
+          python3 -m http.server 8124 --bind 127.0.0.1 > /tmp/app-http.out 2>/tmp/app-http.log &
+          APP_SERVER=$!
+          sleep 1
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom http://127.0.0.1:8124/index.html > /tmp/final-app-dom.txt 2>/tmp/final-app-stderr.txt
+          grep -F '<title>ANTLAB H5</title>' /tmp/final-app-dom.txt
+          if grep -F 'GET /src/p4.js ' /tmp/app-http.log; then echo 'Canonical app unexpectedly loaded P4' >&2; exit 1; fi
+          if grep -E '/(reference/.*pheromone|p2\.js|p3\.js|p4_response_estimation|run-p4-estimation|reports/p[1234])' /tmp/app-http.log; then echo 'Forbidden canonical-app browser request' >&2; exit 1; fi
+          echo '{"p4_browser_parity":true,"canonical_app_smoke":true,"canonical_app_loaded_p4":false,"forbidden_requests":0,"p4_reachability_rerun":false}' > /tmp/final-chromium-result.json
 
-      - name: Upload P4 qualification artifact
+      - name: Upload final code + Chromium audit artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: p4-v034c-implementation-reachability
+          name: p4-v034c-final-code-chromium
           retention-days: 90
           if-no-files-found: ignore
           path: |
-            reports/p4_reference_free_reachability_v1.json
-            /tmp/report.sha256
-            /tmp/chrome-version.txt
-            /tmp/p4-browser-dom.txt
-            /tmp/p4-browser-stderr.txt
-            /tmp/app-dom.txt
-            /tmp/app-stderr.txt
-            /tmp/http.log
-            /tmp/chromium-result.json
+            /tmp/final-changed.txt
+            /tmp/final-chrome-version.txt
+            /tmp/final-p4-browser-dom.txt
+            /tmp/final-p4-browser-stderr.txt
+            /tmp/p4-http.log
+            /tmp/final-app-dom.txt
+            /tmp/final-app-stderr.txt
+            /tmp/app-http.log
+            /tmp/final-chromium-result.json
