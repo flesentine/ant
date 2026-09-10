@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "id": "P4_reference_free_reachability_execution_v1",
+  "status": "execution_policy_frozen_before_P4_runtime_implementation_or_execution",
+  "freeze_date_local": "2026-09-10",
+  "scientific_scope": "Reference-free engineering qualification of the already-frozen P4-v1 local-sector hard-detection Weber steering mechanism. This policy is frozen before P4 runtime implementation and before any P4 simulation execution.",
+  "mechanism_freeze": {
+    "file": "hypotheses/p4_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "609551836e540c341365db9cc987d2ca340cc053"
+  },
+  "candidate_class_decision": {
+    "file": "hypotheses/p4_painted_trail_candidate_class_decision_v1.json",
+    "git_blob_sha": "ad7295ba6d466549c60c8ecac37e39d30006ec1c"
+  },
+  "independent_evidence": {
+    "file": "hypotheses/p4_painted_trail_candidate_class_evidence_v1.json",
+    "git_blob_sha": "262f332062f271bbf111d0572f83b2faaf2cfd74"
+  },
+  "selection_main_checkpoint": {
+    "commit": "b73c97b4c3fd70e67cf22c050cf695a5f07771c8",
+    "permanent_main_workflow_run_id": 34452510140,
+    "permanent_main_workflow_run_number": 155,
+    "test_job_id": 102791233581,
+    "deploy_job_id": 102791465602,
+    "conclusion": "success"
+  },
+  "frozen_inputs": {
+    "canonical_model_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "integrity_runtime_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018",
+    "p1_component_runtime_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "open_arena_apparatus_git_blob_sha": "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4"
+  },
+  "frozen_execution": {
+    "physics_dt_s": 0.02,
+    "engineering_values": {
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 4,
+      "theta_detect": 0.25,
+      "sector_radius_mm": 10,
+      "radial_bins": 4,
+      "angular_bins_per_sector": 8,
+      "samples_per_sector": 32
+    },
+    "exact_identity_panel": {
+      "seeds": [840001,840002,840003,840004,840005,840006,840007,840008],
+      "fixed_time_s": 8,
+      "cases": [
+        "zero_dose_canonical_identity",
+        "zero_kappa_canonical_identity",
+        "global_subthreshold_dose_ratio_0.10_canonical_identity"
+      ]
+    },
+    "pure_invariance_panel": {
+      "cases": [
+        "threshold_boundary_off",
+        "just_above_threshold_right_turn",
+        "above_threshold_equal_signal_zero",
+        "above_threshold_left_right_antisymmetry",
+        "conditional_above_threshold_positive_scale_invariance",
+        "scale_crossing_detection_boundary",
+        "endpoint_reversal",
+        "rigid_translation",
+        "rigid_rotation",
+        "left_right_reflection",
+        "centered_parallel_trail_zero_steering",
+        "sector_geometry_4x8"
+      ],
+      "numeric_tolerance": 1e-10
+    },
+    "nominal_reachability_panel": {
+      "trials": 400,
+      "first_seed": 841000,
+      "last_seed": 841399,
+      "workers_per_trial": 1,
+      "dose_ratio": 1,
+      "sigma_field_mm": 8,
+      "kappa_trail_per_s": 4,
+      "theta_detect": 0.25,
+      "purpose": "Verify finite deterministic detection-gated relative-sector steering, canonical biology-RNG isolation, structural invariances, both off/on gate states, and non-degenerate reference-free open-arena reachability without target outcomes."
+    }
+  },
+  "required_structural_checks": [
+    "For every exact-identity seed, zero-dose P4 is bit-exact to canonical ant state and biology RNG state with zero sector/gate/steering evaluations.",
+    "For every exact-identity seed, kappa=0 P4 is bit-exact to canonical ant state and biology RNG state with zero sector/gate/steering evaluations.",
+    "For every exact-identity seed at dose_ratio=0.10, P4 is bit-exact to canonical ant state and biology RNG state. The runtime may evaluate local signal, but every evaluation must remain subthreshold and add exactly zero heading increment.",
+    "P4 adds zero RNG streams and zero biology RNG draws.",
+    "The deterministic sensor operator produces exactly 32 front-left and 32 front-right samples using the frozen 4x8 equal-area midpoint rule.",
+    "The hard gate is exactly OFF at L+R == theta_detect and ON only for L+R > theta_detect.",
+    "Above threshold, the Weber directional response is left-right antisymmetric and conditionally positive-scale-invariant when scaling does not cross the threshold.",
+    "Scaling across theta_detect intentionally changes response expression between exactly OFF and Weber-directed ON.",
+    "Endpoint reversal, rigid translation, and rigid rotation preserve sector summaries, detection state, and steering within frozen tolerance.",
+    "Left-right reflection swaps sector summaries and reverses above-threshold steering sign with equal magnitude within frozen tolerance.",
+    "Centered parallel trail geometry away from endpoint effects yields equal sector summaries and zero steering within frozen tolerance.",
+    "Every nominal-panel trial completes without NaN/Infinity in ant state or P4 diagnostics.",
+    "At least one nominal-panel trial contains at least one above-threshold P4 steering evaluation.",
+    "At least one nominal-panel trial contains at least one subthreshold moving-step P4 evaluation so both gate states are exercised in open-arena execution.",
+    "Mean moving speed and all open-arena summaries are descriptive diagnostics only and may not tune the mechanism."
+  ],
+  "reference_firewall": {
+    "poissonnier2026_pheromone_response_targets_may_be_loaded": false,
+    "any_reference_outcomes_may_be_loaded": false,
+    "P1_official_result_semantics_may_be_loaded": false,
+    "P2_official_result_semantics_may_be_loaded": false,
+    "P3_official_result_semantics_may_be_loaded": false,
+    "candidate_ranking_or_parameter_search": false,
+    "fit_or_parameter_search": false,
+    "adaptive_refinement": false,
+    "reserved_ymaze_may_be_loaded": false,
+    "reserved_ymaze_fitting_or_ranking": false
+  },
+  "implementation_constraints": [
+    "P4 runtime must extend canonical integrity.Simulation directly.",
+    "P4 may reuse frozen P1 helpers for apparatus, Gaussian field concentration, distance-to-segment, and moving-step preview only; it must not instantiate P1, P2, or P3 Simulation as a base.",
+    "P4 runtime may implement only the frozen local-sector hard-detection Weber steering mechanism.",
+    "No response RNG, signal-independent lapse state, stochastic detector, soft gate, sigmoid slope, Hill exponent, epsilon, or denominator regularizer is allowed.",
+    "No treatment-, path-, colony-, direction-, or experience-specific response parameter is allowed.",
+    "No speed, pause, angular-noise, contact, boundary, apparatus, observation, or scoring change is allowed.",
+    "No H2-H5 mechanism combination is allowed.",
+    "No canonical file may be modified."
+  ],
+  "result_rule": {
+    "pass": "All frozen structural checks pass on the exact panels. This establishes P4 implementation/reachability only, not biological fit.",
+    "fail": "Fix implementation defects only. Do not change the P4 mechanism, hard-gate boundary, sector geometry, engineering values, seeds, trial counts, dt, identities, invariances, or pass checks in response to reachability outcomes.",
+    "parameter_promotion_authorized": false,
+    "response_estimation_policy_authorized": false,
+    "canonical_update_authorized": false,
+    "reserved_ymaze_unlock_authorized": false
+  }
+}
