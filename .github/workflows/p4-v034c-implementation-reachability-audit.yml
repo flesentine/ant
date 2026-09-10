@@ -1,0 +1,138 @@
+name: P4 v0.3.4c implementation + reachability audit
+
+on:
+  push:
+    branches:
+      - v0.3.4c-p4-implementation-reachability
+    paths:
+      - .github/workflows/p4-v034c-implementation-reachability-audit.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: p4-v034c-implementation-reachability-audit
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify frozen provenance and implementation-only diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor b73c97b4c3fd70e67cf22c050cf695a5f07771c8 HEAD
+          test "$(git hash-object hypotheses/p4_painted_trail_mechanism_v1.json)" = "609551836e540c341365db9cc987d2ca340cc053"
+          test "$(git hash-object hypotheses/p4_reachability_execution_v1.json)" = "0d452f9c0d548ec962e0a6d9826648bf5e14a4ef"
+          test "$(git hash-object hypotheses/p4_implementation_authorization_v1.json)" = "42f8d51b06a20c0c6001a42b6021a134f2694e0d"
+          test "$(git hash-object src/p4.js)" = "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"
+          test "$(git hash-object models/lasius_niger_painted_trail_p4_v1.json)" = "3d8460b6916a90d06e70768f696ee3f0d48fccf4"
+          test "$(git hash-object experiments/open_arena_p4_zero_dose_reachability.json)" = "a0ce8285448adacd18feebb3e82e76092e102eec"
+          test "$(git hash-object experiments/open_arena_p4_low_dose_reachability.json)" = "3d21c82250b7c27a382606fb45b247d4eef20fb7"
+          test "$(git hash-object experiments/open_arena_p4_nominal_dose_reachability.json)" = "d7605792f6f0eb871d7b3999940e08f750784b64"
+          test "$(git hash-object tools/run-p4-reachability.js)" = "ba4e067a7f686933ed3271a64da2f79f0a558ab0"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          git diff --name-only b73c97b4c3fd70e67cf22c050cf695a5f07771c8...HEAD | tee /tmp/changed.txt
+          test "$(grep -Ec '^(reference/|reports/|apparatus/|states/|observations/|scoring/)' /tmp/changed.txt || true)" = "0"
+          test "$(grep -Ec '^hypotheses/(p1_|p2_|p3_|p4_response_estimation)' /tmp/changed.txt || true)" = "0"
+          test ! -e hypotheses/p4_response_estimation_v1.json
+          test ! -e tools/run-p4-estimation.js
+
+      - name: Run permanent regression suite before P4 execution
+        run: ./tests/run-tests.sh
+
+      - name: Execute frozen P4 reference-free reachability panel
+        run: node tools/run-p4-reachability.js --out reports/p4_reference_free_reachability_v1.json
+
+      - name: Validate exact P4 reachability result
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('reports/p4_reference_free_reachability_v1.json','utf8'));
+          if(r.id!=='P4_reference_free_reachability_report_v1')throw new Error('wrong report id');
+          if(r.status!=='reference_free_reachability_passed')throw new Error('reachability did not pass');
+          if(r.scientific_claim!=='implementation_and_reference_free_reachability_only_not_biological_fit')throw new Error('claim drift');
+          for(const [k,v] of Object.entries(r.checks))if(v!==true)throw new Error('failed check '+k);
+          if(r.nominal_panel.trials!==400)throw new Error('trial count drift');
+          if(r.engineering_values.theta_detect!==0.25)throw new Error('theta drift');
+          if(r.downstream_authorization.biological_fit_claim!==false||r.downstream_authorization.response_estimation_policy!==false||r.downstream_authorization.reserved_ymaze_unlock!==false)throw new Error('downstream prematurely authorized');
+          if(r.reference_firewall.poissonnier2026_pheromone_response_targets_may_be_loaded!==false||r.reference_firewall.P3_official_result_semantics_may_be_loaded!==false||r.reference_firewall.reserved_ymaze_may_be_loaded!==false)throw new Error('reference firewall drift');
+          console.log(JSON.stringify({status:r.status,trials:r.nominal_panel.trials,detected:r.nominal_panel.any_trial_with_detected_response,subthreshold:r.nominal_panel.any_trial_with_subthreshold_evaluation,central_zone:r.nominal_panel.mean_central_zone_fraction,trail_axis:r.nominal_panel.trail_axis_exit_rate}));
+          NODE
+          sha256sum reports/p4_reference_free_reachability_v1.json | tee /tmp/report.sha256
+
+      - name: Fresh Chromium P4 parity and firewall audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          "$CHROME" --version | tee /tmp/chrome-version.txt
+          cat > p4-browser-audit.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>P4 browser audit</title>
+          <script src="src/sim-core.js"></script><script src="src/integrity.js"></script><script src="src/p1.js"></script><script src="src/p4.js"></script>
+          <pre id="out">pending</pre><script>
+          (()=>{try{
+            const p=window.AntLabP4;if(!p)throw new Error('P4 missing');
+            const a=p.gatedRelativeSignal(.10,.15,.25),b=p.gatedRelativeSignal(.10,.16,.25),c=p.gatedRelativeSignal(.4,.4,.25),d=p.gatedRelativeSignal(.1,.4,.25),e=p.gatedRelativeSignal(.4,.1,.25),f=p.gatedRelativeSignal(.2,.6,.25),g=p.gatedRelativeSignal(.4,1.2,.25),h=p.gatedRelativeSignal(.02,.08,.25),i=p.gatedRelativeSignal(.08,.32,.25);
+            if(a.detected||a.signal!==0)throw new Error('threshold boundary');
+            if(!b.detected||!(b.signal>0))throw new Error('above threshold');
+            if(!c.detected||c.signal!==0)throw new Error('equal signal');
+            if(Math.abs(d.signal+e.signal)>1e-15)throw new Error('antisymmetry');
+            if(Math.abs(f.signal-g.signal)>1e-15)throw new Error('conditional scale');
+            if(h.detected||!i.detected)throw new Error('scale crossing');
+            document.getElementById('out').textContent=JSON.stringify({pass:true,browser:true,threshold_boundary_off:true,conditional_scale:true,global_scale_invariance:false});
+          }catch(err){document.getElementById('out').textContent=JSON.stringify({pass:false,error:String(err&&err.stack||err)});}})();
+          </script>
+          HTML
+          python3 -m http.server 8123 --bind 127.0.0.1 > /tmp/http.out 2>/tmp/http.log &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          sleep 1
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=3000 --dump-dom http://127.0.0.1:8123/p4-browser-audit.html > /tmp/p4-browser-dom.txt 2>/tmp/p4-browser-stderr.txt
+          grep -F '"pass":true' /tmp/p4-browser-dom.txt
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2000 --dump-dom http://127.0.0.1:8123/index.html > /tmp/app-dom.txt 2>/tmp/app-stderr.txt
+          grep -F '<title>ANTLAB H5</title>' /tmp/app-dom.txt
+          if grep -E '/(reference/.*pheromone|p2\.js|p3\.js|neutral-y-maze|p4_response_estimation|run-p4-estimation|reports/p[1234])' /tmp/http.log; then
+            echo 'Forbidden browser request detected' >&2; exit 1
+          fi
+          grep -F 'GET /src/p4.js ' /tmp/http.log
+          echo '{"chromium_p4_parity":true,"app_smoke":true,"forbidden_requests":0}' > /tmp/chromium-result.json
+
+      - name: Commit exact P4 reachability report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add reports/p4_reference_free_reachability_v1.json
+          git commit -m "Materialize exact P4 reference-free reachability report"
+          git push origin HEAD:v0.3.4c-p4-implementation-reachability
+
+      - name: Upload P4 qualification artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-v034c-implementation-reachability
+          retention-days: 90
+          path: |
+            reports/p4_reference_free_reachability_v1.json
+            /tmp/report.sha256
+            /tmp/chrome-version.txt
+            /tmp/p4-browser-dom.txt
+            /tmp/app-dom.txt
+            /tmp/http.log
+            /tmp/chromium-result.json
