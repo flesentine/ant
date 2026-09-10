@@ -1,0 +1,78 @@
+name: P4 v0.3.4c final review audit
+
+on:
+  push:
+    branches:
+      - v0.3.4c-p4-implementation-reachability
+    paths:
+      - .github/workflows/p4-v034c-final-review-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify frozen science bytes and no estimation gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p4_painted_trail_mechanism_v1.json)" = "609551836e540c341365db9cc987d2ca340cc053"
+          test "$(git hash-object hypotheses/p4_reachability_execution_v1.json)" = "0d452f9c0d548ec962e0a6d9826648bf5e14a4ef"
+          test "$(git hash-object hypotheses/p4_implementation_authorization_v1.json)" = "42f8d51b06a20c0c6001a42b6021a134f2694e0d"
+          test "$(git hash-object src/p4.js)" = "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"
+          test "$(git hash-object models/lasius_niger_painted_trail_p4_v1.json)" = "3d8460b6916a90d06e70768f696ee3f0d48fccf4"
+          test "$(git hash-object tools/run-p4-reachability.js)" = "ba4e067a7f686933ed3271a64da2f79f0a558ab0"
+          test "$(git hash-object reports/p4_reference_free_reachability_v1.json)" = "f6e77596eb25cc7bca3bf0dde1da712511a1d0d0"
+          test "$(git hash-object hypotheses/p4_reachability_result_freeze_v1.json)" = "f2074ae3157f22208ff98ebc620c00006549cab6"
+          echo '7105d70ddb80d1d8f91f19fcba8a992560dfb22c5989c1c6d11c5479bd946713  reports/p4_reference_free_reachability_v1.json' | sha256sum -c -
+          test ! -e hypotheses/p4_response_estimation_v1.json
+          test ! -e tools/run-p4-estimation.js
+
+      - name: Run full permanent suite without P4 reachability rerun
+        run: ./tests/run-tests.sh
+
+      - name: Fresh Chrome P4 parity and canonical firewall
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$CHROME" --version | tee /tmp/chrome-version.txt
+          cat > p4-final-review.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>P4 final review</title>
+          <script src="src/sim-core.js"></script><script src="src/measurement.js"></script><script src="src/h3.js"></script><script src="src/integrity.js"></script><script src="src/p1.js"></script><script src="src/p4.js"></script>
+          <pre id="out">pending</pre><script>(()=>{try{const p=window.AntLabP4;const a=p.gatedRelativeSignal(.10,.15,.25),b=p.gatedRelativeSignal(.10,.16,.25),c=p.gatedRelativeSignal(.1,.4,.25),d=p.gatedRelativeSignal(.4,.1,.25),e=p.gatedRelativeSignal(.2,.6,.25),f=p.gatedRelativeSignal(.4,1.2,.25),g=p.gatedRelativeSignal(.02,.08,.25),h=p.gatedRelativeSignal(.08,.32,.25);if(a.detected||a.signal!==0||!b.detected||b.signal<=0||Math.abs(c.signal+d.signal)>1e-15||Math.abs(e.signal-f.signal)>1e-15||g.detected||!h.detected)throw new Error('P4 parity');document.getElementById('out').textContent=JSON.stringify({pass:true,reachability_rerun:false});}catch(err){document.getElementById('out').textContent=JSON.stringify({pass:false,error:String(err)});}})();</script>
+          HTML
+          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/http.out 2>/tmp/http.log & PID=$!; trap 'kill $PID 2>/dev/null || true' EXIT; sleep 1
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=3000 --dump-dom http://127.0.0.1:8123/p4-final-review.html >/tmp/p4-dom.txt 2>/tmp/p4-stderr.txt
+          grep -F '"pass":true' /tmp/p4-dom.txt
+          grep -F 'GET /src/p4.js ' /tmp/http.log
+          "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom http://127.0.0.1:8123/index.html >/tmp/app-dom.txt 2>/tmp/app-stderr.txt
+          grep -F '<title>ANTLAB H5</title>' /tmp/app-dom.txt
+          APP_REQS="$(grep -c 'GET /src/p4.js ' /tmp/http.log || true)"
+          test "$APP_REQS" = "1"
+          if grep -E '/(reference/.*pheromone|p2\.js|p3\.js|p4_response_estimation|run-p4-estimation|reports/p[1234])' /tmp/http.log; then echo forbidden request >&2; exit 1; fi
+
+      - name: Upload final review artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-v034c-final-review
+          retention-days: 90
+          if-no-files-found: ignore
+          path: |
+            /tmp/chrome-version.txt
+            /tmp/p4-dom.txt
+            /tmp/p4-stderr.txt
+            /tmp/app-dom.txt
+            /tmp/app-stderr.txt
+            /tmp/http.log
