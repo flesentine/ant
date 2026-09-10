@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "id": "P4_painted_trail_candidate_class_evidence_v1",
+  "status": "independent_candidate_evidence_frozen_one_fresh_broad_class_supported_no_mechanism_selected_no_implementation_authorized",
+  "freeze_date_local": "2026-09-09",
+  "species": "Lasius niger",
+  "scientific_scope": "Independent evidence gate after permanent P3-v1 closure. This record asks which genuinely new painted-trail response classes are supported without using P3 target-ranked outcomes to tune a replacement. It freezes evidence and class boundaries only. It does not select an exact P4 mechanism, equation, sensor geometry, threshold, regularizer, parameter value or bound; does not authorize simulation or response-target search; and does not unlock the reserved Y-maze validation stage.",
+  "starting_checkpoint": {
+    "main_commit": "50ab8180982dd1a7d8864f88a72fc7dbd3aac166",
+    "permanent_main_workflow_run_id": 34444825773,
+    "permanent_main_workflow_run_number": 152,
+    "test_job_id": 102767251258,
+    "test_job_conclusion": "success",
+    "deploy_job_id": 102767409139,
+    "deploy_job_conclusion": "success"
+  },
+  "prior_closure_boundary": {
+    "p1_result_freeze_file": "hypotheses/p1_response_estimation_result_freeze_v1.json",
+    "p1_result_freeze_git_blob_sha": "1d99ebfaa378aeb1b98963f63b3a513a616a6617",
+    "p2_result_freeze_file": "hypotheses/p2_response_estimation_result_freeze_v1.json",
+    "p2_result_freeze_git_blob_sha": "088316e1746594f9b3f700cb277a83eb53fdd9f6",
+    "p3_result_freeze_file": "hypotheses/p3_response_estimation_result_freeze_v1.json",
+    "p3_result_freeze_git_blob_sha": "aa69afda6d80cc9d4ea0b563470cffdf0762b941",
+    "p3_post_failure_characterization_file": "hypotheses/p3_post_failure_characterization_v1.json",
+    "p3_post_failure_characterization_git_blob_sha": "541259b5f26cc475997b7b1a03d6b6f3cba6a332",
+    "p1_closed": true,
+    "p2_closed": true,
+    "p3_closed": true,
+    "p1_rerun_or_rescue_authorized": false,
+    "p2_rerun_or_rescue_authorized": false,
+    "p3_rerun_or_rescue_authorized": false,
+    "p3_target_ranked_outcomes_used_to_define_or_parameterize_P4_classes": false,
+    "p3_postmortem_role": "The P3 closure may motivate asking what independently supported response classes exist, but its fold outcomes, low-kappa pattern, component errors, and comparator performance may not choose a P4 equation, threshold, sensor geometry, stochastic process, parameter surface, bounds, seeds, folds, weights, objective, or promotion rule."
+  },
+  "independent_sources": [
+    {
+      "source_id": "oberhauser_wendt_czaczkes_2020_lasius_concentration_attraction",
+      "species": "Lasius niger",
+      "title": "Trail Pheromone Does Not Modulate Subjective Reward Evaluation in Lasius niger Ants",
+      "journal": "Frontiers in Psychology",
+      "year": 2020,
+      "doi": "10.3389/fpsyg.2020.555576",
+      "pmid": "33071878",
+      "pmcid": "PMC7540218",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7540218/",
+      "frozen_relevant_facts": [
+        "In a separate concentration-dependent attraction assay, ants chose a pheromone-treated Y-maze arm over solvent-only DCM significantly more often at all three tested pheromone concentrations.",
+        "Observed pheromone-arm choice proportions were 73.4% at 2 glands/ml, 85.1% at 4 glands/ml, and 94.4% at 8 glands/ml, while DCM versus DCM was 51.2%.",
+        "The four solution conditions differed overall, and the strongest 8 glands/ml concentration attracted significantly more ants than the weakest 2 glands/ml concentration.",
+        "The concentration series establishes that absolute pheromone level can affect attraction/choice strength in Lasius niger under the tested assay."
+      ],
+      "allowed_inference": "A genuinely new Lasius niger response hypothesis may include an absolute local pheromone-evidence dependence in whether or how strongly directional trail information affects behavior.",
+      "limits": [
+        "The assay does not identify a hard sensory threshold, sigmoid, Hill function, denominator offset, saturation constant, stochastic detection law, or any other exact transduction equation.",
+        "The assay does not determine local open-arena sensor geometry, Gaussian field width, steering gain, parameter bounds, or Poissonnier-assay parameter values.",
+        "The published Y-maze assay is used here only as external biological evidence; it does not expose or unlock the project's reserved Y-maze validation target."
+      ]
+    },
+    {
+      "source_id": "perna_et_al_2012_linepithema_relative_turning_with_detection_threshold_boundary",
+      "species": "Linepithema humile",
+      "title": "Individual rules for trail pattern formation in Argentine ants (Linepithema humile)",
+      "journal": "PLoS Computational Biology",
+      "year": 2012,
+      "doi": "10.1371/journal.pcbi.1002592",
+      "pmid": "22829756",
+      "pmcid": "PMC3400603",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3400603/",
+      "frozen_relevant_facts": [
+        "Turning responded to local pheromone concentration while speed was largely unaffected in the reported Argentine-ant assay.",
+        "Directional turning was described by a local Weber-like bilateral comparison based on left-right pheromone difference relative to their sum.",
+        "The authors explicitly discuss a minimum sensory detection threshold: when pheromone is below what an ant can sense, the expected average response is to continue without changing direction.",
+        "Their threshold discussion shows that local relative directional comparison and absolute detectability are mechanistically compatible rather than mutually exclusive concepts."
+      ],
+      "allowed_inference": "A future candidate class may combine local bilateral directional information with an absolute-signal-dependent expression or detection stage, provided the exact Lasius niger mechanism is frozen prospectively and is not copied from a cross-species numerical threshold.",
+      "limits": [
+        "This is cross-species mechanistic evidence and does not establish that Lasius niger uses the same Weber equation, sector geometry, detection threshold, or numerical constants.",
+        "The paper's pheromone-unit threshold discussion cannot be translated into glands/ml, hindgut-equivalents/cm, field concentration, or a P4 threshold value without separate evidence."
+      ]
+    },
+    {
+      "source_id": "czaczkes_gruter_jones_ratnieks_2011_lasius_presence_strength_boundary",
+      "species": "Lasius niger",
+      "title": "Synergy between social and private information increases foraging efficiency in ants",
+      "journal": "Biology Letters",
+      "year": 2011,
+      "doi": "10.1098/rsbl.2011.0067",
+      "pmid": "21325309",
+      "pmcid": "PMC3130237",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3130237/",
+      "frozen_relevant_facts": [
+        "Trail pheromone interacting with route memory increased walking speed and straightness in experienced Lasius niger foragers in that assay.",
+        "Changing trail strength from one ant passage to 20 ant passages did not significantly change pheromone deposition, U-turning, walking speed, or path sinuosity in the reported comparison.",
+        "The authors interpreted those measured effects as compatible with a presence-like or all-or-nothing role under that behavioral context."
+      ],
+      "allowed_inference": "Absolute-signal effects need not be assumed to form one universal smooth dose-response across every behavioral endpoint; a P4 evidence class should remain broad enough to include detection/gating behavior without selecting its mathematical form.",
+      "limits": [
+        "This assay does not establish the form of open-arena painted-trail steering or a P4 speed law.",
+        "The one-versus-20-passage comparison cannot be used to set a P4 threshold or claim that all Lasius niger pheromone responses are binary."
+      ]
+    },
+    {
+      "source_id": "koch_czaczkes_2021_lasius_transient_nonfollowing",
+      "species": "Lasius niger",
+      "title": "No specialist pheromone-ignoring ants in Lasius niger",
+      "journal": "Ecological Entomology",
+      "year": 2021,
+      "doi": "10.1111/een.12995",
+      "url": "https://doi.org/10.1111/een.12995",
+      "frozen_relevant_facts": [
+        "The study reports transient pheromone non-following behavior rather than a stable pheromone-ignoring specialist identity.",
+        "This source already underpinned the P2-v1 signal-independent transient-lapse candidate class."
+      ],
+      "allowed_inference": "Transient non-following remains biologically real, but the already-tested P2-v1 signal-independent lapse class is not a fresh P4 class. A future signal-dependent stochastic detection process would require its own prospective justification and cannot simply relabel P2.",
+      "limits": [
+        "This source does not establish that lapse probability depends on instantaneous absolute pheromone concentration in the Poissonnier assay.",
+        "It cannot justify reusing or rescuing the closed P2-v1 mechanism."
+      ]
+    },
+    {
+      "source_id": "poissonnier_et_al_2026_lasius_context_boundary",
+      "species": "Lasius niger",
+      "title": "Pheromone trail following is not modulated by previous visit to food location, distance travelled, or travel direction in the ant Lasius niger",
+      "journal": "Insectes Sociaux",
+      "year": 2026,
+      "doi": "10.1007/s00040-026-01106-9",
+      "url": "https://link.springer.com/article/10.1007/s00040-026-01106-9",
+      "frozen_relevant_facts": [
+        "Trail-following behavior was robust across the tested conditions.",
+        "No significant modulation of trail following was detected by distance travelled, travel direction, or recent food discovery in the tested assays."
+      ],
+      "allowed_inference": "A P4 candidate should remain shared across those context variables unless separate independent evidence later supports a modifier.",
+      "limits": [
+        "The source does not identify an absolute-signal gating equation or threshold.",
+        "The source cannot be used to create path-length-specific, direction-specific, or recent-experience-specific P4 response parameters."
+      ]
+    }
+  ],
+  "fresh_candidate_classes": [
+    {
+      "class_id": "P4_candidate_absolute_signal_dependent_bilateral_response",
+      "description": "A local painted-trail response in which left-right directional information remains bilateral/local, while whether or how strongly that directional information is expressed depends on an absolute local pheromone-evidence quantity. The class deliberately leaves open whether absolute evidence acts through deterministic attenuation, detection/gating, or a signal-dependent probability of response.",
+      "independent_evidence_strength": "direct_Lasius_niger_support_for_absolute_concentration_dependence_plus_cross_species_support_for_detection_threshold_compatible_local_bilateral_turning",
+      "species_support": [
+        "Lasius niger",
+        "Linepithema humile"
+      ],
+      "source_ids": [
+        "oberhauser_wendt_czaczkes_2020_lasius_concentration_attraction",
+        "perna_et_al_2012_linepithema_relative_turning_with_detection_threshold_boundary",
+        "czaczkes_gruter_jones_ratnieks_2011_lasius_presence_strength_boundary"
+      ],
+      "why_genuinely_new_relative_to_closed_versions": [
+        "Unlike P1-v1, the class does not prespecify the frozen P1 point-sensor C/(1+C) absolute-transduction kernel.",
+        "Unlike P2-v1, any response suppression would be tied to absolute sensory evidence rather than a signal-independent trial-level lapse probability.",
+        "Unlike P3-v1, the class is not positively scale-invariant: absolute signal magnitude is allowed to influence response expression."
+      ],
+      "mechanism_subclasses_not_selected_by_this_gate": [
+        "hard absolute detection threshold",
+        "smooth deterministic absolute-signal gate",
+        "absolute-signal-dependent stochastic detection or engagement",
+        "regularized relative comparison whose magnitude decreases with weak absolute evidence",
+        "other prospectively justified absolute-evidence modulation"
+      ],
+      "must_remain_unset_until_a_separate_mechanism_freeze": [
+        "exact absolute-evidence statistic such as sum, mean, maximum, or another local quantity",
+        "hard versus smooth versus stochastic response form",
+        "exact transduction equation",
+        "threshold, half-response, regularization, slope, Hill, or noise parameters",
+        "sensor geometry and quadrature",
+        "field representation changes",
+        "steering gain",
+        "parameter values and search bounds",
+        "response RNG design",
+        "estimation objective, folds, seeds, trial budgets, comparators, and promotion criteria"
+      ],
+      "status": "fresh_plausible_class_supported_not_formally_selected"
+    }
+  ],
+  "previously_tested_or_nonfresh_classes": [
+    {
+      "class_id": "absolute_point_sensor_saturating_always_engaged",
+      "maps_to": "P1-v1",
+      "status": "already_tested_and_permanently_closed_not_a_fresh_P4_class",
+      "rule": "The 2020 concentration-dependence evidence cannot be used posthoc to promote or rerun the exact P1-v1 mechanism."
+    },
+    {
+      "class_id": "signal_independent_transient_trial_level_lapse",
+      "maps_to": "P2-v1",
+      "status": "already_tested_and_permanently_closed_not_a_fresh_P4_class",
+      "rule": "Koch and Czaczkes 2021 cannot be reused as permission to rerun or rename P2-v1."
+    },
+    {
+      "class_id": "pure_scale_invariant_relative_bilateral_weber_response",
+      "maps_to": "P3-v1",
+      "status": "already_tested_and_permanently_closed_not_a_fresh_P4_class",
+      "rule": "Perna et al. 2012 cannot be used to rescue or rerun the exact threshold-free P3-v1 mechanism."
+    }
+  ],
+  "negative_or_not_yet_supported_classes": [
+    {
+      "class_id": "path_distance_direction_recent_experience_specific_response",
+      "status": "not_supported_by_current_direct_Lasius_niger_evidence",
+      "source_ids": [
+        "poissonnier_et_al_2026_lasius_context_boundary"
+      ],
+      "rule": "Do not create short-vs-long, inward-vs-outward, or recent-food-specific P4 response parameters."
+    },
+    {
+      "class_id": "stable_specialist_pheromone_ignorer_identity",
+      "status": "contradicted_by_current_repeatability_evidence_and_not_fresh",
+      "source_ids": [
+        "koch_czaczkes_2021_lasius_transient_nonfollowing"
+      ],
+      "rule": "Do not create a persistent worker identity that always ignores pheromone."
+    },
+    {
+      "class_id": "pheromone_driven_speed_law_as_primary_P4_mechanism",
+      "status": "not_selected_by_current_evidence_gate",
+      "source_ids": [
+        "perna_et_al_2012_linepithema_relative_turning_with_detection_threshold_boundary",
+        "czaczkes_gruter_jones_ratnieks_2011_lasius_presence_strength_boundary"
+      ],
+      "rule": "Published effects on speed are assay- and context-dependent; this gate does not authorize changing canonical speed, pause, or locomotor-noise processes."
+    },
+    {
+      "class_id": "repulsive_or_sign_reversing_pheromone_response",
+      "status": "not_established_by_sources_in_this_gate",
+      "rule": "Negative colony/path contrasts in the frozen P3 report are posthoc outcomes and cannot create a repulsive P4 mechanism without separate independent evidence."
+    }
+  ],
+  "evidence_synthesis": {
+    "strongest_direct_species_fact": "Lasius niger attraction to a pheromone-marked arm increased across the tested 2, 4, and 8 glands/ml concentration series, demonstrating that absolute pheromone level can matter to trail attraction.",
+    "strongest_mechanistic_compatibility_fact": "Published local Weber-like bilateral turning in another ant species was explicitly discussed together with a minimum sensory detection threshold, so relative directional comparison does not require response magnitude to remain scale-invariant arbitrarily close to zero absolute signal.",
+    "important_form_uncertainty": "The current evidence does not distinguish a hard threshold, smooth deterministic gate, regularized relative response, or signal-dependent stochastic detection process for Lasius niger.",
+    "candidate_class_supported": "P4_candidate_absolute_signal_dependent_bilateral_response",
+    "candidate_class_formally_selected": false,
+    "reason_selection_is_deferred": "A separate candidate-class decision gate should explicitly choose or reject this broad class before any exact mechanism equation is frozen. Keeping evidence and selection separate prevents this literature review from silently turning into a post-P3 model design exercise."
+  },
+  "selection_firewall": {
+    "P4_candidate_class_formally_selected": false,
+    "P4_exact_mechanism_exists": false,
+    "P4_runtime_authorized": false,
+    "P4_model_authorized": false,
+    "new_simulation_authorized": false,
+    "P4_parameter_estimation_policy_authorized": false,
+    "response_target_semantic_access_authorized": false,
+    "candidate_ranking_against_response_target_authorized": false,
+    "raw_P3_target_ranked_outcomes_used_for_P4_design": false,
+    "P1_rerun_or_rescue_authorized": false,
+    "P2_rerun_or_rescue_authorized": false,
+    "P3_rerun_or_rescue_authorized": false,
+    "canonical_locomotion_change_authorized": false,
+    "H2_H3_H4_H5_refit_authorized": false,
+    "reserved_project_Y_maze_validation_access_authorized": false,
+    "rule": "This gate freezes public independent evidence and candidate-class boundaries only. No P4 executable structure or target-ranked choice is authorized."
+  },
+  "next_gate": "Create a separate P4 candidate-class decision record. That gate may select P4_candidate_absolute_signal_dependent_bilateral_response as a broad class from this independent evidence, but it must still leave the exact absolute-evidence statistic, gate/transduction equation, sensor geometry, parameters, bounds, stochastic structure, and estimation procedure unset until a later prospective mechanism freeze."
+}
