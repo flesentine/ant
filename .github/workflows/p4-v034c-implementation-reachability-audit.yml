@@ -1,4 +1,5 @@
 name: P4 v0.3.4c implementation + reachability audit
+# retry after Chromium dependency-chain fix; frozen P4 mechanism/runtime/policy bytes unchanged
 
 on:
   push:
@@ -84,7 +85,12 @@ jobs:
           "$CHROME" --version | tee /tmp/chrome-version.txt
           cat > p4-browser-audit.html <<'HTML'
           <!doctype html><meta charset="utf-8"><title>P4 browser audit</title>
-          <script src="src/sim-core.js"></script><script src="src/integrity.js"></script><script src="src/p1.js"></script><script src="src/p4.js"></script>
+          <script src="src/sim-core.js"></script>
+          <script src="src/measurement.js"></script>
+          <script src="src/h3.js"></script>
+          <script src="src/integrity.js"></script>
+          <script src="src/p1.js"></script>
+          <script src="src/p4.js"></script>
           <pre id="out">pending</pre><script>
           (()=>{try{
             const p=window.AntLabP4;if(!p)throw new Error('P4 missing');
@@ -124,15 +130,19 @@ jobs:
           git push origin HEAD:v0.3.4c-p4-implementation-reachability
 
       - name: Upload P4 qualification artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: p4-v034c-implementation-reachability
           retention-days: 90
+          if-no-files-found: ignore
           path: |
             reports/p4_reference_free_reachability_v1.json
             /tmp/report.sha256
             /tmp/chrome-version.txt
             /tmp/p4-browser-dom.txt
+            /tmp/p4-browser-stderr.txt
             /tmp/app-dom.txt
+            /tmp/app-stderr.txt
             /tmp/http.log
             /tmp/chromium-result.json
