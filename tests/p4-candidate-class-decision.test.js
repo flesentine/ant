@@ -29,7 +29,6 @@ assert.strictEqual(decision.starting_checkpoint.test_job_id, 102769004574);
 assert.strictEqual(decision.starting_checkpoint.deploy_job_id, 102769165169);
 assert.strictEqual(decision.starting_checkpoint.test_job_conclusion, 'success');
 assert.strictEqual(decision.starting_checkpoint.deploy_job_conclusion, 'success');
-
 assert.strictEqual(decision.independent_evidence_input.git_blob_sha, '262f332062f271bbf111d0572f83b2faaf2cfd74');
 assert.strictEqual(decision.independent_evidence_input.response_target_semantics_used, false);
 assert.strictEqual(decision.independent_evidence_input.p3_target_ranked_outcomes_used_to_select_or_parameterize_P4, false);
@@ -43,66 +42,41 @@ assert.match(decision.selected_next_candidate_class.selection_strength, /direct_
 assert.match(decision.selected_next_candidate_class.description, /absolute local pheromone evidence/i);
 assert.match(decision.selected_next_candidate_class.description, /bilateral directional information/i);
 
-for (const [key, value] of Object.entries(decision.explicit_nonselections)) {
-  assert.strictEqual(value, false, `explicit non-selection ${key} must remain false at the historical decision freeze`);
-}
-for (const [key, value] of Object.entries(decision.selection_firewall)) {
-  assert.strictEqual(value, false, `selection firewall ${key} must remain false at the historical decision freeze`);
-}
+for (const [key, value] of Object.entries(decision.explicit_nonselections)) assert.strictEqual(value, false, `explicit non-selection ${key} must remain false at the historical decision freeze`);
+for (const [key, value] of Object.entries(decision.selection_firewall)) assert.strictEqual(value, false, `selection firewall ${key} must remain false at the historical decision freeze`);
 
 const requiredUnsetConcepts = [
-  'exact absolute-evidence statistic',
-  'hard versus smooth versus stochastic expression',
-  'exact bilateral directional equation',
-  'sensor or antenna geometry',
-  'response RNG and its stream ownership',
-  'parameter surface and bounds',
-  'engineering-only reachability values and seed panel',
-  'estimation objective, nuisance handling, folds, seeds, budgets, weights, and promotion rules'
+  'exact absolute-evidence statistic','hard versus smooth versus stochastic expression','exact bilateral directional equation','sensor or antenna geometry','response RNG and its stream ownership','parameter surface and bounds','engineering-only reachability values and seed panel','estimation objective, nuisance handling, folds, seeds, budgets, weights, and promotion rules'
 ];
-for (const item of requiredUnsetConcepts) {
-  assert.ok(decision.mechanism_details_deliberately_not_frozen_here.includes(item), `missing deliberately-unset item: ${item}`);
-}
+for (const item of requiredUnsetConcepts) assert.ok(decision.mechanism_details_deliberately_not_frozen_here.includes(item), `missing deliberately-unset item: ${item}`);
 
-// The decision gate itself remains immutable, while the later prospective mechanism freeze may now exist.
-const mechanismRel = 'hypotheses/p4_painted_trail_mechanism_v1.json';
-const mechanismPresent = fs.existsSync(path.join(root, mechanismRel));
-if (mechanismPresent) {
-  assert.strictEqual(hash(mechanismRel), '609551836e540c341365db9cc987d2ca340cc053');
-  const mechanism = readJson(mechanismRel);
-  assert.strictEqual(mechanism.candidate_class_input.decision_git_blob_sha, 'ad7295ba6d466549c60c8ecac37e39d30006ec1c');
-  assert.strictEqual(mechanism.candidate_class_input.evidence_git_blob_sha, '262f332062f271bbf111d0572f83b2faaf2cfd74');
-  assert.strictEqual(mechanism.candidate_class_input.selected_class_id, selectedId);
-  assert.strictEqual(mechanism.implementation_gate.src_p4_exists_at_this_freeze, false);
-  assert.strictEqual(mechanism.implementation_gate.p4_model_exists_at_this_freeze, false);
-  assert.strictEqual(mechanism.implementation_gate.new_P4_simulation_executed_at_this_freeze, false);
-  assert.strictEqual(mechanism.implementation_gate.implementation_authorized_by_this_record, false);
-  assert.strictEqual(mechanism.estimation_firewall.response_target_semantic_access_authorized, false);
-  assert.strictEqual(mechanism.global_firewall.reserved_Y_maze_access, false);
-}
+const mechanismRel='hypotheses/p4_painted_trail_mechanism_v1.json';
+assert.strictEqual(hash(mechanismRel),'609551836e540c341365db9cc987d2ca340cc053');
+const mechanism=readJson(mechanismRel);
+assert.strictEqual(mechanism.candidate_class_input.decision_git_blob_sha,'ad7295ba6d466549c60c8ecac37e39d30006ec1c');
+assert.strictEqual(mechanism.candidate_class_input.evidence_git_blob_sha,'262f332062f271bbf111d0572f83b2faaf2cfd74');
+assert.strictEqual(mechanism.candidate_class_input.selected_class_id,selectedId);
+assert.strictEqual(mechanism.implementation_gate.src_p4_exists_at_this_freeze,false);
+assert.strictEqual(mechanism.implementation_gate.implementation_authorized_by_this_record,false);
 
-const stillForbiddenFiles = [
-  'src/p4.js',
-  'models/lasius_niger_painted_trail_p4_v1.json',
-  'hypotheses/p4_response_estimation_v1.json',
-  'hypotheses/p4_implementation_authorization_v1.json',
-  'hypotheses/p4_reachability_execution_v1.json',
-  'tools/run-p4-estimation.js',
-  'tools/run-p4-reachability.js'
-];
-for (const rel of stillForbiddenFiles) {
-  assert.strictEqual(fs.existsSync(path.join(root, rel)), false, `${rel} must not exist before a later implementation/estimation gate`);
+const policyRel='hypotheses/p4_reachability_execution_v1.json',authRel='hypotheses/p4_implementation_authorization_v1.json';
+const implementationPresent=fs.existsSync(path.join(root,'src/p4.js'));
+if(implementationPresent){
+  assert.strictEqual(hash(policyRel),'0d452f9c0d548ec962e0a6d9826648bf5e14a4ef');
+  assert.strictEqual(hash(authRel),'42f8d51b06a20c0c6001a42b6021a134f2694e0d');
+  assert.strictEqual(hash('src/p4.js'),'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
+  assert.strictEqual(hash('models/lasius_niger_painted_trail_p4_v1.json'),'3d8460b6916a90d06e70768f696ee3f0d48fccf4');
+  assert.strictEqual(hash('tools/run-p4-reachability.js'),'ba4e067a7f686933ed3271a64da2f79f0a558ab0');
+  const policy=readJson(policyRel),auth=readJson(authRel);
+  assert.strictEqual(policy.mechanism_freeze.git_blob_sha,'609551836e540c341365db9cc987d2ca340cc053');
+  assert.strictEqual(auth.reachability_execution_policy.git_blob_sha,'0d452f9c0d548ec962e0a6d9826648bf5e14a4ef');
+  assert.strictEqual(auth.authorization.create_src_p4_js,true);
+  assert.strictEqual(auth.still_forbidden.response_target_access,true);
+  assert.strictEqual(auth.still_forbidden.reserved_Y_maze_access,true);
 }
+assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false,'P4 response estimation policy remains forbidden');
+assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator remains forbidden');
 
 assert.match(decision.next_gate, /separate P4 mechanism-selection\/freeze record/i);
 assert.match(decision.next_gate, /before any P4 implementation or simulation/i);
-
-console.log('P4 candidate-class decision freeze PASS '+JSON.stringify({
-  decision_blob:hash(decisionPath),
-  selected_class:selectedId,
-  historical_exact_mechanism_selected:false,
-  later_mechanism_present:mechanismPresent,
-  p4_runtime_present:false,
-  response_target_access:false,
-  reserved_ymaze_access:false
-}));
+console.log('P4 candidate-class decision freeze PASS '+JSON.stringify({decision_blob:hash(decisionPath),selected_class:selectedId,historical_exact_mechanism_selected:false,later_mechanism_present:true,later_implementation_present:implementationPresent,response_target_access:false,reserved_ymaze_access:false}));
