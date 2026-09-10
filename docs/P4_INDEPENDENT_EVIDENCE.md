@@ -113,8 +113,41 @@ Still not selected or authorized:
 
 The published Y-maze concentration experiment is used only as external biological evidence. It does **not** expose or unlock the project's reserved Y-maze validation target.
 
+## Candidate-class decision
+
+Decision record:
+
+`hypotheses/p4_painted_trail_candidate_class_decision_v1.json`
+
+Git blob:
+
+`ad7295ba6d466549c60c8ecac37e39d30006ec1c`
+
+After the evidence gate merged and permanent main workflow #153 passed, ANTLAB formally selected:
+
+`P4_candidate_absolute_signal_dependent_bilateral_response`
+
+This is a **class selection only**. It says the next internal development hypothesis may let absolute local pheromone evidence control whether or how strongly local bilateral directional information is expressed.
+
+It still does not choose:
+
+- a hard threshold;
+- a smooth deterministic gate;
+- a stochastic detector or engagement process;
+- a regularized relative formula;
+- the absolute-evidence statistic;
+- the directional equation;
+- sensor geometry;
+- field treatment;
+- steering gain;
+- response RNG;
+- parameters or bounds;
+- an estimation policy.
+
+P1-v1, P2-v1, and P3-v1 remain permanently closed. Their scientific outcomes cannot be reused as a tuning surface for P4.
+
 ## Next gate
 
-Create a separate **P4 candidate-class decision** record. That gate may formally select `P4_candidate_absolute_signal_dependent_bilateral_response` from this independent evidence, but it must still leave the exact mathematical mechanism unset.
+Create a separate **P4 mechanism-selection/freeze** record. That prospective gate must choose exactly one mathematical realization of the selected broad class and freeze its zero-signal identity, structural invariances, sensor/field treatment, engineering-only reachability values, and seed panel before any P4 implementation or simulation.
 
-Only after that decision is merged should a later prospective mechanism-freeze gate choose one exact equation, sensor structure, null identities, invariances, and reference-free engineering reachability panel before any P4 implementation or simulation.
+Response-target semantics and the project's reserved Y-maze validation remain locked until later explicit authorization gates.
