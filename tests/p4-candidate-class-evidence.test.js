@@ -19,7 +19,7 @@ assert.strictEqual(e.starting_checkpoint.test_job_conclusion,'success');
 assert.strictEqual(e.starting_checkpoint.deploy_job_conclusion,'success');
 assert.strictEqual(blob(e.prior_closure_boundary.p1_result_freeze_file),'1d99ebfaa378aeb1b98963f63b3a513a616a6617');
 assert.strictEqual(blob(e.prior_closure_boundary.p2_result_freeze_file),'088316e1746594f9b3f700cb277a83eb53fdd9f6');
-assert.strictEqual(blob(e.prior_closure_boundary.p3_result_freeze_file),'aa69afda6d80cc0c9a3da1b8045df3f0e2a03d'.replace('aa69afda6d80cc0c9a3da1b8045df3f0e2a03d','aa69afda6d80cc9d4ea0b563470cffdf0762b941'));
+assert.strictEqual(blob(e.prior_closure_boundary.p3_result_freeze_file),'aa69afda6d80cc9d4ea0b563470cffdf0762b941');
 assert.strictEqual(blob(e.prior_closure_boundary.p3_post_failure_characterization_file),'541259b5f26cc475997b7b1a03d6b6f3cba6a332');
 assert.strictEqual(e.prior_closure_boundary.p1_closed,true);
 assert.strictEqual(e.prior_closure_boundary.p2_closed,true);
