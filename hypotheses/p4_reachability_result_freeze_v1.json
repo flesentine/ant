@@ -34,6 +34,7 @@
       "workflow_run_id": 34517441563,
       "job_id": 103006286920,
       "head_sha": "d919913c916578a45fec8ad8d1032af6050ba8fd",
+      "workflow_git_blob_sha": "1452def40721fe4b2ea6bb032a7dfe296fa7301e",
       "permanent_suite_before_execution": "success",
       "frozen_reachability_execution": "success",
       "report_validation": "success",
@@ -49,6 +50,7 @@
       "workflow_run_number": 2,
       "job_id": 103007498050,
       "execution_head_sha": "a4efbdd04da136224cfd7bb66a71d18b77147cc0",
+      "workflow_git_blob_sha": "f06c5c0cae651f34a21da2bb63515eb1c71a0c1c",
       "report_materialization_commit": "933362fc955df543eabdb98c7b5979a4816cff83",
       "conclusion": "success",
       "permanent_suite_before_execution": "success",
@@ -77,17 +79,7 @@
     "digest": "sha256:89faa80894fb75b40a6ce024c0c630d5d4be994eecc1a58dca5593463c46ef24",
     "retention_days": 90,
     "expires_at_utc": "2026-12-09T19:00:32Z",
-    "contains": [
-      "exact reachability report",
-      "report SHA-256 record",
-      "Chrome version",
-      "P4 browser DOM",
-      "P4 browser stderr",
-      "canonical app DOM",
-      "canonical app stderr",
-      "HTTP request log",
-      "Chromium result JSON"
-    ]
+    "contains": ["exact reachability report","report SHA-256 record","Chrome version","P4 browser DOM","P4 browser stderr","canonical app DOM","canonical app stderr","HTTP request log","Chromium result JSON"]
   },
   "chromium_qualification": {
     "browser": "Google Chrome 152.0.7977.82",
@@ -123,16 +115,7 @@
     "zero_dose_canonical_identity_all_seeds": true,
     "zero_kappa_canonical_identity_all_seeds": true,
     "global_subthreshold_dose_ratio_0_10_canonical_identity_all_seeds": true,
-    "low_dose_evaluations_by_seed": {
-      "840001": 348,
-      "840002": 400,
-      "840003": 400,
-      "840004": 279,
-      "840005": 334,
-      "840006": 400,
-      "840007": 271,
-      "840008": 400
-    },
+    "low_dose_evaluations_by_seed": {"840001":348,"840002":400,"840003":400,"840004":279,"840005":334,"840006":400,"840007":271,"840008":400},
     "interpretation": "The guaranteed-subthreshold case exercised P4 local-signal evaluation while remaining bit-exact to canonical locomotion and biology RNG state, proving that the hard gate can turn P4 off without perturbing canonical dynamics."
   },
   "invariance_result": {
