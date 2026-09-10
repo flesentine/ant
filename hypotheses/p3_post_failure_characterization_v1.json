@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "id": "P3_post_failure_characterization_v1",
+  "status": "posthoc_descriptive_characterization_frozen_no_rescue_no_p4_authorization",
+  "freeze_date_local": "2026-09-09",
+  "scope": "Descriptive characterization of the already-frozen official P3-v1 development result and the already-frozen P3-v1 mechanism only. This record does not reopen P3-v1, authorize a rerun, change any scientific implementation, select P4, or create new fit evidence.",
+  "frozen_inputs": {
+    "official_report": {
+      "file": "reports/p3_response_estimation_1000x60_v1.json",
+      "git_blob_sha": "264d822c7e6180dc0c9a3da1b8045df3f0e2a03d",
+      "sha256": "55bffcd30c85e1a891879fd712f8332f119d191d5930fa4c4710ae9589c8e73b"
+    },
+    "result_freeze": {
+      "file": "hypotheses/p3_response_estimation_result_freeze_v1.json",
+      "git_blob_sha": "aa69afda6d80cc9d4ea0b563470cffdf0762b941"
+    },
+    "response_estimation_policy": {
+      "file": "hypotheses/p3_response_estimation_v1.json",
+      "git_blob_sha": "d86eb9936e993d188f2a28faab838ba158c40f3b"
+    },
+    "mechanism_freeze": {
+      "file": "hypotheses/p3_painted_trail_mechanism_v1.json",
+      "git_blob_sha": "5d00ce0058ff388c9f57d7dce56ce465d82c5765"
+    }
+  },
+  "analysis_firewall": {
+    "raw_102_row_target_semantics_reloaded": false,
+    "new_simulation_run": false,
+    "candidate_reranking": false,
+    "new_objective_or_weighting": false,
+    "new_fold_definition": false,
+    "new_parameter_search": false,
+    "new_sensor_geometry_search": false,
+    "new_threshold_or_regularization_search": false,
+    "inferential_significance_test": false,
+    "p4_mechanism_selected": false,
+    "p4_implementation_authorized": false,
+    "canonical_locomotion_changed": false,
+    "ymaze_accessed": false,
+    "rule": "Only quantities already recorded in the immutable official P3 report and structural facts already frozen in the P3 mechanism may be summarized. No new target-row access, simulation, search, model comparison, threshold/epsilon proposal ranking, or replacement-mechanism selection is permitted."
+  },
+  "frozen_primary_outcome": {
+    "heldout_wins_vs_exact_null": 4,
+    "heldout_wins_vs_selected_absolute_benchmark": 2,
+    "folds_total": 6,
+    "required_minimum_wins_per_guard": 5,
+    "median_relative_improvement_vs_exact_null": 0.2096536795073778,
+    "median_relative_improvement_vs_absolute_benchmark": -1.0090708050960875,
+    "canonical_null_survival_guard_passed": false,
+    "structural_increment_survival_guard_passed": false,
+    "dual_survival_guard_passed": false,
+    "final_all_data_fit_executed": false
+  },
+  "structural_mechanism_facts": {
+    "relative_transduction": "W(L,R)=0 when L+R<=0; otherwise W=(R-L)/(R+L).",
+    "steering": "omega_trail=kappa_trail_per_s*W(L,R).",
+    "positive_scale_invariance": "For any finite a>0, W(aL,aR)=W(L,R).",
+    "absolute_concentration_attenuation_present": false,
+    "epsilon_or_regularization": 0,
+    "threshold_parameter_present": false,
+    "descriptive_implication": "Within P3-v1, once a nonzero bilateral field is sensed, absolute signal scale cannot by itself attenuate the normalized steering signal. This is a frozen mathematical property of the mechanism, not a posthoc biological claim."
+  },
+  "selected_candidate_descriptors": {
+    "P3_selected_candidate_indices_by_heldout_colony": {
+      "0": 108,
+      "7": 648,
+      "16": 864,
+      "20": 108,
+      "21": 108,
+      "27": 864
+    },
+    "P3_distinct_selected_candidate_indices": [108, 648, 864],
+    "P3_sigma_field_mm": {
+      "min": 2.151687778125582,
+      "median": 3.0001251840082306,
+      "max": 3.589418150006214
+    },
+    "P3_kappa_trail_per_s": {
+      "min": 0.1755829903978052,
+      "median": 0.2633744855967078,
+      "max": 0.4682213077274805,
+      "normalized_min_under_frozen_0_to_16_bound": 0.010973936899862825,
+      "normalized_median_under_frozen_0_to_16_bound": 0.016460905349794237,
+      "normalized_max_under_frozen_0_to_16_bound": 0.02926383173296753
+    },
+    "P3_top12_kappa_by_fold": {
+      "heldout_0_range": [0.1755829903978052, 0.48285322359396426],
+      "heldout_7_range": [0.0438957475994513, 0.6364883401920438],
+      "heldout_16_range": [0.1316872427983539, 0.48285322359396426],
+      "heldout_20_range": [0.1755829903978052, 0.9876543209876543],
+      "heldout_21_range": [0.0877914951989026, 0.3950617283950617],
+      "heldout_27_range": [0.20484682213077274, 0.746227709190672],
+      "all_recorded_top12_candidates_below_1_per_s": true
+    },
+    "absolute_comparator_selected_kappa_trail_per_s": {
+      "min": 4.126200274348423,
+      "median": 7.345221764974852,
+      "max": 15.341563786008228
+    },
+    "absolute_comparator_top12_global_min_kappa_per_s": 3.3360768175582987,
+    "interpretation_limit": "These are descriptive LOCO selected-candidate and recorded-top-candidate summaries only. They are not the frozen final identifiability test because final all-data fitting was never authorized after dual-survival failure."
+  },
+  "training_fit_descriptors": {
+    "absolute_comparator_training_loss_lower_than_P3_in_all_folds": true,
+    "P3_to_absolute_training_loss_ratio_by_heldout_colony": {
+      "0": 5.270401862490589,
+      "7": 8.077523796703806,
+      "16": 12.989072213428665,
+      "20": 60.18125441987,
+      "21": 9.469384293587584,
+      "27": 5.790113790552687
+    },
+    "selected_P3_training_component_mean_error_across_folds": {
+      "short_middle_zone_fraction": -0.1606375723701946,
+      "short_trail_axis_exit": 0.14722222222222217,
+      "long_middle_zone_fraction": -0.11899516659842324,
+      "long_trail_axis_exit": 0.04246031746031745
+    },
+    "selected_absolute_training_component_mean_error_across_folds": {
+      "short_middle_zone_fraction": -0.022964550101062967,
+      "short_trail_axis_exit": 0.0111111111111111,
+      "long_middle_zone_fraction": 0.004169823268036485,
+      "long_trail_axis_exit": -0.051984126984126994
+    },
+    "descriptive_pattern": "Across the already-recorded training summaries, selected P3 candidates systematically under-reproduced middle-zone treatment contrasts and over-reproduced short-path trail-axis contrasts. The separately ranked absolute-transduction comparator had much smaller training errors on those same frozen summaries."
+  },
+  "fold_descriptors": [
+    {
+      "held_out_colony": 0,
+      "selected_P3_sigma_field_mm": 3.589418150006214,
+      "selected_P3_kappa_trail_per_s": 0.2633744855967078,
+      "selected_absolute_sigma_field_mm": 3.638342224317217,
+      "selected_absolute_kappa_trail_per_s": 6.52583447645176,
+      "P3_training_loss": 0.017244136163657952,
+      "absolute_training_loss": 0.0032718826028019497,
+      "P3_heldout_primary_loss": 0.0314004351087724,
+      "absolute_heldout_primary_loss": 0.006409138732902495,
+      "null_heldout_primary_loss": 0.028194375663801723,
+      "relative_improvement_vs_null": -0.11371273062403295,
+      "relative_improvement_vs_absolute": -3.8993221113427423,
+      "notable_recorded_components": [
+        "Long-path trail-axis reference contrast was 0 while selected P3 simulation contrast was +0.24166666666666664.",
+        "Short- and long-path middle-zone contrasts were both under-reproduced by selected P3."
+      ]
+    },
+    {
+      "held_out_colony": 7,
+      "selected_P3_sigma_field_mm": 2.4108322180102473,
+      "selected_P3_kappa_trail_per_s": 0.1755829903978052,
+      "selected_absolute_sigma_field_mm": 2.929757488292812,
+      "selected_absolute_kappa_trail_per_s": 4.126200274348423,
+      "P3_training_loss": 0.018107479953999348,
+      "absolute_training_loss": 0.0022417117435653317,
+      "P3_heldout_primary_loss": 0.24929899921720966,
+      "absolute_heldout_primary_loss": 0.3186614691917888,
+      "null_heldout_primary_loss": 0.409731937626747,
+      "relative_improvement_vs_null": 0.39155585317268266,
+      "relative_improvement_vs_absolute": 0.2176682049150812,
+      "notable_recorded_components": [
+        "Colony 7 had large positive reference contrasts on all four primary endpoints.",
+        "Selected P3 under-reproduced all four but still improved on both comparators."
+      ]
+    },
+    {
+      "held_out_colony": 16,
+      "selected_P3_sigma_field_mm": 2.151687778125582,
+      "selected_P3_kappa_trail_per_s": 0.4682213077274805,
+      "selected_absolute_sigma_field_mm": 3.194923195817254,
+      "selected_absolute_kappa_trail_per_s": 8.866941015089163,
+      "P3_training_loss": 0.014162230532227543,
+      "absolute_training_loss": 0.001090318869548359,
+      "P3_heldout_primary_loss": 0.039988991802023685,
+      "absolute_heldout_primary_loss": 0.04984574847556099,
+      "null_heldout_primary_loss": 0.07230578220593327,
+      "relative_improvement_vs_null": 0.446946142037002,
+      "relative_improvement_vs_absolute": 0.19774518339051525,
+      "notable_recorded_components": [
+        "Selected P3 over-reproduced the short-path trail-axis contrast but under-reproduced the long-path trail-axis contrast.",
+        "Despite that path-dependent mismatch, total primary loss beat both comparators."
+      ]
+    },
+    {
+      "held_out_colony": 20,
+      "selected_P3_sigma_field_mm": 3.589418150006214,
+      "selected_P3_kappa_trail_per_s": 0.2633744855967078,
+      "selected_absolute_sigma_field_mm": 2.198803605260444,
+      "selected_absolute_kappa_trail_per_s": 5.735711019661637,
+      "P3_training_loss": 0.024554246676099196,
+      "absolute_training_loss": 0.0004080048997448637,
+      "P3_heldout_primary_loss": 0.07340642210998409,
+      "absolute_heldout_primary_loss": 0.03123753307361924,
+      "null_heldout_primary_loss": 0.0949545802651772,
+      "relative_improvement_vs_null": 0.22693121379733472,
+      "relative_improvement_vs_absolute": -1.3499429976427098,
+      "notable_recorded_components": [
+        "Short-path trail-axis reference contrast was 0 while selected P3 simulation contrast was +0.4.",
+        "Selected P3 beat the exact null overall but lost clearly to the absolute comparator."
+      ]
+    },
+    {
+      "held_out_colony": 21,
+      "selected_P3_sigma_field_mm": 3.589418150006214,
+      "selected_P3_kappa_trail_per_s": 0.2633744855967078,
+      "selected_absolute_sigma_field_mm": 10.262960128630226,
+      "selected_absolute_kappa_trail_per_s": 15.341563786008228,
+      "P3_training_loss": 0.024771789430627283,
+      "absolute_training_loss": 0.0026159873401063764,
+      "P3_heldout_primary_loss": 0.04504726564231232,
+      "absolute_heldout_primary_loss": 0.018098224475209475,
+      "null_heldout_primary_loss": 0.05577753229495619,
+      "relative_improvement_vs_null": 0.19237614521742083,
+      "relative_improvement_vs_absolute": -1.4890433701945187,
+      "notable_recorded_components": [
+        "Long-path trail-axis reference contrast was -0.08333333333333331 while selected P3 simulation contrast was +0.29166666666666663.",
+        "Selected P3 beat the exact null overall but lost clearly to the absolute comparator."
+      ]
+    },
+    {
+      "held_out_colony": 27,
+      "selected_P3_sigma_field_mm": 2.151687778125582,
+      "selected_P3_kappa_trail_per_s": 0.4682213077274805,
+      "selected_absolute_sigma_field_mm": 3.118008800475674,
+      "selected_absolute_kappa_trail_per_s": 8.164609053497943,
+      "P3_training_loss": 0.008256508136193557,
+      "absolute_training_loss": 0.0014259664723109775,
+      "P3_heldout_primary_loss": 0.2225809543607769,
+      "absolute_heldout_primary_loss": 0.1334259318323087,
+      "null_heldout_primary_loss": 0.05080229510642097,
+      "relative_improvement_vs_null": -3.381316904964882,
+      "relative_improvement_vs_absolute": -0.6681986125494653,
+      "notable_recorded_components": [
+        "Short-path trail-axis reference contrast was -0.33333333333333337 while selected P3 simulation contrast was +0.5583333333333333.",
+        "That short-path trail-axis endpoint alone contributed squared error 0.7950694444444445, the dominant recorded P3 heldout error in this fold.",
+        "Both P3 and the absolute comparator were worse than the exact null overall for colony 27."
+      ]
+    }
+  ],
+  "recorded_reference_contrast_heterogeneity": {
+    "trail_axis_exit": {
+      "short_path_by_colony": {
+        "0": 0.15000000000000002,
+        "7": 0.6666666666666667,
+        "16": 0.08333333333333337,
+        "20": 0,
+        "21": 0.33333333333333337,
+        "27": -0.33333333333333337
+      },
+      "long_path_by_colony": {
+        "0": 0,
+        "7": 0.75,
+        "16": 0.5,
+        "20": 0.4285714285714286,
+        "21": -0.08333333333333331,
+        "27": 0.16666666666666663
+      },
+      "descriptive_fact": "The already-recorded heldout trail-axis treatment contrasts vary strongly in magnitude and include positive, zero, and negative values. This is a property of the frozen development report and cannot justify posthoc exclusion, reweighting, or context-specific parameters."
+    }
+  },
+  "posthoc_model_behavior_diagnosis": {
+    "diagnosis_strength": "descriptive_model_behavior_only_not_biological_inference",
+    "observed_pattern": "P3 repeatedly selected very low steering gains, yet still tended to under-reproduce middle-zone contrasts and over-reproduce short-path trail-axis contrasts. The absolute comparator fit the frozen training summaries substantially better in every fold.",
+    "structural_consistency_statement": "This pattern is consistent with the frozen scale-invariant Weber/Michelson transduction producing a relative steering signal that cannot attenuate with absolute concentration magnitude, forcing the fit toward small kappa values to limit steering. The official result does not prove that this structural property is the unique cause of failure.",
+    "strongest_heldout_failure": "Colony 27 short-path trail-axis response had the opposite sign from both attractive-response simulations, with P3 showing the larger positive mismatch.",
+    "important_limit": "The absolute comparator's superior P3-era training fit does not promote P1 or establish the absolute comparator as biologically correct; P1-v1 already failed its own frozen robustness gate."
+  },
+  "conclusions_allowed": [
+    "P3-v1 failed both preregistered heldout survival guards despite a positive median improvement versus the exact null.",
+    "The selected P3 training fit was worse than the separately ranked absolute-transduction comparator in all six folds.",
+    "P3 selected gains clustered near the lower end of the frozen kappa search range, and all recorded P3 top-12 candidates in every fold had kappa below 1 per second.",
+    "The frozen P3 training summaries show a consistent tendency to under-reproduce middle-zone contrasts and over-reproduce short-path trail-axis contrasts.",
+    "The recorded heldout trail-axis treatment-response surface is heterogeneous across colonies and paths, including zero and negative contrasts.",
+    "A single shared always-attractive scale-invariant P3-v1 response did not generalize sufficiently under the frozen test.",
+    "The scale-invariant P3 transduction is structurally consistent with the observed low-kappa fit behavior, but the official result does not identify a unique causal mechanism.",
+    "The official P3 result does not select a replacement mechanism."
+  ],
+  "conclusions_forbidden": [
+    "Weber-like trail sensing is disproven in Lasius niger.",
+    "Colony 27 is an outlier that may be removed, downweighted, or excluded.",
+    "P3-v1 should be rerun with a lower kappa range, altered sigma bounds, different seeds, different folds, different weights, or a larger trial budget.",
+    "P3-v1 should be rescued by adding an epsilon, concentration threshold, detection floor, different sector radius, different sensor geometry, or context-specific gain.",
+    "The absolute comparator should be promoted because it fit the P3 training folds better.",
+    "Colony-specific, path-specific, direction-specific, or experience-specific response parameters are justified by this failure.",
+    "The observed heterogeneity proves a specific stochastic, sensory, learning, or colony mechanism.",
+    "A P4 mechanism is selected by this characterization."
+  ],
+  "unresolved_explanations": [
+    "finite-sample variation in colony-level treatment contrasts",
+    "true biological heterogeneity not represented by a single shared attractive response",
+    "scale-invariant transduction being too strong in low-absolute-signal regions",
+    "missing biological detection threshold or sensory floor",
+    "source-inspired sector geometry not matching Lasius niger sensing",
+    "Gaussian field representation not matching effective experimental cue geometry",
+    "unmodeled environmental or assay variation",
+    "another independently motivated sensory or behavioral mechanism"
+  ],
+  "next_gate": "A separate independent-evidence gate may decide whether any new P4 candidate class is scientifically justified. It must not use P3 target-ranked outcomes to tune a replacement equation, threshold, sensor geometry, parameter bounds, or context-specific response, and it must not reopen P1, P2, or P3."
+}
