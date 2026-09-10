@@ -94,12 +94,41 @@ assert.strictEqual(m.implementation_gate.implementation_authorized_by_this_recor
 for(const [k,v] of Object.entries(m.estimation_firewall)) if(k!=='rule') assert.strictEqual(v,false,k);
 for(const v of Object.values(m.global_firewall)) assert.strictEqual(v,false);
 
-for(const forbidden of ['src/p4.js','models/lasius_niger_painted_trail_p4_v1.json','hypotheses/p4_response_estimation_v1.json','tools/run-p4-reachability.js','tools/run-p4-estimation.js']) assert.ok(!fs.existsSync(path.join(root,forbidden)),forbidden+' must not exist at mechanism freeze');
-
 const forbiddenText=m.invariances_and_forbidden_inputs.join(' ');
 assert.match(forbiddenText,/No stochastic detection or response RNG/);
 assert.match(forbiddenText,/No sigmoid slope, Hill exponent, epsilon/);
 assert.match(forbiddenText,/No painted-trail-driven speed modulation/);
 assert.match(forbiddenText,/No reserved Y-maze/);
 
-console.log('p4-mechanism-selection.test.js PASS '+JSON.stringify({mechanism_blob:blob(mechPath),subclass:m.selection_rule.selected_subclass,theta_engineering:eng.theta_detect,implementation_authorized:false,response_target_access:false}));
+// Historical mechanism-freeze state is immutable; later implementation is accepted only through exact frozen lineage.
+const implementationPresent=fs.existsSync(path.join(root,'src/p4.js'));
+if(implementationPresent){
+  assert.strictEqual(blob('hypotheses/p4_reachability_execution_v1.json'),'0d452f9c0d548ec962e0a6d9826648bf5e14a4ef');
+  assert.strictEqual(blob('hypotheses/p4_implementation_authorization_v1.json'),'42f8d51b06a20c0c6001a42b6021a134f2694e0d');
+  assert.strictEqual(blob('src/p4.js'),'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
+  assert.strictEqual(blob('models/lasius_niger_painted_trail_p4_v1.json'),'3d8460b6916a90d06e70768f696ee3f0d48fccf4');
+  assert.strictEqual(blob('experiments/open_arena_p4_zero_dose_reachability.json'),'a0ce8285448adacd18feebb3e82e76092e102eec');
+  assert.strictEqual(blob('experiments/open_arena_p4_low_dose_reachability.json'),'3d21c82250b7c27a382606fb45b247d4eef20fb7');
+  assert.strictEqual(blob('experiments/open_arena_p4_nominal_dose_reachability.json'),'d7605792f6f0eb871d7b3999940e08f750784b64');
+  assert.strictEqual(blob('tools/run-p4-reachability.js'),'ba4e067a7f686933ed3271a64da2f79f0a558ab0');
+  const policy=read('hypotheses/p4_reachability_execution_v1.json');
+  const auth=read('hypotheses/p4_implementation_authorization_v1.json');
+  assert.strictEqual(policy.mechanism_freeze.git_blob_sha,'609551836e540c341365db9cc987d2ca340cc053');
+  assert.strictEqual(auth.reachability_execution_policy.git_blob_sha,'0d452f9c0d548ec962e0a6d9826648bf5e14a4ef');
+  assert.strictEqual(auth.authorization.create_src_p4_js,true);
+  assert.strictEqual(auth.authorization.run_frozen_400_trial_nominal_panel,true);
+  assert.strictEqual(auth.still_forbidden.response_target_access,true);
+  assert.strictEqual(auth.still_forbidden.P3_official_result_semantic_access,true);
+  assert.strictEqual(auth.still_forbidden.reserved_Y_maze_access,true);
+}
+assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false,'P4 response-estimation policy must remain absent');
+assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');
+
+console.log('p4-mechanism-selection.test.js PASS '+JSON.stringify({
+  mechanism_blob:blob(mechPath),
+  subclass:m.selection_rule.selected_subclass,
+  theta_engineering:eng.theta_detect,
+  historical_implementation_authorized:false,
+  later_implementation_present:implementationPresent,
+  response_target_access:false
+}));

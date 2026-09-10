@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "id": "P4_reference_free_reachability_report_v1",
+  "status": "reference_free_reachability_passed",
+  "generated_from_git_head": "a4efbdd04da136224cfd7bb66a71d18b77147cc0",
+  "scientific_claim": "implementation_and_reference_free_reachability_only_not_biological_fit",
+  "frozen_provenance": {
+    "mechanism_git_blob_sha": "609551836e540c341365db9cc987d2ca340cc053",
+    "reachability_policy_git_blob_sha": "0d452f9c0d548ec962e0a6d9826648bf5e14a4ef",
+    "implementation_authorization_git_blob_sha": "42f8d51b06a20c0c6001a42b6021a134f2694e0d",
+    "runtime_git_blob_sha": "bf7d5781bd69ec4568450ebbd3bdc284897b6f61",
+    "model_git_blob_sha": "3d8460b6916a90d06e70768f696ee3f0d48fccf4",
+    "zero_experiment_git_blob_sha": "a0ce8285448adacd18feebb3e82e76092e102eec",
+    "low_dose_experiment_git_blob_sha": "3d21c82250b7c27a382606fb45b247d4eef20fb7",
+    "nominal_experiment_git_blob_sha": "d7605792f6f0eb871d7b3999940e08f750784b64"
+  },
+  "engineering_values": {
+    "sigma_field_mm": 8,
+    "kappa_trail_per_s": 4,
+    "theta_detect": 0.25,
+    "sector_radius_mm": 10,
+    "radial_bins": 4,
+    "angular_bins_per_sector": 8,
+    "samples_per_sector": 32
+  },
+  "identity_panel": [
+    {
+      "seed": 840001,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 348
+    },
+    {
+      "seed": 840002,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 400
+    },
+    {
+      "seed": 840003,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 400
+    },
+    {
+      "seed": 840004,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 279
+    },
+    {
+      "seed": 840005,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 334
+    },
+    {
+      "seed": 840006,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 400
+    },
+    {
+      "seed": 840007,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 271
+    },
+    {
+      "seed": 840008,
+      "zero_dose_canonical_identity": true,
+      "zero_kappa_canonical_identity": true,
+      "global_subthreshold_canonical_identity": true,
+      "low_dose_evaluations": 400
+    }
+  ],
+  "invariance_panel": {
+    "threshold_boundary_off": true,
+    "just_above_threshold_right_turn": true,
+    "above_threshold_equal_signal_zero": true,
+    "above_threshold_left_right_antisymmetry": true,
+    "conditional_above_threshold_positive_scale_invariance": true,
+    "scale_crossing_detection_boundary": true,
+    "endpoint_reversal": true,
+    "translation": true,
+    "rotation": true,
+    "left_right_reflection": true,
+    "centered_parallel_trail_zero_steering": true,
+    "sector_geometry_4x8": true
+  },
+  "nominal_panel": {
+    "trials": 400,
+    "all_trials_finite": true,
+    "any_trial_with_detected_response": true,
+    "any_trial_with_subthreshold_evaluation": true,
+    "biology_rng_identical_at_construction": true,
+    "mean_central_zone_fraction": 0.8269531383223194,
+    "trail_axis_exit_rate": 0.8825,
+    "mean_moving_speed_mm_s": 23.969071878106433,
+    "mean_time_to_exit_s": 9.221000000000002,
+    "mean_evaluation_samples": 457.3375,
+    "mean_detected_samples": 385.485,
+    "mean_subthreshold_samples": 71.8525,
+    "mean_nonzero_steering_samples": 385.485
+  },
+  "checks": {
+    "exact_zero_dose_canonical_identity": true,
+    "exact_zero_kappa_canonical_identity": true,
+    "exact_global_subthreshold_canonical_identity": true,
+    "zero_response_rng_and_biology_rng_construction_identity": true,
+    "threshold_boundary_off": true,
+    "just_above_threshold_right_turn": true,
+    "above_threshold_equal_signal_zero": true,
+    "above_threshold_left_right_antisymmetry": true,
+    "conditional_above_threshold_positive_scale_invariance": true,
+    "scale_crossing_detection_boundary": true,
+    "endpoint_reversal_invariant": true,
+    "translation_invariant": true,
+    "rotation_invariant": true,
+    "left_right_reflection": true,
+    "centered_parallel_trail_zero_steering": true,
+    "sector_geometry_4x8": true,
+    "nominal_panel_all_finite": true,
+    "nominal_panel_reaches_detected_response": true,
+    "nominal_panel_reaches_subthreshold_state": true
+  },
+  "reference_firewall": {
+    "poissonnier2026_pheromone_response_targets_may_be_loaded": false,
+    "any_reference_outcomes_may_be_loaded": false,
+    "P1_official_result_semantics_may_be_loaded": false,
+    "P2_official_result_semantics_may_be_loaded": false,
+    "P3_official_result_semantics_may_be_loaded": false,
+    "candidate_ranking_or_parameter_search": false,
+    "fit_or_parameter_search": false,
+    "adaptive_refinement": false,
+    "reserved_ymaze_may_be_loaded": false,
+    "reserved_ymaze_fitting_or_ranking": false
+  },
+  "downstream_authorization": {
+    "biological_fit_claim": false,
+    "response_estimation_policy": false,
+    "parameter_promotion": false,
+    "canonical_update": false,
+    "reserved_ymaze_unlock": false
+  },
+  "report_content_sha256": "f612e6bf87085d5e3d59e489b69efea5bc562dcf4c8f6ea33089b5d32bb91968"
+}

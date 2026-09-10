@@ -117,7 +117,7 @@ assert.match(e.next_gate,/separate P4 candidate-class decision record/);
 assert.match(e.next_gate,/exact absolute-evidence statistic/);
 assert.match(e.next_gate,/unset until a later prospective mechanism freeze/);
 
-// Historical evidence-gate state is immutable, but later gates may legitimately exist.
+// Historical evidence-gate state is immutable, while later qualified gates may legitimately exist.
 const decisionRel='hypotheses/p4_painted_trail_candidate_class_decision_v1.json';
 const decisionPresent=fs.existsSync(path.join(root,decisionRel));
 if(decisionPresent){
@@ -143,8 +143,23 @@ if(mechanismPresent){
   assert.strictEqual(m.estimation_firewall.response_target_semantic_access_authorized,false);
   assert.strictEqual(m.global_firewall.reserved_Y_maze_access,false);
 }
-for(const p of ['src/p4.js','models/lasius_niger_painted_trail_p4_v1.json','hypotheses/p4_response_estimation_v1.json'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must still be absent before P4 implementation/estimation gates');
+const implementationPresent=fs.existsSync(path.join(root,'src/p4.js'));
+if(implementationPresent){
+  assert.strictEqual(blob('hypotheses/p4_reachability_execution_v1.json'),'0d452f9c0d548ec962e0a6d9826648bf5e14a4ef');
+  assert.strictEqual(blob('hypotheses/p4_implementation_authorization_v1.json'),'42f8d51b06a20c0c6001a42b6021a134f2694e0d');
+  assert.strictEqual(blob('src/p4.js'),'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
+  assert.strictEqual(blob('models/lasius_niger_painted_trail_p4_v1.json'),'3d8460b6916a90d06e70768f696ee3f0d48fccf4');
+  assert.strictEqual(blob('tools/run-p4-reachability.js'),'ba4e067a7f686933ed3271a64da2f79f0a558ab0');
+  const p=read('hypotheses/p4_reachability_execution_v1.json');
+  const a=read('hypotheses/p4_implementation_authorization_v1.json');
+  assert.strictEqual(p.mechanism_freeze.git_blob_sha,'609551836e540c341365db9cc987d2ca340cc053');
+  assert.strictEqual(a.reachability_execution_policy.git_blob_sha,'0d452f9c0d548ec962e0a6d9826648bf5e14a4ef');
+  assert.strictEqual(a.authorization.create_src_p4_js,true);
+  assert.strictEqual(a.still_forbidden.response_target_access,true);
+  assert.strictEqual(a.still_forbidden.reserved_Y_maze_access,true);
+}
+assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false,'P4 response-estimation policy must remain absent');
+assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');
 
 console.log('p4-candidate-class-evidence.test.js PASS '+JSON.stringify({
   evidence_blob:blob(rel),
@@ -153,6 +168,6 @@ console.log('p4-candidate-class-evidence.test.js PASS '+JSON.stringify({
   historical_formally_selected:e.evidence_synthesis.candidate_class_formally_selected,
   later_decision_present:decisionPresent,
   later_mechanism_present:mechanismPresent,
-  p4_runtime_exists:false,
+  later_implementation_present:implementationPresent,
   reserved_ymaze_access:e.selection_firewall.reserved_project_Y_maze_validation_access_authorized
 }));
