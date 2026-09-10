@@ -117,14 +117,42 @@ assert.match(e.next_gate,/separate P4 candidate-class decision record/);
 assert.match(e.next_gate,/exact absolute-evidence statistic/);
 assert.match(e.next_gate,/unset until a later prospective mechanism freeze/);
 
-for(const p of ['src/p4.js','models/lasius_niger_painted_trail_p4_v1.json','hypotheses/p4_painted_trail_mechanism_v1.json','hypotheses/p4_response_estimation_v1.json'])
-  assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at evidence gate');
+// Historical evidence-gate state is immutable, but later gates may legitimately exist.
+const decisionRel='hypotheses/p4_painted_trail_candidate_class_decision_v1.json';
+const decisionPresent=fs.existsSync(path.join(root,decisionRel));
+if(decisionPresent){
+  assert.strictEqual(blob(decisionRel),'ad7295ba6d466549c60c8ecac37e39d30006ec1c');
+  const d=read(decisionRel);
+  assert.strictEqual(d.independent_evidence_input.git_blob_sha,'262f332062f271bbf111d0572f83b2faaf2cfd74');
+  assert.strictEqual(d.selected_next_candidate_class.class_id,c.class_id);
+  assert.strictEqual(d.selection_firewall.P4_executable_mechanism_exists,false);
+  assert.strictEqual(d.selection_firewall.new_P4_simulation_authorized,false);
+  assert.strictEqual(d.selection_firewall.response_target_semantic_access_authorized,false);
+}
+const mechanismRel='hypotheses/p4_painted_trail_mechanism_v1.json';
+const mechanismPresent=fs.existsSync(path.join(root,mechanismRel));
+if(mechanismPresent){
+  assert.strictEqual(blob(mechanismRel),'609551836e540c341365db9cc987d2ca340cc053');
+  const m=read(mechanismRel);
+  assert.strictEqual(m.candidate_class_input.evidence_git_blob_sha,'262f332062f271bbf111d0572f83b2faaf2cfd74');
+  assert.strictEqual(m.candidate_class_input.selected_class_id,c.class_id);
+  assert.strictEqual(m.implementation_gate.src_p4_exists_at_this_freeze,false);
+  assert.strictEqual(m.implementation_gate.p4_model_exists_at_this_freeze,false);
+  assert.strictEqual(m.implementation_gate.new_P4_simulation_executed_at_this_freeze,false);
+  assert.strictEqual(m.implementation_gate.implementation_authorized_by_this_record,false);
+  assert.strictEqual(m.estimation_firewall.response_target_semantic_access_authorized,false);
+  assert.strictEqual(m.global_firewall.reserved_Y_maze_access,false);
+}
+for(const p of ['src/p4.js','models/lasius_niger_painted_trail_p4_v1.json','hypotheses/p4_response_estimation_v1.json'])
+  assert.ok(!fs.existsSync(path.join(root,p)),p+' must still be absent before P4 implementation/estimation gates');
 
 console.log('p4-candidate-class-evidence.test.js PASS '+JSON.stringify({
   evidence_blob:blob(rel),
   sources:e.independent_sources.length,
   supported_class:c.class_id,
-  formally_selected:e.evidence_synthesis.candidate_class_formally_selected,
+  historical_formally_selected:e.evidence_synthesis.candidate_class_formally_selected,
+  later_decision_present:decisionPresent,
+  later_mechanism_present:mechanismPresent,
   p4_runtime_exists:false,
   reserved_ymaze_access:e.selection_firewall.reserved_project_Y_maze_validation_access_authorized
 }));

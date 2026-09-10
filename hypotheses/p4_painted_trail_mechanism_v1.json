@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "id": "P4_painted_trail_mechanism_v1",
+  "status": "prospective_absolute_signal_detection_gated_bilateral_mechanism_frozen_before_implementation_or_new_simulation",
+  "freeze_date_local": "2026-09-10",
+  "species": "Lasius niger",
+  "scientific_scope": "Prospective P4-v1 painted-trail mechanism freeze after permanent P1-v1, P2-v1, and P3-v1 closure and after the P4 independent-evidence and candidate-class decision gates. This record chooses exactly one mathematical realization of the selected broad absolute-signal-dependent bilateral response class before any P4 implementation, simulation, response-target semantic access, target-ranked candidate search, or reserved Y-maze validation access.",
+  "starting_checkpoint": {
+    "main_commit": "4a0a007b080039848dc2d3453afb033921460de5",
+    "permanent_main_workflow_run_id": 34450498772,
+    "permanent_main_workflow_run_number": 154,
+    "test_job_id": 102784908386,
+    "test_job_conclusion": "success",
+    "deploy_job_id": 102785107053,
+    "deploy_job_conclusion": "success"
+  },
+  "candidate_class_input": {
+    "decision_file": "hypotheses/p4_painted_trail_candidate_class_decision_v1.json",
+    "decision_git_blob_sha": "ad7295ba6d466549c60c8ecac37e39d30006ec1c",
+    "evidence_file": "hypotheses/p4_painted_trail_candidate_class_evidence_v1.json",
+    "evidence_git_blob_sha": "262f332062f271bbf111d0572f83b2faaf2cfd74",
+    "selected_class_id": "P4_candidate_absolute_signal_dependent_bilateral_response"
+  },
+  "independent_evidence_basis": {
+    "oberhauser_wendt_czaczkes_2020": {
+      "species": "Lasius niger",
+      "doi": "10.3389/fpsyg.2020.555576",
+      "role": "Direct evidence that absolute pheromone concentration can alter attraction strength in Lasius niger. It motivates an absolute-evidence dependence but does not set a threshold value or equation."
+    },
+    "perna_et_al_2012": {
+      "species": "Linepithema humile",
+      "doi": "10.1371/journal.pcbi.1002592",
+      "role": "Cross-species mechanistic evidence for local bilateral Weber/Michelson directional comparison together with an explicitly discussed minimum sensory detection threshold below which average turning should vanish."
+    },
+    "czaczkes_gruter_jones_ratnieks_2011": {
+      "species": "Lasius niger",
+      "doi": "10.1098/rsbl.2011.0067",
+      "role": "Direct Lasius niger evidence that a stronger trail does not necessarily produce a smooth monotonic change in all locomotor endpoints, supporting a parsimonious detection-gate realization over an invented multi-parameter smooth gain law for this first P4 mechanism."
+    }
+  },
+  "selection_rule": {
+    "selected_subclass": "hard_absolute_detection_gate_then_local_weber_direction",
+    "why_this_subclass": [
+      "It is the simplest exact realization that satisfies the selected P4 class while preserving local bilateral direction.",
+      "It directly mirrors the independently documented concept of a minimum detectable total pheromone signal below which turning vanishes.",
+      "It introduces one new scientific scale parameter only: theta_detect, the absolute bilateral detection threshold.",
+      "It avoids adding an unsupported sigmoid slope, Hill exponent, stochastic response RNG, baseline regularizer, colony effect, path effect, or response-memory state.",
+      "It does not reuse P3 target-ranked outcomes to choose its equation or threshold value."
+    ],
+    "biological_claim_limit": "This is a prospective internal model realization, not a claim that a hard deterministic threshold or the exact equation below has been physiologically established in Lasius niger."
+  },
+  "mechanism": {
+    "mechanism_id": "P4_local_sector_hard_detection_weber_steering_v1",
+    "concept": "Each moving ant senses the painted-trail scalar field in deterministic front-left and front-right local sectors. The absolute evidence statistic S=L+R first controls detectability. When S is at or below theta_detect, trail steering is exactly absent. When S exceeds theta_detect, steering direction and normalized magnitude are determined by the bilateral Weber/Michelson contrast (R-L)/(R+L). P4-v1 has no response RNG and no transient lapse state.",
+    "field": {
+      "type": "gaussian_distance_to_segment",
+      "equation": "C(p) = dose_ratio * exp(-d(p, segment)^2 / (2*sigma_field_mm^2))",
+      "source_component": "Reuse the already-frozen painted-line Gaussian field representation unchanged so P4-v1 isolates the new absolute-detection gate rather than changing external cue geometry at the same time.",
+      "dose_ratio_definition": "applied_hindgut_equivalents_per_cm / nominal_dose_hindgut_equivalents_per_cm",
+      "sigma_field_mm_role": "shared field-width structural parameter; no biological value or estimation bound is selected by this gate"
+    },
+    "sector_sensors": {
+      "type": "deterministic_equal_area_front_quadrant_sector_means",
+      "source_geometry_status": "source-inspired engineering geometry based on the 1 cm local analysis scale in Perna et al.; not a Lasius niger anatomical estimate",
+      "radius_mm": 10,
+      "left_sector": "the 90-degree front-left quadrant relative to instantaneous heading",
+      "right_sector": "the 90-degree front-right quadrant relative to instantaneous heading",
+      "basis_definition": {
+        "forward": "u=(cos(heading), sin(heading))",
+        "right": "r=(-sin(heading), cos(heading))",
+        "left": "l=(sin(heading), -cos(heading))"
+      },
+      "digital_operator": {
+        "radial_bins": 4,
+        "angular_bins_per_sector": 8,
+        "samples_per_sector": 32,
+        "radial_midpoint_rule": "rho_i = radius_mm * sqrt((i + 0.5)/4), i=0..3",
+        "angular_midpoint_rule": "alpha_j = (j + 0.5) * (pi/2) / 8, j=0..7",
+        "right_sample_point": "p_R(i,j)=position + rho_i*(cos(alpha_j)*u + sin(alpha_j)*r)",
+        "left_sample_point": "p_L(i,j)=position + rho_i*(cos(alpha_j)*u + sin(alpha_j)*l)",
+        "sector_summary": "R = arithmetic mean of C(p_R(i,j)) over 32 samples; L = arithmetic mean of C(p_L(i,j)) over 32 samples",
+        "weighting": "equal weights; sqrt radial transform makes radial bins equal-area under the polar midpoint approximation"
+      }
+    },
+    "absolute_detection": {
+      "absolute_evidence_statistic": "S = L + R",
+      "theta_parameter": "theta_detect",
+      "theta_units": "dimensionless field-concentration units under the frozen dose-ratio field representation",
+      "gate": "G(S;theta_detect) = 0 when S <= theta_detect; G = 1 when S > theta_detect",
+      "boundary_rule": "Equality is subthreshold: S == theta_detect produces exactly zero trail steering.",
+      "theta_detect_role": "shared absolute bilateral detection-threshold structural parameter; no biological value or future estimation bound is selected by this gate",
+      "reason_for_sum": "The same two local bilateral sector summaries used for direction provide the minimum sufficient absolute-evidence statistic; summing them adds no new sensor geometry or hidden environmental input."
+    },
+    "directional_transduction": {
+      "equation": "W(L,R;theta_detect) = 0 if L+R <= theta_detect; otherwise (R-L)/(R+L)",
+      "range": [-1, 1],
+      "zero_or_subthreshold_rule": "When L+R <= theta_detect, W is exactly zero.",
+      "equal_signal_rule": "When L == R, W == 0 whether below or above threshold.",
+      "above_threshold_left_right_antisymmetry": "For L+R > theta_detect, W(R,L;theta_detect) = -W(L,R;theta_detect).",
+      "conditional_positive_scale_invariance": "For any finite a>0 such that both L+R and a*(L+R) remain strictly above theta_detect, the directional ratio is unchanged. Crossing theta_detect intentionally breaks global positive scale invariance.",
+      "global_positive_scale_invariance": false,
+      "epsilon_or_regularization": 0
+    },
+    "steering": {
+      "type": "detection_gated_relative_right_minus_left_heading_drift",
+      "equation": "omega_trail = kappa_trail_per_s * W(L,R;theta_detect)",
+      "sign_convention": "Positive W means the right sector has more pheromone and applies positive rightward steering using the existing painted-trail sign convention.",
+      "kappa_trail_per_s_role": "shared steering-gain structural parameter; no biological value or future estimation bound is selected by this gate"
+    },
+    "canonical_update_order": "When active and above threshold, apply omega_trail*dt to heading immediately before the unchanged canonical Ant.update step, preserving the previously audited painted-trail update ordering.",
+    "moving_step_rule": "Evaluate painted-trail steering only when the ant is not finished, is not already paused, and a preview of the canonical pause hazard indicates the ant will move; preview the hazard by cloning canonical biology RNG state without mutation.",
+    "stochastic_structure": {
+      "signal_independent_lapse_state_present": false,
+      "response_rng_present": false,
+      "biology_rng_draws_added": 0
+    },
+    "speed_pause_noise_effects": {
+      "base_speed_changed": false,
+      "speed_process_changed": false,
+      "pause_process_changed": false,
+      "angular_noise_amplitude_changed": false,
+      "contact_process_changed": false,
+      "boundary_logic_changed": false
+    }
+  },
+  "exact_and_structural_identities": [
+    {"case":"DCM_or_zero_dose","condition":"dose_ratio == 0","required_identity":"Exact canonical locomotion trajectory and canonical biology RNG state. P4 must bypass field, sector, gate, and transduction evaluation and add no heading increment."},
+    {"case":"zero_steering_gain","condition":"kappa_trail_per_s == 0","required_identity":"Exact canonical locomotion trajectory and canonical biology RNG state. P4 must bypass field, sector, gate, and transduction evaluation and add no heading increment."},
+    {"case":"subthreshold_local_signal","condition":"L+R <= theta_detect","required_identity":"Local P4 steering rate is exactly zero with no response RNG draw."},
+    {"case":"threshold_boundary","condition":"L+R == theta_detect","required_identity":"Local P4 steering rate is exactly zero."},
+    {"case":"equal_sector_signal","condition":"L == R","required_identity":"Local P4 steering rate is exactly zero."},
+    {"case":"above_threshold_left_right_reflection","condition":"L+R > theta_detect and local field is reflected across the ant forward axis","required_identity":"Sector summaries swap and P4 steering changes sign with equal magnitude."},
+    {"case":"conditional_positive_dose_scale","condition":"same geometry and sigma, every local concentration multiplied by the same finite positive scalar, and both original and scaled bilateral sums remain strictly above theta_detect","required_identity":"The ideal above-threshold Weber/Michelson directional ratio is unchanged. This conditional identity must not be misreported as global scale invariance."},
+    {"case":"scale_crossing_detection_boundary","condition":"positive concentration scaling moves L+R from <= theta_detect to > theta_detect or vice versa","required_identity":"P4 response expression changes between exactly off and Weber-directed on; global positive scale invariance is intentionally absent."},
+    {"case":"trail_segment_endpoint_reversal","condition":"swap painted-line endpoints a and b","required_identity":"Distance field, sector summaries, detection state, and P4 steering are unchanged."},
+    {"case":"rigid_translation","condition":"translate ant position and trail segment by the same vector","required_identity":"Sector summaries, detection state, and P4 steering are unchanged."},
+    {"case":"rigid_rotation","condition":"rotate ant position, heading, and trail segment by the same angle around the same origin","required_identity":"Sector summaries, detection state, and P4 steering are unchanged within floating-point tolerance of the deterministic implementation."},
+    {"case":"centered_parallel_trail_symmetry","condition":"ant lies on the painted line centerline and heading is parallel to the line away from endpoint asymmetry","required_identity":"Left and right sector summaries are equal within implementation tolerance and P4 steering is zero within the same tolerance, regardless of detection state."}
+  ],
+  "structural_parameters": {
+    "sigma_field_mm": {"role":"shared Gaussian field width","future_estimation_status":"not_decided_by_this_gate"},
+    "kappa_trail_per_s": {"role":"shared above-threshold relative steering gain","future_estimation_status":"not_decided_by_this_gate"},
+    "theta_detect": {"role":"shared absolute bilateral detection threshold on S=L+R","future_estimation_status":"not_decided_by_this_gate","hard_gate_form_frozen":true},
+    "fixed_sensor_structure": {"radius_mm":10,"sector_angle_deg_each":90,"radial_bins":4,"angular_bins_per_sector":8,"estimated_in_P4_v1":false}
+  },
+  "engineering_only_reachability_values": {
+    "parameter_status": "ASSUMED_FOR_REFERENCE_FREE_ENGINEERING_REACHABILITY_ONLY_NOT_FITTED_NOT_LASIUS_NIGER_ESTIMATES",
+    "sigma_field_mm": 8,
+    "kappa_trail_per_s": 4,
+    "theta_detect": 0.25,
+    "sector_radius_mm": 10,
+    "radial_bins": 4,
+    "angular_bins_per_sector": 8,
+    "samples_per_sector": 32,
+    "value_rationale": "sigma=8 mm and kappa=4 s^-1 reuse pre-target engineering reachability values only. theta_detect=0.25 is a new engineering-only value chosen before P4 simulation because, under the frozen normalized Gaussian field, any dose_ratio <=0.10 guarantees L<=0.10 and R<=0.10 everywhere and therefore L+R<=0.20<0.25, giving an exact global subthreshold identity case, while nominal-dose synthetic sector cases can be chosen above threshold. It is not a biological threshold estimate and may not define a later estimation bound.",
+    "planned_reference_free_panel": {
+      "physics_dt_s": 0.02,
+      "exact_identity_seeds": [840001,840002,840003,840004,840005,840006,840007,840008],
+      "fixed_identity_time_s": 8,
+      "nominal_reachability_trials": 400,
+      "nominal_first_seed": 841000,
+      "nominal_last_seed": 841399,
+      "cases": ["zero_dose_canonical_identity","zero_kappa_canonical_identity","global_subthreshold_dose_ratio_0.10_canonical_identity","synthetic_threshold_boundary_off_L_0.10_R_0.15","synthetic_just_above_threshold_right_turn_L_0.10_R_0.16","synthetic_above_threshold_equal_signal_zero_L_0.40_R_0.40","synthetic_above_threshold_left_right_sign_pair","conditional_above_threshold_positive_scale_invariance","scale_crossing_detection_boundary","endpoint_reversal_translation_rotation_covariance","centered_parallel_trail_zero_steering","nominal_reference_free_open_arena_reachability"],
+      "numeric_tolerance": 1e-10
+    },
+    "retuning_from_reachability_forbidden": true
+  },
+  "invariances_and_forbidden_inputs": [
+    "No signal-independent p_lapse or P2 transient-engagement state.",
+    "No stochastic detection or response RNG in P4-v1.",
+    "No sigmoid slope, Hill exponent, epsilon, denominator regularizer, or soft-gate parameter.",
+    "No treatment-specific response parameter.",
+    "No short-vs-long path-specific response parameter.",
+    "No colony-specific response parameter.",
+    "No inward-vs-outward travel-direction response parameter.",
+    "No recent-food-experience response parameter.",
+    "No persistent specialist/ignorer ant identity.",
+    "No repulsive or sign-reversing pheromone state beyond the instantaneous left-right sign of the local field difference.",
+    "No trail bearing, target direction, arena goal, or future path knowledge.",
+    "No painted-trail-driven speed modulation.",
+    "No change to canonical pause, speed noise, angular noise, contacts, boundary logic, locomotion state, or biology RNG stream.",
+    "No H2, H3, H4, or H5 mechanism combination in P4-v1.",
+    "No P1, P2, or P3 official result semantics may be used for P4 implementation tuning.",
+    "No reserved Y-maze geometry, outcomes, or treatment labels."
+  ],
+  "implementation_gate": {"src_p4_exists_at_this_freeze":false,"p4_model_exists_at_this_freeze":false,"new_P4_simulation_executed_at_this_freeze":false,"implementation_authorized_by_this_record":false,"next_step":"A separate P4 implementation plus reference-free reachability execution gate may implement exactly this frozen mechanism after this record is audited and merged. It may not access response-target semantics, P1/P2/P3 official result semantics, or reserved Y-maze validation."},
+  "estimation_firewall": {"p4_response_estimation_policy_exists":false,"p4_parameter_search_authorized":false,"response_target_semantic_access_authorized":false,"candidate_ranking_against_response_target_authorized":false,"P1_result_semantic_access_authorized":false,"P2_result_semantic_access_authorized":false,"P3_result_semantic_access_authorized":false,"adaptive_tuning_authorized":false,"rule":"No P4 estimation bounds, candidate panel, objective, folds, seeds, trial budget, comparator, identifiability rule, nuisance policy, or promotion threshold is selected by this mechanism freeze."},
+  "global_firewall": {"canonical_locomotion_change":false,"H2_H3_H4_H5_refit":false,"P1_rerun_or_rescue":false,"P2_rerun_or_rescue":false,"P3_rerun_or_rescue":false,"response_target_access":false,"reserved_Y_maze_access":false,"reserved_Y_maze_fitting_or_ranking":false}
+}

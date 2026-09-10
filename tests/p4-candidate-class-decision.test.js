@@ -44,24 +44,10 @@ assert.match(decision.selected_next_candidate_class.description, /absolute local
 assert.match(decision.selected_next_candidate_class.description, /bilateral directional information/i);
 
 for (const [key, value] of Object.entries(decision.explicit_nonselections)) {
-  assert.strictEqual(value, false, `explicit non-selection ${key} must remain false`);
+  assert.strictEqual(value, false, `explicit non-selection ${key} must remain false at the historical decision freeze`);
 }
 for (const [key, value] of Object.entries(decision.selection_firewall)) {
-  assert.strictEqual(value, false, `selection firewall ${key} must remain false`);
-}
-
-const forbiddenFiles = [
-  'src/p4.js',
-  'models/lasius_niger_painted_trail_p4_v1.json',
-  'hypotheses/p4_painted_trail_mechanism_v1.json',
-  'hypotheses/p4_response_estimation_v1.json',
-  'hypotheses/p4_implementation_authorization_v1.json',
-  'hypotheses/p4_reachability_execution_v1.json',
-  'tools/run-p4-estimation.js',
-  'tools/run-p4-reachability.js'
-];
-for (const rel of forbiddenFiles) {
-  assert.strictEqual(fs.existsSync(path.join(root, rel)), false, `${rel} must not exist at decision gate`);
+  assert.strictEqual(value, false, `selection firewall ${key} must remain false at the historical decision freeze`);
 }
 
 const requiredUnsetConcepts = [
@@ -78,7 +64,45 @@ for (const item of requiredUnsetConcepts) {
   assert.ok(decision.mechanism_details_deliberately_not_frozen_here.includes(item), `missing deliberately-unset item: ${item}`);
 }
 
+// The decision gate itself remains immutable, while the later prospective mechanism freeze may now exist.
+const mechanismRel = 'hypotheses/p4_painted_trail_mechanism_v1.json';
+const mechanismPresent = fs.existsSync(path.join(root, mechanismRel));
+if (mechanismPresent) {
+  assert.strictEqual(hash(mechanismRel), '609551836e540c341365db9cc987d2ca340cc053');
+  const mechanism = readJson(mechanismRel);
+  assert.strictEqual(mechanism.candidate_class_input.decision_git_blob_sha, 'ad7295ba6d466549c60c8ecac37e39d30006ec1c');
+  assert.strictEqual(mechanism.candidate_class_input.evidence_git_blob_sha, '262f332062f271bbf111d0572f83b2faaf2cfd74');
+  assert.strictEqual(mechanism.candidate_class_input.selected_class_id, selectedId);
+  assert.strictEqual(mechanism.implementation_gate.src_p4_exists_at_this_freeze, false);
+  assert.strictEqual(mechanism.implementation_gate.p4_model_exists_at_this_freeze, false);
+  assert.strictEqual(mechanism.implementation_gate.new_P4_simulation_executed_at_this_freeze, false);
+  assert.strictEqual(mechanism.implementation_gate.implementation_authorized_by_this_record, false);
+  assert.strictEqual(mechanism.estimation_firewall.response_target_semantic_access_authorized, false);
+  assert.strictEqual(mechanism.global_firewall.reserved_Y_maze_access, false);
+}
+
+const stillForbiddenFiles = [
+  'src/p4.js',
+  'models/lasius_niger_painted_trail_p4_v1.json',
+  'hypotheses/p4_response_estimation_v1.json',
+  'hypotheses/p4_implementation_authorization_v1.json',
+  'hypotheses/p4_reachability_execution_v1.json',
+  'tools/run-p4-estimation.js',
+  'tools/run-p4-reachability.js'
+];
+for (const rel of stillForbiddenFiles) {
+  assert.strictEqual(fs.existsSync(path.join(root, rel)), false, `${rel} must not exist before a later implementation/estimation gate`);
+}
+
 assert.match(decision.next_gate, /separate P4 mechanism-selection\/freeze record/i);
 assert.match(decision.next_gate, /before any P4 implementation or simulation/i);
 
-console.log('P4 candidate-class decision freeze PASS');
+console.log('P4 candidate-class decision freeze PASS '+JSON.stringify({
+  decision_blob:hash(decisionPath),
+  selected_class:selectedId,
+  historical_exact_mechanism_selected:false,
+  later_mechanism_present:mechanismPresent,
+  p4_runtime_present:false,
+  response_target_access:false,
+  reserved_ymaze_access:false
+}));
