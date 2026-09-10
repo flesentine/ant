@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "P4_implementation_authorization_v1",
+  "status": "P4_v1_implementation_and_reference_free_reachability_authorized_against_exact_frozen_mechanism_and_execution_policy",
+  "freeze_date_local": "2026-09-10",
+  "mechanism_freeze": {
+    "file": "hypotheses/p4_painted_trail_mechanism_v1.json",
+    "git_blob_sha": "609551836e540c341365db9cc987d2ca340cc053"
+  },
+  "reachability_execution_policy": {
+    "file": "hypotheses/p4_reachability_execution_v1.json",
+    "git_blob_sha": "0d452f9c0d548ec962e0a6d9826648bf5e14a4ef"
+  },
+  "candidate_class_decision_git_blob_sha": "ad7295ba6d466549c60c8ecac37e39d30006ec1c",
+  "independent_evidence_git_blob_sha": "262f332062f271bbf111d0572f83b2faaf2cfd74",
+  "selection_checkpoint": {
+    "main_commit": "b73c97b4c3fd70e67cf22c050cf695a5f07771c8",
+    "permanent_main_workflow_run_id": 34452510140,
+    "permanent_main_test_job_id": 102791233581,
+    "permanent_main_deploy_job_id": 102791465602,
+    "conclusion": "success"
+  },
+  "authorization": {
+    "create_src_p4_js": true,
+    "create_p4_engineering_model": true,
+    "create_p4_reference_free_experiments": true,
+    "create_reference_free_reachability_runner": true,
+    "run_exact_identity_panel": true,
+    "run_pure_invariance_panel": true,
+    "run_frozen_400_trial_nominal_panel": true,
+    "run_node_chromium_parity_and_firewall": true,
+    "read_P1_helpers_for_field_apparatus_and_moving_step_preview": true
+  },
+  "still_forbidden": {
+    "response_target_access": true,
+    "reference_outcome_access": true,
+    "P1_official_result_semantic_access": true,
+    "P2_official_result_semantic_access": true,
+    "P3_official_result_semantic_access": true,
+    "P1_rerun_or_rescue": true,
+    "P2_rerun_or_rescue": true,
+    "P3_rerun_or_rescue": true,
+    "parameter_search_or_ranking": true,
+    "adaptive_retuning": true,
+    "P4_response_estimation_policy": true,
+    "canonical_locomotion_update": true,
+    "H2_H3_H4_H5_refit_or_combination": true,
+    "reserved_Y_maze_access": true,
+    "reserved_Y_maze_fitting_or_ranking": true
+  },
+  "preimplementation_state": {
+    "src_p4_exists": false,
+    "P4_model_exists": false,
+    "P4_experiment_files_exist": false,
+    "P4_reachability_runner_exists": false,
+    "P4_simulation_has_been_executed": false
+  },
+  "implementation_rule": "Implement exactly mechanism blob 609551836e540c341365db9cc987d2ca340cc053 and execution-policy blob 0d452f9c0d548ec962e0a6d9826648bf5e14a4ef. If qualification fails, correct code defects only; do not alter the frozen equation, threshold boundary, sector geometry, sigma/kappa/theta engineering values, seeds, dt, trial count, identities, invariances, or firewalls.",
+  "promotion_rule": {
+    "successful_reference_free_reachability_means": "implementation/reachability qualified only",
+    "biological_fit_claim_authorized": false,
+    "fixed_parameter_triplet_promoted": false,
+    "response_estimation_policy_authorized": false,
+    "canonical_locomotion_update_authorized": false,
+    "reserved_Y_maze_unlock_authorized": false
+  }
+}
