@@ -1,5 +1,5 @@
 name: P4 v0.3.4d response-estimation policy audit
-# retrigger after workflow registration
+# final retrigger after historical-gate regression updates
 
 on:
   push:
