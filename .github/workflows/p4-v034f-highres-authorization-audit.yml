@@ -1,5 +1,5 @@
 name: P4 v0.3.4f high-resolution authorization audit
-# rerun after all historical later-state regressions were updated
+# final rerun after historical-test helper correction
 
 on:
   push:
