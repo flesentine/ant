@@ -1,4 +1,5 @@
 name: P4 v0.3.4f remaining history updater
+# retrigger after workflow registration
 
 on:
   push:
