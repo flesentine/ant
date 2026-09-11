@@ -48,8 +48,12 @@ jobs:
           for(const bad of ['p1_response_estimation_','p2_response_estimation_','p3_response_estimation_','neutral-y-maze']){
             if(runner.includes(bad))throw new Error('Forbidden prior-result/Y-maze reference in runner: '+bad);
           }
-          const pre=runner.indexOf('const preflight = highResolutionPreflight({ root, policy, options });');
-          const read=runner.indexOf("validateReferenceTarget(readJson(path.resolve(root, RESPONSE_TARGET_FILE)), policy)");
+          const loadStart=runner.indexOf('function loadReferenceTarget');
+          const loadEnd=runner.indexOf('function comparatorMathQualification',loadStart);
+          if(loadStart<0||loadEnd<=loadStart)throw new Error('Could not isolate loadReferenceTarget implementation');
+          const loadBody=runner.slice(loadStart,loadEnd);
+          const pre=loadBody.indexOf('highResolutionPreflight');
+          const read=loadBody.indexOf('readJson(path.resolve(root, RESPONSE_TARGET_FILE))');
           if(!(pre>=0&&read>pre))throw new Error('Target semantic read is not after high-resolution preflight');
           console.log(JSON.stringify({syntax:true,no_response_rng:true,prior_result_paths:false,ymaze_path:false,target_read_after_preflight:true}));
           NODE
