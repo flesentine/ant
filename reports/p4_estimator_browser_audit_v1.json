@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "audit_id": "P4_estimator_browser_firewall_audit_v1",
+  "status": "passed",
+  "scientific_evidence": false,
+  "tested_git_head": "a692c8febb456447d7828478be4fa6f9c2158e93",
+  "browser": "Google Chrome 152.0.7977.82",
+  "qualified_blobs": {
+    "policy": "2d0bdfaba74ad08f8424870f37a48399428ae8b7",
+    "implementation_authorization": "e8f26731412d8693a5596da4374de932745b9392",
+    "estimator_core": "4d985cd7258fc26eb06be75f09bdac4b92325ff0",
+    "estimator_runner": "e57b554c0ad56a0034f4f79ec8090d3e863e3d11",
+    "qualification_report": "33cf1216ade03b0f25ddf643cdc28fd5c3df0010",
+    "p4_runtime": "bf7d5781bd69ec4568450ebbd3bdc284897b6f61",
+    "canonical_index": "75698249c34de27b0fd370daa8f1f488796add05"
+  },
+  "canonical_app": {
+    "error": null,
+    "title": "ANTLAB H5",
+    "initial": {
+      "status": "PAUSED",
+      "model": "lasius_niger_locomotion_v1",
+      "simTime": "0.0 s",
+      "experiment": "open_arena_short_control.json",
+      "note": "Open arena \u2014 20 cm approach, DCM control. Approach: 200 mm. Treatment: solvent_control. Observation: 25 fps. Scoring: apparatus_boundary.",
+      "playText": "Run"
+    },
+    "afterStep": {
+      "status": "PAUSED",
+      "model": "lasius_niger_locomotion_v1",
+      "simTime": "1.0 s",
+      "experiment": "open_arena_short_control.json",
+      "note": "Open arena \u2014 20 cm approach, DCM control. Approach: 200 mm. Treatment: solvent_control. Observation: 25 fps. Scoring: apparatus_boundary.",
+      "playText": "Run"
+    },
+    "duringRun": {
+      "status": "RUNNING",
+      "model": "lasius_niger_locomotion_v1",
+      "simTime": "1.0 s",
+      "experiment": "open_arena_short_control.json",
+      "note": "Open arena \u2014 20 cm approach, DCM control. Approach: 200 mm. Treatment: solvent_control. Observation: 25 fps. Scoring: apparatus_boundary.",
+      "playText": "Pause"
+    },
+    "afterLongSwitch": {
+      "status": "PAUSED",
+      "model": "lasius_niger_locomotion_v1",
+      "simTime": "0.0 s",
+      "experiment": "open_arena_long_control.json",
+      "note": "Open arena \u2014 100 cm approach, DCM control. Approach: 1000 mm. Treatment: solvent_control. Observation: 25 fps. Scoring: apparatus_boundary.",
+      "playText": "Run"
+    }
+  },
+  "canonical_requests": [
+    "/p4-canonical-audit.tmp.html",
+    "/src/style.css",
+    "/src/integrity.js",
+    "/src/h3.js",
+    "/src/sim-core.js",
+    "/src/h5.js",
+    "/src/app.js",
+    "/src/measurement.js",
+    "/experiments/open_arena_short_control.json",
+    "/observations/poissonnier2026_tracking_25fps.json",
+    "/models/lasius_niger_locomotion_v1.json",
+    "/apparatus/poissonnier2026_open_arena.json",
+    "/states/naive_outbound_v1.json",
+    "/scoring/open_arena_first_border_v1.json",
+    "/favicon.ico",
+    "/experiments/open_arena_long_control.json"
+  ],
+  "canonical_forbidden_request_counts": {
+    "response_target": 0,
+    "p4_runtime": 0,
+    "p4_estimator_core": 0,
+    "p4_estimator_runner": 0,
+    "p1_result": 0,
+    "p2_result": 0,
+    "p3_result": 0,
+    "p4_highres_authorization": 0
+  },
+  "P4_browser_parity": {
+    "cases": 10,
+    "passed": true,
+    "results": [
+      {
+        "name": "threshold_boundary_off",
+        "pass": true,
+        "detail": {
+          "signal": 0,
+          "detected": false,
+          "sum": 0.25
+        }
+      },
+      {
+        "name": "just_above_detects_right",
+        "pass": true,
+        "detail": {
+          "signal": 0.23076923076923075,
+          "detected": true,
+          "sum": 0.26
+        }
+      },
+      {
+        "name": "equal_above_threshold_zero_turn",
+        "pass": true,
+        "detail": {
+          "signal": 0,
+          "detected": true,
+          "sum": 0.8
+        }
+      },
+      {
+        "name": "left_right_antisymmetry",
+        "pass": true,
+        "detail": {
+          "a": 0.6000000000000001,
+          "b": -0.6000000000000001
+        }
+      },
+      {
+        "name": "above_threshold_scale_invariance",
+        "pass": true,
+        "detail": {
+          "s1": 0.49999999999999994,
+          "s2": 0.49999999999999994
+        }
+      },
+      {
+        "name": "scale_crossing_detection_boundary",
+        "pass": true,
+        "detail": {
+          "low": {
+            "signal": 0,
+            "detected": false,
+            "sum": 0.1
+          },
+          "high": {
+            "signal": 0.6,
+            "detected": true,
+            "sum": 0.4
+          }
+        }
+      },
+      {
+        "name": "theta_zero_matches_ungated_weber",
+        "pass": true,
+        "detail": {
+          "signal": 0.6000000000000001,
+          "detected": true,
+          "sum": 0.5
+        }
+      },
+      {
+        "name": "frozen_config_values",
+        "pass": true,
+        "detail": {
+          "sigma": 8,
+          "kappa": 4,
+          "theta": 0.25,
+          "radius": 10
+        }
+      },
+      {
+        "name": "frozen_quadrature",
+        "pass": true,
+        "detail": {
+          "radialBins": 4,
+          "angularBins": 8,
+          "samplesPerSector": 32
+        }
+      },
+      {
+        "name": "sector_sample_cardinality",
+        "pass": true,
+        "detail": {
+          "left": 32,
+          "right": 32
+        }
+      }
+    ]
+  },
+  "response_target_semantics_loaded": false,
+  "P1_official_result_semantics_loaded": false,
+  "P2_official_result_semantics_loaded": false,
+  "P3_official_result_semantics_loaded": false,
+  "high_resolution_search_executed": false,
+  "ymaze_accessed_by_P4_estimator": false
+}
