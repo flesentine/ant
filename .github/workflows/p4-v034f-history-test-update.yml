@@ -1,4 +1,5 @@
 name: P4 v0.3.4f history-test updater
+# second pass for remaining earlier P4 gates
 
 on:
   push:
@@ -15,50 +16,44 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Update later-authorization state in historical P4 tests
+      - name: Update remaining earlier P4 gates for later authorization state
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-
-          def replace(path, old, new):
-              p=Path(path); s=p.read_text()
-              if old not in s: raise SystemExit(f'missing expected block in {path}')
-              p.write_text(s.replace(old,new,1))
-
-          replace('tests/p4-estimation.test.js',
-          """assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false);\nassert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);\nassert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);\n""",
-          """const highresAuthPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));\nif(highresAuthPresent){\n  assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');\n  const a=readJson(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));\n  assert.strictEqual(a.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');\n  assert.strictEqual(a.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');\n  assert.strictEqual(a.estimator_core_git_blob_sha,'4d985cd7258fc26eb06be75f09bdac4b92325ff0');\n  assert.strictEqual(a.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');\n  assert.strictEqual(a.P1_official_result_semantic_access_authorized,false);\n  assert.strictEqual(a.P2_official_result_semantic_access_authorized,false);\n  assert.strictEqual(a.P3_official_result_semantic_access_authorized,false);\n  assert.strictEqual(a.ymaze_access_authorized,false);\n  assert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);\n  assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);\n}else{\n  assert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);\n  assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);\n}\n""")
-          p=Path('tests/p4-estimation.test.js'); s=p.read_text();
-          s=s.replace("highres_authorized:false,ymaze:false", "highres_authorization_present:highresAuthPresent,highres_effective_on_review_branch:false,ymaze:false")
-          p.write_text(s)
-
-          replace('tests/p4-estimator-qualification-result.test.js',
-          """assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false,'P4 high-resolution authorization must remain absent at estimator qualification freeze');\n""",
-          """const laterHighresAuthPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));\nif(laterHighresAuthPresent){\n  assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');\n  const a=read('hypotheses/p4_highres_authorization_v1.json');\n  assert.strictEqual(a.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');\n  assert.strictEqual(a.response_target_semantic_access_authorized,true);\n  assert.strictEqual(a.P1_official_result_semantic_access_authorized,false);\n  assert.strictEqual(a.P2_official_result_semantic_access_authorized,false);\n  assert.strictEqual(a.P3_official_result_semantic_access_authorized,false);\n  assert.strictEqual(a.canonical_promotion_authorized,false);\n  assert.strictEqual(a.ymaze_access_authorized,false);\n}\n""")
-          p=Path('tests/p4-estimator-qualification-result.test.js'); s=p.read_text();
-          s=s.replace("highres_authorized:false,target_semantics:false,ymaze:false", "historical_highres_authorized:false,later_highres_authorization_present:laterHighresAuthPresent,historical_target_semantics:false,ymaze:false")
-          p.write_text(s)
-
-          replace('tests/p4-response-estimation-policy.test.js',
-          """assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false);\n""",
-          """const laterHighresAuthPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));\nif(laterHighresAuthPresent){\n  assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');\n  const highres=read('hypotheses/p4_highres_authorization_v1.json');\n  assert.strictEqual(highres.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');\n  assert.strictEqual(highres.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');\n  assert.strictEqual(highres.P1_official_result_semantic_access_authorized,false);\n  assert.strictEqual(highres.P2_official_result_semantic_access_authorized,false);\n  assert.strictEqual(highres.P3_official_result_semantic_access_authorized,false);\n  assert.strictEqual(highres.ymaze_access_authorized,false);\n}\n""")
-          p=Path('tests/p4-response-estimation-policy.test.js'); s=p.read_text();
-          s=s.replace("estimator_exists:false,ymaze:false", "historical_estimator_exists:false,later_highres_authorization_present:laterHighresAuthPresent,ymaze:false")
-          p.write_text(s)
-
-          p=Path('tests/run-tests.sh'); s=p.read_text()
-          needle='node tests/p4-estimator-qualification-result.test.js\n'
-          if needle not in s: raise SystemExit('missing P4 qualification test insertion point')
-          s=s.replace(needle,needle+'node tests/p4-highres-authorization.test.js\n',1)
-          s=s.replace('P4 evidence/decision/mechanism/implementation/reachability/estimation-policy/estimator/qualification-freeze tests PASS','P4 evidence/decision/mechanism/implementation/reachability/estimation-policy/estimator/qualification-freeze/highres-authorization tests PASS')
-          p.write_text(s)
+          files=[
+            ('tests/p4-candidate-class-evidence.test.js','blob','read'),
+            ('tests/p4-candidate-class-decision.test.js','hash','readJson'),
+            ('tests/p4-mechanism-selection.test.js','blob','read'),
+            ('tests/p4-implementation.test.js','blob','read'),
+            ('tests/p4-reachability-result.test.js','blob','read'),
+          ]
+          old="assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false,'P4 high-resolution authorization must remain absent during estimator qualification');"
+          for fn,hasher,reader in files:
+              p=Path(fn); s=p.read_text()
+              if old not in s: raise SystemExit('missing expected assertion in '+fn)
+              block=(
+                "const laterHighresAuthorizationPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));\n"
+                "if(laterHighresAuthorizationPresent){\n"
+                f"  assert.strictEqual({hasher}('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');\n"
+                f"  const highres={reader}('hypotheses/p4_highres_authorization_v1.json');\n"
+                "  assert.strictEqual(highres.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');\n"
+                "  assert.strictEqual(highres.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');\n"
+                "  assert.strictEqual(highres.estimator_core_git_blob_sha,'4d985cd7258fc26eb06be75f09bdac4b92325ff0');\n"
+                "  assert.strictEqual(highres.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');\n"
+                "  assert.strictEqual(highres.P1_official_result_semantic_access_authorized,false);\n"
+                "  assert.strictEqual(highres.P2_official_result_semantic_access_authorized,false);\n"
+                "  assert.strictEqual(highres.P3_official_result_semantic_access_authorized,false);\n"
+                "  assert.strictEqual(highres.canonical_promotion_authorized,false);\n"
+                "  assert.strictEqual(highres.ymaze_access_authorized,false);\n"
+                "}\n"
+              )
+              p.write_text(s.replace(old,block,1))
           PY
           git diff --check
-          git diff -- tests/p4-estimation.test.js tests/p4-estimator-qualification-result.test.js tests/p4-response-estimation-policy.test.js tests/run-tests.sh
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tests/p4-estimation.test.js tests/p4-estimator-qualification-result.test.js tests/p4-response-estimation-policy.test.js tests/run-tests.sh
-          git commit -m "Accept later P4 high-resolution authorization through exact lineage"
+          git add tests/p4-candidate-class-evidence.test.js tests/p4-candidate-class-decision.test.js tests/p4-mechanism-selection.test.js tests/p4-implementation.test.js tests/p4-reachability-result.test.js
+          git commit -m "Accept later P4 authorization in earlier gate regressions"
           git push origin HEAD:v0.3.4f-p4-highres-authorization
