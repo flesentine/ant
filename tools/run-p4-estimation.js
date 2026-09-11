@@ -10,7 +10,7 @@ const { readJson } = require('./load-bundle.js');
 
 const POLICY_FILE = 'hypotheses/p4_response_estimation_v1.json';
 const POLICY_GIT_BLOB_SHA = '2d0bdfaba74ad08f8424870f37a48399428ae8b7';
-const CORE_GIT_BLOB_SHA = 'db5c0325423234b52a3a791a9c0e6edef9398f4a';
+const CORE_GIT_BLOB_SHA = '4d985cd7258fc26eb06be75f09bdac4b92325ff0';
 const IMPLEMENTATION_AUTH_FILE = 'hypotheses/p4_estimator_implementation_authorization_v1.json';
 const IMPLEMENTATION_AUTH_GIT_BLOB_SHA = 'e8f26731412d8693a5596da4374de932745b9392';
 const HIGHRES_AUTHORIZATION_FILE = 'hypotheses/p4_highres_authorization_v1.json';
