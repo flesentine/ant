@@ -1,5 +1,5 @@
 name: P4 v0.3.4f history-test updater
-# second pass for remaining earlier P4 gates
+# final helper-name correction
 
 on:
   push:
@@ -16,44 +16,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Update remaining earlier P4 gates for later authorization state
+      - name: Correct P4 estimator test helper name
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          files=[
-            ('tests/p4-candidate-class-evidence.test.js','blob','read'),
-            ('tests/p4-candidate-class-decision.test.js','hash','readJson'),
-            ('tests/p4-mechanism-selection.test.js','blob','read'),
-            ('tests/p4-implementation.test.js','blob','read'),
-            ('tests/p4-reachability-result.test.js','blob','read'),
-          ]
-          old="assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false,'P4 high-resolution authorization must remain absent during estimator qualification');"
-          for fn,hasher,reader in files:
-              p=Path(fn); s=p.read_text()
-              if old not in s: raise SystemExit('missing expected assertion in '+fn)
-              block=(
-                "const laterHighresAuthorizationPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));\n"
-                "if(laterHighresAuthorizationPresent){\n"
-                f"  assert.strictEqual({hasher}('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');\n"
-                f"  const highres={reader}('hypotheses/p4_highres_authorization_v1.json');\n"
-                "  assert.strictEqual(highres.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');\n"
-                "  assert.strictEqual(highres.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');\n"
-                "  assert.strictEqual(highres.estimator_core_git_blob_sha,'4d985cd7258fc26eb06be75f09bdac4b92325ff0');\n"
-                "  assert.strictEqual(highres.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');\n"
-                "  assert.strictEqual(highres.P1_official_result_semantic_access_authorized,false);\n"
-                "  assert.strictEqual(highres.P2_official_result_semantic_access_authorized,false);\n"
-                "  assert.strictEqual(highres.P3_official_result_semantic_access_authorized,false);\n"
-                "  assert.strictEqual(highres.canonical_promotion_authorized,false);\n"
-                "  assert.strictEqual(highres.ymaze_access_authorized,false);\n"
-                "}\n"
-              )
-              p.write_text(s.replace(old,block,1))
+          p=Path('tests/p4-estimation.test.js')
+          s=p.read_text()
+          old="const a=readJson(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));"
+          new="const a=read('hypotheses/p4_highres_authorization_v1.json');"
+          if old not in s: raise SystemExit('expected helper call not found')
+          p.write_text(s.replace(old,new,1))
           PY
           git diff --check
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tests/p4-candidate-class-evidence.test.js tests/p4-candidate-class-decision.test.js tests/p4-mechanism-selection.test.js tests/p4-implementation.test.js tests/p4-reachability-result.test.js
-          git commit -m "Accept later P4 authorization in earlier gate regressions"
+          git add tests/p4-estimation.test.js
+          git commit -m "Fix P4 authorization test helper call"
           git push origin HEAD:v0.3.4f-p4-highres-authorization
