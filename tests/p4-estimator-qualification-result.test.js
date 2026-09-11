@@ -122,8 +122,19 @@ assert.strictEqual(f.qualification_consequence.canonical_locomotion_update_autho
 assert.strictEqual(f.qualification_consequence.H2_H3_H4_H5_refit_or_combination_authorized,false);
 assert.strictEqual(f.qualification_consequence.cross_apparatus_validation_authorized,false);
 assert.strictEqual(f.qualification_consequence.Y_maze_access_authorized,false);
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false,'P4 high-resolution authorization must remain absent at estimator qualification freeze');
+const laterHighresAuthPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));
+if(laterHighresAuthPresent){
+  assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
+  const a=read('hypotheses/p4_highres_authorization_v1.json');
+  assert.strictEqual(a.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');
+  assert.strictEqual(a.response_target_semantic_access_authorized,true);
+  assert.strictEqual(a.P1_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.P2_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.P3_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.canonical_promotion_authorized,false);
+  assert.strictEqual(a.ymaze_access_authorized,false);
+}
 assert.match(f.next_gate,/separate post-qualification P4 high-resolution authorization/i);
 assert.match(f.next_gate,/one frozen P4 high-resolution response search/i);
 
-console.log('p4-estimator-qualification-result.test.js PASS '+JSON.stringify({freeze_blob:blob(freezePath),qualification_blob:blob(qualificationPath),qualification_sha256:sha256(qualificationPath),browser_blob:blob(browserPath),browser_sha256:sha256(browserPath),qualification_run:n.github_run_id,browser_run:c.github_run_id,checks:Object.keys(q.checks).length,chromium_cases:b.P4_browser_parity.cases,highres_authorized:false,target_semantics:false,ymaze:false}));
+console.log('p4-estimator-qualification-result.test.js PASS '+JSON.stringify({freeze_blob:blob(freezePath),qualification_blob:blob(qualificationPath),qualification_sha256:sha256(qualificationPath),browser_blob:blob(browserPath),browser_sha256:sha256(browserPath),qualification_run:n.github_run_id,browser_run:c.github_run_id,checks:Object.keys(q.checks).length,chromium_cases:b.P4_browser_parity.cases,historical_highres_authorized:false,later_highres_authorization_present:laterHighresAuthPresent,historical_target_semantics:false,ymaze:false}));
