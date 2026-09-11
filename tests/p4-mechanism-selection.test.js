@@ -141,6 +141,20 @@ if(estimatorPresent){
   assert.strictEqual(estimatorAuth.still_forbidden.official_high_resolution_search,true);
   assert.strictEqual(estimatorAuth.still_forbidden.reserved_Y_maze_access,true);
 }
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false,'P4 high-resolution authorization must remain absent during estimator qualification');
+const laterHighresAuthorizationPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));
+if(laterHighresAuthorizationPresent){
+  assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
+  const highres=read('hypotheses/p4_highres_authorization_v1.json');
+  assert.strictEqual(highres.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  assert.strictEqual(highres.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
+  assert.strictEqual(highres.estimator_core_git_blob_sha,'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
+  assert.strictEqual(highres.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');
+  assert.strictEqual(highres.P1_official_result_semantic_access_authorized,false);
+  assert.strictEqual(highres.P2_official_result_semantic_access_authorized,false);
+  assert.strictEqual(highres.P3_official_result_semantic_access_authorized,false);
+  assert.strictEqual(highres.canonical_promotion_authorized,false);
+  assert.strictEqual(highres.ymaze_access_authorized,false);
+}
+
 
 console.log('p4-mechanism-selection.test.js PASS '+JSON.stringify({mechanism_blob:blob(mechPath),subclass:m.selection_rule.selected_subclass,theta_engineering:eng.theta_detect,historical_implementation_authorized:false,later_implementation_present:implementationPresent,later_response_policy_present:responsePolicyPresent,response_target_access:false}));
