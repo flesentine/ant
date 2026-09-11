@@ -111,7 +111,7 @@ for(const [name,value] of Object.entries(qualification.checks)) assert.strictEqu
 const highresAuthPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));
 if(highresAuthPresent){
   assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
-  const a=readJson(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));
+  const a=read('hypotheses/p4_highres_authorization_v1.json');
   assert.strictEqual(a.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
   assert.strictEqual(a.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
   assert.strictEqual(a.estimator_core_git_blob_sha,'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
