@@ -79,7 +79,6 @@ assert.strictEqual(eng.planned_reference_free_panel.nominal_first_seed,841000);
 assert.strictEqual(eng.planned_reference_free_panel.nominal_last_seed,841399);
 assert.strictEqual(eng.retuning_from_reachability_forbidden,true);
 
-// Engineering proof: C(p)<=dose_ratio, so at dose_ratio=.10 each sector mean <=.10 and S<=.20<theta=.25 globally.
 assert(2*0.10<eng.theta_detect);
 assert.match(eng.value_rationale,/not a biological threshold estimate/i);
 assert.match(eng.value_rationale,/may not define a later estimation bound/i);
@@ -100,7 +99,6 @@ assert.match(forbiddenText,/No sigmoid slope, Hill exponent, epsilon/);
 assert.match(forbiddenText,/No painted-trail-driven speed modulation/);
 assert.match(forbiddenText,/No reserved Y-maze/);
 
-// Historical mechanism-freeze state is immutable; later implementation is accepted only through exact frozen lineage.
 const implementationPresent=fs.existsSync(path.join(root,'src/p4.js'));
 if(implementationPresent){
   assert.strictEqual(blob('hypotheses/p4_reachability_execution_v1.json'),'0d452f9c0d548ec962e0a6d9826648bf5e14a4ef');
@@ -121,14 +119,17 @@ if(implementationPresent){
   assert.strictEqual(auth.still_forbidden.P3_official_result_semantic_access,true);
   assert.strictEqual(auth.still_forbidden.reserved_Y_maze_access,true);
 }
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false,'P4 response-estimation policy must remain absent');
+
+const responsePolicyPresent=fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json'));
+if(responsePolicyPresent){
+  assert.strictEqual(blob('hypotheses/p4_response_estimation_v1.json'),'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  const p=read('hypotheses/p4_response_estimation_v1.json');
+  assert.strictEqual(p.frozen_inputs.mechanism_freeze.git_blob_sha,'609551836e540c341365db9cc987d2ca340cc053');
+  assert.strictEqual(p.estimator_implementation_gate.P4_estimator_exists_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantics_accessed_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.estimator_implementation_authorized_by_this_record,false);
+  assert.strictEqual(p.global_firewall.reserved_Y_maze_access,false);
+}
 assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');
 
-console.log('p4-mechanism-selection.test.js PASS '+JSON.stringify({
-  mechanism_blob:blob(mechPath),
-  subclass:m.selection_rule.selected_subclass,
-  theta_engineering:eng.theta_detect,
-  historical_implementation_authorized:false,
-  later_implementation_present:implementationPresent,
-  response_target_access:false
-}));
+console.log('p4-mechanism-selection.test.js PASS '+JSON.stringify({mechanism_blob:blob(mechPath),subclass:m.selection_rule.selected_subclass,theta_engineering:eng.theta_detect,historical_implementation_authorized:false,later_implementation_present:implementationPresent,later_response_policy_present:responsePolicyPresent,response_target_access:false}));
