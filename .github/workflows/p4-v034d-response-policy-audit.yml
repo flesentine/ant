@@ -1,0 +1,46 @@
+name: P4 v0.3.4d response-estimation policy audit
+
+on:
+  push:
+    branches:
+      - v0.3.4d-p4-response-estimation-policy
+    paths:
+      - .github/workflows/p4-v034d-response-policy-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify exact prospective policy scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p4_response_estimation_v1.json)" = "2d0bdfaba74ad08f8424870f37a48399428ae8b7"
+          test "$(git hash-object hypotheses/p4_painted_trail_mechanism_v1.json)" = "609551836e540c341365db9cc987d2ca340cc053"
+          test "$(git hash-object hypotheses/p4_reachability_result_freeze_v1.json)" = "f2074ae3157f22208ff98ebc620c00006549cab6"
+          test "$(git hash-object src/p4.js)" = "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"
+          test "$(git hash-object src/p3.js)" = "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test ! -e tools/run-p4-estimation.js
+          test ! -e tools/p4-estimation-core.js
+          test ! -e hypotheses/p4_highres_authorization_v1.json
+          git diff --name-only a2fbb130b37eac155f5753287cf402321c38ec3b...HEAD | tee /tmp/p4-v034d-changed.txt
+          test "$(grep -Ec '^(src/|models/|experiments/|reference/|apparatus/|reports/|tools/)' /tmp/p4-v034d-changed.txt || true)" = "0"
+          test "$(grep -Ec '^hypotheses/(p1_|p2_|p3_|p4_painted_trail|p4_reachability|p4_implementation)' /tmp/p4-v034d-changed.txt || true)" = "0"
+
+      - name: Run P4 response-estimation policy regression directly
+        run: node tests/p4-response-estimation-policy.test.js
+
+      - name: Run complete permanent regression suite
+        run: ./tests/run-tests.sh
