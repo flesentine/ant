@@ -1,0 +1,96 @@
+name: P4 v0.3.4e history-test updater
+
+on:
+  push:
+    branches:
+      - v0.3.4e-p4-estimator-qualification
+    paths:
+      - .github/workflows/p4-v034e-history-test-update.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Update historical P4 tests for later estimator state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          auth_blob='e8f26731412d8693a5596da4374de932745b9392'
+          core_blob='4d985cd7258fc26eb06be75f09bdac4b92325ff0'
+          runner_blob='e57b554c0ad56a0034f4f79ec8090d3e863e3d11'
+          policy_blob='2d0bdfaba74ad08f8424870f37a48399428ae8b7'
+
+          def replace_once(path, old, new):
+              p=Path(path); s=p.read_text()
+              if s.count(old)!=1:
+                  raise SystemExit(f'{path}: expected exactly one replacement target, got {s.count(old)}')
+              p.write_text(s.replace(old,new))
+
+          lineage = """const estimatorPresent=fs.existsSync(path.join(root,'tools/run-p4-estimation.js'));
+          if(estimatorPresent){
+            assert.strictEqual(blob('hypotheses/p4_estimator_implementation_authorization_v1.json'),'e8f26731412d8693a5596da4374de932745b9392');
+            assert.strictEqual(blob('tools/p4-estimation-core.js'),'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
+            assert.strictEqual(blob('tools/run-p4-estimation.js'),'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
+            const estimatorAuth=read('hypotheses/p4_estimator_implementation_authorization_v1.json');
+            assert.strictEqual(estimatorAuth.frozen_policy.git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+            assert.strictEqual(estimatorAuth.still_forbidden.response_target_semantic_access,true);
+            assert.strictEqual(estimatorAuth.still_forbidden.official_high_resolution_search,true);
+            assert.strictEqual(estimatorAuth.still_forbidden.reserved_Y_maze_access,true);
+          }
+          assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false,'P4 high-resolution authorization must remain absent during estimator qualification');"""
+
+          replace_once('tests/p4-candidate-class-evidence.test.js',
+              "assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');",
+              lineage)
+
+          decision_lineage = lineage.replace("const estimatorAuth=read(", "const estimatorAuth=readJson(").replace("blob('hypotheses", "hash('hypotheses").replace("blob('tools", "hash('tools")
+          replace_once('tests/p4-candidate-class-decision.test.js',
+              "assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator remains forbidden');",
+              decision_lineage)
+
+          replace_once('tests/p4-mechanism-selection.test.js',
+              "assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');",
+              lineage)
+
+          replace_once('tests/p4-implementation.test.js',
+              "assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');",
+              lineage)
+
+          replace_once('tests/p4-reachability-result.test.js',
+              "assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false);",
+              lineage)
+
+          policy_old = """assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false);
+          assert.strictEqual(fs.existsSync(path.join(root,'tools/p4-estimation-core.js')),false);
+          assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false);"""
+          policy_new = """const estimatorPresent=fs.existsSync(path.join(root,'tools/run-p4-estimation.js'));
+          if(estimatorPresent){
+            assert.strictEqual(blob('hypotheses/p4_estimator_implementation_authorization_v1.json'),'e8f26731412d8693a5596da4374de932745b9392');
+            assert.strictEqual(blob('tools/p4-estimation-core.js'),'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
+            assert.strictEqual(blob('tools/run-p4-estimation.js'),'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
+            const estimatorAuth=read('hypotheses/p4_estimator_implementation_authorization_v1.json');
+            assert.strictEqual(estimatorAuth.frozen_policy.git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+            assert.strictEqual(estimatorAuth.still_forbidden.response_target_semantic_access,true);
+            assert.strictEqual(estimatorAuth.still_forbidden.official_high_resolution_search,true);
+            assert.strictEqual(estimatorAuth.still_forbidden.reserved_Y_maze_access,true);
+          }
+          assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false);"""
+          replace_once('tests/p4-response-estimation-policy.test.js', policy_old, policy_new)
+          PY
+
+          git diff --check
+          git diff -- tests/p4-candidate-class-evidence.test.js tests/p4-candidate-class-decision.test.js tests/p4-mechanism-selection.test.js tests/p4-implementation.test.js tests/p4-reachability-result.test.js tests/p4-response-estimation-policy.test.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/p4-candidate-class-evidence.test.js tests/p4-candidate-class-decision.test.js tests/p4-mechanism-selection.test.js tests/p4-implementation.test.js tests/p4-reachability-result.test.js tests/p4-response-estimation-policy.test.js
+          git commit -m "Update historical P4 gates for estimator qualification state"
+          git push origin HEAD:v0.3.4e-p4-estimator-qualification
