@@ -130,6 +130,17 @@ if(responsePolicyPresent){
   assert.strictEqual(p.estimator_implementation_gate.estimator_implementation_authorized_by_this_record,false);
   assert.strictEqual(p.global_firewall.reserved_Y_maze_access,false);
 }
-assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');
+const estimatorPresent=fs.existsSync(path.join(root,'tools/run-p4-estimation.js'));
+if(estimatorPresent){
+  assert.strictEqual(blob('hypotheses/p4_estimator_implementation_authorization_v1.json'),'e8f26731412d8693a5596da4374de932745b9392');
+  assert.strictEqual(blob('tools/p4-estimation-core.js'),'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
+  assert.strictEqual(blob('tools/run-p4-estimation.js'),'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
+  const estimatorAuth=read('hypotheses/p4_estimator_implementation_authorization_v1.json');
+  assert.strictEqual(estimatorAuth.frozen_policy.git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  assert.strictEqual(estimatorAuth.still_forbidden.response_target_semantic_access,true);
+  assert.strictEqual(estimatorAuth.still_forbidden.official_high_resolution_search,true);
+  assert.strictEqual(estimatorAuth.still_forbidden.reserved_Y_maze_access,true);
+}
+assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false,'P4 high-resolution authorization must remain absent during estimator qualification');
 
 console.log('p4-mechanism-selection.test.js PASS '+JSON.stringify({mechanism_blob:blob(mechPath),subclass:m.selection_rule.selected_subclass,theta_engineering:eng.theta_detect,historical_implementation_authorized:false,later_implementation_present:implementationPresent,later_response_policy_present:responsePolicyPresent,response_target_access:false}));
