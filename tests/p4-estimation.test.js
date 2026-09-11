@@ -108,9 +108,24 @@ assert.strictEqual(qualification.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79
 assert.strictEqual(qualification.implementation_authorization_git_blob_sha,'e8f26731412d8693a5596da4374de932745b9392');
 for(const [name,value] of Object.entries(qualification.checks)) assert.strictEqual(value,true,'qualification check failed: '+name);
 
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false);
-assert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
-assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
+const highresAuthPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));
+if(highresAuthPresent){
+  assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
+  const a=readJson(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));
+  assert.strictEqual(a.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  assert.strictEqual(a.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
+  assert.strictEqual(a.estimator_core_git_blob_sha,'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
+  assert.strictEqual(a.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');
+  assert.strictEqual(a.P1_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.P2_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.P3_official_result_semantic_access_authorized,false);
+  assert.strictEqual(a.ymaze_access_authorized,false);
+  assert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
+  assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
+}else{
+  assert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
+  assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
+}
 
 const runnerSource=fs.readFileSync(path.join(root,'tools/run-p4-estimation.js'),'utf8');
 assert(runnerSource.indexOf('highResolutionPreflight({ root, policy, options })') < runnerSource.indexOf("validateReferenceTarget(readJson(path.resolve(root, RESPONSE_TARGET_FILE)), policy)"));
@@ -120,4 +135,4 @@ assert(!runnerSource.includes('p3_response_estimation_'));
 assert(!runnerSource.includes('neutral-y-maze'));
 assert(!fs.readFileSync(path.join(root,'tools/p4-estimation-core.js'),'utf8').includes('Math.random'));
 
-console.log('p4-estimation.test.js PASS '+JSON.stringify({policy_blob:blob('hypotheses/p4_response_estimation_v1.json'),authorization_blob:blob('hypotheses/p4_estimator_implementation_authorization_v1.json'),core_blob:blob('tools/p4-estimation-core.js'),runner_blob:blob('tools/run-p4-estimation.js'),parameters:policy.response_parameter_surface.estimated_parameter_names_exact,candidates:policy.search_protocol.candidate_budget_per_fold_total,qualification:'passed',scientific_evidence:false,target_semantics:false,highres_authorized:false,ymaze:false}));
+console.log('p4-estimation.test.js PASS '+JSON.stringify({policy_blob:blob('hypotheses/p4_response_estimation_v1.json'),authorization_blob:blob('hypotheses/p4_estimator_implementation_authorization_v1.json'),core_blob:blob('tools/p4-estimation-core.js'),runner_blob:blob('tools/run-p4-estimation.js'),parameters:policy.response_parameter_surface.estimated_parameter_names_exact,candidates:policy.search_protocol.candidate_budget_per_fold_total,qualification:'passed',scientific_evidence:false,target_semantics:false,highres_authorization_present:highresAuthPresent,highres_effective_on_review_branch:false,ymaze:false}));

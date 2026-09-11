@@ -116,6 +116,16 @@ if(estimatorPresent){
   assert.strictEqual(estimatorAuth.still_forbidden.official_high_resolution_search,true);
   assert.strictEqual(estimatorAuth.still_forbidden.reserved_Y_maze_access,true);
 }
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),false);
+const laterHighresAuthPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json'));
+if(laterHighresAuthPresent){
+  assert.strictEqual(blob('hypotheses/p4_highres_authorization_v1.json'),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
+  const highres=read('hypotheses/p4_highres_authorization_v1.json');
+  assert.strictEqual(highres.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  assert.strictEqual(highres.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');
+  assert.strictEqual(highres.P1_official_result_semantic_access_authorized,false);
+  assert.strictEqual(highres.P2_official_result_semantic_access_authorized,false);
+  assert.strictEqual(highres.P3_official_result_semantic_access_authorized,false);
+  assert.strictEqual(highres.ymaze_access_authorized,false);
+}
 
-console.log('p4-response-estimation-policy.test.js PASS '+JSON.stringify({policy_blob:blob(rel),parameters:p.response_parameter_surface.estimated_parameter_names_exact,candidates:p.search_protocol.candidate_budget_per_fold_total,comparator:'ungated_P3',response_target_semantics:false,estimator_exists:false,ymaze:false}));
+console.log('p4-response-estimation-policy.test.js PASS '+JSON.stringify({policy_blob:blob(rel),parameters:p.response_parameter_surface.estimated_parameter_names_exact,candidates:p.search_protocol.candidate_budget_per_fold_total,comparator:'ungated_P3',response_target_semantics:false,historical_estimator_exists:false,later_highres_authorization_present:laterHighresAuthPresent,ymaze:false}));
