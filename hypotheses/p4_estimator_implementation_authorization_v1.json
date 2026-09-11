@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "id": "P4_estimator_implementation_authorization_v1",
+  "status": "reference_free_estimator_implementation_and_synthetic_qualification_authorized_no_response_target_semantics_no_high_resolution_search",
+  "authorization_date_local": "2026-09-10",
+  "starting_checkpoint": {
+    "main_commit": "6b7ccc4f81d458faf67b68dd99b2297222b70838",
+    "permanent_main_workflow_run_id": 34566006281,
+    "permanent_main_workflow_run_number": 159,
+    "test_job_id": 103158153477,
+    "test_job_conclusion": "success",
+    "deploy_job_id": 103158359180,
+    "deploy_job_conclusion": "success"
+  },
+  "frozen_policy": {
+    "file": "hypotheses/p4_response_estimation_v1.json",
+    "git_blob_sha": "2d0bdfaba74ad08f8424870f37a48399428ae8b7"
+  },
+  "frozen_runtime": {
+    "file": "src/p4.js",
+    "git_blob_sha": "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"
+  },
+  "ungated_structural_benchmark_runtime": {
+    "file": "src/p3.js",
+    "git_blob_sha": "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8",
+    "use_rule": "Implementation may call the frozen ungated P3 runtime only as the structural comparator defined by P4_response_estimation_v1. P3 official target-ranked result semantics remain forbidden."
+  },
+  "response_target_metadata": {
+    "file": "reference/poissonnier2026_pheromone_response_targets.json",
+    "git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+    "rows": 102,
+    "allowed_now": "file existence, exact Git blob hash, and frozen row-count metadata only",
+    "semantic_loading_authorized": false
+  },
+  "authorization": {
+    "create_tools_p4_estimation_core_js": true,
+    "create_tools_run_p4_estimation_js": true,
+    "create_reference_free_estimator_tests": true,
+    "run_synthetic_and_reference_free_estimator_qualification": true,
+    "write_reference_free_estimator_qualification_report": true,
+    "freeze_estimator_qualification_result": true
+  },
+  "qualification_requirements": [
+    "Exact policy blob and all frozen P4/P3 structural runtime blobs must be verified before qualification.",
+    "3D Halton candidate generation must reproduce frozen candidate sanity values and exact 2000-slot null index.",
+    "Projected ungated benchmark coordinates must exactly match each P4 candidate sigma/kappa coordinate while removing only the P4 absolute-detection gate.",
+    "Canonical null and DCM/zero-gain identities must remain exact.",
+    "No response RNG may be introduced.",
+    "Equal-colony weighting, primary-only ranking, n-1 secondary scaling, dual 5-of-6 survival math, three-parameter identifiability, and independent final-increment math must be tested on synthetic data.",
+    "Qualification must verify the response-target Git blob without parsing target semantics.",
+    "Qualification must prove P1/P2/P3 official result semantics and reserved Y-maze data are not loaded."
+  ],
+  "still_forbidden": {
+    "response_target_semantic_access": true,
+    "official_high_resolution_search": true,
+    "high_resolution_authorization_creation_by_estimator": true,
+    "P1_official_result_semantic_access": true,
+    "P2_official_result_semantic_access": true,
+    "P3_official_result_semantic_access": true,
+    "P1_P2_P3_reopening_or_refit": true,
+    "parameter_bound_or_budget_change": true,
+    "policy_change_from_qualification_outcomes": true,
+    "canonical_locomotion_update": true,
+    "H2_H3_H4_H5_refit_or_combination": true,
+    "reserved_Y_maze_access": true,
+    "cross_apparatus_validation": true
+  },
+  "post_qualification_rule": "A successful reference-free estimator qualification may support a later, separate high-resolution authorization record. It does not itself authorize response-target semantic loading or an official scientific search."
+}
