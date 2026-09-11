@@ -117,7 +117,6 @@ assert.match(e.next_gate,/separate P4 candidate-class decision record/);
 assert.match(e.next_gate,/exact absolute-evidence statistic/);
 assert.match(e.next_gate,/unset until a later prospective mechanism freeze/);
 
-// Historical evidence-gate state is immutable, while later qualified gates may legitimately exist.
 const decisionRel='hypotheses/p4_painted_trail_candidate_class_decision_v1.json';
 const decisionPresent=fs.existsSync(path.join(root,decisionRel));
 if(decisionPresent){
@@ -158,7 +157,16 @@ if(implementationPresent){
   assert.strictEqual(a.still_forbidden.response_target_access,true);
   assert.strictEqual(a.still_forbidden.reserved_Y_maze_access,true);
 }
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false,'P4 response-estimation policy must remain absent');
+const responsePolicyPresent=fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json'));
+if(responsePolicyPresent){
+  assert.strictEqual(blob('hypotheses/p4_response_estimation_v1.json'),'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  const p=read('hypotheses/p4_response_estimation_v1.json');
+  assert.strictEqual(p.frozen_inputs.candidate_class_evidence.git_blob_sha,'262f332062f271bbf111d0572f83b2faaf2cfd74');
+  assert.strictEqual(p.estimator_implementation_gate.P4_estimator_exists_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantics_accessed_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.estimator_implementation_authorized_by_this_record,false);
+  assert.strictEqual(p.global_firewall.reserved_Y_maze_access,false);
+}
 assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');
 
 console.log('p4-candidate-class-evidence.test.js PASS '+JSON.stringify({
@@ -169,5 +177,6 @@ console.log('p4-candidate-class-evidence.test.js PASS '+JSON.stringify({
   later_decision_present:decisionPresent,
   later_mechanism_present:mechanismPresent,
   later_implementation_present:implementationPresent,
+  later_response_policy_present:responsePolicyPresent,
   reserved_ymaze_access:e.selection_firewall.reserved_project_Y_maze_validation_access_authorized
 }));

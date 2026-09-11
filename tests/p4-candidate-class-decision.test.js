@@ -64,7 +64,6 @@ for (const item of requiredUnsetConcepts) {
   assert.ok(decision.mechanism_details_deliberately_not_frozen_here.includes(item), `missing deliberately-unset item: ${item}`);
 }
 
-// The decision gate itself remains immutable, while later qualified gates may now exist.
 const mechanismRel = 'hypotheses/p4_painted_trail_mechanism_v1.json';
 const mechanismPresent = fs.existsSync(path.join(root, mechanismRel));
 if (mechanismPresent) {
@@ -99,18 +98,19 @@ if(implementationPresent){
   assert.strictEqual(auth.still_forbidden.reserved_Y_maze_access,true);
 }
 
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false,'P4 response-estimation policy remains forbidden');
+const responsePolicyPresent=fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json'));
+if(responsePolicyPresent){
+  assert.strictEqual(hash('hypotheses/p4_response_estimation_v1.json'),'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  const p=readJson('hypotheses/p4_response_estimation_v1.json');
+  assert.strictEqual(p.frozen_inputs.candidate_class_decision.git_blob_sha,'ad7295ba6d466549c60c8ecac37e39d30006ec1c');
+  assert.strictEqual(p.estimator_implementation_gate.P4_estimator_exists_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantics_accessed_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.estimator_implementation_authorized_by_this_record,false);
+  assert.strictEqual(p.global_firewall.reserved_Y_maze_access,false);
+}
 assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator remains forbidden');
 
 assert.match(decision.next_gate, /separate P4 mechanism-selection\/freeze record/i);
 assert.match(decision.next_gate, /before any P4 implementation or simulation/i);
 
-console.log('P4 candidate-class decision freeze PASS '+JSON.stringify({
-  decision_blob:hash(decisionPath),
-  selected_class:selectedId,
-  historical_exact_mechanism_selected:false,
-  later_mechanism_present:mechanismPresent,
-  later_implementation_present:implementationPresent,
-  response_target_access:false,
-  reserved_ymaze_access:false
-}));
+console.log('P4 candidate-class decision freeze PASS '+JSON.stringify({decision_blob:hash(decisionPath),selected_class:selectedId,historical_exact_mechanism_selected:false,later_mechanism_present:mechanismPresent,later_implementation_present:implementationPresent,later_response_policy_present:responsePolicyPresent,response_target_access:false,reserved_ymaze_access:false}));

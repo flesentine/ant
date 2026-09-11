@@ -79,7 +79,17 @@ assert.strictEqual(model.contacts.enabled,false);
 assert.strictEqual(model.provenance.parameter_status,'ASSUMED_ENGINEERING_REACHABILITY_NOT_FITTED');
 assert.strictEqual(model.provenance.runtime_git_blob_sha,'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
 
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false,'P4 response estimation policy must remain absent');
+const responsePolicyPresent=fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json'));
+if(responsePolicyPresent){
+  assert.strictEqual(blob('hypotheses/p4_response_estimation_v1.json'),'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  const p=read('hypotheses/p4_response_estimation_v1.json');
+  assert.strictEqual(p.frozen_inputs.implementation_authorization.git_blob_sha,'42f8d51b06a20c0c6001a42b6021a134f2694e0d');
+  assert.strictEqual(p.frozen_inputs.p4_runtime.git_blob_sha,'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
+  assert.strictEqual(p.estimator_implementation_gate.P4_estimator_exists_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantics_accessed_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.estimator_implementation_authorized_by_this_record,false);
+  assert.strictEqual(p.global_firewall.reserved_Y_maze_access,false);
+}
 assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false,'P4 estimator must remain absent');
 
-console.log('p4-implementation.test.js PASS '+JSON.stringify({policy_blob:blob('hypotheses/p4_reachability_execution_v1.json'),authorization_blob:blob('hypotheses/p4_implementation_authorization_v1.json'),runtime_blob:blob('src/p4.js'),model_blob:blob('models/lasius_niger_painted_trail_p4_v1.json'),runner_blob:blob('tools/run-p4-reachability.js'),trials:policy.frozen_execution.nominal_reachability_panel.trials,target_access:false,reserved_ymaze:false}));
+console.log('p4-implementation.test.js PASS '+JSON.stringify({policy_blob:blob('hypotheses/p4_reachability_execution_v1.json'),authorization_blob:blob('hypotheses/p4_implementation_authorization_v1.json'),runtime_blob:blob('src/p4.js'),model_blob:blob('models/lasius_niger_painted_trail_p4_v1.json'),runner_blob:blob('tools/run-p4-reachability.js'),trials:policy.frozen_execution.nominal_reachability_panel.trials,later_response_policy_present:responsePolicyPresent,target_access:false,reserved_ymaze:false}));

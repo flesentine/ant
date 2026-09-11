@@ -102,7 +102,18 @@ assert.strictEqual(f.rerun_and_retuning_rule.retune_mechanism_from_reachability,
 assert.strictEqual(f.rerun_and_retuning_rule.retune_engineering_values_from_reachability,false);
 assert.match(f.next_gate,/separate P4 response-estimation policy/);
 assert.match(f.next_gate,/Reserved Y-maze validation remains locked/);
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json')),false);
+
+const responsePolicyPresent=fs.existsSync(path.join(root,'hypotheses/p4_response_estimation_v1.json'));
+if(responsePolicyPresent){
+  assert.strictEqual(blob('hypotheses/p4_response_estimation_v1.json'),'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
+  const p=read('hypotheses/p4_response_estimation_v1.json');
+  assert.strictEqual(p.frozen_inputs.reachability_result_freeze.git_blob_sha,'f2074ae3157f22208ff98ebc620c00006549cab6');
+  assert.strictEqual(p.frozen_inputs.reachability_report.git_blob_sha,'f6e77596eb25cc7bca3bf0dde1da712511a1d0d0');
+  assert.strictEqual(p.estimator_implementation_gate.P4_estimator_exists_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.response_target_semantics_accessed_at_this_freeze,false);
+  assert.strictEqual(p.estimator_implementation_gate.estimator_implementation_authorized_by_this_record,false);
+  assert.strictEqual(p.global_firewall.reserved_Y_maze_access,false);
+}
 assert.strictEqual(fs.existsSync(path.join(root,'tools/run-p4-estimation.js')),false);
 
-console.log('p4-reachability-result.test.js PASS '+JSON.stringify({freeze_blob:blob(freezePath),report_blob:blob(reportPath),report_sha256:sha256(reportPath),report_bytes:fs.statSync(path.join(root,reportPath)).size,official_run:34517794416,artifact:10168383473,chromium:'152.0.7977.82',trials:r.nominal_panel.trials,central_zone:r.nominal_panel.mean_central_zone_fraction,trail_axis:r.nominal_panel.trail_axis_exit_rate,implementation_qualified:true,biological_fit:false,response_target:false,reserved_ymaze:false}));
+console.log('p4-reachability-result.test.js PASS '+JSON.stringify({freeze_blob:blob(freezePath),report_blob:blob(reportPath),report_sha256:sha256(reportPath),report_bytes:fs.statSync(path.join(root,reportPath)).size,official_run:34517794416,artifact:10168383473,chromium:'152.0.7977.82',trials:r.nominal_panel.trials,central_zone:r.nominal_panel.mean_central_zone_fraction,trail_axis:r.nominal_panel.trail_axis_exit_rate,implementation_qualified:true,biological_fit:false,later_response_policy_present:responsePolicyPresent,response_target:false,reserved_ymaze:false}));
