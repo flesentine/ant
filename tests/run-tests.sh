@@ -71,6 +71,7 @@ node tests/p4-response-estimation-policy.test.js
 node tests/p4-estimation.test.js
 node tests/p4-estimator-qualification-result.test.js
 node tests/p4-highres-authorization.test.js
+node tests/p4-highres-execution-precondition.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
@@ -102,4 +103,4 @@ node --check tools/p4-estimation-core.js
 node --check tools/run-p4-estimation.js
 node --check tools/load-bundle.js
 python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py tools/derive-poissonnier2026-control-effects.py tools/derive-h2-estimation-targets.py tools/derive-pheromone-response-targets.py
-echo "All ANTLAB H0-H5 + P1/P2/P3 implementation + P4 evidence/decision/mechanism/implementation/reachability/estimation-policy/estimator/qualification-freeze/highres-authorization tests PASS"
+echo "All ANTLAB H0-H5 + P1/P2/P3 implementation + P4 evidence/decision/mechanism/implementation/reachability/estimation-policy/estimator/qualification-freeze/highres-authorization/execution-precondition tests PASS"
