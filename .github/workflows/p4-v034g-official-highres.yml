@@ -1,0 +1,229 @@
+name: P4 v0.3.4g official high-resolution response execution
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/p4-v034g-official-highres.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p4-v034g-official-highres
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify one-shot main-only execution preconditions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test "${GITHUB_EVENT_NAME}" = "push"
+          git merge-base --is-ancestor c5f8f2c7e8e9efbbe5393777aeada695a712a05b HEAD
+
+          test "$(git hash-object hypotheses/p4_highres_authorization_v1.json)" = "d8088ab94480faf0f5db012ca538bdc4d5a42ccb"
+          test "$(git hash-object hypotheses/p4_response_estimation_v1.json)" = "2d0bdfaba74ad08f8424870f37a48399428ae8b7"
+          test "$(git hash-object hypotheses/p4_estimator_implementation_authorization_v1.json)" = "e8f26731412d8693a5596da4374de932745b9392"
+          test "$(git hash-object tools/p4-estimation-core.js)" = "4d985cd7258fc26eb06be75f09bdac4b92325ff0"
+          test "$(git hash-object tools/run-p4-estimation.js)" = "e57b554c0ad56a0034f4f79ec8090d3e863e3d11"
+          test "$(git hash-object reports/p4_estimator_qualification_v1.json)" = "33cf1216ade03b0f25ddf643cdc28fd5c3df0010"
+          test "$(git hash-object reports/p4_estimator_browser_audit_v1.json)" = "8ae7c0f8940502c64e720b5abafde4fc094a255c"
+          test "$(git hash-object hypotheses/p4_estimator_qualification_result_freeze_v1.json)" = "635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5"
+          test "$(git hash-object src/p4.js)" = "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"
+          test "$(git hash-object models/lasius_niger_painted_trail_p4_v1.json)" = "3d8460b6916a90d06e70768f696ee3f0d48fccf4"
+          test "$(git hash-object src/p3.js)" = "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8"
+          test "$(git hash-object models/lasius_niger_painted_trail_p3_v1.json)" = "9107de0c71641c4037bbedbb498b9fa868c1ef00"
+          test "$(git hash-object reference/poissonnier2026_pheromone_response_targets.json)" = "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed"
+          test "$(git hash-object apparatus/poissonnier2026_open_arena_p1_v1.json)" = "df589d6b39c1617a7dedc3bfa9d34a408c51b2f4"
+          test "$(git hash-object models/lasius_niger_locomotion_v1.json)" = "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d"
+          test "$(git hash-object src/sim-core.js)" = "24777aac3577d442893e4779d70aee4e27761fe8"
+          test "$(git hash-object src/integrity.js)" = "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+          test "$(git hash-object tools/load-bundle.js)" = "235067f10ed85eeeaebcfe6fef0963940d516b6b"
+
+          node - <<'NODE'
+          const fs=require('fs');
+          const cp=require('child_process');
+          const a=JSON.parse(fs.readFileSync('hypotheses/p4_highres_authorization_v1.json','utf8'));
+          const p=JSON.parse(fs.readFileSync('hypotheses/p4_highres_execution_precondition_v1.json','utf8'));
+
+          if(a.id!=='P4_high_resolution_authorization_v1')throw new Error('authorization id drift');
+          if(a.status!=='qualified_estimator_authorized_for_frozen_high_resolution_response_search')throw new Error('authorization status drift');
+          if(a.effective_when_merged_to_main!==true||a.high_resolution_response_search_authorized!==true)throw new Error('authorization effectiveness drift');
+          if(a.policy_git_blob_sha!=='2d0bdfaba74ad08f8424870f37a48399428ae8b7')throw new Error('authorization policy pin drift');
+          if(a.estimator_git_blob_sha!=='e57b554c0ad56a0034f4f79ec8090d3e863e3d11')throw new Error('authorization estimator pin drift');
+          if(a.estimator_core_git_blob_sha!=='4d985cd7258fc26eb06be75f09bdac4b92325ff0')throw new Error('authorization estimator-core pin drift');
+          if(a.estimator_implementation_authorization?.git_blob_sha!=='e8f26731412d8693a5596da4374de932745b9392')throw new Error('authorization estimator implementation pin drift');
+          if(a.qualification_report?.git_blob_sha!=='33cf1216ade03b0f25ddf643cdc28fd5c3df0010')throw new Error('authorization qualification-report pin drift');
+          if(a.browser_firewall_report?.git_blob_sha!=='8ae7c0f8940502c64e720b5abafde4fc094a255c')throw new Error('authorization browser-report pin drift');
+          if(a.qualification_result_freeze?.git_blob_sha!=='635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5')throw new Error('authorization qualification-freeze pin drift');
+          if(a.P1_official_result_semantic_access_authorized!==false||a.P2_official_result_semantic_access_authorized!==false||a.P3_official_result_semantic_access_authorized!==false||a.P1_P2_P3_rerun_or_refit_authorized!==false||a.canonical_promotion_authorized!==false||a.H2_H3_H4_H5_refit_or_combination_authorized!==false||a.cross_apparatus_validation_authorized!==false||a.ymaze_access_authorized!==false)throw new Error('authorization firewall drift');
+
+          if(p.id!=='P4_high_resolution_execution_precondition_v1')throw new Error('execution-precondition id drift');
+          if(p.status!=='authorization_merged_and_permanent_main_ci_green_before_official_execution')throw new Error('execution-precondition status drift');
+          if(p.authorization_pr_number!==41)throw new Error('authorization PR drift');
+          if(p.authorization_main_commit!=='c5f8f2c7e8e9efbbe5393777aeada695a712a05b')throw new Error('authorization main checkpoint drift');
+          if(p.authorization_git_blob_sha!=='d8088ab94480faf0f5db012ca538bdc4d5a42ccb')throw new Error('precondition authorization blob drift');
+          if(p.policy_git_blob_sha!=='2d0bdfaba74ad08f8424870f37a48399428ae8b7')throw new Error('precondition policy blob drift');
+          if(p.estimator_implementation_authorization_git_blob_sha!=='e8f26731412d8693a5596da4374de932745b9392')throw new Error('precondition estimator implementation auth drift');
+          if(p.estimator_git_blob_sha!=='e57b554c0ad56a0034f4f79ec8090d3e863e3d11')throw new Error('precondition estimator blob drift');
+          if(p.estimator_core_git_blob_sha!=='4d985cd7258fc26eb06be75f09bdac4b92325ff0')throw new Error('precondition estimator-core blob drift');
+          if(p.qualification_report_git_blob_sha!=='33cf1216ade03b0f25ddf643cdc28fd5c3df0010')throw new Error('precondition qualification-report drift');
+          if(p.browser_firewall_report_git_blob_sha!=='8ae7c0f8940502c64e720b5abafde4fc094a255c')throw new Error('precondition browser-report drift');
+          if(p.qualification_result_freeze_git_blob_sha!=='635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5')throw new Error('precondition qualification-freeze drift');
+          if(p.response_target_git_blob_sha!=='81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed')throw new Error('precondition target drift');
+          if(p.permanent_main_workflow.run_id!==34568453092||p.permanent_main_workflow.run_number!==161||p.permanent_main_workflow.conclusion!=='success')throw new Error('permanent main workflow checkpoint drift');
+          if(p.permanent_main_workflow.test_job_id!==103165280046||p.permanent_main_workflow.test_job_conclusion!=='success')throw new Error('permanent main test checkpoint drift');
+          if(p.permanent_main_workflow.deploy_job_id!==103165436328||p.permanent_main_workflow.deploy_job_conclusion!=='success')throw new Error('permanent main deploy checkpoint drift');
+
+          const workflowBlob=cp.execFileSync('git',['hash-object','.github/workflows/p4-v034g-official-highres.yml'],{encoding:'utf8'}).trim();
+          if(p.execution_workflow_git_blob_sha!==workflowBlob)throw new Error('execution workflow blob does not match frozen precondition');
+          if(p.authorized_command_exact!=='node tools/run-p4-estimation.js --mode highres --out reports/p4_response_estimation_2000x60_v1.json')throw new Error('authorized command drift');
+          if(p.official_execution_still_unrun_at_freeze!==true)throw new Error('execution not frozen as unrun');
+          if(!Array.isArray(p.cli_parameter_overrides)||p.cli_parameter_overrides.length!==0)throw new Error('CLI overrides must remain empty');
+          if(p.P1_official_result_semantic_access_authorized!==false||p.P2_official_result_semantic_access_authorized!==false||p.P3_official_result_semantic_access_authorized!==false||p.P1_P2_P3_rerun_or_refit_authorized!==false||p.canonical_promotion_authorized!==false||p.H2_H3_H4_H5_refit_or_combination_authorized!==false||p.cross_apparatus_validation_authorized!==false||p.ymaze_access_authorized!==false)throw new Error('precondition firewall drift');
+
+          if(fs.existsSync('reports/p4_response_estimation_2000x60_v1.json'))throw new Error('official P4 report already exists before one-shot execution');
+          if(fs.existsSync('reports/p4_response_estimation_execution_provenance_v1.json'))throw new Error('official P4 execution provenance already exists before one-shot execution');
+          NODE
+
+      - name: Run permanent regression suite before official search
+        run: ./tests/run-tests.sh
+
+      - name: Run official frozen P4 high-resolution response search
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/run-p4-estimation.js --mode highres --out reports/p4_response_estimation_2000x60_v1.json
+
+      - name: Validate official result and write execution provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const crypto=require('crypto');
+          const cp=require('child_process');
+
+          const reportPath='reports/p4_response_estimation_2000x60_v1.json';
+          const report=JSON.parse(fs.readFileSync(reportPath,'utf8'));
+          const allowedStatuses=new Set([
+            'development_response_estimation_failed_dual_primary_survival_guard',
+            'development_response_estimation_survived_but_parameter_triplet_not_eligible',
+            'development_response_estimation_passed_and_parameter_triplet_eligible_for_future_freeze'
+          ]);
+          if(!allowedStatuses.has(report.status))throw new Error('unexpected official P4 result status: '+report.status);
+          if(report.execution_class!=='frozen_high_resolution_response_search')throw new Error('official execution class drift');
+          if(report.scientific_evidence!==true)throw new Error('official result must be scientific evidence');
+          if(report.reference_outcomes_accessed!==true)throw new Error('official result must record authorized response-target access');
+          if(report.policy_git_blob_sha!=='2d0bdfaba74ad08f8424870f37a48399428ae8b7')throw new Error('official report policy drift');
+          if(report.estimator_git_blob_sha!=='e57b554c0ad56a0034f4f79ec8090d3e863e3d11')throw new Error('official report estimator drift');
+          if(report.estimator_core_git_blob_sha!=='4d985cd7258fc26eb06be75f09bdac4b92325ff0')throw new Error('official report estimator-core drift');
+          if(report.response_target_git_blob_sha!=='81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed')throw new Error('official report target drift');
+          if(report.authorization_id!=='P4_high_resolution_authorization_v1')throw new Error('official report authorization drift');
+          if(report.P1_official_result_semantics_loaded!==false||report.P2_official_result_semantics_loaded!==false||report.P3_official_result_semantics_loaded!==false)throw new Error('prior official-result semantics must remain unloaded');
+          if(report.ymaze_accessed!==false||report.canonical_locomotion_updated!==false)throw new Error('official result validation firewall drift');
+          if(report.nuisance_parameters_estimated!==false||report.H2_H3_H4_H5_refit!==false)throw new Error('official nuisance/refit firewall drift');
+
+          const s=report.search||{};
+          if(s.P4_candidates_per_fold_total!==2000||s.positive_P4_halton_candidates!==1999||s.ungated_benchmark_candidates_per_fold_total!==2000)throw new Error('official candidate-panel drift');
+          if(s.training_trials_per_treatment_path_per_candidate!==60||s.heldout_evaluation_trials_per_treatment_path!==120)throw new Error('official LOCO budget drift');
+          if(s.folds!==6||s.root_fit_seed!==8210000||s.root_evaluation_seed!==8810000)throw new Error('official fold/seed drift');
+          if(s.common_random_numbers!==true||s.response_rng!=='none')throw new Error('official RNG contract drift');
+          if(report.internal_cv?.total_folds!==6)throw new Error('official fold-count drift');
+          if(report.promotion?.canonical_promotion!==false||report.promotion?.ymaze_unlock!==false)throw new Error('official promotion firewall drift');
+
+          const failed=report.status==='development_response_estimation_failed_dual_primary_survival_guard';
+          if(failed){
+            if(report.internal_cv.P4_dual_survival_guard_passed!==false)throw new Error('failed status inconsistent with dual survival');
+            if(report.final_all_data_fit!==null)throw new Error('failed dual survival must not run final all-data fit');
+            if(report.promotion.mechanism_survives_internal_development!==false||report.promotion.fixed_parameter_triplet_eligible_for_future_freeze!==false)throw new Error('failed-status promotion inconsistency');
+          }else{
+            if(report.internal_cv.P4_dual_survival_guard_passed!==true)throw new Error('survived status inconsistent with dual survival');
+            if(!report.final_all_data_fit)throw new Error('survived status requires frozen final all-data fit');
+            if(report.promotion.mechanism_survives_internal_development!==true)throw new Error('survived-status promotion inconsistency');
+            const check=report.final_all_data_fit.independent_final_check;
+            if(!check)throw new Error('survived result missing independent final check');
+            if(report.status==='development_response_estimation_passed_and_parameter_triplet_eligible_for_future_freeze'&&report.promotion.fixed_parameter_triplet_eligible_for_future_freeze!==true)throw new Error('eligible status/promotion mismatch');
+            if(report.status==='development_response_estimation_survived_but_parameter_triplet_not_eligible'&&report.promotion.fixed_parameter_triplet_eligible_for_future_freeze!==false)throw new Error('non-eligible status/promotion mismatch');
+          }
+
+          const buf=fs.readFileSync(reportPath);
+          const sha256=crypto.createHash('sha256').update(buf).digest('hex');
+          const gitBlob=cp.execFileSync('git',['hash-object',reportPath],{encoding:'utf8'}).trim();
+          const workflowBlob=cp.execFileSync('git',['hash-object','.github/workflows/p4-v034g-official-highres.yml'],{encoding:'utf8'}).trim();
+          const preconditionBlob=cp.execFileSync('git',['hash-object','hypotheses/p4_highres_execution_precondition_v1.json'],{encoding:'utf8'}).trim();
+
+          const provenance={
+            schema_version:1,
+            id:'P4_official_high_resolution_execution_provenance_v1',
+            status:'official_execution_completed_result_uninterpreted_at_provenance_write',
+            github:{
+              repository:process.env.GITHUB_REPOSITORY,
+              run_id:Number(process.env.GITHUB_RUN_ID),
+              run_number:Number(process.env.GITHUB_RUN_NUMBER),
+              run_attempt:Number(process.env.GITHUB_RUN_ATTEMPT),
+              workflow:process.env.GITHUB_WORKFLOW,
+              event_name:process.env.GITHUB_EVENT_NAME,
+              ref:process.env.GITHUB_REF,
+              sha:process.env.GITHUB_SHA
+            },
+            frozen_chain:{
+              authorization_main_commit:'c5f8f2c7e8e9efbbe5393777aeada695a712a05b',
+              authorization_git_blob_sha:'d8088ab94480faf0f5db012ca538bdc4d5a42ccb',
+              policy_git_blob_sha:'2d0bdfaba74ad08f8424870f37a48399428ae8b7',
+              estimator_implementation_authorization_git_blob_sha:'e8f26731412d8693a5596da4374de932745b9392',
+              estimator_git_blob_sha:'e57b554c0ad56a0034f4f79ec8090d3e863e3d11',
+              estimator_core_git_blob_sha:'4d985cd7258fc26eb06be75f09bdac4b92325ff0',
+              qualification_report_git_blob_sha:'33cf1216ade03b0f25ddf643cdc28fd5c3df0010',
+              browser_firewall_report_git_blob_sha:'8ae7c0f8940502c64e720b5abafde4fc094a255c',
+              qualification_result_freeze_git_blob_sha:'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5',
+              execution_precondition_git_blob_sha:preconditionBlob,
+              execution_workflow_git_blob_sha:workflowBlob,
+              response_target_git_blob_sha:'81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed'
+            },
+            command:'node tools/run-p4-estimation.js --mode highres --out reports/p4_response_estimation_2000x60_v1.json',
+            cli_parameter_overrides:[],
+            report:{
+              file:'p4_response_estimation_2000x60_v1.json',
+              bytes:buf.length,
+              git_blob_sha:gitBlob,
+              sha256,
+              status:report.status
+            },
+            firewalls:{
+              P1_official_result_semantics_loaded:false,
+              P2_official_result_semantics_loaded:false,
+              P3_official_result_semantics_loaded:false,
+              canonical_locomotion_updated:false,
+              H2_H3_H4_H5_refit:false,
+              nuisance_parameters_estimated:false,
+              ymaze_accessed:false
+            },
+            interpretation_deferred:true
+          };
+          fs.writeFileSync('reports/p4_response_estimation_execution_provenance_v1.json',JSON.stringify(provenance,null,2)+'\n');
+          console.log(JSON.stringify({status:report.status,bytes:buf.length,git_blob:gitBlob,sha256}));
+          NODE
+
+      - name: Upload exact official P4 result and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-v034g-official-highres
+          retention-days: 90
+          if-no-files-found: error
+          path: |
+            reports/p4_response_estimation_2000x60_v1.json
+            reports/p4_response_estimation_execution_provenance_v1.json
