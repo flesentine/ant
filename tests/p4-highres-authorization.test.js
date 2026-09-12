@@ -109,7 +109,17 @@ const policy=readJson(path.join(root,'hypotheses/p4_response_estimation_v1.json'
 assert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
 assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
 assert.strictEqual(run.assertAuthorizationEffective(a,root,{branchName:'main'}),'main');
-assert.strictEqual(fs.existsSync(path.join(root,'hypotheses/p4_highres_execution_precondition_v1.json')),false,'execution precondition must not exist at authorization gate');
-assert.strictEqual(fs.existsSync(path.join(root,'reports/p4_response_estimation_2000x60_v1.json')),false,'official P4 scientific result must not exist at authorization gate');
+const laterExecutionPreconditionPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_execution_precondition_v1.json'));
+if(laterExecutionPreconditionPresent){
+  assert.strictEqual(blob('hypotheses/p4_highres_execution_precondition_v1.json'),'313f2892a5627195b1319911a87cdfe7884337ae');
+  const p=readJson(path.join(root,'hypotheses/p4_highres_execution_precondition_v1.json'));
+  assert.strictEqual(p.authorization_git_blob_sha,'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
+  assert.strictEqual(p.authorization_main_commit,'c5f8f2c7e8e9efbbe5393777aeada695a712a05b');
+  assert.strictEqual(p.permanent_main_workflow.run_id,34568453092);
+  assert.strictEqual(p.permanent_main_workflow.test_job_id,103165280046);
+  assert.strictEqual(p.permanent_main_workflow.deploy_job_id,103165436328);
+  assert.strictEqual(p.official_execution_still_unrun_at_freeze,true);
+}
+assert.strictEqual(fs.existsSync(path.join(root,'reports/p4_response_estimation_2000x60_v1.json')),false,'official P4 scientific result must not exist at authorization/execution-gate stage');
 
-console.log('p4-highres-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),effective_on_branch:false,effective_when_merged_to_main:true,candidates:2000,benchmark_candidates:2000,target_semantics_scope:'post-main-plus-precondition',P1_result_semantics:false,P2_result_semantics:false,P3_result_semantics:false,ymaze:false}));
+console.log('p4-highres-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),effective_on_branch:false,effective_when_merged_to_main:true,candidates:2000,benchmark_candidates:2000,target_semantics_scope:'post-main-plus-precondition',later_execution_precondition_present:laterExecutionPreconditionPresent,P1_result_semantics:false,P2_result_semantics:false,P3_result_semantics:false,ymaze:false}));
