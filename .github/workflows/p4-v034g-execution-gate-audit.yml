@@ -1,4 +1,5 @@
 name: P4 v0.3.4g execution-gate audit
+# rerun after authorization lifecycle regression update
 
 on:
   push:
