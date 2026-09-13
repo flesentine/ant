@@ -10,6 +10,18 @@ const root=path.resolve(__dirname,'..');
 const read=rel=>JSON.parse(fs.readFileSync(path.join(root,rel),'utf8'));
 const blob=rel=>execFileSync('git',['hash-object',rel],{cwd:root,encoding:'utf8'}).trim();
 const clone=x=>JSON.parse(JSON.stringify(x));
+const same=(a,b)=>Object.is(a,b);
+function assertExactAntIdentity(a,b,label){
+  const keys=['x','y','heading','speedFactor','pauseRemaining','baseSpeed','turnScale','pauseScale','distanceTravelled','movingTime'];
+  for(const k of keys)assert.ok(same(a[k],b[k]),label+': ant.'+k+' drifted '+a[k]+' vs '+b[k]);
+  assert.strictEqual(a.rng.state,b.rng.state,label+': biology RNG state drifted');
+  assert.strictEqual(a.state,b.state,label+': state drifted');
+  assert.strictEqual(a.finished,b.finished,label+': finished drifted');
+  assert.strictEqual(a.outcome,b.outcome,label+': outcome drifted');
+  assert.ok(same(a.completedAt,b.completedAt),label+': completedAt drifted');
+  assert.ok(same(a.exitX,b.exitX),label+': exitX drifted');
+  assert.ok(same(a.exitY,b.exitY),label+': exitY drifted');
+}
 
 const PINS={
   authorization:'db64b72830c3715b3dd26d5ad3422655e50e8828',
@@ -93,7 +105,9 @@ for(const [experiment,seed,side] of [['y_maze_p4_left_consistency_v1.json',84100
 const bn=loadBundle('y_maze_p4_neutral_consistency_v1.json',{modelId:'lasius_niger_locomotion_v1'}),pn=loadBundle('y_maze_p4_neutral_consistency_v1.json');
 const seed=8510000,baseSim=new integrity.Simulation(bn,seed),p4Sim=new p4.Simulation(pn,seed);
 baseSim.runUntilComplete(bn.experiment.duration_s,integrity.FIXED_DT);p4Sim.runUntilComplete(pn.experiment.duration_s,p4.FIXED_DT);
-assert.strictEqual(JSON.parse(p4Sim.fingerprint()).base,baseSim.fingerprint(),'zero-dose P4 base fingerprint must equal canonical');
+assert.ok(same(baseSim.time,p4Sim.time),'zero-dose simulation time drifted');
+assert.deepStrictEqual(p4Sim.metrics,baseSim.metrics,'zero-dose metrics drifted');
+assertExactAntIdentity(p4Sim.ants[0],baseSim.ants[0],'zero-dose P4');
 assert.strictEqual(p4Sim.ants[0].p4EvaluationSamples,0,'zero-dose P4 must bypass evaluation');
 
 const observed={overall:0.61,conditions:{outwards_naive:0.51,outwards_experienced:0.52,return_experienced:0.53,return_naive:0.54},pheromone_side:{left:0.55,right:0.56}};
@@ -107,4 +121,4 @@ assert.throws(()=>comparator.requireRealAuthorization(),/locked|authorization/i,
 
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must not exist');
-console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,official_stage_A_locked:true,official_stage_B_locked:true,zero_dose_identity:true}));
+console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,official_stage_A_locked:true,official_stage_B_locked:true,zero_dose_behavior_rng_lifecycle_identity:true}));
