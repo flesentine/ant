@@ -1,3 +1,4 @@
+# rerun after lifecycle pin updates
 name: P4 v0.3.4l post-review hardening audit
 
 on:
