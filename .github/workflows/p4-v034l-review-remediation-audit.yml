@@ -1,3 +1,4 @@
+# final full-suite qualification after P1 review remediation evidence freeze
 name: P4 v0.3.4l review remediation audit
 
 on:
@@ -30,38 +31,38 @@ jobs:
           test "$(git hash-object experiments/y_maze_p4_left_consistency_v1.json)" = "08edc2d3ef9899820c04e900154f1b4bee2a5104"
           test "$(git hash-object experiments/y_maze_p4_right_consistency_v1.json)" = "217f94ec4ba61a61c7956baeac34abd19cf5eec8"
           test "$(git hash-object experiments/y_maze_p4_neutral_consistency_v1.json)" = "e58cf3f4f5c51168f2dc267af7a820bc5b875b90"
-      - name: Verify review-remediated tooling bytes
+      - name: Verify remediated tooling and evidence bytes
         run: |
           set -euo pipefail
           test "$(git hash-object tools/run-p4-ymaze-consistency.js)" = "fe3bff285290d0d612a5b9ab665e887c728e3d2e"
           test "$(git hash-object tools/compare-p4-ymaze-consistency.js)" = "75cf0ae6075695784e7c67c1473a50e0daaa98cc"
           test "$(git hash-object tests/p4-ymaze-consistency-implementation.test.js)" = "74ecec3c2a588e7decc04875fd814101b705abef"
           test "$(git hash-object tests/p4-ymaze-consistency-implementation-authorization.test.js)" = "8907721d081665c40f485f3146b590b38f948c1c"
+          test "$(git hash-object reports/p4_ymaze_consistency_implementation_qualification_v1.json)" = "184e1dc5d50a14fd10615f95db412dc414cf45d5"
+          test "$(git hash-object tests/p4-ymaze-consistency-implementation-qualification-result.test.js)" = "5b1aa2109f91fd1535abb9b6c1c1562a6cb0fc7f"
           test ! -e hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json
           test ! -e hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
           test ! -e reports/p4_ymaze_consistency_simulation_v1.json
           test ! -e reports/p4_ymaze_consistency_comparison_v1.json
-      - name: Run remediated implementation checks
+      - name: Run remediated implementation and evidence checks
         run: |
           node --check tools/run-p4-ymaze-consistency.js
           node --check tools/compare-p4-ymaze-consistency.js
           node tests/p4-ymaze-consistency-implementation.test.js
           node tests/p4-ymaze-consistency-implementation-authorization.test.js
+          node tests/p4-ymaze-consistency-implementation-qualification-result.test.js
       - name: Confirm Stage A and Stage B remain locked
         run: |
           set -euo pipefail
           if node tools/run-p4-ymaze-consistency.js --official --out /tmp/forbidden-stage-a.json; then exit 1; fi
           test ! -e /tmp/forbidden-stage-a.json
           if node tools/compare-p4-ymaze-consistency.js --simulation anything.json --observed anything.json --synthetic; then exit 1; fi
-      - name: Run permanent suite except stale qualification-result evidence pin
-        run: |
-          sed '/p4-ymaze-consistency-implementation-qualification-result.test.js/d' tests/run-tests.sh > tests/run-tests-review.tmp.sh
-          bash tests/run-tests-review.tmp.sh
-          rm tests/run-tests-review.tmp.sh
+      - name: Run complete permanent regression suite
+        run: ./tests/run-tests.sh
       - name: Confirm no official artifacts were created
         run: |
           set -euo pipefail
           test ! -e reports/p4_ymaze_consistency_simulation_v1.json
           test ! -e reports/p4_ymaze_consistency_comparison_v1.json
           test "$(git status --porcelain)" = ""
-          echo 'review remediation qualification remained reference-free and non-official'
+          echo 'final P1 remediation qualification remained reference-free and non-official'
