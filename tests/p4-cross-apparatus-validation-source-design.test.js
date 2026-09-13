@@ -104,7 +104,7 @@ assert.match(b.contamination_consequence,/must not be described as blind validat
 const h=d.cross_apparatus_consistency_hypothesis;
 assert.match(h.model_under_test,/candidate-307 parameters unchanged/i);
 assert.match(h.directional_expectation,/more model choices than the symmetric DCM arm/i);
-assert.match(h.directional_expectation,/without.*direction-.*experience-.*colony-.*side-.*path-specific response parameters/i);
+assert.match(h.directional_expectation,/does not introduce.*direction-.*experience-.*colony-.*side-.*path-specific response parameters/i);
 assert.match(h.neutral_reference,/0\.5 arm-choice probability/);
 assert.match(h.interpretation,/descriptive consistency only/i);
 assert.strictEqual(h.no_fit,true);
