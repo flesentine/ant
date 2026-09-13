@@ -1,0 +1,67 @@
+name: P4 v0.3.4l post-review hardening audit
+
+on:
+  push:
+    branches: [v0.3.4l-p4-ymaze-implementation-qualification]
+    paths:
+      - '.github/workflows/p4-v034l-post-review-hardening-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify browser-facing simulation bytes stayed frozen
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/p4.js)" = "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_painted_trail_p4_fitted_v1.json)" = "e23b022279d463442bdd4e16d4cf56e0212d2b11"
+          test "$(git hash-object apparatus/poissonnier2026_y_maze_p4_left_v1.json)" = "219d42036c13463e8cae5045b8fdba6d5bd24454"
+          test "$(git hash-object apparatus/poissonnier2026_y_maze_p4_right_v1.json)" = "bfcba7e34eed4b4f79e67d6fc22c60af993f5386"
+          test "$(git hash-object experiments/y_maze_p4_left_consistency_v1.json)" = "08edc2d3ef9899820c04e900154f1b4bee2a5104"
+          test "$(git hash-object experiments/y_maze_p4_right_consistency_v1.json)" = "217f94ec4ba61a61c7956baeac34abd19cf5eec8"
+          test "$(git hash-object experiments/y_maze_p4_neutral_consistency_v1.json)" = "e58cf3f4f5c51168f2dc267af7a820bc5b875b90"
+      - name: Verify hardened Node tooling bytes
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tools/run-p4-ymaze-consistency.js)" = "fe3bff285290d0d612a5b9ab665e887c728e3d2e"
+          test "$(git hash-object tools/compare-p4-ymaze-consistency.js)" = "02333b7e49e0fcc78fa13850088511e482291f13"
+          test "$(git hash-object tests/p4-ymaze-consistency-implementation.test.js)" = "f5252419e16bb3258e5b1e9be187e88763d819e3"
+          test ! -e hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json
+          test ! -e hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
+          test ! -e reports/p4_ymaze_consistency_simulation_v1.json
+          test ! -e reports/p4_ymaze_consistency_comparison_v1.json
+      - name: Syntax and hardened implementation regression
+        run: |
+          node --check tools/run-p4-ymaze-consistency.js
+          node --check tools/compare-p4-ymaze-consistency.js
+          node tests/p4-ymaze-consistency-implementation.test.js
+      - name: Confirm Stage A and Stage B CLI lockouts
+        run: |
+          set -euo pipefail
+          if node tools/run-p4-ymaze-consistency.js --official --out /tmp/forbidden-stage-a.json; then exit 1; fi
+          test ! -e /tmp/forbidden-stage-a.json
+          printf '{"predeclared_fields":{"side_balanced_marked_arm_choice_fraction":0.5,"left_marked_marked_arm_choice_fraction_among_choices":0.5,"right_marked_marked_arm_choice_fraction_among_choices":0.5}}' >/tmp/sim.json
+          printf '{"overall":0.5,"conditions":{"outwards_naive":0.5,"outwards_experienced":0.5,"return_experienced":0.5,"return_naive":0.5},"pheromone_side":{"left":0.5,"right":0.5}}' >/tmp/observed.json
+          if node tools/compare-p4-ymaze-consistency.js --simulation /tmp/sim.json --observed /tmp/observed.json --synthetic --out /tmp/forbidden-stage-b.json; then exit 1; fi
+          test ! -e /tmp/forbidden-stage-b.json
+      - name: Run permanent suite except stale pre-hardening qualification-result pin
+        run: |
+          sed '/p4-ymaze-consistency-implementation-qualification-result.test.js/d' tests/run-tests.sh > /tmp/run-tests-without-stale-result.sh
+          bash /tmp/run-tests-without-stale-result.sh
+      - name: Confirm no official artifacts were created
+        run: |
+          set -euo pipefail
+          test ! -e reports/p4_ymaze_consistency_simulation_v1.json
+          test ! -e reports/p4_ymaze_consistency_comparison_v1.json
+          git status --porcelain | grep -v '^?? .github/workflows/' | grep -v '^?? p4-ymaze-browser-audit.tmp.html' && exit 1 || true
+          echo 'post-review hardening audit stayed non-official and reference-free'
