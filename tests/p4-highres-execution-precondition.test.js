@@ -28,7 +28,9 @@ assert.strictEqual(p.permanent_main_workflow.run_id,34568453092);
 assert.strictEqual(p.permanent_main_workflow.run_number,161);
 assert.strictEqual(p.permanent_main_workflow.conclusion,'success');
 assert.strictEqual(p.permanent_main_workflow.test_job_id,103165280046);
+assert.strictEqual(p.permanent_main_workflow.test_job_conclusion,'success');
 assert.strictEqual(p.permanent_main_workflow.deploy_job_id,103165436328);
+assert.strictEqual(p.permanent_main_workflow.deploy_job_conclusion,'success');
 assert.strictEqual(p.official_execution_still_unrun_at_freeze,true,'historical pre-execution fact must remain frozen');
 assert.strictEqual(p.authorized_command_exact,'node tools/run-p4-estimation.js --mode highres --out reports/p4_response_estimation_2000x60_v1.json');
 assert.deepStrictEqual(p.cli_parameter_overrides,[]);
@@ -73,8 +75,10 @@ assert.strictEqual(p.cross_apparatus_validation_authorized,false);
 assert.strictEqual(p.ymaze_access_authorized,false);
 
 const archiveRel='hypotheses/archive/p4_highres_authorization_v1.json';
+const workflowArchiveRel='hypotheses/archive/p4-v034g-official-highres.yml';
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_highres_authorization_v1.json')),'active P4 authorization must be retired');
 assert.strictEqual(blob(archiveRel),p.authorization_git_blob_sha);
+assert.strictEqual(blob(workflowArchiveRel),p.execution_workflow_git_blob_sha,'retired official workflow must be archived byte-for-byte');
 assert.strictEqual(blob('hypotheses/p4_response_estimation_v1.json'),p.policy_git_blob_sha);
 assert.strictEqual(blob('hypotheses/p4_estimator_implementation_authorization_v1.json'),p.estimator_implementation_authorization_git_blob_sha);
 assert.strictEqual(blob('tools/run-p4-estimation.js'),p.estimator_git_blob_sha);
@@ -85,6 +89,18 @@ assert.strictEqual(blob('hypotheses/p4_estimator_qualification_result_freeze_v1.
 assert.strictEqual(blob('reference/poissonnier2026_pheromone_response_targets.json'),p.response_target_git_blob_sha);
 assert.ok(!fs.existsSync(path.join(root,p.execution_workflow_file)),'official P4 one-shot workflow must be retired after valid execution');
 assert.ok(!fs.existsSync(path.join(root,'.github/workflows/p4-v034h-materialize-result.yml')),'one-time P4 result materializer must be retired');
+
+const w=fs.readFileSync(path.join(root,workflowArchiveRel),'utf8');
+assert.match(w,/branches:\s*\[main\]/);
+assert.match(w,/paths:\s*\n\s*- '\.github\/workflows\/p4-v034g-official-highres\.yml'/);
+assert.ok(!/workflow_dispatch/.test(w));
+assert.ok(!/pull_request/.test(w));
+assert.match(w,/cancel-in-progress:\s*false/);
+assert.match(w,/test "\$\{GITHUB_REF\}" = "refs\/heads\/main"/);
+assert.match(w,/test "\$\{GITHUB_EVENT_NAME\}" = "push"/);
+assert.match(w,/node tools\/run-p4-estimation\.js --mode highres --out reports\/p4_response_estimation_2000x60_v1\.json/);
+assert.match(w,/\.\/tests\/run-tests\.sh/);
+
 assert.strictEqual(blob('reports/p4_response_estimation_2000x60_v1.json'),'f3e61db9964c25b95d3bfc55d8aa7d52930a0b7f');
 assert.strictEqual(blob('reports/p4_response_estimation_execution_provenance_v1.json'),'09078f08b94d4ac01f10a4ca73b03f7e3f9d50a5');
 assert.strictEqual(blob('hypotheses/p4_response_estimation_result_freeze_v1.json'),'73f802be9dd9f21819649ab25323a9b3a92cff04');
@@ -99,4 +115,4 @@ assert.strictEqual(report.promotion.fixed_parameter_triplet_eligible_for_future_
 assert.strictEqual(report.promotion.canonical_promotion,false);
 assert.strictEqual(report.promotion.ymaze_unlock,false);
 
-console.log('p4-highres-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:blob(rel),execution_workflow_retired:true,materializer_retired:true,valid_attempt_run:34724113310,official_result_materialized:true,active_authorization:false,dual_survival:true,candidate_index:307}));
+console.log('p4-highres-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:blob(rel),archived_workflow_blob:blob(workflowArchiveRel),execution_workflow_retired:true,materializer_retired:true,valid_attempt_run:34724113310,official_result_materialized:true,active_authorization:false,dual_survival:true,candidate_index:307}));
