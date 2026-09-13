@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "id": "P4_response_estimation_result_freeze_v1",
+  "status": "official_development_response_estimation_passed_all_internal_guards_parameter_triplet_frozen_for_future_independent_validation",
+  "freeze_date_local": "2026-09-13",
+  "scientific_scope": "Internal Poissonnier 2026 open-arena P4-v1 hard absolute-detection-gated local Weber painted-trail response development estimation. This freezes the one valid authorized high-resolution target-ranked execution. It establishes internal-development survival and a fixed parameter triplet eligible for future independent validation; it is not external validation, canonical locomotion promotion, or reserved Y-maze validation.",
+  "official_execution": {
+    "repo_commit": "55ad9d1d7c794216c917012a94f4abe78a79d588",
+    "github_run_id": 34724113310,
+    "github_run_number": 1,
+    "github_job_id": 103635116514,
+    "github_run_attempt": 1,
+    "artifact_id": 10309441871,
+    "artifact_name": "p4-v034g-official-highres",
+    "artifact_digest": "sha256:9f0d4c98a4bd7d3c0ebbb9b0beda8a46622868b79215fb9d427ad0c2bab3d400",
+    "report_file": "reports/p4_response_estimation_2000x60_v1.json",
+    "report_git_blob_sha": "f3e61db9964c25b95d3bfc55d8aa7d52930a0b7f",
+    "report_sha256": "0092dc672114371d43ae1b75a63ce48e03263e34a32dae12474780b735be191d",
+    "report_bytes": 318152,
+    "execution_provenance_file": "reports/p4_response_estimation_execution_provenance_v1.json",
+    "execution_provenance_git_blob_sha": "09078f08b94d4ac01f10a4ca73b03f7e3f9d50a5",
+    "execution_provenance_sha256": "12ea29cbfd7317614b39adcef3d0674e4ccd05737384985ec198549025b3904b",
+    "execution_provenance_bytes": 2351
+  },
+  "materialization": {
+    "workflow_run_id": 34777225062,
+    "workflow_job_id": 103777443484,
+    "branch_commit_after_materialization": "159346680e7cc5cc1ec5a9d7dcdb2fbd31d21e56",
+    "report_git_blob_sha_verified": "f3e61db9964c25b95d3bfc55d8aa7d52930a0b7f",
+    "provenance_git_blob_sha_verified": "09078f08b94d4ac01f10a4ca73b03f7e3f9d50a5",
+    "artifact_digest_verified": "sha256:9f0d4c98a4bd7d3c0ebbb9b0beda8a46622868b79215fb9d427ad0c2bab3d400"
+  },
+  "frozen_input_chain": {
+    "candidate_class_evidence_git_blob_sha": "262f332062f271bbf111d0572f83b2faaf2cfd74",
+    "candidate_class_decision_git_blob_sha": "ad7295ba6d466549c60c8ecac37e39d30006ec1c",
+    "mechanism_git_blob_sha": "609551836e540c341365db9cc987d2ca340cc053",
+    "reachability_execution_policy_git_blob_sha": "0d452f9c0d548ec962e0a6d9826648bf5e14a4ef",
+    "implementation_authorization_git_blob_sha": "42f8d51b06a20c0c6001a42b6021a134f2694e0d",
+    "reachability_result_freeze_git_blob_sha": "f2074ae3157f22208ff98ebc620c00006549cab6",
+    "reachability_report_git_blob_sha": "f6e77596eb25cc7bca3bf0dde1da712511a1d0d0",
+    "p4_runtime_git_blob_sha": "bf7d5781bd69ec4568450ebbd3bdc284897b6f61",
+    "p4_model_git_blob_sha": "3d8460b6916a90d06e70768f696ee3f0d48fccf4",
+    "policy_git_blob_sha": "2d0bdfaba74ad08f8424870f37a48399428ae8b7",
+    "estimator_implementation_authorization_git_blob_sha": "e8f26731412d8693a5596da4374de932745b9392",
+    "estimator_core_git_blob_sha": "4d985cd7258fc26eb06be75f09bdac4b92325ff0",
+    "estimator_git_blob_sha": "e57b554c0ad56a0034f4f79ec8090d3e863e3d11",
+    "qualification_report_git_blob_sha": "33cf1216ade03b0f25ddf643cdc28fd5c3df0010",
+    "browser_firewall_report_git_blob_sha": "8ae7c0f8940502c64e720b5abafde4fc094a255c",
+    "qualification_result_freeze_git_blob_sha": "635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5",
+    "authorization_git_blob_sha": "d8088ab94480faf0f5db012ca538bdc4d5a42ccb",
+    "execution_precondition_git_blob_sha": "313f2892a5627195b1319911a87cdfe7884337ae",
+    "execution_workflow_git_blob_sha": "1b34c35246117ad483c25c10601c8971fe6f273e",
+    "response_target_git_blob_sha": "81910c5bd3ec7b1f7728c2c9f100b0e8a6db29ed",
+    "p3_runtime_structural_comparator_git_blob_sha": "4010b19fd7a1b713a4b8d25b6a693d3ee0a581b8",
+    "p3_model_structural_comparator_git_blob_sha": "9107de0c71641c4037bbedbb498b9fa868c1ef00",
+    "canonical_locomotion_git_blob_sha": "2fde196d6c8a9353c1c8c206d4fcef223e92ad1d",
+    "sim_core_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+    "integrity_runtime_git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"
+  },
+  "permanent_main_checkpoint_of_valid_execution_commit": {
+    "main_commit": "55ad9d1d7c794216c917012a94f4abe78a79d588",
+    "workflow_run_id": 34724113314,
+    "workflow_run_number": 162,
+    "conclusion": "success",
+    "test_job_id": 103635116564,
+    "test_job_conclusion": "success",
+    "deploy_job_id": 103635191580,
+    "deploy_job_conclusion": "success"
+  },
+  "dual_primary_survival_result": {
+    "folds_total": 6,
+    "required_minimum_wins_per_guard": 5,
+    "canonical_null_guard": {
+      "heldout_wins": 5,
+      "median_relative_improvement": 0.38539021396028006,
+      "median_relative_improvement_strictly_positive": true,
+      "guard_passed": true,
+      "decision": "PASS"
+    },
+    "ungated_P3_structural_increment_guard": {
+      "heldout_wins": 5,
+      "median_relative_improvement": 0.4048332663477944,
+      "median_relative_improvement_strictly_positive": true,
+      "guard_passed": true,
+      "decision": "PASS"
+    },
+    "dual_survival_guard_passed": true,
+    "decision": "PASS"
+  },
+  "heldout_fold_results": [
+    {"held_out_colony":0,"P4_primary_loss":0.013655943726163243,"selected_ungated_benchmark_primary_loss":0.030385114084009124,"exact_null_primary_loss":0.028194375663801723,"relative_improvement_vs_exact_null":0.5156500754263598,"relative_improvement_vs_ungated_benchmark":0.5505712537920006,"win_vs_exact_null":true,"win_vs_ungated_benchmark":true},
+    {"held_out_colony":7,"P4_primary_loss":0.25366189871036027,"selected_ungated_benchmark_primary_loss":0.30384552154333133,"exact_null_primary_loss":0.409731937626747,"relative_improvement_vs_exact_null":0.3809076730029321,"relative_improvement_vs_ungated_benchmark":0.16516163403716447,"win_vs_exact_null":true,"win_vs_ungated_benchmark":true},
+    {"held_out_colony":16,"P4_primary_loss":0.04551148071579462,"selected_ungated_benchmark_primary_loss":0.038175860099492115,"exact_null_primary_loss":0.07230578220593327,"relative_improvement_vs_exact_null":0.37056927776296106,"relative_improvement_vs_ungated_benchmark":-0.19215338167063575,"win_vs_exact_null":true,"win_vs_ungated_benchmark":false},
+    {"held_out_colony":20,"P4_primary_loss":0.0152359934054379,"selected_ungated_benchmark_primary_loss":0.054516151743751386,"exact_null_primary_loss":0.0949545802651772,"relative_improvement_vs_exact_null":0.8395444078327898,"relative_improvement_vs_ungated_benchmark":0.7205233143187836,"win_vs_exact_null":true,"win_vs_ungated_benchmark":true},
+    {"held_out_colony":21,"P4_primary_loss":0.034031392116614656,"selected_ungated_benchmark_primary_loss":0.0607735430066589,"exact_null_primary_loss":0.05577753229495619,"relative_improvement_vs_exact_null":0.38987275491762796,"relative_improvement_vs_ungated_benchmark":0.440029485974088,"win_vs_exact_null":true,"win_vs_ungated_benchmark":true},
+    {"held_out_colony":27,"P4_primary_loss":0.0865193772695865,"selected_ungated_benchmark_primary_loss":0.13725327102362497,"exact_null_primary_loss":0.05080229510642097,"relative_improvement_vs_exact_null":-0.7030604048172463,"relative_improvement_vs_ungated_benchmark":0.3696370467215008,"win_vs_exact_null":false,"win_vs_ungated_benchmark":true}
+  ],
+  "frozen_parameter_triplet": {
+    "candidate_index": 307,
+    "source": "halton_P4",
+    "sigma_field_mm": 18.319554310908863,
+    "kappa_trail_per_s": 6.342935528120713,
+    "theta_detect": 0.9184,
+    "all_data_training_primary_loss": 0.0004571615051027154
+  },
+  "identifiability_result": {
+    "passed": true,
+    "near_best_loss_limit": 0.0008571615051027155,
+    "exact_canonical_null_in_near_best_set": false,
+    "best_ungated_benchmark_outside_P4_near_best_tolerance": true,
+    "selected_normalized_coordinates": {"sigma_field_mm":0.7988281249999999,"kappa_trail_per_s":0.39643347050754457,"theta_detect":0.4592},
+    "selected_distance_to_nearest_bound": {"sigma_field_mm":0.2011718750000001,"kappa_trail_per_s":0.39643347050754457,"theta_detect":0.4592},
+    "near_best_normalized_spans": {"sigma_field_mm":0.09716796875000022,"kappa_trail_per_s":0.34567901234567894,"theta_detect":0.22400000000000003}
+  },
+  "independent_final_check": {
+    "P4_primary_loss": 0.006594757914079803,
+    "selected_ungated_P3_primary_loss": 0.025229600836192963,
+    "exact_canonical_null_primary_loss": 0.061743601665493385,
+    "P4_strictly_better_than_both_primary_comparators": true,
+    "P4_secondary_guard_passed": true,
+    "P4_secondary_absolute_standardized_errors": {
+      "short_time_to_exit_s": 0.5277376866231855,
+      "short_beeline_mm": 0.02387670303158215,
+      "long_time_to_exit_s": 0.07707569616952707,
+      "long_beeline_mm": 0.4176607614129172
+    }
+  },
+  "downstream_frozen_consequences": {
+    "mechanism_survives_internal_development": true,
+    "fixed_parameter_triplet_eligible_for_future_freeze": true,
+    "fixed_parameter_triplet_is_frozen_by_this_record": true,
+    "future_target_ranked_refit_or_rescue_authorized": false,
+    "canonical_locomotion_update_authorized": false,
+    "cross_apparatus_validation_authorized": false,
+    "Y_maze_unlock_authorized": false,
+    "next_scientific_stage": "separate_independent_validation_design_gate"
+  },
+  "firewalls_verified_in_official_provenance": {
+    "P1_official_result_semantics_loaded": false,
+    "P2_official_result_semantics_loaded": false,
+    "P3_official_result_semantics_loaded": false,
+    "ymaze_accessed": false,
+    "canonical_locomotion_updated": false,
+    "nuisance_parameters_estimated": false,
+    "H2_H3_H4_H5_refit": false
+  },
+  "closure_rule": "The one valid P4-v1 target-ranked development execution is permanently closed to rerun, rescue, retuning, candidate injection, changed bounds, changed Halton mapping, changed seeds, changed trial budgets, changed folds, changed colony weights, changed objective, changed secondary guards, changed identifiability thresholds, changed sensor geometry, changed hard detection gate, changed Weber transduction, or favorable-seed repetition. The parameter triplet frozen here may only be carried prospectively into a separately preregistered independent-validation stage. Any later mechanism change requires a new version and independent justification rather than reopening P4-v1 development fitting.",
+  "rerun_authorized": false,
+  "canonical_locomotion_changed": false,
+  "Y_maze_accessed": false
+}
