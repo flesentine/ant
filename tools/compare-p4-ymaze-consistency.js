@@ -4,7 +4,10 @@ const ROOT=path.resolve(__dirname,'..');
 const REAL_AUTH=path.join(ROOT,'hypotheses','p4_Y_maze_consistency_stage_B_authorization_v1.json');
 const CONDITION_IDS=['outwards_naive','outwards_experienced','return_experienced','return_naive'];
 
-function rate(x,label){const n=Number(x);if(!Number.isFinite(n)||n<0||n>1)throw new Error(label+' must be a finite rate in [0,1]');return n;}
+function rate(x,label){
+  if(x===null||x===undefined||x==='')throw new Error(label+' must be a finite rate in [0,1]');
+  const n=Number(x);if(!Number.isFinite(n)||n<0||n>1)throw new Error(label+' must be a finite rate in [0,1]');return n;
+}
 function row(id,scope,model,observed){
   const m=rate(model,id+' model'),o=rate(observed,id+' observed'),signed=m-o;
   return{id,scope,model_prediction:m,observed_rate:o,signed_difference_model_minus_observed:signed,absolute_difference:Math.abs(signed)};
@@ -37,9 +40,9 @@ function requireRealAuthorization(){
 }
 function arg(argv,name){const i=argv.indexOf(name);return i>=0?argv[i+1]:null;}
 function main(argv=process.argv.slice(2)){
-  const simulation=arg(argv,'--simulation'),observedPath=arg(argv,'--observed'),out=arg(argv,'--out'),synthetic=argv.includes('--synthetic');
-  if(!simulation||!observedPath)throw new Error('Usage: --simulation <stage-A.json> --observed <normalized-summary.json> [--synthetic] [--out <file>]');
-  if(!synthetic)requireRealAuthorization();
+  const simulation=arg(argv,'--simulation'),observedPath=arg(argv,'--observed'),out=arg(argv,'--out');
+  if(!simulation||!observedPath)throw new Error('Usage: --simulation <stage-A.json> --observed <normalized-summary.json> [--out <file>]');
+  requireRealAuthorization();
   const sim=JSON.parse(fs.readFileSync(path.resolve(ROOT,simulation),'utf8'));
   const observed=JSON.parse(fs.readFileSync(path.resolve(ROOT,observedPath),'utf8'));
   const report=compare(sim,observed),text=JSON.stringify(report,null,2)+'\n';
