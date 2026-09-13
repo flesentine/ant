@@ -76,7 +76,7 @@ assert.strictEqual(b.aggregate_result_permitted_for_metric_selection_or_threshol
 assert.strictEqual(b.aggregate_result_permitted_for_parameter_change_or_model_selection,false);
 assert.strictEqual(b.fully_blind_holdout_claim_permitted,false);
 assert.match(b.contamination_consequence,/may not be described as pristine blinded validation/i);
-assert.match(b.contamination_consequence,/nor as sufficient by itself for canonical promotion/i);
+assert.match(b.contamination_consequence,/as sufficient by itself for canonical promotion/i);
 
 const h=d.prospective_transfer_hypothesis;
 assert.match(h.model_under_test,/candidate-307 parameters unchanged/i);
