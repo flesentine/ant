@@ -106,13 +106,14 @@ function loadAuthorizedOfficialStageA(auth){
   if(!spec||spec.file!==OFFICIAL_STAGE_A_FILE||typeof spec.git_blob_sha!=='string'||!/^[0-9a-f]{40}$/.test(spec.git_blob_sha))throw new Error('Stage B authorization must pin the official Stage A file and git blob SHA.');
   return validateOfficialStageAReport(readPinnedJson(spec.file,spec.git_blob_sha));
 }
-function arg(argv,name){const i=argv.indexOf(name);return i>=0?argv[i+1]:null;}
-function main(argv=process.argv.slice(2)){
-  const auth=requireRealAuthorization();
+function parseRealCliArgs(argv){
   for(const forbidden of ['--simulation','--observed','--synthetic'])if(argv.includes(forbidden))throw new Error(forbidden+' input override is forbidden for real Stage B.');
-  const out=arg(argv,'--out');
-  const allowed=out?["--out",out]:[];
-  if(argv.length!==allowed.length||argv.some((v,i)=>v!==allowed[i]))throw new Error('Usage: [--out <file>]');
+  if(argv.length===0)return{out:null};
+  if(argv.length===2&&argv[0]==='--out'&&argv[1])return{out:argv[1]};
+  throw new Error('Usage: [--out <file>]');
+}
+function main(argv=process.argv.slice(2)){
+  const auth=requireRealAuthorization(),{out}=parseRealCliArgs(argv);
   const sim=loadAuthorizedOfficialStageA(auth),observed=loadFrozenObservedSummary();
   const report=compare(sim,observed),text=JSON.stringify(report,null,2)+'\n';
   if(out){const p=path.resolve(ROOT,out);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,text);}else process.stdout.write(text);
@@ -120,7 +121,7 @@ function main(argv=process.argv.slice(2)){
 }
 if(require.main===module)main();
 module.exports={
-  CONDITION_IDS,CONDITION_CODES,PUBLISHED_FILE,INVENTORY_FILE,PUBLISHED_BLOB,INVENTORY_BLOB,
+  CONDITION_IDS,CONDITION_CODES,PUBLISHED_FILE,INVENTORY_FILE,PUBLISHED_BLOB,INVENTORY_BLOB,OFFICIAL_STAGE_A_FILE,
   gitBlobSha,readPinnedJson,rate,rateFromCounts,row,normalizeFrozenObservedSources,loadFrozenObservedSummary,
-  compare,requireRealAuthorization,validateOfficialStageAReport,loadAuthorizedOfficialStageA,main
+  compare,requireRealAuthorization,validateOfficialStageAReport,loadAuthorizedOfficialStageA,parseRealCliArgs,main
 };
