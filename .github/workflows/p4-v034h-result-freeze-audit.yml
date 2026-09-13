@@ -1,0 +1,42 @@
+name: P4 v0.3.4h result-freeze audit
+
+on:
+  push:
+    branches: [v0.3.4h-p4-result-freeze]
+    paths:
+      - '.github/workflows/p4-v034h-result-freeze-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact frozen result chain and retired execution gate
+        run: |
+          set -euo pipefail
+          test "$(git hash-object reports/p4_response_estimation_2000x60_v1.json)" = "f3e61db9964c25b95d3bfc55d8aa7d52930a0b7f"
+          test "$(sha256sum reports/p4_response_estimation_2000x60_v1.json | cut -d' ' -f1)" = "0092dc672114371d43ae1b75a63ce48e03263e34a32dae12474780b735be191d"
+          test "$(git hash-object reports/p4_response_estimation_execution_provenance_v1.json)" = "09078f08b94d4ac01f10a4ca73b03f7e3f9d50a5"
+          test "$(sha256sum reports/p4_response_estimation_execution_provenance_v1.json | cut -d' ' -f1)" = "12ea29cbfd7317614b39adcef3d0674e4ccd05737384985ec198549025b3904b"
+          test "$(git hash-object hypotheses/p4_response_estimation_result_freeze_v1.json)" = "73f802be9dd9f21819649ab25323a9b3a92cff04"
+          test "$(git hash-object hypotheses/archive/p4_highres_authorization_v1.json)" = "d8088ab94480faf0f5db012ca538bdc4d5a42ccb"
+          test ! -e hypotheses/p4_highres_authorization_v1.json
+          test ! -e .github/workflows/p4-v034g-official-highres.yml
+          test ! -e .github/workflows/p4-v034h-materialize-result.yml
+      - name: Run P4 result-freeze regression directly
+        run: node tests/p4-response-estimation-result-freeze.test.js
+      - name: Run complete permanent regression suite
+        run: ./tests/run-tests.sh
+      - name: Confirm no scientific rerun occurred
+        run: |
+          set -euo pipefail
+          test "$(git status --porcelain)" = ""
+          echo 'P4 result-freeze audit performed no estimator execution'
