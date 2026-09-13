@@ -122,15 +122,9 @@ assert.strictEqual(d.promotion_grade_next_gate.id,'P4_external_validation_source
 assert.strictEqual(d.promotion_grade_next_gate.required_before_canonical_promotion,true);
 assert.match(d.future_promotion_requirement,/cannot establish external validity or authorize canonical promotion/i);
 
-// Historical v0.3.4i truth: no runner/report/protocol existed at that gate. In later lifecycle
-// states the exact protocol may exist, but it must point back to this immutable source-design blob
-// and must still leave execution/report surfaces absent until their own authorization gate.
-for(const file of [
-  'tools/run-p4-ymaze-consistency.js',
-  'reports/p4_ymaze_consistency_v1.json',
-  'reports/p4_ymaze_consistency_simulation_v1.json',
-  'reports/p4_ymaze_consistency_comparison_v1.json'
-]) assert.ok(!fs.existsSync(path.join(root,file)),`${file} must remain absent before implementation/execution authorization`);
+// Historical v0.3.4i truth: protocol/runner/reports did not exist at that gate. Later lifecycle
+// states may materialize them only behind the exact frozen authorization lineage. Official Stage A
+// and real Stage B reports remain forbidden until later execution/comparison authorizations.
 const laterProtocol='hypotheses/p4_cross_apparatus_Y_maze_consistency_protocol_v1.json';
 if(fs.existsSync(path.join(root,laterProtocol))){
   assert.strictEqual(blob(laterProtocol),'22515a3fe0945c0f19b6fb2166923f027bbf1b54');
@@ -140,6 +134,20 @@ if(fs.existsSync(path.join(root,laterProtocol))){
   assert.strictEqual(lp.simulation_design.new_simulation_authorized_at_this_protocol_gate,false);
   assert.strictEqual(lp.predeclared_stage_B_comparison_reporting.validation_pass_fail_threshold,null);
 }
+const laterImplementationAuthorization='hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json';
+const laterRunner='tools/run-p4-ymaze-consistency.js';
+if(fs.existsSync(path.join(root,laterImplementationAuthorization))){
+  assert.strictEqual(blob(laterImplementationAuthorization),'db64b72830c3715b3dd26d5ad3422655e50e8828');
+  const ia=read(laterImplementationAuthorization);
+  assert.strictEqual(ia.protocol_lineage.protocol_git_blob_sha,'22515a3fe0945c0f19b6fb2166923f027bbf1b54');
+  assert.ok(fs.existsSync(path.join(root,laterRunner)),'runner may appear only after implementation authorization');
+  assert.strictEqual(blob(laterRunner),'af0fd2d91f67102c62243bef289bbfe20cf471d7');
+}else assert.ok(!fs.existsSync(path.join(root,laterRunner)),'runner must be absent before implementation authorization');
+for(const file of [
+  'reports/p4_ymaze_consistency_v1.json',
+  'reports/p4_ymaze_consistency_simulation_v1.json',
+  'reports/p4_ymaze_consistency_comparison_v1.json'
+]) assert.ok(!fs.existsSync(path.join(root,file)),`${file} must remain absent before its execution/comparison authorization`);
 
 assert.strictEqual(blob('src/p4.js'),'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
 assert.strictEqual(blob('models/lasius_niger_painted_trail_p4_v1.json'),'3d8460b6916a90d06e70768f696ee3f0d48fccf4');
@@ -147,4 +155,4 @@ assert.strictEqual(blob('tools/p4-estimation-core.js'),'4d985cd7258fc26eb06be75f
 assert.strictEqual(blob('tools/run-p4-estimation.js'),'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
 assert.ok(!fs.existsSync(path.join(root,'hypotheses','p4_highres_authorization_v1.json')),'development high-res authorization must remain retired');
 
-console.log('p4-cross-apparatus-validation-source-design.test.js PASS '+JSON.stringify({design_blob:blob(rel),classification:s.classification,triplet:{sigma:t.sigma_field_mm,kappa:t.kappa_trail_per_s,theta:t.theta_detect},preexisting_outcome_artifacts:d.preexisting_Y_maze_outcome_artifacts.length,raw_choices_loaded:false,later_protocol_present:fs.existsSync(path.join(root,laterProtocol)),simulation_authorized:false,promotion_authorized:false}));
+console.log('p4-cross-apparatus-validation-source-design.test.js PASS '+JSON.stringify({design_blob:blob(rel),classification:s.classification,triplet:{sigma:t.sigma_field_mm,kappa:t.kappa_trail_per_s,theta:t.theta_detect},preexisting_outcome_artifacts:d.preexisting_Y_maze_outcome_artifacts.length,raw_choices_loaded:false,later_protocol_present:fs.existsSync(path.join(root,laterProtocol)),later_implementation_authorization_present:fs.existsSync(path.join(root,laterImplementationAuthorization)),simulation_authorized:false,promotion_authorized:false}));
