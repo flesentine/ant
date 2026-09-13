@@ -37,7 +37,7 @@ const PINS={
   rightExperiment:'217f94ec4ba61a61c7956baeac34abd19cf5eec8',
   neutralExperiment:'e58cf3f4f5c51168f2dc267af7a820bc5b875b90',
   runner:'fe3bff285290d0d612a5b9ab665e887c728e3d2e',
-  comparator:'02333b7e49e0fcc78fa13850088511e482291f13'
+  comparator:'75cf0ae6075695784e7c67c1473a50e0daaa98cc'
 };
 for(const [rel,sha] of Object.entries({
   'hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json':PINS.authorization,
@@ -86,13 +86,44 @@ for(const [file,side,apparatus,dose] of [
 
 const runnerSource=fs.readFileSync(path.join(root,'tools/run-p4-ymaze-consistency.js'),'utf8');
 for(const forbidden of ['poissonnier2026_published_targets','poissonnier2026_inventory','raw Experiment 2','colony-level Experiment 2'])assert.ok(!runnerSource.includes(forbidden),'Stage A source contains forbidden semantic input '+forbidden);
-const comparatorSource=fs.readFileSync(path.join(root,'tools/compare-p4-ymaze-consistency.js'),'utf8');
-assert.ok(!comparatorSource.includes('--synthetic'),'Stage B CLI must not expose an authorization bypass flag');
 assert.deepStrictEqual(runner.PLAN.qualification,{leftRoot:8410000,rightRoot:8410000,markedCount:12,neutralRoot:8510000,neutralCount:12,scientificEvidence:false});
 assert.deepStrictEqual(runner.PLAN.official,{leftRoot:8210000,rightRoot:8210000,markedCount:1000,neutralRoot:8310000,neutralCount:1000,scientificEvidence:false});
 assert.throws(()=>runner.buildReport('official'),/locked|authorization/i,'official Stage A must remain locked');
-assert.throws(()=>comparator.main(['--simulation','does-not-matter.json','--observed','does-not-matter.json','--synthetic']),/locked|authorization/i,'Stage B CLI must remain locked even if a caller supplies the retired --synthetic flag');
+assert.throws(()=>comparator.main(['--simulation','does-not-matter.json','--observed','does-not-matter.json','--synthetic']),/locked|authorization/i,'Stage B CLI must remain locked before it can consider any retired input override');
+for(const args of [['--simulation','x.json'],['--observed','x.json'],['--synthetic']])assert.throws(()=>comparator.parseRealCliArgs(args),/forbidden/i,'real Stage B must reject caller-selected input overrides');
+assert.deepStrictEqual(comparator.parseRealCliArgs([]),{out:null});
+assert.deepStrictEqual(comparator.parseRealCliArgs(['--out','reports/example.json']),{out:'reports/example.json'});
 assert.throws(()=>comparator.rate(null,'missing model rate'),/finite rate/i,'missing rates must not coerce to zero');
+assert.strictEqual(comparator.PUBLISHED_FILE,'reference/poissonnier2026_published_targets.json');
+assert.strictEqual(comparator.PUBLISHED_BLOB,'5836b5011d765043f94683fa761f3016e86643dc');
+assert.strictEqual(comparator.INVENTORY_FILE,'reference/poissonnier2026_inventory.json');
+assert.strictEqual(comparator.INVENTORY_BLOB,'2ff7d9dcd27cf7609ce77b0f655a6520597c2432');
+assert.strictEqual(comparator.OFFICIAL_STAGE_A_FILE,'reports/p4_ymaze_consistency_simulation_v1.json');
+
+const publishedFixture={source:'poissonnier2026_final_record',y_maze:{n:10,pheromone_followed:8,condition_results:{outwards_naive:{n:3,correct:2},outwards_experienced:{n:2,correct:2},return_experienced:{n:2,correct:2},return_naive:{n:3,correct:2}}}};
+const inventoryFixture={source:'poissonnier2026_final_record',experiment_2:{rows:10,overall:{n:10,correct:8},condition_counts:{ON:{n:3,correct:2},OE:{n:2,correct:2},RE:{n:2,correct:2},RN:{n:3,correct:2}},pheromone_side_counts:{Left:{n:5,correct:4},Right:{n:5,correct:4}}}};
+const normalizedFixture=comparator.normalizeFrozenObservedSources(publishedFixture,inventoryFixture);
+assert.strictEqual(normalizedFixture.overall,0.8);
+assert.deepStrictEqual(normalizedFixture.conditions,{outwards_naive:2/3,outwards_experienced:1,return_experienced:1,return_naive:2/3});
+assert.deepStrictEqual(normalizedFixture.pheromone_side,{left:0.8,right:0.8});
+assert.strictEqual(normalizedFixture.provenance.normalized_from_frozen_counts,true);
+assert.strictEqual(normalizedFixture.provenance.published_targets.git_blob_sha,comparator.PUBLISHED_BLOB);
+assert.strictEqual(normalizedFixture.provenance.inventory.git_blob_sha,comparator.INVENTORY_BLOB);
+const conflictingInventory=clone(inventoryFixture);conflictingInventory.experiment_2.condition_counts.ON.correct=1;
+assert.throws(()=>comparator.normalizeFrozenObservedSources(publishedFixture,conflictingInventory),/disagree/i,'source normalization must fail closed when frozen summaries disagree');
+
+const officialStageAFixture={
+  id:'P4_Y_maze_consistency_stage_A_simulation_v1',mode:'official',scientific_evidence:false,
+  frozen_candidate:{index:307,sigma_field_mm:18.319554310908863,kappa_trail_per_s:6.342935528120713,theta_detect:0.9184},
+  seed_contract:{left_root:8210000,right_root:8210000,marked_count_per_side:1000,neutral_root:8310000,neutral_count:1000,paired_left_right:true},
+  left_marked:{trials:1000,left_choices:700,right_choices:250,timeouts:50},
+  right_marked:{trials:1000,left_choices:250,right_choices:700,timeouts:50},
+  neutral:{trials:1000,left_choices:490,right_choices:490,timeouts:20}
+};
+assert.strictEqual(comparator.validateOfficialStageAReport(officialStageAFixture),officialStageAFixture);
+const qualificationImpostor=clone(officialStageAFixture);qualificationImpostor.id='P4_Y_maze_consistency_reference_free_qualification_simulation_v1';qualificationImpostor.mode='qualification';
+assert.throws(()=>comparator.validateOfficialStageAReport(qualificationImpostor),/official frozen Stage A/i,'qualification output must never be accepted as official Stage A');
+assert.throws(()=>comparator.loadAuthorizedOfficialStageA({}),/pin the official Stage A/i,'future Stage B authorization must pin the official Stage A blob');
 
 for(const [s,n] of [[0,1],[1,1],[6,12],[12,12]]){const w=runner.wilson95(s,n);assert.ok(Number.isFinite(w.low)&&Number.isFinite(w.high)&&w.low>=0&&w.high<=1&&w.low<=w.high);}
 const report=runner.buildReport('qualification');
@@ -125,4 +156,4 @@ assert.throws(()=>comparator.requireRealAuthorization(),/locked|authorization/i,
 
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must not exist');
-console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,official_stage_A_locked:true,official_stage_B_locked:true,stage_B_cli_bypass:false,zero_dose_behavior_rng_lifecycle_identity:true}));
+console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,official_stage_A_locked:true,official_stage_B_locked:true,stage_B_input_overrides:false,stage_B_frozen_source_normalizer:true,stage_B_official_stage_A_pin_required:true,zero_dose_behavior_rng_lifecycle_identity:true}));
