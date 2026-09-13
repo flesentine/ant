@@ -76,7 +76,7 @@ assert.strictEqual(b.aggregate_result_permitted_for_metric_selection_or_threshol
 assert.strictEqual(b.aggregate_result_permitted_for_parameter_change_or_model_selection,false);
 assert.strictEqual(b.fully_blind_holdout_claim_permitted,false);
 assert.match(b.contamination_consequence,/may not be described as pristine blinded validation/i);
-assert.match(b.contamination_consequence,/not sufficient by itself for canonical promotion/i);
+assert.match(b.contamination_consequence,/nor as sufficient by itself for canonical promotion/i);
 
 const h=d.prospective_transfer_hypothesis;
 assert.match(h.model_under_test,/candidate-307 parameters unchanged/i);
@@ -96,12 +96,10 @@ assert.strictEqual(d.next_gate.may_change_P4_parameters,false);
 assert.strictEqual(d.next_gate.may_set_thresholds_using_exposed_aggregate_result,false);
 assert.match(d.future_promotion_requirement,/would not alone establish external validity or authorize canonical promotion/i);
 
-// No biological Y-maze target may be present in the reference surface at this gate.
 const refNames=fs.readdirSync(path.join(root,'reference'));
 const yTargetNames=refNames.filter(n=>/y[_-]?maze|maze.*target|target.*maze/i.test(n));
 assert.deepStrictEqual(yTargetNames,[],'no Y-maze biological target may be materialized at source-design gate');
 
-// No executable validation surface exists yet.
 for(const p of [
   'tools/run-p4-ymaze-validation.js',
   'tools/run-p4-y-maze-validation.js',
@@ -110,7 +108,6 @@ for(const p of [
   'hypotheses/p4_cross_apparatus_Y_maze_protocol_v1.json'
 ]) assert.ok(!fs.existsSync(path.join(root,p)),`${p} must not exist at source-design gate`);
 
-// Development model/runtime/estimator stay exactly frozen.
 assert.strictEqual(blob('src/p4.js'),'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
 assert.strictEqual(blob('models/lasius_niger_painted_trail_p4_v1.json'),'3d8460b6916a90d06e70768f696ee3f0d48fccf4');
 assert.strictEqual(blob('tools/p4-estimation-core.js'),'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
