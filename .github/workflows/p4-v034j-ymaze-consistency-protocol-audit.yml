@@ -1,4 +1,4 @@
-# rerun after semantic seed-contract assertion fix
+# rerun after lifecycle-aware v0.3.4i regression update
 name: P4 v0.3.4j Y-maze consistency protocol audit
 
 on:
@@ -37,9 +37,11 @@ jobs:
           test ! -e tools/run-p4-ymaze-consistency.js
           test ! -e reports/p4_ymaze_consistency_simulation_v1.json
           test ! -e reports/p4_ymaze_consistency_comparison_v1.json
-          git diff --name-only 92cf82051b4cf780721dbb66042d5d373527fff9...HEAD | grep -Ev '^(.github/workflows/p4-v034j-ymaze-consistency-protocol-audit.yml|hypotheses/p4_cross_apparatus_Y_maze_consistency_protocol_v1.json|tests/p4-ymaze-consistency-protocol.test.js|tests/run-tests.sh|docs/P4_VALIDATION.md)$' && { echo 'unexpected v0.3.4j diff'; exit 1; } || true
+          git diff --name-only 92cf82051b4cf780721dbb66042d5d373527fff9...HEAD | grep -Ev '^(.github/workflows/p4-v034j-ymaze-consistency-protocol-audit.yml|hypotheses/p4_cross_apparatus_Y_maze_consistency_protocol_v1.json|tests/p4-ymaze-consistency-protocol.test.js|tests/p4-cross-apparatus-validation-source-design.test.js|tests/run-tests.sh|docs/P4_VALIDATION.md)$' && { echo 'unexpected v0.3.4j diff'; exit 1; } || true
       - name: Run Y-maze consistency protocol regression directly
         run: node tests/p4-ymaze-consistency-protocol.test.js
+      - name: Run source-design lifecycle regression directly
+        run: node tests/p4-cross-apparatus-validation-source-design.test.js
       - name: Run complete permanent regression suite
         run: ./tests/run-tests.sh
       - name: Confirm protocol freeze performed no new Y-maze simulation
