@@ -144,7 +144,7 @@ if(fs.existsSync(path.join(root,implementationAuthorization))){
     [m.future_execution_model_file,'e23b022279d463442bdd4e16d4cf56e0212d2b11'],
     [a.future_left_marked_apparatus_file,'219d42036c13463e8cae5045b8fdba6d5bd24454'],
     [a.future_right_marked_apparatus_file,'bfcba7e34eed4b4f79e67d6fc22c60af993f5386'],
-    [d.future_runner_file,'af0fd2d91f67102c62243bef289bbfe20cf471d7']
+    [d.future_runner_file,'fe3bff285290d0d612a5b9ab665e887c728e3d2e']
   ]){assert.ok(fs.existsSync(path.join(root,file)),file+' should exist only after implementation authorization');assert.strictEqual(blob(file),sha,file+' blob drift');}
 }else{
   for(const file of [m.future_execution_model_file,a.future_left_marked_apparatus_file,a.future_right_marked_apparatus_file,d.future_runner_file])assert.ok(!fs.existsSync(path.join(root,file)),file+' must not exist before implementation authorization');
