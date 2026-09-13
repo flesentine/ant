@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "id": "poissonnier2026_y_maze_p4_left_v1",
+  "title": "Poissonnier et al. 2026 Y-maze — P4 left arm marked",
+  "world": {"width": 215, "height": 240},
+  "geometry": {"primitives": [
+    {"type": "corridor", "name": "approach", "x1": 20, "y1": 120, "x2": 135, "y2": 120, "width": 10},
+    {"type": "corridor", "name": "fork_neck", "x1": 132, "y1": 120, "x2": 143, "y2": 120, "width": 2},
+    {"type": "corridor", "name": "left_arm", "x1": 140, "y1": 120, "x2": 190, "y2": 33.3975, "width": 10},
+    {"type": "corridor", "name": "right_arm", "x1": 140, "y1": 120, "x2": 190, "y2": 206.6025, "width": 10}
+  ]},
+  "boundary": {"mode": "reflect", "outcome": "wall"},
+  "entry_points": {"default": {"x": 30, "y": 120, "heading_rad": 0}, "stem": {"x": 30, "y": 120, "heading_rad": 0}},
+  "terminal_regions": [],
+  "external_fields": {
+    "painted_trail": {
+      "type": "line_segment_scalar_field",
+      "line_segment_mm": {"x1": 140, "y1": 120, "x2": 190, "y2": 33.3975},
+      "nominal_dose_hindgut_equivalents_per_cm": 0.0048,
+      "directionality": "undirected"
+    }
+  },
+  "metadata": {
+    "reference_geometry": "100 mm arms, 10 mm width, tapering to 2 mm at bifurcation, 120 degree branch angle",
+    "integrity_note": "Base Y-maze geometry is preserved exactly; the only physical addition is the authorized painted-trail field on the left-arm centerline.",
+    "base_apparatus_git_blob_sha": "eca7a0e66aed9546e5fc26c08f7abaa37bb3cbc8",
+    "protocol_git_blob_sha": "22515a3fe0945c0f19b6fb2166923f027bbf1b54",
+    "implementation_authorization_git_blob_sha": "db64b72830c3715b3dd26d5ad3422655e50e8828",
+    "marked_side": "left"
+  }
+}
