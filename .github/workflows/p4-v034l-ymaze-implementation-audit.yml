@@ -1,4 +1,4 @@
-# rerun after zero-dose behavioral identity correction
+# rerun after source-design lifecycle correction
 name: P4 v0.3.4l Y-maze implementation audit
 
 on:
@@ -31,11 +31,13 @@ jobs:
           test ! -e hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
           test ! -e reports/p4_ymaze_consistency_simulation_v1.json
           test ! -e reports/p4_ymaze_consistency_comparison_v1.json
-          git diff --name-only 4a2c6a0f40f9d07c57ac7eb2ad6eec58aa0cd6e6...HEAD | grep -Ev '^(.github/workflows/p4-v034l-ymaze-implementation-audit.yml|models/lasius_niger_painted_trail_p4_fitted_v1.json|apparatus/poissonnier2026_y_maze_p4_left_v1.json|apparatus/poissonnier2026_y_maze_p4_right_v1.json|experiments/y_maze_p4_left_consistency_v1.json|experiments/y_maze_p4_right_consistency_v1.json|experiments/y_maze_p4_neutral_consistency_v1.json|tools/run-p4-ymaze-consistency.js|tools/compare-p4-ymaze-consistency.js|tests/p4-ymaze-consistency-implementation.test.js|tests/run-tests.sh)$' && { echo 'unexpected v0.3.4l diff'; exit 1; } || true
+          git diff --name-only 4a2c6a0f40f9d07c57ac7eb2ad6eec58aa0cd6e6...HEAD | grep -Ev '^(.github/workflows/p4-v034l-ymaze-implementation-audit.yml|models/lasius_niger_painted_trail_p4_fitted_v1.json|apparatus/poissonnier2026_y_maze_p4_left_v1.json|apparatus/poissonnier2026_y_maze_p4_right_v1.json|experiments/y_maze_p4_left_consistency_v1.json|experiments/y_maze_p4_right_consistency_v1.json|experiments/y_maze_p4_neutral_consistency_v1.json|tools/run-p4-ymaze-consistency.js|tools/compare-p4-ymaze-consistency.js|tests/p4-cross-apparatus-validation-source-design.test.js|tests/p4-ymaze-consistency-implementation.test.js|tests/run-tests.sh)$' && { echo 'unexpected v0.3.4l diff'; exit 1; } || true
       - name: Syntax-check new runners
         run: |
           node --check tools/run-p4-ymaze-consistency.js
           node --check tools/compare-p4-ymaze-consistency.js
+      - name: Run source-design lifecycle regression directly
+        run: node tests/p4-cross-apparatus-validation-source-design.test.js
       - name: Run implementation regression directly
         run: node tests/p4-ymaze-consistency-implementation.test.js
       - name: Run qualification Stage A CLI on non-official seeds
