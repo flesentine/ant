@@ -1,3 +1,4 @@
+# rerun after semantic seed-contract assertion fix
 name: P4 v0.3.4j Y-maze consistency protocol audit
 
 on:
