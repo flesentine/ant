@@ -33,8 +33,8 @@
     "right_experiment": {"file": "experiments/y_maze_p4_right_consistency_v1.json", "git_blob_sha": "217f94ec4ba61a61c7956baeac34abd19cf5eec8"},
     "neutral_experiment": {"file": "experiments/y_maze_p4_neutral_consistency_v1.json", "git_blob_sha": "e58cf3f4f5c51168f2dc267af7a820bc5b875b90"},
     "stage_A_runner": {"file": "tools/run-p4-ymaze-consistency.js", "git_blob_sha": "fe3bff285290d0d612a5b9ab665e887c728e3d2e"},
-    "stage_B_comparator": {"file": "tools/compare-p4-ymaze-consistency.js", "git_blob_sha": "02333b7e49e0fcc78fa13850088511e482291f13"},
-    "implementation_regression": {"file": "tests/p4-ymaze-consistency-implementation.test.js", "git_blob_sha": "f5252419e16bb3258e5b1e9be187e88763d819e3"}
+    "stage_B_comparator": {"file": "tools/compare-p4-ymaze-consistency.js", "git_blob_sha": "75cf0ae6075695784e7c67c1473a50e0daaa98cc"},
+    "implementation_regression": {"file": "tests/p4-ymaze-consistency-implementation.test.js", "git_blob_sha": "74ecec3c2a588e7decc04875fd814101b705abef"}
   },
   "node_qualification": {
     "status": "success",
@@ -101,32 +101,48 @@
     "workflow_run_id": 34789972638,
     "job_id": 103812264700,
     "qualified_head_sha": "bd4de24b95a426456be96f2163152937843361dc",
-    "stage_A_runner_git_blob_sha": "fe3bff285290d0d612a5b9ab665e887c728e3d2e",
-    "stage_B_comparator_git_blob_sha": "02333b7e49e0fcc78fa13850088511e482291f13",
-    "implementation_regression_git_blob_sha": "f5252419e16bb3258e5b1e9be187e88763d819e3",
-    "source_design_lifecycle_test_git_blob_sha": "8e74a315bc72429722ecf82d763e116fc5d70ef8",
-    "protocol_lifecycle_test_git_blob_sha": "bbf3df54afaf2373cac6a1762b7382d102b4449a",
-    "implementation_authorization_lifecycle_test_git_blob_sha": "e0344e8abadba6137f61faf908da06d8dcd0237d",
+    "historical_stage_A_runner_git_blob_sha": "fe3bff285290d0d612a5b9ab665e887c728e3d2e",
+    "historical_stage_B_comparator_git_blob_sha": "02333b7e49e0fcc78fa13850088511e482291f13",
+    "historical_implementation_regression_git_blob_sha": "f5252419e16bb3258e5b1e9be187e88763d819e3",
     "stage_A_official_cli_lockout": true,
     "stage_B_cli_authorization_bypass_present": false,
     "stage_B_retired_synthetic_flag_cannot_bypass_authorization": true,
     "missing_model_rate_fails_closed": true,
     "all_timeout_side_rate_is_explicit_null": true,
     "permanent_suite_excluding_pre_hardening_qualification_result_pin": true,
+    "official_or_biological_comparison_artifacts_created": false
+  },
+  "review_thread_remediation": {
+    "status": "success",
+    "workflow_run_id": 34790305630,
+    "job_id": 103813160026,
+    "qualified_head_sha": "70c50bd54d216d36c1ab20dd01dbc143fe57aa96",
+    "review_findings": [
+      "Stage B must consume the two frozen biological-summary schemas without an untracked manual normalization step.",
+      "Stage B must reject arbitrary simulation JSON and compare only the future authorization-pinned official Stage A artifact."
+    ],
+    "stage_B_comparator_git_blob_sha": "75cf0ae6075695784e7c67c1473a50e0daaa98cc",
+    "implementation_regression_git_blob_sha": "74ecec3c2a588e7decc04875fd814101b705abef",
+    "implementation_authorization_lifecycle_test_git_blob_sha": "8907721d081665c40f485f3146b590b38f948c1c",
+    "frozen_observed_sources": [
+      {"file": "reference/poissonnier2026_published_targets.json", "git_blob_sha": "5836b5011d765043f94683fa761f3016e86643dc"},
+      {"file": "reference/poissonnier2026_inventory.json", "git_blob_sha": "2ff7d9dcd27cf7609ce77b0f655a6520597c2432"}
+    ],
+    "observed_normalization_rule": "Deterministically derive overall and condition rates from frozen exact correct/n counts in the published-target record, cross-check those counts against the frozen inventory, and derive pheromone-side rates from frozen inventory correct/n counts. Any cross-source disagreement fails closed.",
+    "caller_selected_simulation_path_authorized": false,
+    "caller_selected_observed_path_authorized": false,
+    "manual_normalized_summary_input_authorized": false,
+    "future_stage_B_authorization_must_pin_official_stage_A_file": "reports/p4_ymaze_consistency_simulation_v1.json",
+    "future_stage_B_authorization_must_pin_official_stage_A_git_blob_sha": true,
+    "official_stage_A_validation_requires": ["official report id", "mode=official", "scientific_evidence=false", "candidate 307 triplet", "official 8210000/8310000 seed contract", "1000 trials per left/right/neutral condition", "exact outcome accounting"],
+    "qualification_impostor_rejected": true,
+    "stage_A_official_cli_lockout": true,
+    "stage_B_real_cli_lockout": true,
+    "permanent_suite_excluding_pre_remediation_qualification_result_pin": true,
     "official_or_biological_comparison_artifacts_created": false,
     "browser_facing_simulation_bytes_unchanged_from_chromium_qualification": true,
-    "browser_facing_unchanged_files": [
-      "src/p4.js",
-      "src/p1.js",
-      "models/lasius_niger_painted_trail_p4_fitted_v1.json",
-      "apparatus/poissonnier2026_y_maze_p4_left_v1.json",
-      "apparatus/poissonnier2026_y_maze_p4_right_v1.json",
-      "experiments/y_maze_p4_left_consistency_v1.json",
-      "experiments/y_maze_p4_right_consistency_v1.json",
-      "experiments/y_maze_p4_neutral_consistency_v1.json"
-    ],
     "chromium_rerun_required": false,
-    "chromium_rerun_reason": "The hardening changed only Node CLI/reporting tooling and regressions; all runtime, model, apparatus, and experiment bytes exercised by the successful Chrome audit remain bit-for-bit unchanged."
+    "chromium_rerun_reason": "The P1 remediation changed only the Node Stage-B comparator and regression/lifecycle evidence. Runtime, model, apparatus, and experiment bytes exercised by the successful Chrome audit remain bit-for-bit unchanged."
   },
   "stage_A_semantic_firewall": {
     "known_biological_ymaze_summaries_read_by_runner": false,
@@ -141,6 +157,7 @@
     "real_biological_comparison_executed": false,
     "protocol_predeclared_rows": 7,
     "row_contract": "1 overall + 4 direction/experience strata + 2 pheromone-side rows",
+    "real_input_contract": "After future Stage-B authorization, the comparator itself loads only the two frozen biological source artifacts and only the authorization-pinned official Stage-A Git blob; caller-selected simulation, observed-summary, and synthetic input overrides are forbidden.",
     "authorization_wording_discrepancy_note": "The later implementation-authorization prose refers once to 'all six' comparison rows, while the earlier frozen protocol explicitly enumerates one overall, four condition, and two pheromone-side comparisons (seven total). Qualification follows the earlier, more specific frozen protocol and therefore omits no predeclared row.",
     "best_subset_selection_authorized": false,
     "inferential_significance_testing_authorized": false,
