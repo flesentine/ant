@@ -76,7 +76,7 @@ const fixedLaterBlobs=new Map([
   [s.right_experiment,'217f94ec4ba61a61c7956baeac34abd19cf5eec8'],
   [s.neutral_experiment,'e58cf3f4f5c51168f2dc267af7a820bc5b875b90'],
   [s.stage_A_runner,'fe3bff285290d0d612a5b9ab665e887c728e3d2e'],
-  [s.stage_B_comparator,'02333b7e49e0fcc78fa13850088511e482291f13']
+  [s.stage_B_comparator,'75cf0ae6075695784e7c67c1473a50e0daaa98cc']
 ]);
 const implementationPresent=fs.existsSync(path.join(root,s.fitted_model));
 if(implementationPresent){
