@@ -65,6 +65,27 @@ assert.ok(q.required_checks.some(x=>/zero requests.*biological Y-maze outcome/i.
 for(const [k,v] of Object.entries(a.firewalls))assert.strictEqual(v,false,k+' must remain false');
 assert.strictEqual(a.next_gate.id,'P4_Y_maze_consistency_implementation_qualification_v1');
 assert.strictEqual(a.next_gate.official_execution_remains_locked,true);
-// At authorization freeze no executable surface exists yet.
-for(const p of [s.fitted_model,s.left_marked_apparatus,s.right_marked_apparatus,s.left_experiment,s.right_experiment,s.neutral_experiment,s.stage_A_runner,s.stage_B_comparator,s.implementation_test,s.qualification_report])assert.ok(!fs.existsSync(path.join(root,p)),p+' must not exist at authorization freeze');
-console.log('p4-ymaze-consistency-implementation-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),candidate:m.candidate_index,qualification_seed_count:q.left_right_seed_count,official_stage_A:false,chromium_required:true}));
+
+// Historical v0.3.4k truth: no executable surface existed at authorization freeze. Later lifecycle
+// states may materialize only this authorized surface while official Stage A and real Stage B stay locked.
+const fixedLaterBlobs=new Map([
+  [s.fitted_model,'e23b022279d463442bdd4e16d4cf56e0212d2b11'],
+  [s.left_marked_apparatus,'219d42036c13463e8cae5045b8fdba6d5bd24454'],
+  [s.right_marked_apparatus,'bfcba7e34eed4b4f79e67d6fc22c60af993f5386'],
+  [s.left_experiment,'08edc2d3ef9899820c04e900154f1b4bee2a5104'],
+  [s.right_experiment,'217f94ec4ba61a61c7956baeac34abd19cf5eec8'],
+  [s.neutral_experiment,'e58cf3f4f5c51168f2dc267af7a820bc5b875b90'],
+  [s.stage_A_runner,'fe3bff285290d0d612a5b9ab665e887c728e3d2e'],
+  [s.stage_B_comparator,'75cf0ae6075695784e7c67c1473a50e0daaa98cc']
+]);
+const implementationPresent=fs.existsSync(path.join(root,s.fitted_model));
+if(implementationPresent){
+  for(const [file,sha] of fixedLaterBlobs){assert.ok(fs.existsSync(path.join(root,file)),file+' missing from authorized later implementation');assert.strictEqual(blob(file),sha,file+' blob drift');}
+  assert.ok(fs.existsSync(path.join(root,s.implementation_test)),'authorized implementation regression must exist with later implementation');
+}else for(const file of [...fixedLaterBlobs.keys(),s.implementation_test])assert.ok(!fs.existsSync(path.join(root,file)),file+' must not exist before later implementation gate');
+assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json')),'official Stage A authorization must remain absent');
+assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'real Stage B authorization must remain absent');
+assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must remain absent');
+assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must remain absent');
+
+console.log('p4-ymaze-consistency-implementation-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),candidate:m.candidate_index,qualification_seed_count:q.left_right_seed_count,later_implementation_present:implementationPresent,official_stage_A:false,chromium_required:true}));

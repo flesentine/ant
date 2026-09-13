@@ -1,0 +1,27 @@
+{
+  "schema_version": 3,
+  "id": "y_maze_p4_left_consistency_v1",
+  "title": "P4 Y-maze consistency — left arm marked",
+  "model": "lasius_niger_painted_trail_p4_fitted_v1",
+  "state": "naive_outbound_v1",
+  "apparatus": "poissonnier2026_y_maze_p4_left_v1",
+  "observation": "engineering_25fps",
+  "scoring": "y_maze_endpoint_engineering_v1",
+  "workers": 1,
+  "duration_s": 90,
+  "protocol": {
+    "entry_point": "stem",
+    "entry_state": {"heading_rad": 0, "position_jitter_mm": 0.4, "heading_jitter_rad": 0.05},
+    "state_facts": {"travel_direction": "outbound", "experience": "naive"},
+    "treatment": {"type": "P4_cross_apparatus_consistency", "marked_side": "left", "opposite_arm": "DCM"},
+    "painted_trail": {"applied_hindgut_equivalents_per_cm": 0.0048}
+  },
+  "requested_metrics": ["branch_choice"],
+  "calibration_role": "frozen_cross_apparatus_consistency_surface_not_fit",
+  "metadata": {
+    "evidence_class": "posthoc_same_study_cross_apparatus_consistency_only",
+    "protocol_git_blob_sha": "22515a3fe0945c0f19b6fb2166923f027bbf1b54",
+    "implementation_authorization_git_blob_sha": "db64b72830c3715b3dd26d5ad3422655e50e8828",
+    "official_execution_authorized": false
+  }
+}
