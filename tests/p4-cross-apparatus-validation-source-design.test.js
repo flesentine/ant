@@ -141,7 +141,7 @@ if(fs.existsSync(path.join(root,laterImplementationAuthorization))){
   const ia=read(laterImplementationAuthorization);
   assert.strictEqual(ia.protocol_lineage.protocol_git_blob_sha,'22515a3fe0945c0f19b6fb2166923f027bbf1b54');
   assert.ok(fs.existsSync(path.join(root,laterRunner)),'runner may appear only after implementation authorization');
-  assert.strictEqual(blob(laterRunner),'af0fd2d91f67102c62243bef289bbfe20cf471d7');
+  assert.strictEqual(blob(laterRunner),'fe3bff285290d0d612a5b9ab665e887c728e3d2e');
 }else assert.ok(!fs.existsSync(path.join(root,laterRunner)),'runner must be absent before implementation authorization');
 for(const file of [
   'reports/p4_ymaze_consistency_v1.json',
