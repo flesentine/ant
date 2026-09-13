@@ -37,23 +37,33 @@ The already-known Y-maze outcomes may not be used to:
 - select a different model after seeing the Y-maze summaries;
 - authorize canonical promotion.
 
-A future Y-maze consistency protocol must report the frozen model transparently without pretending that a newly selected threshold is prospective.
+## Frozen Y-maze consistency protocol
 
-## Current gate
+`P4_cross_apparatus_Y_maze_consistency_protocol_v1` freezes the descriptive audit before any new Y-maze simulation.
 
-`P4_cross_apparatus_validation_source_design_v1` now does three things:
+The future execution must use candidate 307 unchanged. Two derived apparatus variants will preserve the base Y-maze geometry exactly and add only the already-supported undirected line-segment painted-trail field. For the left-marked condition the field is the left-arm centerline `(140,120) -> (190,33.3975)`; for the right-marked condition it is `(140,120) -> (190,206.6025)`. The opposite DCM arm has no active scalar field. The nominal applied dose remains `0.0048` hindgut equivalents/cm.
 
-1. preserves the successful Experiment 1 development lineage and immutable candidate-307 triplet;
-2. explicitly records the pre-existing Y-maze outcome artifacts and the subsequent PR #44 outcome exposure;
-3. reclassifies Experiment 2 as a descriptive cross-apparatus consistency audit only.
+Initialization is inherited unchanged from the neutral engineering fixture: stem entry `(30,120)`, heading `0`, position jitter `0.4 mm`, heading jitter `0.05 rad`, one worker, and `90 s` duration. The endpoint remains the explicitly engineering-only first-entry scoring circles at the two branch endpoints; because the exact biological decision line is unavailable, the result must not be described as an exact Experiment 2 scoring reconstruction.
 
-The repo's reserved Y-maze apparatus, neutral engineering fixture, and engineering scoring files remain pinned. Their contents are not yet adopted as a P4 consistency protocol.
+The simulation budget is frozen at:
 
-## Next Y-maze gate
+- 1,000 left-marked trials;
+- 1,000 right-marked trials;
+- paired marked-side seeds `8210000..8210999`;
+- 1,000 neutral diagnostic trials using seeds `8310000..8310999`.
 
-`P4_cross_apparatus_Y_maze_consistency_protocol_freeze_v1` may inspect and freeze the Y-maze apparatus geometry and define an outcome-nonadaptive simulation/audit procedure. It must specify initialization, trail-field mapping, binary-choice endpoint, neutral comparator, simulation budget, RNG/seeds, and comprehensive reporting fields with the frozen P4 triplet unchanged.
+The marked-side runs use common random numbers across left/right field placement. Overall marked-arm choice gives equal simulation weight to the two marked-side conditions. Timeouts are always reported explicitly. Wilson 95% intervals are descriptive only.
 
-Because the biological outcome summaries are already known, this gate must **not** create a promotion or validation pass/fail threshold.
+P4 has no direction-, experience-, colony-, or side-specific response parameter, so the same side-balanced model prediction is projected to all four published direction/experience conditions. No condition-specific fit or parameter is allowed.
+
+### Two-stage outcome firewall
+
+The consistency audit must execute in two stages:
+
+1. **Stage A — simulation only.** Generate and freeze `reports/p4_ymaze_consistency_simulation_v1.json` without parsing or receiving any biological Y-maze outcome values. Its bytes, hashes, runner/model/apparatus blobs, seed contract, and execution provenance must be frozen first.
+2. **Stage B — descriptive comparison.** Only after Stage A is immutable may a separate comparison step read the two already-known pinned Y-maze summary artifacts. It must report all predeclared comparisons: overall choice, all four direction/experience conditions, left-phero side, and right-phero side. Signed and absolute discrepancies are reported for all of them; no best-subset selection, inferential significance test, pass/fail threshold, refit, rerun, or promotion decision is allowed.
+
+No Y-maze simulation is authorized by the protocol-freeze gate itself. A separate implementation-authorization gate must first create and qualify the exact fitted model, paired apparatus variants, fixed experiments, and two-stage runner.
 
 ## Promotion-grade validation
 
