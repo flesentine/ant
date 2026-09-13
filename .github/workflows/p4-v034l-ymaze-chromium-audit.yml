@@ -1,0 +1,180 @@
+name: P4 v0.3.4l Y-maze Chromium parity audit
+
+on:
+  push:
+    branches: [v0.3.4l-p4-ymaze-implementation-qualification]
+    paths:
+      - '.github/workflows/p4-v034l-ymaze-chromium-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  chromium:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Node-qualified implementation bytes
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/p4.js)" = "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"
+          test "$(git hash-object src/p1.js)" = "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"
+          test "$(git hash-object models/lasius_niger_painted_trail_p4_fitted_v1.json)" = "e23b022279d463442bdd4e16d4cf56e0212d2b11"
+          test "$(git hash-object apparatus/poissonnier2026_y_maze_p4_left_v1.json)" = "219d42036c13463e8cae5045b8fdba6d5bd24454"
+          test "$(git hash-object apparatus/poissonnier2026_y_maze_p4_right_v1.json)" = "bfcba7e34eed4b4f79e67d6fc22c60af993f5386"
+          test "$(git hash-object tools/run-p4-ymaze-consistency.js)" = "af0fd2d91f67102c62243bef289bbfe20cf471d7"
+          test ! -e hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json
+          test ! -e hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
+      - name: Locate real Chrome
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME"
+          echo "CHROME=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version | tee /tmp/chrome-version.txt
+      - name: Generate six-case Node reference
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p4=require('./src/p4.js');
+          const {loadBundle}=require('./tools/load-bundle.js');
+          const cases=[
+            ['left-8410000','y_maze_p4_left_consistency_v1.json',8410000],
+            ['left-8410001','y_maze_p4_left_consistency_v1.json',8410001],
+            ['right-8410000','y_maze_p4_right_consistency_v1.json',8410000],
+            ['right-8410001','y_maze_p4_right_consistency_v1.json',8410001],
+            ['neutral-8510000','y_maze_p4_neutral_consistency_v1.json',8510000],
+            ['neutral-8510001','y_maze_p4_neutral_consistency_v1.json',8510001]
+          ];
+          const num=x=>Number.isFinite(x)?Number(x.toFixed(12)):x;
+          function summary(name,seed,sim){const a=sim.ants[0];return{
+            case:name,seed,time:num(sim.time),outcome:a.outcome,finished:a.finished,completedAt:num(a.completedAt),
+            x:num(a.x),y:num(a.y),heading:num(a.heading),distanceTravelled:num(a.distanceTravelled),movingTime:num(a.movingTime),
+            speedFactor:num(a.speedFactor),pauseRemaining:num(a.pauseRemaining),rngState:a.rng.state,
+            p4EvaluationSamples:a.p4EvaluationSamples,p4DetectedSamples:a.p4DetectedSamples,
+            p4SubthresholdSamples:a.p4SubthresholdSamples,p4NonzeroSteeringSamples:a.p4NonzeroSteeringSamples
+          };}
+          const out=[];
+          for(const [name,file,seed] of cases){const b=loadBundle(file);const sim=new p4.Simulation(b,seed);sim.runUntilComplete(b.experiment.duration_s,p4.FIXED_DT);out.push(summary(name,seed,sim));}
+          fs.writeFileSync('/tmp/node-cases.json',JSON.stringify(out));
+          console.log(JSON.stringify(out,null,2));
+          NODE
+      - name: Build browser harness
+        run: |
+          cat > p4-ymaze-browser-audit.tmp.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>P4 Y-maze browser audit</title>
+          <script src="/src/sim-core.js"></script>
+          <script src="/src/measurement.js"></script>
+          <script src="/src/h3.js"></script>
+          <script src="/src/integrity.js"></script>
+          <script src="/src/p1.js"></script>
+          <script src="/src/p4.js"></script>
+          <pre id="result">RUNNING</pre>
+          <script>
+          (async()=>{
+            const cases=[
+              ['left-8410000','y_maze_p4_left_consistency_v1.json',8410000],
+              ['left-8410001','y_maze_p4_left_consistency_v1.json',8410001],
+              ['right-8410000','y_maze_p4_right_consistency_v1.json',8410000],
+              ['right-8410001','y_maze_p4_right_consistency_v1.json',8410001],
+              ['neutral-8510000','y_maze_p4_neutral_consistency_v1.json',8510000],
+              ['neutral-8510001','y_maze_p4_neutral_consistency_v1.json',8510001]
+            ];
+            const j=async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(u+' HTTP '+r.status);return r.json();};
+            async function load(file){const experiment=await j('/experiments/'+file);return{
+              experiment,
+              model:await j('/models/'+experiment.model+'.json'),
+              apparatus:await j('/apparatus/'+experiment.apparatus+'.json'),
+              state:await j('/states/'+experiment.state+'.json'),
+              observation:await j('/observations/'+experiment.observation+'.json'),
+              scoring:await j('/scoring/'+experiment.scoring+'.json')
+            };}
+            const num=x=>Number.isFinite(x)?Number(x.toFixed(12)):x;
+            function summary(name,seed,sim){const a=sim.ants[0];return{
+              case:name,seed,time:num(sim.time),outcome:a.outcome,finished:a.finished,completedAt:num(a.completedAt),
+              x:num(a.x),y:num(a.y),heading:num(a.heading),distanceTravelled:num(a.distanceTravelled),movingTime:num(a.movingTime),
+              speedFactor:num(a.speedFactor),pauseRemaining:num(a.pauseRemaining),rngState:a.rng.state,
+              p4EvaluationSamples:a.p4EvaluationSamples,p4DetectedSamples:a.p4DetectedSamples,
+              p4SubthresholdSamples:a.p4SubthresholdSamples,p4NonzeroSteeringSamples:a.p4NonzeroSteeringSamples
+            };}
+            try{
+              const out=[];
+              for(const [name,file,seed] of cases){const b=await load(file);const sim=new AntLabP4.Simulation(b,seed);sim.runUntilComplete(b.experiment.duration_s,AntLabP4.FIXED_DT);out.push(summary(name,seed,sim));}
+              document.getElementById('result').textContent=JSON.stringify(out);
+              document.documentElement.dataset.done='1';
+            }catch(e){document.getElementById('result').textContent='ERROR:'+String(e&&e.stack||e);document.documentElement.dataset.done='error';}
+          })();
+          </script>
+          HTML
+      - name: Run real Chrome and capture HTTP requests
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 1
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-background-networking --disable-component-update --disable-default-apps --disable-sync --no-first-run --virtual-time-budget=15000 --dump-dom http://127.0.0.1:8000/p4-ymaze-browser-audit.tmp.html > /tmp/browser-dom.html
+          grep -q 'data-done="1"' /tmp/browser-dom.html
+          python3 <<'PY'
+          import html
+          from html.parser import HTMLParser
+          class P(HTMLParser):
+              def __init__(self): super().__init__(); self.on=False; self.parts=[]
+              def handle_starttag(self,tag,attrs):
+                  if tag=='pre' and dict(attrs).get('id')=='result': self.on=True
+              def handle_endtag(self,tag):
+                  if tag=='pre' and self.on: self.on=False
+              def handle_data(self,data):
+                  if self.on: self.parts.append(data)
+          p=P(); p.feed(open('/tmp/browser-dom.html',encoding='utf8').read())
+          text=html.unescape(''.join(p.parts))
+          if text.startswith('ERROR:'): raise SystemExit(text)
+          open('/tmp/browser-cases.json','w',encoding='utf8').write(text)
+          PY
+          cat /tmp/http.log
+      - name: Verify exact Node-Chrome parity
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),assert=require('assert');
+          const n=JSON.parse(fs.readFileSync('/tmp/node-cases.json','utf8'));
+          const b=JSON.parse(fs.readFileSync('/tmp/browser-cases.json','utf8'));
+          assert.strictEqual(n.length,6); assert.strictEqual(b.length,6); assert.deepStrictEqual(b,n);
+          const neutral=b.filter(x=>x.case.startsWith('neutral-'));
+          assert.strictEqual(neutral.length,2); for(const x of neutral)assert.strictEqual(x.p4EvaluationSamples,0);
+          console.log('REAL CHROME PARITY PASS cases='+b.length);
+          NODE
+      - name: Verify browser network firewall
+        run: |
+          set -euo pipefail
+          ! grep -Eqi 'poissonnier2026_published_targets|poissonnier2026_inventory|/reference/' /tmp/http.log
+          REQUESTS=$(grep -Ec '"GET ' /tmp/http.log || true)
+          test "$REQUESTS" -gt 0
+          echo "Browser HTTP requests: $REQUESTS; forbidden biological Y-maze outcome requests: 0"
+      - name: Write browser audit artifact
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const report={
+            schema_version:1,
+            id:'P4_Y_maze_consistency_chromium_qualification_v1',
+            scientific_evidence:false,
+            chrome_version:fs.readFileSync('/tmp/chrome-version.txt','utf8').trim(),
+            cases:JSON.parse(fs.readFileSync('/tmp/browser-cases.json','utf8')),
+            case_count:6,
+            node_chrome_exact_parity:true,
+            forbidden_biological_ymaze_network_requests:0,
+            official_stage_A_executed:false,
+            real_stage_B_executed:false
+          };
+          fs.writeFileSync('/tmp/p4-ymaze-chromium-audit.json',JSON.stringify(report,null,2)+'\n');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4-ymaze-chromium-qualification
+          path: /tmp/p4-ymaze-chromium-audit.json
+          if-no-files-found: error
