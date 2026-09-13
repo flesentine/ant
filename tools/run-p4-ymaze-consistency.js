@@ -74,7 +74,10 @@ function buildReport(mode='qualification'){
   const left=runCondition(EXP.left,seeds(plan.leftRoot,plan.markedCount),'left');
   const right=runCondition(EXP.right,seeds(plan.rightRoot,plan.markedCount),'right');
   const neutral=runCondition(EXP.neutral,seeds(plan.neutralRoot,plan.neutralCount),null);
-  const sideBalanced=(left.marked_arm_choice_fraction_among_choices+right.marked_arm_choice_fraction_among_choices)/2;
+  const leftMarked=left.marked_arm_choice_fraction_among_choices;
+  const rightMarked=right.marked_arm_choice_fraction_among_choices;
+  const sideBalanced=leftMarked===null||rightMarked===null?null:(leftMarked+rightMarked)/2;
+  const sideDifference=leftMarked===null||rightMarked===null?null:leftMarked-rightMarked;
   return{
     schema_version:1,
     id:mode==='official'?'P4_Y_maze_consistency_stage_A_simulation_v1':'P4_Y_maze_consistency_reference_free_qualification_simulation_v1',
@@ -91,19 +94,19 @@ function buildReport(mode='qualification'){
       left_marked_left_choices:left.left_choices,
       left_marked_right_choices:left.right_choices,
       left_marked_timeouts:left.timeouts,
-      left_marked_marked_arm_choice_fraction_among_choices:left.marked_arm_choice_fraction_among_choices,
+      left_marked_marked_arm_choice_fraction_among_choices:leftMarked,
       right_marked_trials:right.trials,
       right_marked_left_choices:right.left_choices,
       right_marked_right_choices:right.right_choices,
       right_marked_timeouts:right.timeouts,
-      right_marked_marked_arm_choice_fraction_among_choices:right.marked_arm_choice_fraction_among_choices,
+      right_marked_marked_arm_choice_fraction_among_choices:rightMarked,
       side_balanced_marked_arm_choice_fraction:sideBalanced,
       neutral_trials:neutral.trials,
       neutral_left_choices:neutral.left_choices,
       neutral_right_choices:neutral.right_choices,
       neutral_timeouts:neutral.timeouts,
       neutral_left_fraction_among_choices:neutral.left_fraction_among_choices,
-      left_right_marked_side_difference:left.marked_arm_choice_fraction_among_choices-right.marked_arm_choice_fraction_among_choices,
+      left_right_marked_side_difference:sideDifference,
       P4_detection_diagnostics_by_marked_side:{left:left.P4_diagnostics,right:right.P4_diagnostics}
     },
     decision_semantics:{validation_pass_fail_threshold:null,promotion_rule:null,canonical_update_authorized:false}
