@@ -6,7 +6,7 @@ const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
 const rel='reports/p4_ymaze_consistency_implementation_qualification_v1.json';
-assert.strictEqual(blob(rel),'ac44324c1e7619a7e9d43f338c19951b661e8a14');
+assert.strictEqual(blob(rel),'33096af85b4c5743e7289bd779611743f700ae90');
 const r=read(rel);
 assert.strictEqual(r.id,'P4_Y_maze_consistency_implementation_qualification_v1');
 assert.strictEqual(r.status,'passed_reference_free_implementation_qualification');
@@ -29,6 +29,9 @@ for(const spec of Object.values(r.qualified_implementation_blobs)){
 }
 assert.strictEqual(r.qualified_implementation_blobs.runtime_p4.changed_in_this_gate,false);
 assert.strictEqual(r.qualified_implementation_blobs.runtime_p1_helper.changed_in_this_gate,false);
+assert.strictEqual(r.qualified_implementation_blobs.stage_A_runner.git_blob_sha,'fe3bff285290d0d612a5b9ab665e887c728e3d2e');
+assert.strictEqual(r.qualified_implementation_blobs.stage_B_comparator.git_blob_sha,'02333b7e49e0fcc78fa13850088511e482291f13');
+assert.strictEqual(r.qualified_implementation_blobs.implementation_regression.git_blob_sha,'f5252419e16bb3258e5b1e9be187e88763d819e3');
 
 const n=r.node_qualification;
 assert.strictEqual(n.status,'success');
@@ -72,6 +75,35 @@ assert.strictEqual(c.real_stage_B_executed,false);
 assert.strictEqual(c.artifact_id,10326087265);
 assert.strictEqual(c.artifact_digest,'sha256:aba0d06f801efbf945478f3bce53f3a4ee0aebe69be177d2d52966e8af118b22');
 
+const h=r.post_review_hardening;
+assert.strictEqual(h.status,'success');
+assert.strictEqual(h.workflow_run_id,34789972638);
+assert.strictEqual(h.job_id,103812264700);
+assert.strictEqual(h.qualified_head_sha,'bd4de24b95a426456be96f2163152937843361dc');
+assert.strictEqual(h.stage_A_runner_git_blob_sha,'fe3bff285290d0d612a5b9ab665e887c728e3d2e');
+assert.strictEqual(blob('tools/run-p4-ymaze-consistency.js'),h.stage_A_runner_git_blob_sha);
+assert.strictEqual(h.stage_B_comparator_git_blob_sha,'02333b7e49e0fcc78fa13850088511e482291f13');
+assert.strictEqual(blob('tools/compare-p4-ymaze-consistency.js'),h.stage_B_comparator_git_blob_sha);
+assert.strictEqual(h.implementation_regression_git_blob_sha,'f5252419e16bb3258e5b1e9be187e88763d819e3');
+assert.strictEqual(blob('tests/p4-ymaze-consistency-implementation.test.js'),h.implementation_regression_git_blob_sha);
+assert.strictEqual(h.source_design_lifecycle_test_git_blob_sha,'8e74a315bc72429722ecf82d763e116fc5d70ef8');
+assert.strictEqual(blob('tests/p4-cross-apparatus-validation-source-design.test.js'),h.source_design_lifecycle_test_git_blob_sha);
+assert.strictEqual(h.protocol_lifecycle_test_git_blob_sha,'bbf3df54afaf2373cac6a1762b7382d102b4449a');
+assert.strictEqual(blob('tests/p4-ymaze-consistency-protocol.test.js'),h.protocol_lifecycle_test_git_blob_sha);
+assert.strictEqual(h.implementation_authorization_lifecycle_test_git_blob_sha,'e0344e8abadba6137f61faf908da06d8dcd0237d');
+assert.strictEqual(blob('tests/p4-ymaze-consistency-implementation-authorization.test.js'),h.implementation_authorization_lifecycle_test_git_blob_sha);
+assert.strictEqual(h.stage_A_official_cli_lockout,true);
+assert.strictEqual(h.stage_B_cli_authorization_bypass_present,false);
+assert.strictEqual(h.stage_B_retired_synthetic_flag_cannot_bypass_authorization,true);
+assert.strictEqual(h.missing_model_rate_fails_closed,true);
+assert.strictEqual(h.all_timeout_side_rate_is_explicit_null,true);
+assert.strictEqual(h.permanent_suite_excluding_pre_hardening_qualification_result_pin,true);
+assert.strictEqual(h.official_or_biological_comparison_artifacts_created,false);
+assert.strictEqual(h.browser_facing_simulation_bytes_unchanged_from_chromium_qualification,true);
+assert.strictEqual(h.chromium_rerun_required,false);
+assert.match(h.chromium_rerun_reason,/runtime, model, apparatus, and experiment bytes.*unchanged/i);
+for(const f of h.browser_facing_unchanged_files)assert.ok(fs.existsSync(path.join(root,f)),f+' missing');
+
 const a=r.stage_A_semantic_firewall;
 for(const k of ['known_biological_ymaze_summaries_read_by_runner','known_biological_ymaze_summaries_requested_by_browser','raw_ymaze_choices_accessed','colony_level_ymaze_outcomes_accessed','official_seed_execution_authorized','official_stage_A_report_created'])assert.strictEqual(a[k],false,k+' must remain false');
 const b=r.stage_B_semantics;
@@ -103,4 +135,4 @@ assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_offici
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must not exist yet');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist yet');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must not exist yet');
-console.log('p4-ymaze-consistency-implementation-qualification-result.test.js PASS '+JSON.stringify({report_blob:blob(rel),node_run:n.workflow_run_id,chromium_run:c.workflow_run_id,chrome:c.chrome_version,cases:c.case_count,max_abs_numeric_difference:c.max_abs_numeric_difference,network_forbidden:0,scientific_evidence:false,official_stage_A:false,real_stage_B:false}));
+console.log('p4-ymaze-consistency-implementation-qualification-result.test.js PASS '+JSON.stringify({report_blob:blob(rel),node_run:n.workflow_run_id,chromium_run:c.workflow_run_id,hardening_run:h.workflow_run_id,chrome:c.chrome_version,cases:c.case_count,max_abs_numeric_difference:c.max_abs_numeric_difference,network_forbidden:0,stage_B_cli_bypass:false,chromium_rerun_required:false,scientific_evidence:false,official_stage_A:false,real_stage_B:false}));
