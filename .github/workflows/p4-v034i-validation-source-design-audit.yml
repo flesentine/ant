@@ -1,3 +1,4 @@
+# rerun after wording-robust corrected source-design regression fix
 name: P4 v0.3.4i corrected validation-source design audit
 
 on:
