@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "id": "P4_Y_maze_consistency_implementation_authorization_v1",
+  "status": "implementation_and_reference_free_qualification_authorized_official_stage_A_execution_not_authorized",
+  "freeze_date_local": "2026-09-13",
+  "protocol_lineage": {
+    "protocol_file": "hypotheses/p4_cross_apparatus_Y_maze_consistency_protocol_v1.json",
+    "protocol_git_blob_sha": "22515a3fe0945c0f19b6fb2166923f027bbf1b54",
+    "source_design_git_blob_sha": "740bedc5d552036c2d8adcac7529b64b2da6de0c",
+    "result_freeze_git_blob_sha": "73f802be9dd9f21819649ab25323a9b3a92cff04",
+    "main_checkpoint": "93d5740da97a2eb839b86fa065b58e7797026707",
+    "main_workflow_run_id": 34782707587,
+    "main_workflow_run_number": 165,
+    "main_test_job_id": 103792504006,
+    "main_test_job_conclusion": "success",
+    "main_deploy_job_id": 103792602723,
+    "main_deploy_job_conclusion": "success"
+  },
+  "authorized_implementation_surface": {
+    "fitted_model": "models/lasius_niger_painted_trail_p4_fitted_v1.json",
+    "left_marked_apparatus": "apparatus/poissonnier2026_y_maze_p4_left_v1.json",
+    "right_marked_apparatus": "apparatus/poissonnier2026_y_maze_p4_right_v1.json",
+    "left_experiment": "experiments/y_maze_p4_left_consistency_v1.json",
+    "right_experiment": "experiments/y_maze_p4_right_consistency_v1.json",
+    "neutral_experiment": "experiments/y_maze_p4_neutral_consistency_v1.json",
+    "stage_A_runner": "tools/run-p4-ymaze-consistency.js",
+    "stage_B_comparator": "tools/compare-p4-ymaze-consistency.js",
+    "implementation_test": "tests/p4-ymaze-consistency-implementation.test.js",
+    "qualification_report": "reports/p4_ymaze_consistency_implementation_qualification_v1.json"
+  },
+  "exact_model_contract": {
+    "source_engineering_model": "models/lasius_niger_painted_trail_p4_v1.json",
+    "source_engineering_model_git_blob_sha": "3d8460b6916a90d06e70768f696ee3f0d48fccf4",
+    "runtime_file": "src/p4.js",
+    "runtime_git_blob_sha": "bf7d5781bd69ec4568450ebbd3bdc284897b6f61",
+    "p1_helper_file": "src/p1.js",
+    "p1_helper_git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca",
+    "candidate_index": 307,
+    "sigma_field_mm": 18.319554310908863,
+    "kappa_trail_per_s": 6.342935528120713,
+    "theta_detect": 0.9184,
+    "rule": "Copy the frozen P4 engineering model structure and canonical movement values exactly; change only field.sigma_field_mm, steering.kappa_trail_per_s, absolute_detection.theta_detect, model id/title/status/provenance fields needed to identify the frozen fitted execution model. No runtime code change is authorized."
+  },
+  "exact_apparatus_contract": {
+    "base_file": "apparatus/poissonnier2026_y_maze.json",
+    "base_git_blob_sha": "eca7a0e66aed9546e5fc26c08f7abaa37bb3cbc8",
+    "left_segment_mm": {"x1": 140, "y1": 120, "x2": 190, "y2": 33.3975},
+    "right_segment_mm": {"x1": 140, "y1": 120, "x2": 190, "y2": 206.6025},
+    "field_type": "line_segment_scalar_field",
+    "directionality": "undirected",
+    "nominal_dose_hindgut_equivalents_per_cm": 0.0048,
+    "rule": "Derived left/right apparatus files must preserve every base world/geometry/boundary/entry/terminal value and differ only by addition of the exact painted_trail external field with the authorized side-specific arm-centerline segment plus metadata/provenance."
+  },
+  "exact_experiment_contract": {
+    "neutral_fixture_provenance": "experiments/neutral_y_maze.json",
+    "neutral_fixture_git_blob_sha": "e61793266a7716587ef11fc96e0959f86103931c",
+    "scoring_file": "scoring/y_maze_endpoint_engineering_v1.json",
+    "scoring_git_blob_sha": "8235e511b8ef4159671f670b944129c82f7358cb",
+    "duration_s": 90,
+    "workers": 1,
+    "entry_point": "stem",
+    "heading_rad": 0,
+    "position_jitter_mm": 0.4,
+    "heading_jitter_rad": 0.05,
+    "applied_hindgut_equivalents_per_cm": 0.0048,
+    "neutral_applied_hindgut_equivalents_per_cm": 0,
+    "rule": "Left/right experiments differ only in apparatus id/marked-side metadata. Neutral uses exact zero-dose P4 identity on one derived apparatus or equivalent base geometry while preserving the same initialization/scoring contract. No biological condition-specific parameterization is allowed."
+  },
+  "stage_A_firewall": {
+    "forbidden_semantic_inputs": [
+      "reference/poissonnier2026_published_targets.json",
+      "reference/poissonnier2026_inventory.json",
+      "raw Experiment 2 choices",
+      "colony-level Experiment 2 outcomes",
+      "any derivative Y-maze biological outcome target"
+    ],
+    "runner_must_not_import_or_parse_forbidden_inputs": true,
+    "official_seed_root_8210000_may_be_executed_during_implementation": false,
+    "official_neutral_seed_root_8310000_may_be_executed_during_implementation": false,
+    "official_report_may_be_created_during_implementation": false
+  },
+  "stage_B_implementation_firewall": {
+    "real_biological_comparison_execution_authorized": false,
+    "comparator_may_be_implemented": true,
+    "qualification_must_use_synthetic_summary_fixture_only": true,
+    "required_synthetic_checks": [
+      "all six predeclared overall/condition/side comparison rows are emitted",
+      "signed difference equals model minus observed",
+      "absolute difference equals absolute signed difference",
+      "no best-subset filtering",
+      "no inferential p-value or significance label",
+      "no pass/fail or promotion field"
+    ]
+  },
+  "reference_free_qualification": {
+    "authorized": true,
+    "purpose": "Verify implementation wiring, symmetry/side reversal, exact zero-dose identity, deterministic reproducibility, endpoint accounting, Stage-A outcome firewall, and Node/Chromium parity without using official seeds or biological Y-maze outcomes.",
+    "left_right_seed_root": 8410000,
+    "left_right_seed_count": 12,
+    "neutral_seed_root": 8510000,
+    "neutral_seed_count": 12,
+    "official_seed_overlap_forbidden": true,
+    "required_checks": [
+      "fitted model differs from frozen P4 engineering model only in authorized identity/provenance fields and candidate-307 sigma/kappa/theta",
+      "derived apparatus preserve base geometry exactly and add only the authorized field segment",
+      "left/right experiments preserve frozen initialization/scoring/dose contract",
+      "Stage-A runner source contains no import/path/read of known biological Y-maze summary artifacts",
+      "zero-dose fitted P4 trajectory/fingerprint preserves canonical identity under same seed",
+      "same-seed left/right marked conditions are deterministic",
+      "side reversal maps the field to the opposite arm without changing runtime biology",
+      "all choices/timeouts sum to requested trial counts",
+      "Wilson interval implementation is finite and bounded",
+      "Stage-B comparator synthetic fixture emits every required comparison and no decision semantics",
+      "full permanent regression suite passes",
+      "real Chromium parity passes on at least 6 non-official seeds spanning left-marked, right-marked, and zero-dose neutral cases",
+      "Chromium/network audit makes zero requests for known biological Y-maze outcome artifacts"
+    ]
+  },
+  "qualification_limits": {
+    "reference_free_simulation_results_are_scientific_evidence": false,
+    "qualification_results_may_change_protocol": false,
+    "qualification_results_may_change_candidate_307": false,
+    "qualification_results_may_change_trial_budget_or_seeds": false,
+    "qualification_results_may_authorize_canonical_promotion": false
+  },
+  "firewalls": {
+    "official_stage_A_execution_authorized": false,
+    "official_stage_B_comparison_authorized": false,
+    "P4_parameter_change_authorized": false,
+    "P4_runtime_change_authorized": false,
+    "P4_refit_or_retuning_authorized": false,
+    "biological_Y_maze_outcome_access_for_qualification_authorized": false,
+    "raw_Y_maze_choice_access_authorized": false,
+    "validation_threshold_authorized": false,
+    "canonical_promotion_authorized": false
+  },
+  "next_gate": {
+    "id": "P4_Y_maze_consistency_implementation_qualification_v1",
+    "purpose": "Implement only the authorized surface and produce a permanent reference-free qualification report with full code/regression and Chromium parity evidence. A later explicit execution gate is required before official Stage A seeds may run.",
+    "official_execution_remains_locked": true
+  }
+}
