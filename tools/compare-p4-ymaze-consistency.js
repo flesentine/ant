@@ -26,11 +26,7 @@ function compare(sim,observed){
     comparison_scope:'comprehensive_descriptive_only',
     row_count:rows.length,
     rows,
-    all_predeclared_comparisons_reported:rows.length===7,
-    inferential_significance_test:null,
-    validation_pass_fail_threshold:null,
-    promotion_rule:null,
-    canonical_update_authorized:false
+    all_predeclared_comparisons_reported:rows.length===7
   };
 }
 function requireRealAuthorization(){
