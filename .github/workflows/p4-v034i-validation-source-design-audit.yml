@@ -1,4 +1,4 @@
-# rerun after direct-regression wording fix
+# rerun after wording-robust direct regression fix
 name: P4 v0.3.4i validation-source design audit
 
 on:
