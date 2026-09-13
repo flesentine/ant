@@ -32,9 +32,9 @@
     "left_experiment": {"file": "experiments/y_maze_p4_left_consistency_v1.json", "git_blob_sha": "08edc2d3ef9899820c04e900154f1b4bee2a5104"},
     "right_experiment": {"file": "experiments/y_maze_p4_right_consistency_v1.json", "git_blob_sha": "217f94ec4ba61a61c7956baeac34abd19cf5eec8"},
     "neutral_experiment": {"file": "experiments/y_maze_p4_neutral_consistency_v1.json", "git_blob_sha": "e58cf3f4f5c51168f2dc267af7a820bc5b875b90"},
-    "stage_A_runner": {"file": "tools/run-p4-ymaze-consistency.js", "git_blob_sha": "af0fd2d91f67102c62243bef289bbfe20cf471d7"},
-    "stage_B_comparator": {"file": "tools/compare-p4-ymaze-consistency.js", "git_blob_sha": "8e8c1ecf1a98fb14fe2e83ce38be224d7739c11c"},
-    "implementation_regression": {"file": "tests/p4-ymaze-consistency-implementation.test.js", "git_blob_sha": "516f4c35561b81b18c0ec2c8b83501ac10e0efdb"}
+    "stage_A_runner": {"file": "tools/run-p4-ymaze-consistency.js", "git_blob_sha": "fe3bff285290d0d612a5b9ab665e887c728e3d2e"},
+    "stage_B_comparator": {"file": "tools/compare-p4-ymaze-consistency.js", "git_blob_sha": "02333b7e49e0fcc78fa13850088511e482291f13"},
+    "implementation_regression": {"file": "tests/p4-ymaze-consistency-implementation.test.js", "git_blob_sha": "f5252419e16bb3258e5b1e9be187e88763d819e3"}
   },
   "node_qualification": {
     "status": "success",
@@ -94,6 +94,39 @@
     "artifact_name": "p4-ymaze-chromium-qualification",
     "artifact_size_bytes": 1329,
     "artifact_digest": "sha256:aba0d06f801efbf945478f3bce53f3a4ee0aebe69be177d2d52966e8af118b22"
+  },
+  "post_review_hardening": {
+    "status": "success",
+    "reason": "Direct PR code review found an unnecessary Stage-B CLI --synthetic authorization bypass plus defensive null-rate and all-timeout reporting edge cases. The bypass was removed, missing rates now fail closed, and Stage-A side-balanced reporting now represents undefined all-timeout rates explicitly as null.",
+    "workflow_run_id": 34789972638,
+    "job_id": 103812264700,
+    "qualified_head_sha": "bd4de24b95a426456be96f2163152937843361dc",
+    "stage_A_runner_git_blob_sha": "fe3bff285290d0d612a5b9ab665e887c728e3d2e",
+    "stage_B_comparator_git_blob_sha": "02333b7e49e0fcc78fa13850088511e482291f13",
+    "implementation_regression_git_blob_sha": "f5252419e16bb3258e5b1e9be187e88763d819e3",
+    "source_design_lifecycle_test_git_blob_sha": "8e74a315bc72429722ecf82d763e116fc5d70ef8",
+    "protocol_lifecycle_test_git_blob_sha": "bbf3df54afaf2373cac6a1762b7382d102b4449a",
+    "implementation_authorization_lifecycle_test_git_blob_sha": "e0344e8abadba6137f61faf908da06d8dcd0237d",
+    "stage_A_official_cli_lockout": true,
+    "stage_B_cli_authorization_bypass_present": false,
+    "stage_B_retired_synthetic_flag_cannot_bypass_authorization": true,
+    "missing_model_rate_fails_closed": true,
+    "all_timeout_side_rate_is_explicit_null": true,
+    "permanent_suite_excluding_pre_hardening_qualification_result_pin": true,
+    "official_or_biological_comparison_artifacts_created": false,
+    "browser_facing_simulation_bytes_unchanged_from_chromium_qualification": true,
+    "browser_facing_unchanged_files": [
+      "src/p4.js",
+      "src/p1.js",
+      "models/lasius_niger_painted_trail_p4_fitted_v1.json",
+      "apparatus/poissonnier2026_y_maze_p4_left_v1.json",
+      "apparatus/poissonnier2026_y_maze_p4_right_v1.json",
+      "experiments/y_maze_p4_left_consistency_v1.json",
+      "experiments/y_maze_p4_right_consistency_v1.json",
+      "experiments/y_maze_p4_neutral_consistency_v1.json"
+    ],
+    "chromium_rerun_required": false,
+    "chromium_rerun_reason": "The hardening changed only Node CLI/reporting tooling and regressions; all runtime, model, apparatus, and experiment bytes exercised by the successful Chrome audit remain bit-for-bit unchanged."
   },
   "stage_A_semantic_firewall": {
     "known_biological_ymaze_summaries_read_by_runner": false,
