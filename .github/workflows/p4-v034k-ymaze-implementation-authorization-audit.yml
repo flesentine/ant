@@ -1,0 +1,42 @@
+name: P4 v0.3.4k Y-maze implementation authorization audit
+
+on:
+  push:
+    branches: [v0.3.4k-p4-ymaze-implementation-authorization]
+    paths:
+      - '.github/workflows/p4-v034k-ymaze-implementation-authorization-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify authorization-only scope
+        run: |
+          set -euo pipefail
+          test "$(git hash-object hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json)" = "db64b72830c3715b3dd26d5ad3422655e50e8828"
+          test "$(git hash-object hypotheses/p4_cross_apparatus_Y_maze_consistency_protocol_v1.json)" = "22515a3fe0945c0f19b6fb2166923f027bbf1b54"
+          test ! -e models/lasius_niger_painted_trail_p4_fitted_v1.json
+          test ! -e apparatus/poissonnier2026_y_maze_p4_left_v1.json
+          test ! -e apparatus/poissonnier2026_y_maze_p4_right_v1.json
+          test ! -e tools/run-p4-ymaze-consistency.js
+          test ! -e tools/compare-p4-ymaze-consistency.js
+          test ! -e reports/p4_ymaze_consistency_implementation_qualification_v1.json
+          git diff --name-only 93d5740da97a2eb839b86fa065b58e7797026707...HEAD | grep -Ev '^(.github/workflows/p4-v034k-ymaze-implementation-authorization-audit.yml|hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json|tests/p4-ymaze-consistency-implementation-authorization.test.js|tests/run-tests.sh)$' && { echo 'unexpected v0.3.4k diff'; exit 1; } || true
+      - name: Run authorization regression directly
+        run: node tests/p4-ymaze-consistency-implementation-authorization.test.js
+      - name: Run complete permanent regression suite
+        run: ./tests/run-tests.sh
+      - name: Confirm no executable implementation occurred
+        run: |
+          set -euo pipefail
+          test "$(git status --porcelain)" = ""
+          echo 'v0.3.4k authorization-only audit passed; executable Y-maze implementation remains absent'
