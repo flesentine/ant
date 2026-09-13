@@ -1,0 +1,138 @@
+{
+  "schema_version": 2,
+  "id": "P4_cross_apparatus_validation_source_design_v1",
+  "status": "same_study_Y_maze_reclassified_as_posthoc_cross_apparatus_consistency_audit_existing_outcomes_acknowledged",
+  "freeze_date_local": "2026-09-13",
+  "scientific_scope": "Corrected source/design gate after P4-v1 open-arena development closure. Poissonnier 2026 Experiment 2 Y-maze remains scientifically useful as a separate-apparatus consistency audit for the frozen P4-v1 mechanism and parameter triplet, but it is not a blind, preregistered, or promotion-grade validation holdout because aggregate, condition-level, and pheromone-side Y-maze outcome summaries were already materialized in generic repository reference artifacts before this gate and were explicitly loaded during correction of PR #44. This gate does not authorize Y-maze fitting, parameter changes, selective pass/fail thresholding, canonical promotion, or any claim of external validation.",
+  "development_result_lineage": {
+    "result_freeze_file": "hypotheses/p4_response_estimation_result_freeze_v1.json",
+    "result_freeze_git_blob_sha": "73f802be9dd9f21819649ab25323a9b3a92cff04",
+    "result_status": "official_development_response_estimation_passed_all_internal_guards_parameter_triplet_frozen_for_future_independent_validation",
+    "development_report_file": "reports/p4_response_estimation_2000x60_v1.json",
+    "development_report_git_blob_sha": "f3e61db9964c25b95d3bfc55d8aa7d52930a0b7f",
+    "development_execution_provenance_git_blob_sha": "09078f08b94d4ac01f10a4ca73b03f7e3f9d50a5",
+    "development_policy_file": "hypotheses/p4_response_estimation_v1.json",
+    "development_policy_git_blob_sha": "2d0bdfaba74ad08f8424870f37a48399428ae8b7",
+    "development_policy_scope": "Experiment 1 open-arena only; Y-maze access not authorized; semantic response target fixed to reference/poissonnier2026_pheromone_response_targets.json",
+    "permanent_main_checkpoint": "91d4a585a2ac96815cb5fcd6c177932b2a715652",
+    "permanent_main_workflow_run_id": 34777850933,
+    "permanent_main_workflow_run_number": 163,
+    "permanent_main_test_job_id": 103779142694,
+    "permanent_main_test_job_conclusion": "success",
+    "permanent_main_deploy_job_id": 103779236035,
+    "permanent_main_deploy_job_conclusion": "success"
+  },
+  "frozen_P4_triplet": {
+    "candidate_index": 307,
+    "source": "halton_P4",
+    "sigma_field_mm": 18.319554310908863,
+    "kappa_trail_per_s": 6.342935528120713,
+    "theta_detect": 0.9184,
+    "refit_authorized": false,
+    "retuning_authorized": false,
+    "context_specific_modifiers_authorized": false
+  },
+  "selected_cross_apparatus_source": {
+    "study": "Poissonnier et al. 2026, Pheromone trail following is not modulated by previous visit to food location, distance travelled, or travel direction in the ant Lasius niger",
+    "doi": "10.1007/s00040-026-01106-9",
+    "experiment": "Experiment 2 binary Y-maze",
+    "classification": "same_study_cross_apparatus_posthoc_consistency_audit",
+    "same_publication_as_development_data": true,
+    "separate_experiment_from_open_arena_development_data": true,
+    "separate_apparatus_from_open_arena_development_data": true,
+    "separate_collection_period_and_ant_dataset_from_experiment_1": true,
+    "fully_external_replication": false,
+    "blind_holdout": false,
+    "preregistered_predictive_holdout": false,
+    "promotion_grade_independent_validation": false,
+    "repository_apparatus_file": "apparatus/poissonnier2026_y_maze.json",
+    "repository_apparatus_git_blob_sha_identity_only": "eca7a0e66aed9546e5fc26c08f7abaa37bb3cbc8",
+    "repository_apparatus_contents_loaded_at_this_gate": false,
+    "repository_neutral_engineering_experiment_file": "experiments/neutral_y_maze.json",
+    "repository_neutral_engineering_experiment_git_blob_sha_identity_only": "e61793266a7716587ef11fc96e0959f86103931c",
+    "repository_engineering_scoring_file": "scoring/y_maze_endpoint_engineering_v1.json",
+    "repository_engineering_scoring_git_blob_sha_identity_only": "8235e511b8ef4159671f670b944129c82f7358cb"
+  },
+  "preexisting_Y_maze_outcome_artifacts": [
+    {
+      "file": "reference/poissonnier2026_published_targets.json",
+      "git_blob_sha": "5836b5011d765043f94683fa761f3016e86643dc",
+      "contains": ["aggregate_Y_maze_n_and_pheromone_followed", "overall_choice_rate", "four_condition_level_counts_and_rates"]
+    },
+    {
+      "file": "reference/poissonnier2026_inventory.json",
+      "git_blob_sha": "2ff7d9dcd27cf7609ce77b0f655a6520597c2432",
+      "contains": ["experiment_2_schema", "colony_ids", "four_condition_level_counts_and_rates", "pheromone_side_counts_and_rates", "overall_counts_and_rate"]
+    }
+  ],
+  "apparatus_and_methods_metadata": {
+    "primary_behavioral_form": "binary choice of pheromone-marked arm versus DCM arm",
+    "conditions": ["outwards_naive", "outwards_experienced", "return_experienced", "return_naive"],
+    "pheromone_side_balanced_left_right": true,
+    "published_analysis_family": "binomial choice model with direction, experience, pheromone side, and colony structure",
+    "natural_model_output_for_consistency_audit": "probability_of_choosing_pheromone_marked_arm",
+    "exact_consistency_metric_selected_at_this_gate": false,
+    "simulation_trial_budget_selected_at_this_gate": false,
+    "Y_maze_geometry_frozen_for_P4_execution_at_this_gate": false,
+    "validation_pass_threshold_selected_at_this_gate": false,
+    "reason_no_validation_threshold": "Outcome summaries are already known/materialized; a newly chosen pass threshold would be post-outcome and therefore cannot support a prospective validation claim."
+  },
+  "blinding_and_contamination_record": {
+    "preexisting_repository_Y_maze_outcome_artifacts_present_before_gate": true,
+    "repository_Y_maze_outcome_summaries_loaded_during_PR44_correction": true,
+    "aggregate_Y_maze_outcome_loaded": true,
+    "condition_level_Y_maze_outcomes_loaded": true,
+    "pheromone_side_Y_maze_outcomes_loaded": true,
+    "colony_ids_loaded": true,
+    "colony_level_Y_maze_outcomes_loaded": false,
+    "raw_Y_maze_choices_loaded": false,
+    "spatial_decision_criterion_still_unavailable_in_published_supplements": true,
+    "fully_blind_holdout_claim_permitted": false,
+    "preregistered_predictive_holdout_claim_permitted": false,
+    "promotion_grade_validation_claim_permitted": false,
+    "outcome_use_for_metric_cherry_picking_permitted": false,
+    "outcome_use_for_pass_threshold_setting_permitted": false,
+    "outcome_use_for_parameter_change_or_model_selection_permitted": false,
+    "contamination_consequence": "Experiment 2 may be used only as a transparent post-hoc cross-apparatus consistency audit with the frozen candidate-307 P4 mechanism. It must not be described as blind validation, preregistered predictive validation, external replication, or sufficient evidence for canonical promotion."
+  },
+  "cross_apparatus_consistency_hypothesis": {
+    "model_under_test": "Frozen P4-v1 hard absolute-detection-gated local Weber steering with candidate-307 parameters unchanged",
+    "directional_expectation": "A pheromone-marked Y-maze arm should receive more model choices than the symmetric DCM arm under an apparatus mapping that does not introduce direction-, experience-, colony-, side-, or path-specific response parameters.",
+    "neutral_reference": "symmetric 0.5 arm-choice probability under a pheromone-insensitive neutral mechanism",
+    "interpretation": "descriptive consistency only; no post-outcome pass/fail threshold",
+    "no_fit": true,
+    "no_parameter_update": true,
+    "no_context_specific_response_parameters": true
+  },
+  "firewalls": {
+    "P4_open_arena_refit_authorized": false,
+    "P4_parameter_search_authorized": false,
+    "P4_candidate_injection_authorized": false,
+    "P4_sensor_geometry_change_authorized": false,
+    "P4_detection_gate_change_authorized": false,
+    "P4_Weber_transduction_change_authorized": false,
+    "canonical_locomotion_update_authorized": false,
+    "H2_H3_H4_H5_refit_or_recombination_authorized": false,
+    "P1_P2_P3_rerun_or_result_semantic_use_authorized": false,
+    "Y_maze_raw_choice_access_authorized": false,
+    "Y_maze_outcome_use_for_protocol_tuning_authorized": false,
+    "Y_maze_outcome_use_for_validation_threshold_authorized": false,
+    "Y_maze_parameter_fitting_authorized": false,
+    "Y_maze_canonical_promotion_authorized": false
+  },
+  "next_gate": {
+    "id": "P4_cross_apparatus_Y_maze_consistency_protocol_freeze_v1",
+    "purpose": "Freeze an outcome-nonadaptive, descriptive Y-maze consistency-audit protocol: apparatus interpretation, initialization, trail-field mapping, binary-choice endpoint, neutral comparator, simulation budget, RNG/seeds, and comprehensive reporting fields. Because outcome summaries are already known, this gate must not define a promotion or validation pass/fail threshold.",
+    "may_load_repository_Y_maze_apparatus_geometry": true,
+    "may_load_additional_Y_maze_biological_outcomes_for_protocol_tuning": false,
+    "may_run_reference_free_Y_maze_engineering_simulations": false,
+    "may_change_P4_parameters": false,
+    "may_define_validation_pass_fail_threshold": false
+  },
+  "promotion_grade_next_gate": {
+    "id": "P4_external_validation_source_discovery_v1",
+    "purpose": "Identify a genuinely independent Lasius niger trail-following source or new dataset whose outcome surface was not used in P4 development and whose validation protocol can be frozen before outcome access.",
+    "required_before_canonical_promotion": true
+  },
+  "future_promotion_requirement": "The same-study Y-maze may provide useful cross-apparatus consistency evidence but cannot establish external validity or authorize canonical promotion. Promotion-grade evidence requires a separately justified independent validation source with a protocol frozen before outcome access."
+}
