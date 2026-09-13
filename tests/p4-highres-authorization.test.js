@@ -6,15 +6,16 @@ const {readJson}=require('../tools/load-bundle.js');
 const root=path.resolve(__dirname,'..');
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
-const rel='hypotheses/p4_highres_authorization_v1.json';
-assert.strictEqual(blob(rel),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
-const a=readJson(path.join(root,rel));
+const activeRel='hypotheses/p4_highres_authorization_v1.json';
+const archiveRel='hypotheses/archive/p4_highres_authorization_v1.json';
+assert.ok(!fs.existsSync(path.join(root,activeRel)),'active P4 authorization must be retired after valid official result');
+assert.strictEqual(blob(archiveRel),'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
+const a=readJson(path.join(root,archiveRel));
 assert.strictEqual(a.id,'P4_high_resolution_authorization_v1');
 assert.strictEqual(a.status,'qualified_estimator_authorized_for_frozen_high_resolution_response_search');
 assert.strictEqual(a.authorization_date_local,'2026-09-10');
 assert.strictEqual(a.effective_when_merged_to_main,true);
-assert.strictEqual(a.high_resolution_response_search_authorized,true);
-
+assert.strictEqual(a.high_resolution_response_search_authorized,true,'archive must preserve historical authorization truth');
 assert.strictEqual(a.policy_git_blob_sha,'2d0bdfaba74ad08f8424870f37a48399428ae8b7');
 assert.strictEqual(a.estimator_git_blob_sha,'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
 assert.strictEqual(a.estimator_core_git_blob_sha,'4d985cd7258fc26eb06be75f09bdac4b92325ff0');
@@ -29,7 +30,6 @@ assert.strictEqual(a.browser_firewall_report.bytes,5517);
 assert.strictEqual(a.browser_firewall_report.P4_browser_parity_cases,10);
 assert.strictEqual(a.browser_firewall_report.canonical_forbidden_requests,0);
 assert.strictEqual(a.qualification_result_freeze.git_blob_sha,'635b64ff1bfe08f6f914e5fd8bef8306ee0b27d5');
-
 assert.strictEqual(blob(a.policy_file),a.policy_git_blob_sha);
 assert.strictEqual(blob(a.estimator_file),a.estimator_git_blob_sha);
 assert.strictEqual(blob(a.estimator_core_file),a.estimator_core_git_blob_sha);
@@ -84,7 +84,6 @@ assert.match(x.dual_survival_rule,/Both held-out survival guards must pass/i);
 assert.match(x.identifiability_rule,/sigma, kappa, and theta/i);
 assert.match(x.final_increment_rule,/strictly lower than both selected ungated P3 benchmark/i);
 assert.match(x.final_fit_rule,/only if both LOCO survival guards pass/i);
-
 assert.deepStrictEqual(a.allowed_terminal_statuses,[
   'development_response_estimation_failed_dual_primary_survival_guard',
   'development_response_estimation_survived_but_parameter_triplet_not_eligible',
@@ -105,21 +104,13 @@ assert.strictEqual(a.H2_H3_H4_H5_refit_or_combination_authorized,false);
 assert.strictEqual(a.cross_apparatus_validation_authorized,false);
 assert.strictEqual(a.ymaze_access_authorized,false);
 
+assert.strictEqual(blob('hypotheses/p4_highres_execution_precondition_v1.json'),'313f2892a5627195b1319911a87cdfe7884337ae');
+assert.strictEqual(blob('reports/p4_response_estimation_2000x60_v1.json'),'f3e61db9964c25b95d3bfc55d8aa7d52930a0b7f');
+assert.strictEqual(blob('reports/p4_response_estimation_execution_provenance_v1.json'),'09078f08b94d4ac01f10a4ca73b03f7e3f9d50a5');
+assert.strictEqual(blob('hypotheses/p4_response_estimation_result_freeze_v1.json'),'73f802be9dd9f21819649ab25323a9b3a92cff04');
+assert.ok(!fs.existsSync(path.join(root,'.github','workflows','p4-v034g-official-highres.yml')),'official one-shot workflow must be retired after valid result');
+assert.throws(()=>run.assertHighResolutionAuthorized(root),/missing post-qualification authorization artifact/);
 const policy=readJson(path.join(root,'hypotheses/p4_response_estimation_v1.json'));
-assert.throws(()=>run.assertHighResolutionAuthorized(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
-assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'authorization-review'}),/not effective until merged to main/);
-assert.strictEqual(run.assertAuthorizationEffective(a,root,{branchName:'main'}),'main');
-const laterExecutionPreconditionPresent=fs.existsSync(path.join(root,'hypotheses/p4_highres_execution_precondition_v1.json'));
-if(laterExecutionPreconditionPresent){
-  assert.strictEqual(blob('hypotheses/p4_highres_execution_precondition_v1.json'),'313f2892a5627195b1319911a87cdfe7884337ae');
-  const p=readJson(path.join(root,'hypotheses/p4_highres_execution_precondition_v1.json'));
-  assert.strictEqual(p.authorization_git_blob_sha,'d8088ab94480faf0f5db012ca538bdc4d5a42ccb');
-  assert.strictEqual(p.authorization_main_commit,'c5f8f2c7e8e9efbbe5393777aeada695a712a05b');
-  assert.strictEqual(p.permanent_main_workflow.run_id,34568453092);
-  assert.strictEqual(p.permanent_main_workflow.test_job_id,103165280046);
-  assert.strictEqual(p.permanent_main_workflow.deploy_job_id,103165436328);
-  assert.strictEqual(p.official_execution_still_unrun_at_freeze,true);
-}
-assert.strictEqual(fs.existsSync(path.join(root,'reports/p4_response_estimation_2000x60_v1.json')),false,'official P4 scientific result must not exist at authorization/execution-gate stage');
+assert.throws(()=>run.loadReferenceTarget(root,policy,{branchName:'main'}),/missing post-qualification authorization artifact/);
 
-console.log('p4-highres-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),effective_on_branch:false,effective_when_merged_to_main:true,candidates:2000,benchmark_candidates:2000,target_semantics_scope:'post-main-plus-precondition',later_execution_precondition_present:laterExecutionPreconditionPresent,P1_result_semantics:false,P2_result_semantics:false,P3_result_semantics:false,ymaze:false}));
+console.log('p4-highres-authorization.test.js PASS '+JSON.stringify({archived_authorization_blob:blob(archiveRel),active_authorization:false,historical_highres_authorized:true,official_result_materialized:true,candidates:2000,benchmark_candidates:2000,P1_result_semantics:false,P2_result_semantics:false,P3_result_semantics:false,ymaze:false}));
