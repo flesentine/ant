@@ -36,8 +36,8 @@ const PINS={
   leftExperiment:'08edc2d3ef9899820c04e900154f1b4bee2a5104',
   rightExperiment:'217f94ec4ba61a61c7956baeac34abd19cf5eec8',
   neutralExperiment:'e58cf3f4f5c51168f2dc267af7a820bc5b875b90',
-  runner:'af0fd2d91f67102c62243bef289bbfe20cf471d7',
-  comparator:'8e8c1ecf1a98fb14fe2e83ce38be224d7739c11c'
+  runner:'fe3bff285290d0d612a5b9ab665e887c728e3d2e',
+  comparator:'02333b7e49e0fcc78fa13850088511e482291f13'
 };
 for(const [rel,sha] of Object.entries({
   'hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json':PINS.authorization,
@@ -86,9 +86,13 @@ for(const [file,side,apparatus,dose] of [
 
 const runnerSource=fs.readFileSync(path.join(root,'tools/run-p4-ymaze-consistency.js'),'utf8');
 for(const forbidden of ['poissonnier2026_published_targets','poissonnier2026_inventory','raw Experiment 2','colony-level Experiment 2'])assert.ok(!runnerSource.includes(forbidden),'Stage A source contains forbidden semantic input '+forbidden);
+const comparatorSource=fs.readFileSync(path.join(root,'tools/compare-p4-ymaze-consistency.js'),'utf8');
+assert.ok(!comparatorSource.includes('--synthetic'),'Stage B CLI must not expose an authorization bypass flag');
 assert.deepStrictEqual(runner.PLAN.qualification,{leftRoot:8410000,rightRoot:8410000,markedCount:12,neutralRoot:8510000,neutralCount:12,scientificEvidence:false});
 assert.deepStrictEqual(runner.PLAN.official,{leftRoot:8210000,rightRoot:8210000,markedCount:1000,neutralRoot:8310000,neutralCount:1000,scientificEvidence:false});
 assert.throws(()=>runner.buildReport('official'),/locked|authorization/i,'official Stage A must remain locked');
+assert.throws(()=>comparator.main(['--simulation','does-not-matter.json','--observed','does-not-matter.json','--synthetic']),/locked|authorization/i,'Stage B CLI must remain locked even if a caller supplies the retired --synthetic flag');
+assert.throws(()=>comparator.rate(null,'missing model rate'),/finite rate/i,'missing rates must not coerce to zero');
 
 for(const [s,n] of [[0,1],[1,1],[6,12],[12,12]]){const w=runner.wilson95(s,n);assert.ok(Number.isFinite(w.low)&&Number.isFinite(w.high)&&w.low>=0&&w.high<=1&&w.low<=w.high);}
 const report=runner.buildReport('qualification');
@@ -121,4 +125,4 @@ assert.throws(()=>comparator.requireRealAuthorization(),/locked|authorization/i,
 
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must not exist');
-console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,official_stage_A_locked:true,official_stage_B_locked:true,zero_dose_behavior_rng_lifecycle_identity:true}));
+console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,official_stage_A_locked:true,official_stage_B_locked:true,stage_B_cli_bypass:false,zero_dose_behavior_rng_lifecycle_identity:true}));
