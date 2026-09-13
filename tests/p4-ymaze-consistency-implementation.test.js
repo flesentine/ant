@@ -15,7 +15,7 @@ const PINS={
   authorization:'db64b72830c3715b3dd26d5ad3422655e50e8828',
   protocol:'22515a3fe0945c0f19b6fb2166923f027bbf1b54',
   runtime:'bf7d5781bd69ec4568450ebbd3bdc284897b6f61',
-  p1:'f8d8e07c92a2fe4ebdbfd640827fe4ebdbfd640827fe4ebdbfd640827fe4eb'.slice(0,40),
+  p1:'f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca',
   engineeringModel:'3d8460b6916a90d06e70768f696ee3f0d48fccf4',
   fittedModel:'e23b022279d463442bdd4e16d4cf56e0212d2b11',
   baseApparatus:'eca7a0e66aed9546e5fc26c08f7abaa37bb3cbc8',
@@ -25,9 +25,8 @@ const PINS={
   rightExperiment:'217f94ec4ba61a61c7956baeac34abd19cf5eec8',
   neutralExperiment:'e58cf3f4f5c51168f2dc267af7a820bc5b875b90',
   runner:'af0fd2d91f67102c62243bef289bbfe20cf471d7',
-  comparator:'8e8c1ecf1a98fb14fe2e83ce38be224d7739c11'
+  comparator:'8e8c1ecf1a98fb14fe2e83ce38be224d7739c11c'
 };
-PINS.p1='f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca';
 for(const [rel,sha] of Object.entries({
   'hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json':PINS.authorization,
   'hypotheses/p4_cross_apparatus_Y_maze_consistency_protocol_v1.json':PINS.protocol,
