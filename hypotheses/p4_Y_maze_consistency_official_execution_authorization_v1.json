@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "P4_Y_maze_consistency_official_execution_authorization_v1",
-  "status": "official_stage_A_execution_authorized_after_authorization_merge_and_permanent_main_green_stage_B_locked",
+  "status": "prospective_official_stage_A_authorization_frozen_pending_merge_and_permanent_main_green_stage_B_locked",
   "freeze_date_local": "2026-09-13",
   "qualification_lineage": {
     "implementation_authorization_file": "hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json",
@@ -44,8 +44,9 @@
     "retuning_authorized": false
   },
   "official_stage_A_execution": {
-    "official_stage_A_execution_authorized": true,
-    "authorization_effective_only_after_merge_and_permanent_main_green": true,
+    "prospective_official_stage_A_execution_authorized": true,
+    "official_stage_A_execution_authorized": false,
+    "activation_requires_separate_post_merge_precondition_freeze": true,
     "official_execution_may_run_on_review_branch": false,
     "authorized_command_exact": "node tools/run-p4-ymaze-consistency.js --official --out reports/p4_ymaze_consistency_simulation_v1.json",
     "cli_parameter_overrides": [],
@@ -66,10 +67,11 @@
     "discrepancy_driven_rerun_authorized": false
   },
   "execution_precondition": {
-    "authorization_must_merge_to_main_before_execution": true,
-    "permanent_main_ci_for_authorization_commit_must_be_green_before_execution": true,
+    "authorization_must_merge_to_main_before_activation": true,
+    "permanent_main_ci_for_authorization_commit_must_be_green_before_activation": true,
+    "future_execution_precondition_file": "hypotheses/p4_Y_maze_consistency_official_execution_precondition_v1.json",
     "future_execution_workflow_file": ".github/workflows/p4-v034n-ymaze-official-stage-a.yml",
-    "future_execution_workflow_must_not_exist_at_this_authorization_gate": true,
+    "future_execution_precondition_and_workflow_must_not_exist_at_this_authorization_gate": true,
     "future_execution_workflow_must_be_main_only": true,
     "future_execution_workflow_must_not_have_pull_request_trigger": true,
     "future_execution_workflow_must_not_have_workflow_dispatch_trigger": true,
@@ -121,7 +123,7 @@
   },
   "next_gate": {
     "id": "P4_Y_maze_consistency_official_execution_precondition_v1",
-    "purpose": "After this authorization is merged and its permanent main CI is green, freeze the exact authorization commit/run provenance and main-only one-shot execution workflow before the official Stage A command may execute.",
+    "purpose": "After this prospective authorization is merged and its permanent main CI is green, activate the exact frozen Stage A authorization and freeze a main-only one-shot execution workflow before the official command may execute.",
     "may_execute_official_stage_A_at_this_review_gate": false,
     "may_access_biological_Y_maze_summaries": false,
     "may_run_stage_B": false,
