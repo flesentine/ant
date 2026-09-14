@@ -12,9 +12,11 @@ const runtimeRel='hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
 const workflowRel='.github/workflows/p4-v034q-ymaze-stage-b.yml';
 const reportRel='reports/p4_ymaze_consistency_comparison_v1.json';
 const provenanceRel='reports/p4_ymaze_consistency_stage_B_execution_provenance_v1.json';
-assert.strictEqual(blob(preRel),'3557779d86b164691d2f07dc11efffe9bc6e0890','Stage-B execution-precondition blob drift');
+const preBlob='bc7b0ea3f5838decd90b83325748ad9403c7be1a';
+const workflowBlob='b1a85646deaea2c0eac6cb4cea7c156841a3da80';
+assert.strictEqual(blob(preRel),preBlob,'Stage-B execution-precondition blob drift');
 assert.strictEqual(blob(authRel),'b973ee451687ccb8f6730d6dc11d09eb34d3e54b','prospective authorization blob drift');
-assert.strictEqual(blob(workflowRel),'f09b73b8225e48137aa41345794ce70f4d9bfe61','Stage-B execution-workflow blob drift');
+assert.strictEqual(blob(workflowRel),workflowBlob,'Stage-B execution-workflow blob drift');
 assert.ok(!fs.existsSync(path.join(root,runtimeRel)),'runtime Stage-B authorization must remain absent in committed repository state');
 assert.ok(!fs.existsSync(path.join(root,reportRel)),'real Stage-B report must remain absent before one-shot execution');
 assert.ok(!fs.existsSync(path.join(root,provenanceRel)),'real Stage-B provenance must remain absent before one-shot execution');
@@ -35,10 +37,31 @@ assert.strictEqual(p.permanent_main_workflow.test_job_conclusion,'success');
 assert.strictEqual(p.permanent_main_workflow.deploy_job_id,104142562658);
 assert.strictEqual(p.permanent_main_workflow.deploy_job_conclusion,'success');
 assert.strictEqual(p.execution_workflow_file,workflowRel);
-assert.strictEqual(p.execution_workflow_git_blob_sha,'f09b73b8225e48137aa41345794ce70f4d9bfe61');
+assert.strictEqual(p.execution_workflow_git_blob_sha,workflowBlob);
 assert.deepStrictEqual(p.execution_trigger,{event:'push',branch:'main',path:workflowRel,expected_before_commit:'7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a',pull_request_enabled:false,workflow_dispatch_enabled:false,workflow_run_rerun_enabled:false,later_unrelated_main_push_may_rerun:false});
+assert.match(p.execution_trigger_rule,/PR #52/i);
 assert.match(p.execution_trigger_rule,/paths filter.*not trusted/i);
-assert.match(p.execution_trigger_rule,/GITHUB_RUN_ATTEMPT equals 1/i);
+assert.match(p.execution_trigger_rule,/GITHUB_RUN_ATTEMPT.*1/i);
+assert.match(p.execution_trigger_rule,/workflow-run history/i);
+assert.match(p.execution_trigger_rule,/force-reset/i);
+
+assert.deepStrictEqual(p.reviewed_merge_binding,{
+  execution_pr_number:52,
+  require_pr_merged:true,
+  require_github_sha_equals_pr_merge_commit_sha:true,
+  require_second_parent_equals_pr_head_sha:true,
+  binding_source:'GitHub pull request metadata queried at runtime'
+});
+assert.deepStrictEqual(p.durable_consumed_state_guard,{
+  backend:'github_actions_workflow_run_history',
+  workflow_file:workflowRel,
+  no_prior_run_other_than_current_required:true,
+  prior_run_conclusion_irrelevant:true,
+  survives_main_history_rewrite:true,
+  guard_rechecked_immediately_before_activation:true,
+  invalid_first_run_requires_new_gate:true
+});
+
 assert.strictEqual(p.activation_mode,'ephemeral_runtime_authorization_file_only');
 assert.strictEqual(p.committed_runtime_authorization_file_must_remain_absent,true);
 assert.strictEqual(p.runtime_authorization_file,runtimeRel);
@@ -73,6 +96,8 @@ assert.strictEqual(p.biological_Y_maze_summary_access_authorized_during_stage_B_
 for(const k of ['raw_Y_maze_choice_access_authorized','colony_level_Y_maze_outcome_access_authorized','stage_A_rerun_or_modification_authorized','P4_parameter_change_authorized','P4_runtime_change_authorized','protocol_change_authorized','canonical_promotion_authorized','external_validation_claim_authorized'])assert.strictEqual(p[k],false,k+' must remain false');
 assert.strictEqual(p.next_gate.id,'P4_Y_maze_consistency_stage_B_result_freeze_v1');
 assert.strictEqual(p.next_gate.may_rerun_stage_B_before_result_freeze,false);
+assert.match(p.rerun_policy,/any Stage-B workflow run/i);
+assert.match(p.rerun_policy,/newly reviewed execution gate/i);
 
 assert.strictEqual(a.official_stage_B_comparison_authorized,false);
 assert.strictEqual(a.prospective_official_stage_B_comparison_authorized,true);
@@ -82,16 +107,25 @@ assert.throws(()=>comparator.requireRealAuthorization(),/locked|authorization fi
 assert.throws(()=>comparator.main([]),/locked|authorization file is absent/i);
 
 for(const required of [
-  "${GITHUB_RUN_ATTEMPT}\" = '1'",
-  "${EVENT_BEFORE}\" = '7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a'",
-  "git cat-file -e HEAD:hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json",
+  'actions: read',
+  'pull-requests: read',
+  '/pulls/52',
+  '/actions/workflows/p4-v034q-ymaze-stage-b.yml/runs?per_page=100',
+  "pr.merge_commit_sha!==process.env.GITHUB_SHA",
+  "pr.head?.sha!==secondParent",
+  "prior.length!==0",
   'Run permanent regression suite before Stage B',
   'Ephemerally materialize active Stage B authorization',
   'Run exact frozen P4 Y-maze Stage B comparison',
   'Remove ephemeral runtime authorization',
   'Upload immutable Stage B artifact'
 ]) assert.ok(workflow.includes(required),'workflow missing hardening marker: '+required);
+assert.ok((workflow.match(/\/pulls\/52/g)||[]).length>=2,'reviewed PR binding must be checked initially and immediately before activation');
+assert.ok((workflow.match(/\/actions\/workflows\/p4-v034q-ymaze-stage-b\.yml\/runs\?per_page=100/g)||[]).length>=2,'durable consumed-state guard must be checked initially and immediately before activation');
+assert.ok((workflow.match(/prior\.length!==0/g)||[]).length>=2,'prior-run rejection must be enforced twice');
+assert.ok(workflow.includes('test "${GITHUB_RUN_ATTEMPT}" = \'1\''),'workflow must reject GitHub rerun attempts');
+assert.ok(workflow.includes("test \"${EVENT_BEFORE}\" = '7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a'"),'workflow must recheck exact parent immediately before activation');
 assert.ok(!/^\s*workflow_dispatch:/m.test(workflow),'workflow_dispatch must remain absent');
 assert.ok(!/^\s*pull_request:/m.test(workflow),'pull_request trigger must remain absent');
 
-console.log('p4-ymaze-consistency-stage-B-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:blob(preRel),workflow_blob:blob(workflowRel),authorization_main:p.authorization_main_commit,main_run:p.permanent_main_workflow.run_id,main_test:p.permanent_main_workflow.test_job_id,main_deploy:p.permanent_main_workflow.deploy_job_id,frozen_surface_entries:p.frozen_execution_surface_entry_count,runtime_authorization_present:false,real_stage_B_executed:false,canonical_promotion_authorized:false}));
+console.log('p4-ymaze-consistency-stage-B-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:blob(preRel),workflow_blob:blob(workflowRel),authorization_main:p.authorization_main_commit,main_run:p.permanent_main_workflow.run_id,main_test:p.permanent_main_workflow.test_job_id,main_deploy:p.permanent_main_workflow.deploy_job_id,execution_pr:p.reviewed_merge_binding.execution_pr_number,durable_consumed_state:p.durable_consumed_state_guard.backend,frozen_surface_entries:p.frozen_execution_surface_entry_count,runtime_authorization_present:false,real_stage_B_executed:false,canonical_promotion_authorized:false}));
