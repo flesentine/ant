@@ -39,7 +39,8 @@
     "workflow_head_sha": "f768c0fcf935be5e8f7122e0be2185ee6a7d4205"
   },
   "frozen_stage_B_report": {
-    "file": "reports/p4_ymaze_consistency_comparison_v1.json",
+    "execution_output_file": "reports/p4_ymaze_consistency_comparison_v1.json",
+    "file": "reports/frozen/p4_ymaze_consistency_comparison_v1.json",
     "git_blob_sha": "afaf2603bbd4a02f19bfe5aebc5f932a1e0c1615",
     "sha256": "c4b7f32f51c171a38c8a73e26dc73d803a197cc26799d9652a36eec8a255ca10",
     "id": "P4_Y_maze_consistency_descriptive_comparison_v1",
@@ -48,7 +49,8 @@
     "all_predeclared_comparisons_reported": true
   },
   "frozen_execution_provenance": {
-    "file": "reports/p4_ymaze_consistency_stage_B_execution_provenance_v1.json",
+    "execution_output_file": "reports/p4_ymaze_consistency_stage_B_execution_provenance_v1.json",
+    "file": "reports/frozen/p4_ymaze_consistency_stage_B_execution_provenance_v1.json",
     "git_blob_sha": "55e7894b71b064fdaf5ee5b7812d632231eb29dc",
     "sha256": "8d90a6df874b3ac90dfc503f750b69fbc1f7733d987c70996bfe48085da1385a",
     "id": "P4_Y_maze_consistency_stage_B_execution_provenance_v1",
@@ -62,55 +64,13 @@
     "inventory_git_blob_sha": "2ff7d9dcd27cf7609ce77b0f655a6520597c2432"
   },
   "frozen_descriptive_rows": [
-    {
-      "id": "overall",
-      "model_prediction": 0.740889950913122,
-      "observed_rate": 0.8743718592964824,
-      "signed_difference_model_minus_observed": -0.13348190838336038,
-      "absolute_difference": 0.13348190838336038
-    },
-    {
-      "id": "outwards_naive",
-      "model_prediction": 0.740889950913122,
-      "observed_rate": 0.88,
-      "signed_difference_model_minus_observed": -0.13911004908687796,
-      "absolute_difference": 0.13911004908687796
-    },
-    {
-      "id": "outwards_experienced",
-      "model_prediction": 0.740889950913122,
-      "observed_rate": 0.88,
-      "signed_difference_model_minus_observed": -0.13911004908687796,
-      "absolute_difference": 0.13911004908687796
-    },
-    {
-      "id": "return_experienced",
-      "model_prediction": 0.740889950913122,
-      "observed_rate": 0.8888888888888888,
-      "signed_difference_model_minus_observed": -0.1479989379757668,
-      "absolute_difference": 0.1479989379757668
-    },
-    {
-      "id": "return_naive",
-      "model_prediction": 0.740889950913122,
-      "observed_rate": 0.8484848484848485,
-      "signed_difference_model_minus_observed": -0.10759489757172647,
-      "absolute_difference": 0.10759489757172647
-    },
-    {
-      "id": "pheromone_left",
-      "model_prediction": 0.7598385469223007,
-      "observed_rate": 0.85,
-      "signed_difference_model_minus_observed": -0.0901614530776993,
-      "absolute_difference": 0.0901614530776993
-    },
-    {
-      "id": "pheromone_right",
-      "model_prediction": 0.7219413549039434,
-      "observed_rate": 0.898989898989899,
-      "signed_difference_model_minus_observed": -0.1770485440859556,
-      "absolute_difference": 0.1770485440859556
-    }
+    {"id":"overall","model_prediction":0.740889950913122,"observed_rate":0.8743718592964824,"signed_difference_model_minus_observed":-0.13348190838336038,"absolute_difference":0.13348190838336038},
+    {"id":"outwards_naive","model_prediction":0.740889950913122,"observed_rate":0.88,"signed_difference_model_minus_observed":-0.13911004908687796,"absolute_difference":0.13911004908687796},
+    {"id":"outwards_experienced","model_prediction":0.740889950913122,"observed_rate":0.88,"signed_difference_model_minus_observed":-0.13911004908687796,"absolute_difference":0.13911004908687796},
+    {"id":"return_experienced","model_prediction":0.740889950913122,"observed_rate":0.8888888888888888,"signed_difference_model_minus_observed":-0.1479989379757668,"absolute_difference":0.1479989379757668},
+    {"id":"return_naive","model_prediction":0.740889950913122,"observed_rate":0.8484848484848485,"signed_difference_model_minus_observed":-0.10759489757172647,"absolute_difference":0.10759489757172647},
+    {"id":"pheromone_left","model_prediction":0.7598385469223007,"observed_rate":0.85,"signed_difference_model_minus_observed":-0.0901614530776993,"absolute_difference":0.0901614530776993},
+    {"id":"pheromone_right","model_prediction":0.7219413549039434,"observed_rate":0.898989898989899,"signed_difference_model_minus_observed":-0.1770485440859556,"absolute_difference":0.1770485440859556}
   ],
   "semantic_firewall": {
     "comparison_is_comprehensive_descriptive_only": true,
@@ -122,17 +82,21 @@
     "colony_level_Y_maze_outcomes_accessed": false,
     "stage_A_was_rerun_or_modified": false,
     "P4_parameters_changed": false,
+    "transient_stage_B_report_path_committed": false,
+    "transient_stage_B_provenance_path_committed": false,
+    "runtime_authorization_file_committed": false,
     "canonical_promotion_authorized": false,
     "external_validation_claim_authorized": false
   },
   "result_immutability": {
     "valid_stage_B_result_must_be_accepted_exactly_as_produced": true,
     "valid_stage_B_rerun_authorized": false,
-    "report_bytes_may_change": false,
-    "provenance_bytes_may_change": false,
+    "archived_report_bytes_may_change": false,
+    "archived_provenance_bytes_may_change": false,
     "result_subset_selection_authorized": false,
     "discrepancy_driven_rerun_authorized": false,
-    "runtime_authorization_file_may_be_committed": false
+    "runtime_authorization_file_may_be_committed": false,
+    "transient_execution_output_paths_may_be_committed": false
   },
   "next_gate": {
     "id": "P4_Y_maze_consistency_stage_B_interpretation_v1",
