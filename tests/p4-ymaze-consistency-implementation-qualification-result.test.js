@@ -102,7 +102,10 @@ assert.strictEqual(blob('tools/compare-p4-ymaze-consistency.js'),rr.stage_B_comp
 assert.strictEqual(rr.implementation_regression_git_blob_sha,'74ecec3c2a588e7decc04875fd814101b705abef');
 assert.strictEqual(blob('tests/p4-ymaze-consistency-implementation.test.js'),rr.implementation_regression_git_blob_sha);
 assert.strictEqual(rr.implementation_authorization_lifecycle_test_git_blob_sha,'8907721d081665c40f485f3146b590b38f948c1c');
-assert.strictEqual(blob('tests/p4-ymaze-consistency-implementation-authorization.test.js'),rr.implementation_authorization_lifecycle_test_git_blob_sha);
+// The report above freezes the exact lifecycle regression used for v0.3.4l qualification.
+// That historical blob must stay recorded, but the live regression is intentionally allowed to
+// evolve at later lifecycle gates (v0.3.4m and beyond) without rewriting this frozen report.
+assert.ok(fs.existsSync(path.join(root,'tests/p4-ymaze-consistency-implementation-authorization.test.js')),'current implementation-authorization lifecycle regression missing');
 assert.deepStrictEqual(rr.frozen_observed_sources,[
   {file:'reference/poissonnier2026_published_targets.json',git_blob_sha:'5836b5011d765043f94683fa761f3016e86643dc'},
   {file:'reference/poissonnier2026_inventory.json',git_blob_sha:'2ff7d9dcd27cf7609ce77b0f655a6520597c2432'}
@@ -154,8 +157,23 @@ assert.strictEqual(r.next_gate.may_access_biological_ymaze_summary_values,false)
 assert.strictEqual(r.next_gate.may_run_stage_B_comparison,false);
 assert.strictEqual(r.next_gate.may_change_P4_parameters_or_protocol,false);
 
-assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json')),'official Stage A authorization must not exist yet');
+// Historical v0.3.4l truth remains frozen above. At later lifecycle gates the prospective official
+// Stage-A authorization may exist, but the committed repository must still be mechanically locked.
+const prospective='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
+if(fs.existsSync(path.join(root,prospective))){
+  assert.strictEqual(blob(prospective),'8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b');
+  const pa=read(prospective);
+  assert.strictEqual(pa.qualification_lineage.implementation_qualification_file,rel);
+  assert.strictEqual(pa.qualification_lineage.implementation_qualification_git_blob_sha,'184e1dc5d50a14fd10615f95db412dc414cf45d5');
+  assert.strictEqual(pa.official_stage_A_execution_authorized,false);
+  assert.strictEqual(pa.official_stage_A_execution.prospective_official_stage_A_execution_authorized,true);
+  assert.strictEqual(pa.official_stage_A_execution.official_stage_A_execution_authorized,false);
+  assert.strictEqual(pa.execution_precondition.repository_authorization_flag_must_remain_false,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_transitive_non_builtin_runtime_dependencies_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.future_one_shot_node_version_must_equal,'22.23.2');
+}else assert.ok(!fs.existsSync(path.join(root,prospective)),'prospective authorization absent before v0.3.4m');
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must not exist yet');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist yet');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must not exist yet');
-console.log('p4-ymaze-consistency-implementation-qualification-result.test.js PASS '+JSON.stringify({report_blob:blob(rel),node_run:n.workflow_run_id,chromium_run:c.workflow_run_id,hardening_run:h.workflow_run_id,review_remediation_run:rr.workflow_run_id,chrome:c.chrome_version,cases:c.case_count,max_abs_numeric_difference:c.max_abs_numeric_difference,network_forbidden:0,stage_B_input_overrides:false,official_stage_A_blob_pin_required:true,chromium_rerun_required:false,scientific_evidence:false,official_stage_A:false,real_stage_B:false}));
+console.log('p4-ymaze-consistency-implementation-qualification-result.test.js PASS '+JSON.stringify({report_blob:blob(rel),node_run:n.workflow_run_id,chromium_run:c.workflow_run_id,hardening_run:h.workflow_run_id,review_remediation_run:rr.workflow_run_id,chrome:c.chrome_version,cases:c.case_count,max_abs_numeric_difference:c.max_abs_numeric_difference,network_forbidden:0,stage_B_input_overrides:false,official_stage_A_blob_pin_required:true,prospective_stage_A_authorization_present:fs.existsSync(path.join(root,prospective)),committed_official_stage_A:false,chromium_rerun_required:false,scientific_evidence:false,real_stage_B:false}));

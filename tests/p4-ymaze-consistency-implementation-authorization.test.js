@@ -67,7 +67,9 @@ assert.strictEqual(a.next_gate.id,'P4_Y_maze_consistency_implementation_qualific
 assert.strictEqual(a.next_gate.official_execution_remains_locked,true);
 
 // Historical v0.3.4k truth: no executable surface existed at authorization freeze. Later lifecycle
-// states may materialize only this authorized surface while official Stage A and real Stage B stay locked.
+// states may materialize only this authorized surface while official Stage A remains mechanically
+// locked in the committed repository. The separate post-merge precondition may authorize only an
+// ephemeral working-copy activation inside the future main-only one-shot workflow.
 const fixedLaterBlobs=new Map([
   [s.fitted_model,'e23b022279d463442bdd4e16d4cf56e0212d2b11'],
   [s.left_marked_apparatus,'219d42036c13463e8cae5045b8fdba6d5bd24454'],
@@ -83,9 +85,22 @@ if(implementationPresent){
   for(const [file,sha] of fixedLaterBlobs){assert.ok(fs.existsSync(path.join(root,file)),file+' missing from authorized later implementation');assert.strictEqual(blob(file),sha,file+' blob drift');}
   assert.ok(fs.existsSync(path.join(root,s.implementation_test)),'authorized implementation regression must exist with later implementation');
 }else for(const file of [...fixedLaterBlobs.keys(),s.implementation_test])assert.ok(!fs.existsSync(path.join(root,file)),file+' must not exist before later implementation gate');
-assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json')),'official Stage A authorization must remain absent');
+const prospective='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
+if(fs.existsSync(path.join(root,prospective))){
+  assert.strictEqual(blob(prospective),'8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b');
+  const pa=read(prospective);
+  assert.strictEqual(pa.official_stage_A_execution_authorized,false);
+  assert.strictEqual(pa.official_stage_A_execution.prospective_official_stage_A_execution_authorized,true);
+  assert.strictEqual(pa.official_stage_A_execution.official_stage_A_execution_authorized,false);
+  assert.strictEqual(pa.execution_precondition.repository_authorization_flag_must_remain_false,true);
+  assert.strictEqual(pa.execution_precondition.activation_mode,'ephemeral_working_copy_only_after_exact_precondition_verification');
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_transitive_non_builtin_runtime_dependencies_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.future_one_shot_node_version_must_equal,'22.23.2');
+  assert.strictEqual(pa.next_gate.may_execute_official_stage_A_at_this_review_gate,false);
+}else assert.ok(!fs.existsSync(path.join(root,prospective)),'prospective authorization absent before its later gate');
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'real Stage B authorization must remain absent');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must remain absent');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must remain absent');
 
-console.log('p4-ymaze-consistency-implementation-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),candidate:m.candidate_index,qualification_seed_count:q.left_right_seed_count,later_implementation_present:implementationPresent,official_stage_A:false,chromium_required:true}));
+console.log('p4-ymaze-consistency-implementation-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),candidate:m.candidate_index,qualification_seed_count:q.left_right_seed_count,later_implementation_present:implementationPresent,prospective_stage_A_authorization_present:fs.existsSync(path.join(root,prospective)),committed_official_stage_A:false,chromium_required:true}));
