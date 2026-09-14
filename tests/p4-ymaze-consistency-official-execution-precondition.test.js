@@ -108,17 +108,32 @@ assert.match(workflow,/Run permanent regression suite before official Stage A/);
 assert.match(workflow,/biological_Y_maze_summary_accessed_during_stage_A:false/);
 assert.match(workflow,/real_stage_B_executed:false/);
 
-assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must be absent at precondition freeze');
-assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json')),'official Stage A provenance must be absent at precondition freeze');
+const resultFreeze='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const officialReport='reports/p4_ymaze_consistency_simulation_v1.json';
+const executionProvenance='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const resultFrozen=fs.existsSync(path.join(root,resultFreeze));
+if(resultFrozen){
+  assert.strictEqual(blob(resultFreeze),'7651b5c50b7d0c752cc85a2af3225c1b5592a4fc');
+  assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23');
+  assert.strictEqual(blob(executionProvenance),'566801802fe434afbd27d48876caa2735a9442ac');
+  const rf=read(resultFreeze);
+  assert.strictEqual(rf.execution_gate.workflow_run_id,34812757309);
+  assert.strictEqual(rf.execution_gate.workflow_attempt,1);
+  assert.strictEqual(rf.semantic_firewall.stage_B_biological_comparison_authorized,false);
+}else{
+  assert.ok(!fs.existsSync(path.join(root,officialReport)),'official Stage A report must be absent before result freeze');
+  assert.ok(!fs.existsSync(path.join(root,executionProvenance)),'official Stage A provenance must be absent before result freeze');
+}
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must remain absent');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must remain absent');
 
-// Behavioral proof that adding the precondition/workflow does not unlock the review branch.
+// Behavioral proof that the committed repository remains locked even after exact Stage-A bytes are frozen.
 const probeRel='reports/.p4_ymaze_stage_A_precondition_lock_probe.json',probe=path.join(root,probeRel);
 assert.ok(!fs.existsSync(probe));
 const cli=spawnSync(process.execPath,['tools/run-p4-ymaze-consistency.js','--official','--out',probeRel],{cwd:root,encoding:'utf8'});
-assert.notStrictEqual(cli.status,0,'official Stage A must remain locked on the committed precondition branch');
+assert.notStrictEqual(cli.status,0,'official Stage A must remain locked in committed repository state');
 assert.match((cli.stdout||'')+(cli.stderr||''),/authorization is not active|locked/i);
 assert.ok(!fs.existsSync(probe),'locked precondition probe must not be written');
+if(resultFrozen)assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23','frozen Stage-A report changed during lock probe');
 
-console.log('p4-ymaze-consistency-official-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:preBlob,workflow_blob:workflowBlob,authorization_blob:authBlob,expected_before:expectedBefore,permanent_main_run:p.permanent_main_workflow.run_id,frozen_surface_entries:p.frozen_execution_surface_entry_count,node:p.exact_node_version,workflow_rerun_enabled:false,review_branch_official_execution:false,stage_B_authorized:false}));
+console.log('p4-ymaze-consistency-official-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:preBlob,workflow_blob:workflowBlob,authorization_blob:authBlob,expected_before:expectedBefore,permanent_main_run:p.permanent_main_workflow.run_id,frozen_surface_entries:p.frozen_execution_surface_entry_count,node:p.exact_node_version,workflow_rerun_enabled:false,review_branch_official_execution:false,stage_A_result_frozen:resultFrozen,stage_B_authorized:false}));
