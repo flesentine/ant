@@ -21,16 +21,17 @@
     "deploy_job_conclusion": "success"
   },
   "execution_workflow_file": ".github/workflows/p4-v034n-ymaze-official-stage-a.yml",
-  "execution_workflow_git_blob_sha": "076619733a3403bfdd19e160aca7f017c95e92f2",
+  "execution_workflow_git_blob_sha": "250da2c81085717a1eda8e4641a2c9bd418f29f1",
   "execution_trigger": {
     "event": "push",
     "branch": "main",
     "path": ".github/workflows/p4-v034n-ymaze-official-stage-a.yml",
     "pull_request_enabled": false,
     "workflow_dispatch_enabled": false,
+    "workflow_run_rerun_enabled": false,
     "later_unrelated_main_push_may_rerun": false
   },
-  "execution_trigger_rule": "The official Stage-A workflow triggers only on a push to main that changes .github/workflows/p4-v034n-ymaze-official-stage-a.yml. It has no pull_request or workflow_dispatch trigger. Therefore review-branch commits cannot execute official Stage A, and later unrelated main commits cannot rerun it.",
+  "execution_trigger_rule": "The official Stage-A workflow triggers only on a push to main that changes .github/workflows/p4-v034n-ymaze-official-stage-a.yml. It has no pull_request or workflow_dispatch trigger, and it fails closed unless GITHUB_RUN_ATTEMPT equals 1. Therefore review-branch commits cannot execute official Stage A, GitHub re-run attempts cannot repeat it, and later unrelated main commits cannot rerun it.",
   "activation_mode": "ephemeral_working_copy_only",
   "committed_authorization_flag_must_remain_false": true,
   "ephemeral_fields_permitted_to_change": [
@@ -77,7 +78,7 @@
     "result_must_be_accepted_exactly_as_produced": true,
     "report_and_provenance_must_be_frozen_in_separate_post_execution_gate_before_stage_B": true
   },
-  "rerun_policy": "No rerun is authorized after a valid official Stage-A result. A rerun is permitted only if the first execution is formally declared invalid because of a genuine implementation or infrastructure error before a valid frozen Stage-A artifact is produced; the exact command, seeds, trial counts, candidate, 18-file frozen execution surface, Node version, apparatus, experiments, state, observation, scoring, and runner must remain unchanged under a separate invalidation record.",
+  "rerun_policy": "No rerun is authorized after a valid official Stage-A result, and the one-shot workflow mechanically rejects GitHub workflow re-run attempts by requiring GITHUB_RUN_ATTEMPT=1. A new execution is permitted only if the first execution is formally declared invalid because of a genuine implementation or infrastructure error before a valid frozen Stage-A artifact is produced; that requires a separate invalidation record and a new separately reviewed execution gate with the exact command, seeds, trial counts, candidate, 18-file frozen execution surface, Node version, apparatus, experiments, state, observation, scoring, and runner unchanged.",
   "biological_Y_maze_summary_access_authorized_during_stage_A": false,
   "raw_Y_maze_choice_access_authorized_during_stage_A": false,
   "colony_level_Y_maze_outcome_access_authorized_during_stage_A": false,

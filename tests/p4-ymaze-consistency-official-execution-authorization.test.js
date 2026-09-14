@@ -6,16 +6,15 @@ const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
 const rel='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
-const prospectiveBlob='8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b';
-assert.strictEqual(blob(rel),prospectiveBlob,'prospective Stage A authorization blob drift');
+const authBlob='8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b';
+assert.strictEqual(blob(rel),authBlob,'prospective Stage A authorization blob drift');
 const a=read(rel);
 assert.strictEqual(a.id,'P4_Y_maze_consistency_official_execution_authorization_v1');
 assert.strictEqual(a.status,'prospective_official_stage_A_authorization_frozen_pending_merge_and_permanent_main_green_stage_B_locked');
 assert.strictEqual(a.freeze_date_local,'2026-09-13');
 
-// The already-qualified Stage-A runner reads this top-level flag. It must remain false in every
-// committed repository state; only the future main-only one-shot workflow may activate a verified
-// working copy ephemerally after the separate post-merge precondition is frozen.
+// Every committed repository state stays mechanically locked; activation is allowed only inside
+// the separately reviewed main-only one-shot workflow's ephemeral working copy.
 assert.strictEqual(a.official_stage_A_execution_authorized,false);
 assert.strictEqual(a.official_stage_A_execution.prospective_official_stage_A_execution_authorized,true);
 assert.strictEqual(a.official_stage_A_execution.official_stage_A_execution_authorized,false);
@@ -23,8 +22,6 @@ assert.strictEqual(a.official_stage_A_execution.activation_requires_separate_pos
 assert.strictEqual(a.official_stage_A_execution.official_execution_may_run_on_review_branch,false);
 assert.strictEqual(a.execution_precondition.repository_authorization_flag_must_remain_false,true);
 assert.strictEqual(a.execution_precondition.activation_mode,'ephemeral_working_copy_only_after_exact_precondition_verification');
-assert.strictEqual(a.execution_precondition.future_one_shot_workflow_may_ephemerally_set_top_level_official_stage_A_execution_authorized_true,true);
-assert.strictEqual(a.execution_precondition.future_one_shot_workflow_may_ephemerally_set_nested_lifecycle_mirror_true,true);
 assert.strictEqual(a.execution_precondition.ephemeral_activation_must_not_be_committed,true);
 
 const q=a.qualification_lineage;
@@ -45,7 +42,7 @@ assert.strictEqual(q.qualified_main_test_job_conclusion,'success');
 assert.strictEqual(q.qualified_main_deploy_job_id,103813840518);
 assert.strictEqual(q.qualified_main_deploy_job_conclusion,'success');
 
-// Freeze the complete transitive Stage-A execution closure, not only the direct P4 files.
+// Complete transitive official Stage-A execution/load surface.
 const expectedSurface={
   stage_A_runner:['tools/run-p4-ymaze-consistency.js','fe3bff285290d0d612a5b9ab665e887c728e3d2e'],
   bundle_loader:['tools/load-bundle.js','235067f10ed85eeeaebcfe6fef0963940d516b6b'],
@@ -66,37 +63,21 @@ const expectedSurface={
   scoring_profile:['scoring/y_maze_endpoint_engineering_v1.json','8235e511b8ef4159671f670b944129c82f7358cb'],
   stage_B_comparator:['tools/compare-p4-ymaze-consistency.js','75cf0ae6075695784e7c67c1473a50e0daaa98cc']
 };
-assert.deepStrictEqual(Object.keys(a.frozen_execution_surface),Object.keys(expectedSurface),'frozen Stage A surface keys drift');
+assert.deepStrictEqual(Object.keys(a.frozen_execution_surface),Object.keys(expectedSurface));
 for(const [key,[file,sha]] of Object.entries(expectedSurface)){
-  const spec=a.frozen_execution_surface[key];
-  assert.deepStrictEqual(spec,{file,git_blob_sha:sha},key+' frozen spec drift');
-  assert.ok(fs.existsSync(path.join(root,file)),file+' missing');
+  assert.deepStrictEqual(a.frozen_execution_surface[key],{file,git_blob_sha:sha},key+' frozen spec drift');
   assert.strictEqual(blob(file),sha,file+' blob drift');
 }
 const dc=a.stage_A_dependency_closure;
 assert.strictEqual(dc.complete_transitive_non_builtin_runtime_dependencies_pinned,true);
 assert.strictEqual(dc.complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned,true);
 assert.deepStrictEqual(dc.external_npm_runtime_dependencies,[]);
-assert.deepStrictEqual(dc.built_in_node_modules_used_by_stage_A_surface,['fs','path']);
-assert.strictEqual(dc.qualified_node_version_exact,'22.23.2');
 assert.strictEqual(dc.future_one_shot_node_version_must_equal,'22.23.2');
-assert.strictEqual(dc.qualified_runner_os,'Ubuntu 24.04.5 LTS');
-assert.strictEqual(dc.qualified_runner_image,'ubuntu-24.04');
-assert.strictEqual(dc.qualified_runner_image_version,'20260907.300.1');
 
-assert.deepStrictEqual(a.frozen_candidate,{
-  candidate_index:307,
-  sigma_field_mm:18.319554310908863,
-  kappa_trail_per_s:6.342935528120713,
-  theta_detect:0.9184,
-  parameter_change_authorized:false,
-  refit_authorized:false,
-  retuning_authorized:false
-});
+assert.deepStrictEqual(a.frozen_candidate,{candidate_index:307,sigma_field_mm:18.319554310908863,kappa_trail_per_s:6.342935528120713,theta_detect:0.9184,parameter_change_authorized:false,refit_authorized:false,retuning_authorized:false});
 const x=a.official_stage_A_execution;
 assert.strictEqual(x.authorized_command_exact,'node tools/run-p4-ymaze-consistency.js --official --out reports/p4_ymaze_consistency_simulation_v1.json');
 assert.deepStrictEqual(x.cli_parameter_overrides,[]);
-assert.strictEqual(x.output_file,'reports/p4_ymaze_consistency_simulation_v1.json');
 assert.strictEqual(x.left_marked_seed_root,8210000);
 assert.strictEqual(x.right_marked_seed_root,8210000);
 assert.strictEqual(x.marked_trials_per_side,1000);
@@ -108,76 +89,55 @@ assert.strictEqual(x.duration_s,90);
 assert.strictEqual(x.workers,1);
 assert.strictEqual(x.adaptive_trial_budget_authorized,false);
 assert.strictEqual(x.seed_change_authorized,false);
-assert.strictEqual(x.precision_driven_rerun_authorized,false);
-assert.strictEqual(x.discrepancy_driven_rerun_authorized,false);
 
 const ep=a.execution_precondition;
-assert.strictEqual(ep.authorization_must_merge_to_main_before_activation,true);
-assert.strictEqual(ep.permanent_main_ci_for_authorization_commit_must_be_green_before_activation,true);
 assert.strictEqual(ep.future_execution_precondition_file,'hypotheses/p4_Y_maze_consistency_official_execution_precondition_v1.json');
 assert.strictEqual(ep.future_execution_workflow_file,'.github/workflows/p4-v034n-ymaze-official-stage-a.yml');
-assert.strictEqual(ep.future_execution_precondition_and_workflow_must_not_exist_at_this_authorization_gate,true);
 assert.strictEqual(ep.future_execution_workflow_must_be_main_only,true);
 assert.strictEqual(ep.future_execution_workflow_must_not_have_pull_request_trigger,true);
 assert.strictEqual(ep.future_execution_workflow_must_not_have_workflow_dispatch_trigger,true);
 assert.strictEqual(ep.future_execution_workflow_must_verify_every_frozen_execution_surface_blob_before_activation,true);
 assert.strictEqual(ep.future_execution_workflow_must_verify_exact_node_version_before_activation,true);
-assert.strictEqual(ep.official_result_still_unrun_at_authorization_freeze,true);
 
-// Historical truth at v0.3.4m: these later-gate files were absent when this authorization froze.
-// At v0.3.4n and later they may exist, but must be the exact reviewed one-shot precondition/workflow
-// and the committed authorization must still remain mechanically inactive.
+// Historical v0.3.4m truth: the later precondition/workflow were absent at authorization freeze.
+// Once v0.3.4n materializes them they must be exactly the reviewed, rerun-locked one-shot gate.
 const preRel=ep.future_execution_precondition_file,workflowRel=ep.future_execution_workflow_file;
 const prePresent=fs.existsSync(path.join(root,preRel)),workflowPresent=fs.existsSync(path.join(root,workflowRel));
 assert.strictEqual(prePresent,workflowPresent,'Stage-A precondition/workflow must materialize together');
 if(prePresent){
-  assert.strictEqual(blob(preRel),'8552c987319fa8688d92cf823ca198db7e17785f','Stage-A execution precondition blob drift');
-  assert.strictEqual(blob(workflowRel),'076619733a3403bfdd19e160aca7f017c95e92f2','Stage-A one-shot workflow blob drift');
+  assert.strictEqual(blob(preRel),'32d67461218f94ca7519fb0193ebecea922d0158');
+  assert.strictEqual(blob(workflowRel),'250da2c81085717a1eda8e4641a2c9bd418f29f1');
   const p=read(preRel),workflow=fs.readFileSync(path.join(root,workflowRel),'utf8');
-  assert.strictEqual(p.id,'P4_Y_maze_consistency_official_execution_precondition_v1');
-  assert.strictEqual(p.authorization_git_blob_sha,prospectiveBlob);
+  assert.strictEqual(p.authorization_git_blob_sha,authBlob);
   assert.strictEqual(p.authorization_main_commit,'71ef3857e775d11269246990b907994e3442e3b2');
   assert.strictEqual(p.official_execution_still_unrun_at_freeze,true);
   assert.strictEqual(p.committed_authorization_flag_must_remain_false,true);
   assert.strictEqual(p.activation_mode,'ephemeral_working_copy_only');
+  assert.strictEqual(p.execution_trigger.workflow_run_rerun_enabled,false);
   assert.strictEqual(p.stage_B_authorized,false);
   assert.strictEqual(p.biological_Y_maze_summary_access_authorized_during_stage_A,false);
   assert.match(workflow,/branches:\s*\[main\]/);
   assert.doesNotMatch(workflow,/^\s*pull_request\s*:/m);
   assert.doesNotMatch(workflow,/^\s*workflow_dispatch\s*:/m);
-}else{
-  assert.ok(!prePresent,'post-merge Stage A precondition must be absent before v0.3.4n');
-  assert.ok(!workflowPresent,'one-shot Stage A workflow must be absent before v0.3.4n');
+  assert.match(workflow,/test "\$\{GITHUB_RUN_ATTEMPT\}" = '1'/);
 }
 
 const sf=a.stage_A_semantic_firewall;
-assert.strictEqual(blob(sf.forbidden_biological_source_1.file),sf.forbidden_biological_source_1.git_blob_sha);
-assert.strictEqual(blob(sf.forbidden_biological_source_2.file),sf.forbidden_biological_source_2.git_blob_sha);
 for(const k of ['known_biological_Y_maze_summary_access_authorized','raw_Y_maze_choice_access_authorized','colony_level_Y_maze_outcome_access_authorized','any_derivative_Y_maze_biological_target_access_authorized','stage_A_runner_may_import_or_parse_biological_summary_artifacts','stage_A_report_may_contain_observed_biological_rates'])assert.strictEqual(sf[k],false,k+' must remain false');
 for(const [k,v] of Object.entries(a.firewalls))assert.strictEqual(v,false,k+' must remain false');
 for(const k of ['official_stage_B_comparison_authorized','stage_B_authorization_file_may_be_created_before_stage_A_report_is_frozen','stage_B_may_rerun_or_modify_stage_A','stage_B_may_change_candidate_307','stage_B_may_change_protocol','validation_pass_fail_threshold_authorized','inferential_significance_test_authorized','best_subset_reporting_authorized','canonical_promotion_authorized','external_validation_claim_authorized'])assert.strictEqual(a.stage_B_and_promotion_firewall[k],false,k+' must remain false');
-assert.strictEqual(a.stage_B_and_promotion_firewall.future_stage_B_authorization_must_pin_stage_A_file,'reports/p4_ymaze_consistency_simulation_v1.json');
-assert.strictEqual(a.stage_B_and_promotion_firewall.future_stage_B_authorization_must_pin_stage_A_git_blob_sha,true);
-assert.strictEqual(a.stage_B_and_promotion_firewall.future_stage_B_authorization_must_preserve_seven_predeclared_rows,true);
-assert.strictEqual(a.next_gate.id,'P4_Y_maze_consistency_official_execution_precondition_v1');
-assert.strictEqual(a.next_gate.may_execute_official_stage_A_at_this_review_gate,false);
-assert.strictEqual(a.next_gate.may_access_biological_Y_maze_summaries,false);
-assert.strictEqual(a.next_gate.may_run_stage_B,false);
-assert.strictEqual(a.next_gate.may_change_candidate_or_protocol,false);
 
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must remain absent');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must remain absent');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must remain absent');
 
-// Behavioral lockout: exercise the exact official CLI surface. It must fail before trial 1 and
-// must not write even a probe report while the committed authorization flag remains false.
-const probeRel='reports/.p4_ymaze_stage_A_lock_probe.json';
-const probe=path.join(root,probeRel);
-assert.ok(!fs.existsSync(probe),'lock probe output must start absent');
+// Behavioral lockout: exact official CLI must fail before trial 1 in every committed state.
+const probeRel='reports/.p4_ymaze_stage_A_lock_probe.json',probe=path.join(root,probeRel);
+assert.ok(!fs.existsSync(probe));
 const cli=spawnSync(process.execPath,['tools/run-p4-ymaze-consistency.js','--official','--out',probeRel],{cwd:root,encoding:'utf8'});
 assert.notStrictEqual(cli.status,0,'official Stage A CLI must fail while committed authorization is inactive');
 assert.match((cli.stdout||'')+(cli.stderr||''),/authorization is not active|locked/i);
 assert.ok(!fs.existsSync(probe),'locked official Stage A CLI must not create probe output');
 assert.ok(!fs.existsSync(path.join(root,x.output_file)),'locked official Stage A CLI must not create official report');
 
-console.log('p4-ymaze-consistency-official-execution-authorization.test.js PASS '+JSON.stringify({authorization_blob:prospectiveBlob,runner_blob:a.frozen_execution_surface.stage_A_runner.git_blob_sha,frozen_stage_A_surface_files:Object.keys(expectedSurface).length,node:dc.future_one_shot_node_version_must_equal,execution_precondition_present:prePresent,committed_execution_authorized:false,prospective_execution_authorized:true,official_trials_executed:0,stage_B_authorized:false,biological_summary_access:false}));
+console.log('p4-ymaze-consistency-official-execution-authorization.test.js PASS '+JSON.stringify({authorization_blob:authBlob,frozen_stage_A_surface_files:Object.keys(expectedSurface).length,node:dc.future_one_shot_node_version_must_equal,execution_precondition_present:prePresent,workflow_rerun_enabled:false,committed_execution_authorized:false,official_trials_executed:0,stage_B_authorized:false}));

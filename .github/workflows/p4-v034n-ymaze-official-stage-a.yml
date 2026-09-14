@@ -39,6 +39,7 @@ jobs:
 
           test "${GITHUB_REF}" = 'refs/heads/main'
           test "${GITHUB_EVENT_NAME}" = 'push'
+          test "${GITHUB_RUN_ATTEMPT}" = '1'
           git merge-base --is-ancestor 71ef3857e775d11269246990b907994e3442e3b2 HEAD
           test "$(git hash-object "${AUTH}")" = '8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b'
           test "$(node -p 'process.versions.node')" = '22.23.2'
@@ -95,7 +96,7 @@ jobs:
           if(p.permanent_main_workflow?.deploy_job_id!==103828787871||p.permanent_main_workflow?.deploy_job_conclusion!=='success')fail('permanent-main deploy provenance drift');
           if(p.execution_workflow_file!==WORKFLOW)fail('workflow path drift');
           if(p.execution_workflow_git_blob_sha!==hash(WORKFLOW))fail('workflow blob does not match frozen precondition');
-          if(p.execution_trigger?.event!=='push'||p.execution_trigger?.branch!=='main'||p.execution_trigger?.path!==WORKFLOW||p.execution_trigger?.pull_request_enabled!==false||p.execution_trigger?.workflow_dispatch_enabled!==false)fail('one-shot trigger drift');
+          if(p.execution_trigger?.event!=='push'||p.execution_trigger?.branch!=='main'||p.execution_trigger?.path!==WORKFLOW||p.execution_trigger?.pull_request_enabled!==false||p.execution_trigger?.workflow_dispatch_enabled!==false||p.execution_trigger?.workflow_run_rerun_enabled!==false)fail('one-shot trigger drift');
           if(p.activation_mode!=='ephemeral_working_copy_only'||p.committed_authorization_flag_must_remain_false!==true)fail('precondition activation firewall drift');
           if(p.exact_node_version!=='22.23.2')fail('precondition Node pin drift');
           if(p.frozen_execution_surface_entry_count!==18||p.verify_every_authorization_surface_blob_before_activation!==true)fail('precondition frozen-surface verification drift');
@@ -115,6 +116,7 @@ jobs:
         run: |
           set -euo pipefail
           test -z "$(git status --porcelain)"
+          test "${GITHUB_RUN_ATTEMPT}" = '1'
           test "$(git hash-object hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json)" = '8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b'
           test "$(node -p 'process.versions.node')" = '22.23.2'
 
@@ -215,6 +217,7 @@ jobs:
             committed_repository_authorization_remained_false:true,
             activation_was_ephemeral_working_copy_only:true
           };
+          if(provenance.workflow_attempt!==1)fail('official workflow rerun attempt is forbidden');
           if(provenance.node_version!=='22.23.2')fail('provenance Node drift');
           fs.writeFileSync(provenancePath,JSON.stringify(provenance,null,2)+'\n');
           NODE

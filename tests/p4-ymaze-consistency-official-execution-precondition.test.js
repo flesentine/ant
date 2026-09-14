@@ -8,8 +8,8 @@ const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).t
 const preRel='hypotheses/p4_Y_maze_consistency_official_execution_precondition_v1.json';
 const workflowRel='.github/workflows/p4-v034n-ymaze-official-stage-a.yml';
 const authRel='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
-const preBlob='8552c987319fa8688d92cf823ca198db7e17785f';
-const workflowBlob='076619733a3403bfdd19e160aca7f017c95e92f2';
+const preBlob='32d67461218f94ca7519fb0193ebecea922d0158';
+const workflowBlob='250da2c81085717a1eda8e4641a2c9bd418f29f1';
 const authBlob='8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b';
 
 assert.strictEqual(blob(preRel),preBlob,'execution precondition blob drift');
@@ -40,10 +40,11 @@ assert.deepStrictEqual(p.permanent_main_workflow,{
 assert.strictEqual(p.execution_workflow_file,workflowRel);
 assert.strictEqual(p.execution_workflow_git_blob_sha,workflowBlob);
 assert.deepStrictEqual(p.execution_trigger,{
-  event:'push',branch:'main',path:workflowRel,pull_request_enabled:false,workflow_dispatch_enabled:false,later_unrelated_main_push_may_rerun:false
+  event:'push',branch:'main',path:workflowRel,pull_request_enabled:false,workflow_dispatch_enabled:false,workflow_run_rerun_enabled:false,later_unrelated_main_push_may_rerun:false
 });
 assert.match(p.execution_trigger_rule,/only on a push to main/i);
 assert.match(p.execution_trigger_rule,/no pull_request or workflow_dispatch/i);
+assert.match(p.execution_trigger_rule,/GITHUB_RUN_ATTEMPT equals 1/i);
 assert.strictEqual(p.activation_mode,'ephemeral_working_copy_only');
 assert.strictEqual(p.committed_authorization_flag_must_remain_false,true);
 assert.deepStrictEqual(p.ephemeral_fields_permitted_to_change,[
@@ -90,6 +91,8 @@ assert.deepStrictEqual(p.stage_A_result_contract,{
   result_must_be_accepted_exactly_as_produced:true,
   report_and_provenance_must_be_frozen_in_separate_post_execution_gate_before_stage_B:true
 });
+assert.match(p.rerun_policy,/GITHUB_RUN_ATTEMPT=1/);
+assert.match(p.rerun_policy,/separate invalidation record/i);
 assert.strictEqual(p.biological_Y_maze_summary_access_authorized_during_stage_A,false);
 assert.strictEqual(p.raw_Y_maze_choice_access_authorized_during_stage_A,false);
 assert.strictEqual(p.colony_level_Y_maze_outcome_access_authorized_during_stage_A,false);
@@ -117,12 +120,15 @@ for(const [name,spec] of Object.entries(a.frozen_execution_surface)){
 }
 assert.strictEqual(a.stage_A_dependency_closure.future_one_shot_node_version_must_equal,'22.23.2');
 
-// Static trigger/firewall proof: no review/manual execution surface exists.
+// Static trigger/firewall proof: no review/manual/rerun execution surface exists.
 assert.match(workflow,/^on:\s*\n\s+push:\s*$/m);
 assert.match(workflow,/branches:\s*\[main\]/);
 assert.match(workflow,/paths:\s*\n\s+- '\.github\/workflows\/p4-v034n-ymaze-official-stage-a\.yml'/);
 assert.doesNotMatch(workflow,/^\s*pull_request\s*:/m);
 assert.doesNotMatch(workflow,/^\s*workflow_dispatch\s*:/m);
+assert.match(workflow,/test "\$\{GITHUB_RUN_ATTEMPT\}" = '1'/);
+assert.match(workflow,/workflow_run_rerun_enabled!==false/);
+assert.match(workflow,/provenance\.workflow_attempt!==1/);
 assert.match(workflow,/node-version:\s*'22\.23\.2'/);
 assert.match(workflow,/entries\.length!==18/);
 assert.match(workflow,/git hash-object/);
@@ -146,4 +152,4 @@ assert.notStrictEqual(cli.status,0,'official Stage A must remain locked on the c
 assert.match((cli.stdout||'')+(cli.stderr||''),/authorization is not active|locked/i);
 assert.ok(!fs.existsSync(probe),'locked precondition probe must not be written');
 
-console.log('p4-ymaze-consistency-official-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:preBlob,workflow_blob:workflowBlob,authorization_blob:authBlob,authorization_main_commit:p.authorization_main_commit,permanent_main_run:p.permanent_main_workflow.run_id,frozen_surface_entries:p.frozen_execution_surface_entry_count,node:p.exact_node_version,review_branch_official_execution:false,stage_B_authorized:false}));
+console.log('p4-ymaze-consistency-official-execution-precondition.test.js PASS '+JSON.stringify({precondition_blob:preBlob,workflow_blob:workflowBlob,authorization_blob:authBlob,authorization_main_commit:p.authorization_main_commit,permanent_main_run:p.permanent_main_workflow.run_id,frozen_surface_entries:p.frozen_execution_surface_entry_count,node:p.exact_node_version,workflow_rerun_enabled:false,review_branch_official_execution:false,stage_B_authorized:false}));
