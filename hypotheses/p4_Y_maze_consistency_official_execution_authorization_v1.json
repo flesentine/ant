@@ -24,16 +24,35 @@
     "qualified_main_deploy_job_conclusion": "success"
   },
   "frozen_execution_surface": {
+    "stage_A_runner": {"file": "tools/run-p4-ymaze-consistency.js", "git_blob_sha": "fe3bff285290d0d612a5b9ab665e887c728e3d2e"},
+    "bundle_loader": {"file": "tools/load-bundle.js", "git_blob_sha": "235067f10ed85eeeaebcfe6fef0963940d516b6b"},
     "runtime_p4": {"file": "src/p4.js", "git_blob_sha": "bf7d5781bd69ec4568450ebbd3bdc284897b6f61"},
     "runtime_p1_helper": {"file": "src/p1.js", "git_blob_sha": "f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca"},
+    "runtime_sim_core": {"file": "src/sim-core.js", "git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8"},
+    "runtime_integrity": {"file": "src/integrity.js", "git_blob_sha": "f23c68a6955832b70eeb3bd3e6893d71a3759018"},
+    "runtime_measurement": {"file": "src/measurement.js", "git_blob_sha": "8845726e02360655c605851662256bc729277b21"},
+    "runtime_h3": {"file": "src/h3.js", "git_blob_sha": "9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1"},
     "fitted_model": {"file": "models/lasius_niger_painted_trail_p4_fitted_v1.json", "git_blob_sha": "e23b022279d463442bdd4e16d4cf56e0212d2b11"},
     "left_marked_apparatus": {"file": "apparatus/poissonnier2026_y_maze_p4_left_v1.json", "git_blob_sha": "219d42036c13463e8cae5045b8fdba6d5bd24454"},
     "right_marked_apparatus": {"file": "apparatus/poissonnier2026_y_maze_p4_right_v1.json", "git_blob_sha": "bfcba7e34eed4b4f79e67d6fc22c60af993f5386"},
     "left_experiment": {"file": "experiments/y_maze_p4_left_consistency_v1.json", "git_blob_sha": "08edc2d3ef9899820c04e900154f1b4bee2a5104"},
     "right_experiment": {"file": "experiments/y_maze_p4_right_consistency_v1.json", "git_blob_sha": "217f94ec4ba61a61c7956baeac34abd19cf5eec8"},
     "neutral_experiment": {"file": "experiments/y_maze_p4_neutral_consistency_v1.json", "git_blob_sha": "e58cf3f4f5c51168f2dc267af7a820bc5b875b90"},
-    "stage_A_runner": {"file": "tools/run-p4-ymaze-consistency.js", "git_blob_sha": "fe3bff285290d0d612a5b9ab665e887c728e3d2e"},
+    "state_profile": {"file": "states/naive_outbound_v1.json", "git_blob_sha": "d3db29a83eed68bc28f771c147dd33966764d535"},
+    "observation_profile": {"file": "observations/engineering_25fps.json", "git_blob_sha": "3ba85f0ae7994e4fe2245ca4732ce39a7b1a7ca8"},
+    "scoring_profile": {"file": "scoring/y_maze_endpoint_engineering_v1.json", "git_blob_sha": "8235e511b8ef4159671f670b944129c82f7358cb"},
     "stage_B_comparator": {"file": "tools/compare-p4-ymaze-consistency.js", "git_blob_sha": "75cf0ae6075695784e7c67c1473a50e0daaa98cc"}
+  },
+  "stage_A_dependency_closure": {
+    "complete_transitive_non_builtin_runtime_dependencies_pinned": true,
+    "complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned": true,
+    "external_npm_runtime_dependencies": [],
+    "built_in_node_modules_used_by_stage_A_surface": ["fs", "path"],
+    "qualified_node_version_exact": "22.23.2",
+    "future_one_shot_node_version_must_equal": "22.23.2",
+    "qualified_runner_os": "Ubuntu 24.04.5 LTS",
+    "qualified_runner_image": "ubuntu-24.04",
+    "qualified_runner_image_version": "20260907.300.1"
   },
   "frozen_candidate": {
     "candidate_index": 307,
@@ -76,6 +95,8 @@
     "future_execution_workflow_must_be_main_only": true,
     "future_execution_workflow_must_not_have_pull_request_trigger": true,
     "future_execution_workflow_must_not_have_workflow_dispatch_trigger": true,
+    "future_execution_workflow_must_verify_every_frozen_execution_surface_blob_before_activation": true,
+    "future_execution_workflow_must_verify_exact_node_version_before_activation": true,
     "repository_authorization_flag_must_remain_false": true,
     "activation_mode": "ephemeral_working_copy_only_after_exact_precondition_verification",
     "future_one_shot_workflow_may_ephemerally_set_top_level_official_stage_A_execution_authorized_true": true,
@@ -99,7 +120,7 @@
     "favorable_rerun_authorized": false,
     "rerun_after_valid_result_for_precision_authorized": false,
     "rerun_after_valid_result_for_discrepancy_authorized": false,
-    "invalid_execution_rerun_rule": "A rerun is permitted only if the first official Stage A execution is formally declared invalid because of a genuine implementation or infrastructure error before a valid frozen Stage A artifact is produced; the full frozen command, seeds, trial counts, model, apparatus, experiments, and runner must remain unchanged under a separate invalidation record."
+    "invalid_execution_rerun_rule": "A rerun is permitted only if the first official Stage A execution is formally declared invalid because of a genuine implementation or infrastructure error before a valid frozen Stage A artifact is produced; the full frozen command, seeds, trial counts, model, transitive runtime surface, bundle-loaded inputs, execution environment, apparatus, experiments, and runner must remain unchanged under a separate invalidation record."
   },
   "stage_B_and_promotion_firewall": {
     "official_stage_B_comparison_authorized": false,
@@ -129,7 +150,7 @@
   },
   "next_gate": {
     "id": "P4_Y_maze_consistency_official_execution_precondition_v1",
-    "purpose": "After this prospective authorization is merged and its permanent main CI is green, freeze the exact authorization commit/run provenance and a main-only one-shot workflow that may activate only an ephemeral verified working copy before the official command executes.",
+    "purpose": "After this prospective authorization is merged and its permanent main CI is green, freeze the exact authorization commit/run provenance and a main-only one-shot workflow that verifies every frozen transitive execution blob plus Node 22.23.2 before activating only an ephemeral verified working copy and executing the official command.",
     "may_execute_official_stage_A_at_this_review_gate": false,
     "may_access_biological_Y_maze_summaries": false,
     "may_run_stage_B": false,

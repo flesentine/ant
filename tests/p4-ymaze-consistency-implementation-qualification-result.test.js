@@ -161,7 +161,7 @@ assert.strictEqual(r.next_gate.may_change_P4_parameters_or_protocol,false);
 // Stage-A authorization may exist, but the committed repository must still be mechanically locked.
 const prospective='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
 if(fs.existsSync(path.join(root,prospective))){
-  assert.strictEqual(blob(prospective),'4fe46a0cd007175deaa004bfbd70f3387b8e9f4c');
+  assert.strictEqual(blob(prospective),'8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b');
   const pa=read(prospective);
   assert.strictEqual(pa.qualification_lineage.implementation_qualification_file,rel);
   assert.strictEqual(pa.qualification_lineage.implementation_qualification_git_blob_sha,'184e1dc5d50a14fd10615f95db412dc414cf45d5');
@@ -169,6 +169,9 @@ if(fs.existsSync(path.join(root,prospective))){
   assert.strictEqual(pa.official_stage_A_execution.prospective_official_stage_A_execution_authorized,true);
   assert.strictEqual(pa.official_stage_A_execution.official_stage_A_execution_authorized,false);
   assert.strictEqual(pa.execution_precondition.repository_authorization_flag_must_remain_false,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_transitive_non_builtin_runtime_dependencies_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.future_one_shot_node_version_must_equal,'22.23.2');
 }else assert.ok(!fs.existsSync(path.join(root,prospective)),'prospective authorization absent before v0.3.4m');
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must not exist yet');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist yet');

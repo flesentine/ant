@@ -6,7 +6,7 @@ const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
 
 const rel='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
-const prospectiveBlob='4fe46a0cd007175deaa004bfbd70f3387b8e9f4c';
+const prospectiveBlob='8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b';
 assert.strictEqual(blob(rel),prospectiveBlob,'prospective Stage A authorization blob drift');
 const a=read(rel);
 assert.strictEqual(a.id,'P4_Y_maze_consistency_official_execution_authorization_v1');
@@ -45,12 +45,44 @@ assert.strictEqual(q.qualified_main_test_job_conclusion,'success');
 assert.strictEqual(q.qualified_main_deploy_job_id,103813840518);
 assert.strictEqual(q.qualified_main_deploy_job_conclusion,'success');
 
-for(const spec of Object.values(a.frozen_execution_surface)){
-  assert.ok(fs.existsSync(path.join(root,spec.file)),spec.file+' missing');
-  assert.strictEqual(blob(spec.file),spec.git_blob_sha,spec.file+' blob drift');
+// Freeze the complete transitive Stage-A execution closure, not only the direct P4 files.
+const expectedSurface={
+  stage_A_runner:['tools/run-p4-ymaze-consistency.js','fe3bff285290d0d612a5b9ab665e887c728e3d2e'],
+  bundle_loader:['tools/load-bundle.js','235067f10ed85eeeaebcfe6fef0963940d516b6b'],
+  runtime_p4:['src/p4.js','bf7d5781bd69ec4568450ebbd3bdc284897b6f61'],
+  runtime_p1_helper:['src/p1.js','f8d8e07c92a2fe4ebdbfd640827fe4b5a489e8ca'],
+  runtime_sim_core:['src/sim-core.js','24777aac3577d442893e4779d70aee4e27761fe8'],
+  runtime_integrity:['src/integrity.js','f23c68a6955832b70eeb3bd3e6893d71a3759018'],
+  runtime_measurement:['src/measurement.js','8845726e02360655c605851662256bc729277b21'],
+  runtime_h3:['src/h3.js','9bb8fc966a5aa4d4173f9bda2020c6d9cd9368f1'],
+  fitted_model:['models/lasius_niger_painted_trail_p4_fitted_v1.json','e23b022279d463442bdd4e16d4cf56e0212d2b11'],
+  left_marked_apparatus:['apparatus/poissonnier2026_y_maze_p4_left_v1.json','219d42036c13463e8cae5045b8fdba6d5bd24454'],
+  right_marked_apparatus:['apparatus/poissonnier2026_y_maze_p4_right_v1.json','bfcba7e34eed4b4f79e67d6fc22c60af993f5386'],
+  left_experiment:['experiments/y_maze_p4_left_consistency_v1.json','08edc2d3ef9899820c04e900154f1b4bee2a5104'],
+  right_experiment:['experiments/y_maze_p4_right_consistency_v1.json','217f94ec4ba61a61c7956baeac34abd19cf5eec8'],
+  neutral_experiment:['experiments/y_maze_p4_neutral_consistency_v1.json','e58cf3f4f5c51168f2dc267af7a820bc5b875b90'],
+  state_profile:['states/naive_outbound_v1.json','d3db29a83eed68bc28f771c147dd33966764d535'],
+  observation_profile:['observations/engineering_25fps.json','3ba85f0ae7994e4fe2245ca4732ce39a7b1a7ca8'],
+  scoring_profile:['scoring/y_maze_endpoint_engineering_v1.json','8235e511b8ef4159671f670b944129c82f7358cb'],
+  stage_B_comparator:['tools/compare-p4-ymaze-consistency.js','75cf0ae6075695784e7c67c1473a50e0daaa98cc']
+};
+assert.deepStrictEqual(Object.keys(a.frozen_execution_surface),Object.keys(expectedSurface),'frozen Stage A surface keys drift');
+for(const [key,[file,sha]] of Object.entries(expectedSurface)){
+  const spec=a.frozen_execution_surface[key];
+  assert.deepStrictEqual(spec,{file,git_blob_sha:sha},key+' frozen spec drift');
+  assert.ok(fs.existsSync(path.join(root,file)),file+' missing');
+  assert.strictEqual(blob(file),sha,file+' blob drift');
 }
-assert.strictEqual(a.frozen_execution_surface.stage_A_runner.git_blob_sha,'fe3bff285290d0d612a5b9ab665e887c728e3d2e');
-assert.strictEqual(a.frozen_execution_surface.stage_B_comparator.git_blob_sha,'75cf0ae6075695784e7c67c1473a50e0daaa98cc');
+const dc=a.stage_A_dependency_closure;
+assert.strictEqual(dc.complete_transitive_non_builtin_runtime_dependencies_pinned,true);
+assert.strictEqual(dc.complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned,true);
+assert.deepStrictEqual(dc.external_npm_runtime_dependencies,[]);
+assert.deepStrictEqual(dc.built_in_node_modules_used_by_stage_A_surface,['fs','path']);
+assert.strictEqual(dc.qualified_node_version_exact,'22.23.2');
+assert.strictEqual(dc.future_one_shot_node_version_must_equal,'22.23.2');
+assert.strictEqual(dc.qualified_runner_os,'Ubuntu 24.04.5 LTS');
+assert.strictEqual(dc.qualified_runner_image,'ubuntu-24.04');
+assert.strictEqual(dc.qualified_runner_image_version,'20260907.300.1');
 
 assert.deepStrictEqual(a.frozen_candidate,{
   candidate_index:307,
@@ -88,6 +120,8 @@ assert.strictEqual(ep.future_execution_precondition_and_workflow_must_not_exist_
 assert.strictEqual(ep.future_execution_workflow_must_be_main_only,true);
 assert.strictEqual(ep.future_execution_workflow_must_not_have_pull_request_trigger,true);
 assert.strictEqual(ep.future_execution_workflow_must_not_have_workflow_dispatch_trigger,true);
+assert.strictEqual(ep.future_execution_workflow_must_verify_every_frozen_execution_surface_blob_before_activation,true);
+assert.strictEqual(ep.future_execution_workflow_must_verify_exact_node_version_before_activation,true);
 assert.strictEqual(ep.official_result_still_unrun_at_authorization_freeze,true);
 assert.ok(!fs.existsSync(path.join(root,ep.future_execution_precondition_file)),'post-merge Stage A precondition must not exist at prospective authorization gate');
 assert.ok(!fs.existsSync(path.join(root,ep.future_execution_workflow_file)),'one-shot Stage A workflow must not exist at prospective authorization gate');
@@ -122,4 +156,4 @@ assert.match((cli.stdout||'')+(cli.stderr||''),/authorization is not active|lock
 assert.ok(!fs.existsSync(probe),'locked official Stage A CLI must not create probe output');
 assert.ok(!fs.existsSync(path.join(root,x.output_file)),'locked official Stage A CLI must not create official report');
 
-console.log('p4-ymaze-consistency-official-execution-authorization.test.js PASS '+JSON.stringify({authorization_blob:prospectiveBlob,runner_blob:a.frozen_execution_surface.stage_A_runner.git_blob_sha,committed_execution_authorized:false,prospective_execution_authorized:true,official_trials_executed:0,stage_B_authorized:false,biological_summary_access:false}));
+console.log('p4-ymaze-consistency-official-execution-authorization.test.js PASS '+JSON.stringify({authorization_blob:prospectiveBlob,runner_blob:a.frozen_execution_surface.stage_A_runner.git_blob_sha,frozen_stage_A_surface_files:Object.keys(expectedSurface).length,node:dc.future_one_shot_node_version_must_equal,committed_execution_authorized:false,prospective_execution_authorized:true,official_trials_executed:0,stage_B_authorized:false,biological_summary_access:false}));

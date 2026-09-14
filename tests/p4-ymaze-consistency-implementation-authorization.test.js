@@ -87,13 +87,16 @@ if(implementationPresent){
 }else for(const file of [...fixedLaterBlobs.keys(),s.implementation_test])assert.ok(!fs.existsSync(path.join(root,file)),file+' must not exist before later implementation gate');
 const prospective='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
 if(fs.existsSync(path.join(root,prospective))){
-  assert.strictEqual(blob(prospective),'4fe46a0cd007175deaa004bfbd70f3387b8e9f4c');
+  assert.strictEqual(blob(prospective),'8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b');
   const pa=read(prospective);
   assert.strictEqual(pa.official_stage_A_execution_authorized,false);
   assert.strictEqual(pa.official_stage_A_execution.prospective_official_stage_A_execution_authorized,true);
   assert.strictEqual(pa.official_stage_A_execution.official_stage_A_execution_authorized,false);
   assert.strictEqual(pa.execution_precondition.repository_authorization_flag_must_remain_false,true);
   assert.strictEqual(pa.execution_precondition.activation_mode,'ephemeral_working_copy_only_after_exact_precondition_verification');
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_transitive_non_builtin_runtime_dependencies_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned,true);
+  assert.strictEqual(pa.stage_A_dependency_closure.future_one_shot_node_version_must_equal,'22.23.2');
   assert.strictEqual(pa.next_gate.may_execute_official_stage_A_at_this_review_gate,false);
 }else assert.ok(!fs.existsSync(path.join(root,prospective)),'prospective authorization absent before its later gate');
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'real Stage B authorization must remain absent');
