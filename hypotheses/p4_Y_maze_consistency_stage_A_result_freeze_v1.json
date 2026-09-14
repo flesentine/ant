@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "P4_Y_maze_consistency_stage_A_result_freeze_v1",
+  "status": "official_stage_A_artifact_frozen_stage_B_locked",
+  "freeze_date_local": "2026-09-13",
+  "execution_gate": {
+    "authorization_file": "hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json",
+    "authorization_git_blob_sha": "8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b",
+    "execution_precondition_file": "hypotheses/p4_Y_maze_consistency_official_execution_precondition_v1.json",
+    "execution_precondition_git_blob_sha": "edaae2a2b2601fb0957287b3d76b1e4029683ea5",
+    "execution_workflow_file": ".github/workflows/p4-v034n-ymaze-official-stage-a.yml",
+    "execution_workflow_git_blob_sha": "d650438d88055fa5e91f45c72e71d5498ba8fed8",
+    "execution_main_commit": "b660a3acd028219d122c07f5db87822be05a9716",
+    "workflow_run_id": 34812757309,
+    "workflow_run_number": 1,
+    "workflow_attempt": 1,
+    "execution_job_id": 103877185733,
+    "execution_job_conclusion": "success",
+    "workflow_event_before": "71ef3857e775d11269246990b907994e3442e3b2",
+    "node_version": "22.23.2"
+  },
+  "permanent_main_qualification": {
+    "workflow_name": "Test and deploy ANTLAB",
+    "main_commit": "b660a3acd028219d122c07f5db87822be05a9716",
+    "run_id": 34812754559,
+    "run_number": 169,
+    "conclusion": "success",
+    "test_job_id": 103877177805,
+    "test_job_conclusion": "success",
+    "deploy_job_id": 103877347197,
+    "deploy_job_conclusion": "success"
+  },
+  "uploaded_artifact": {
+    "artifact_id": 10335490755,
+    "name": "p4-v034n-ymaze-official-stage-a",
+    "size_in_bytes": 2253,
+    "digest": "sha256:24a445d0b302d07534351fa1d98f36e695af9fd801c78c9d378bf7b942890e40",
+    "workflow_run_id": 34812757309,
+    "workflow_head_sha": "b660a3acd028219d122c07f5db87822be05a9716"
+  },
+  "frozen_official_report": {
+    "file": "reports/p4_ymaze_consistency_simulation_v1.json",
+    "git_blob_sha": "a7b3e33ce613254c182360947641c5ff03f5af23",
+    "sha256": "ed61496f918ba9503f984587abc317fadca94df9626c14463caaa195abdc74a3",
+    "id": "P4_Y_maze_consistency_stage_A_simulation_v1",
+    "mode": "official",
+    "scientific_evidence": false,
+    "interpretation": "posthoc_same_study_cross_apparatus_descriptive_consistency_only",
+    "total_trials": 3000
+  },
+  "frozen_execution_provenance": {
+    "file": "reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json",
+    "git_blob_sha": "566801802fe434afbd27d48876caa2735a9442ac",
+    "sha256": "2612288943e391d31328a73fdabc9072674d03fab919f6efb406eac6eb0c57e3",
+    "id": "P4_Y_maze_consistency_stage_A_execution_provenance_v1",
+    "status": "official_stage_A_completed_artifact_not_yet_frozen_stage_B_locked"
+  },
+  "frozen_candidate": {
+    "candidate_index": 307,
+    "sigma_field_mm": 18.319554310908863,
+    "kappa_trail_per_s": 6.342935528120713,
+    "theta_detect": 0.9184
+  },
+  "frozen_stage_A_summary": {
+    "left_marked_trials": 1000,
+    "left_marked_marked_arm_choice_fraction_among_choices": 0.7598385469223007,
+    "left_marked_timeouts": 9,
+    "right_marked_trials": 1000,
+    "right_marked_marked_arm_choice_fraction_among_choices": 0.7219413549039434,
+    "right_marked_timeouts": 11,
+    "side_balanced_marked_arm_choice_fraction": 0.740889950913122,
+    "neutral_trials": 1000,
+    "neutral_left_fraction_among_choices": 0.4806122448979592,
+    "neutral_timeouts": 20,
+    "left_right_marked_side_difference": 0.037897192018357284
+  },
+  "semantic_firewall": {
+    "biological_Y_maze_summary_accessed_during_stage_A": false,
+    "raw_Y_maze_choices_accessed_during_stage_A": false,
+    "colony_level_Y_maze_outcomes_accessed_during_stage_A": false,
+    "stage_A_report_contains_observed_biological_rates": false,
+    "stage_A_is_external_validation": false,
+    "stage_A_is_posthoc_same_study_descriptive_consistency_only": true,
+    "stage_B_biological_comparison_authorized": false,
+    "stage_B_report_exists": false,
+    "validation_pass_fail_threshold_authorized": false,
+    "inferential_significance_test_authorized": false,
+    "canonical_promotion_authorized": false,
+    "P4_parameter_change_authorized": false,
+    "P4_refit_or_retuning_authorized": false
+  },
+  "result_immutability": {
+    "valid_stage_A_result_must_be_accepted_exactly_as_produced": true,
+    "valid_stage_A_rerun_authorized": false,
+    "report_bytes_may_change": false,
+    "provenance_bytes_may_change": false,
+    "result_subset_selection_authorized": false,
+    "precision_driven_rerun_authorized": false,
+    "discrepancy_driven_rerun_authorized": false
+  },
+  "next_gate": {
+    "id": "P4_Y_maze_consistency_stage_B_authorization_v1",
+    "purpose": "Under a separate reviewed gate, bind the real Stage-B comparator to these exact frozen Stage-A report bytes and the already-frozen biological Y-maze source artifacts before any biological comparison executes.",
+    "stage_B_may_execute_at_this_result_freeze_gate": false,
+    "biological_Y_maze_summary_values_may_be_accessed_at_this_result_freeze_gate": false,
+    "future_stage_B_authorization_must_pin_stage_A_report_git_blob_sha": "a7b3e33ce613254c182360947641c5ff03f5af23",
+    "future_stage_B_authorization_must_pin_stage_A_provenance_git_blob_sha": "566801802fe434afbd27d48876caa2735a9442ac",
+    "future_stage_B_authorization_must_preserve_predeclared_seven_rows": true,
+    "may_change_candidate_or_protocol": false,
+    "canonical_promotion_authorized": false
+  }
+}

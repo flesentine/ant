@@ -154,6 +154,19 @@ const forbiddenDecisionKey=/(?:^|_)(?:pass|fail|pvalue|p_value|significance|thre
 (function walk(v){if(!v||typeof v!=='object')return;for(const [k,x] of Object.entries(v)){assert.ok(!forbiddenDecisionKey.test(k),'decision semantic key forbidden: '+k);walk(x);}})(comparison);
 assert.throws(()=>comparator.requireRealAuthorization(),/locked|authorization/i,'real Stage B must remain locked');
 
-assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist');
+const resultFreeze='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const officialReport='reports/p4_ymaze_consistency_simulation_v1.json';
+const executionProvenance='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const resultFrozen=fs.existsSync(path.join(root,resultFreeze));
+if(resultFrozen){
+  assert.strictEqual(blob(resultFreeze),'7651b5c50b7d0c752cc85a2af3225c1b5592a4fc');
+  assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23');
+  assert.strictEqual(blob(executionProvenance),'566801802fe434afbd27d48876caa2735a9442ac');
+  assert.strictEqual(read(resultFreeze).semantic_firewall.stage_B_biological_comparison_authorized,false);
+}else{
+  assert.ok(!fs.existsSync(path.join(root,officialReport)),'official Stage A report must not exist before result freeze');
+  assert.ok(!fs.existsSync(path.join(root,executionProvenance)),'official Stage A provenance must not exist before result freeze');
+}
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must not exist');
-console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,official_stage_A_locked:true,official_stage_B_locked:true,stage_B_input_overrides:false,stage_B_frozen_source_normalizer:true,stage_B_official_stage_A_pin_required:true,zero_dose_behavior_rng_lifecycle_identity:true}));
+assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'real Stage B authorization must not exist');
+console.log('p4-ymaze-consistency-implementation.test.js PASS '+JSON.stringify({candidate:307,qualification_trials:36,comparison_rows:7,stage_A_result_frozen:resultFrozen,official_stage_A_locked:true,official_stage_B_locked:true,stage_B_input_overrides:false,stage_B_frozen_source_normalizer:true,stage_B_official_stage_A_pin_required:true,zero_dose_behavior_rng_lifecycle_identity:true}));

@@ -67,9 +67,8 @@ assert.strictEqual(a.next_gate.id,'P4_Y_maze_consistency_implementation_qualific
 assert.strictEqual(a.next_gate.official_execution_remains_locked,true);
 
 // Historical v0.3.4k truth: no executable surface existed at authorization freeze. Later lifecycle
-// states may materialize only this authorized surface while official Stage A remains mechanically
-// locked in the committed repository. The separate post-merge precondition may authorize only an
-// ephemeral working-copy activation inside the future main-only one-shot workflow.
+// states may materialize only this authorized surface while the committed Stage-A runner stays
+// locked; the one-shot execution may activate only an ephemeral working copy.
 const fixedLaterBlobs=new Map([
   [s.fitted_model,'e23b022279d463442bdd4e16d4cf56e0212d2b11'],
   [s.left_marked_apparatus,'219d42036c13463e8cae5045b8fdba6d5bd24454'],
@@ -99,8 +98,25 @@ if(fs.existsSync(path.join(root,prospective))){
   assert.strictEqual(pa.stage_A_dependency_closure.future_one_shot_node_version_must_equal,'22.23.2');
   assert.strictEqual(pa.next_gate.may_execute_official_stage_A_at_this_review_gate,false);
 }else assert.ok(!fs.existsSync(path.join(root,prospective)),'prospective authorization absent before its later gate');
+
+// Historical implementation-authorization truth required no official report. After the separately
+// reviewed Stage-A result-freeze gate, the report may exist only as the exact immutable frozen bytes.
+const resultFreeze='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const officialReport='reports/p4_ymaze_consistency_simulation_v1.json';
+const executionProvenance='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const resultFrozen=fs.existsSync(path.join(root,resultFreeze));
+if(resultFrozen){
+  assert.strictEqual(blob(resultFreeze),'7651b5c50b7d0c752cc85a2af3225c1b5592a4fc');
+  assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23');
+  assert.strictEqual(blob(executionProvenance),'566801802fe434afbd27d48876caa2735a9442ac');
+  const rf=read(resultFreeze);
+  assert.strictEqual(rf.semantic_firewall.stage_B_biological_comparison_authorized,false);
+  assert.strictEqual(rf.next_gate.stage_B_may_execute_at_this_result_freeze_gate,false);
+}else{
+  assert.ok(!fs.existsSync(path.join(root,officialReport)),'official Stage A report must remain absent before result freeze');
+  assert.ok(!fs.existsSync(path.join(root,executionProvenance)),'official Stage A provenance must remain absent before result freeze');
+}
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'real Stage B authorization must remain absent');
-assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must remain absent');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must remain absent');
 
-console.log('p4-ymaze-consistency-implementation-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),candidate:m.candidate_index,qualification_seed_count:q.left_right_seed_count,later_implementation_present:implementationPresent,prospective_stage_A_authorization_present:fs.existsSync(path.join(root,prospective)),committed_official_stage_A:false,chromium_required:true}));
+console.log('p4-ymaze-consistency-implementation-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(rel),candidate:m.candidate_index,qualification_seed_count:q.left_right_seed_count,later_implementation_present:implementationPresent,prospective_stage_A_authorization_present:fs.existsSync(path.join(root,prospective)),stage_A_result_frozen:resultFrozen,committed_official_stage_A:false,chromium_required:true}));

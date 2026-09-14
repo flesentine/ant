@@ -131,9 +131,8 @@ assert.strictEqual(p.next_gate.may_run_official_consistency_execution,false);
 assert.strictEqual(p.next_gate.may_read_known_biological_summaries_in_stage_A,false);
 assert.match(p.separate_promotion_grade_track,/external_validation_source_discovery/i);
 
-// Historical v0.3.4j truth: these implementation surfaces were absent at protocol freeze.
-// Later they may exist only after the exact v0.3.4k authorization, while official Stage A
-// and real Stage B reports remain absent until their own later authorizations.
+// Historical v0.3.4j truth: implementation surfaces and the official Stage-A artifact were absent
+// at protocol freeze. Later lifecycle gates may materialize them only under their exact frozen pins.
 const implementationAuthorization='hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json';
 if(fs.existsSync(path.join(root,implementationAuthorization))){
   assert.strictEqual(blob(implementationAuthorization),'db64b72830c3715b3dd26d5ad3422655e50e8828');
@@ -149,6 +148,20 @@ if(fs.existsSync(path.join(root,implementationAuthorization))){
 }else{
   for(const file of [m.future_execution_model_file,a.future_left_marked_apparatus_file,a.future_right_marked_apparatus_file,d.future_runner_file])assert.ok(!fs.existsSync(path.join(root,file)),file+' must not exist before implementation authorization');
 }
-for(const file of ['reports/p4_ymaze_consistency_simulation_v1.json','reports/p4_ymaze_consistency_comparison_v1.json'])assert.ok(!fs.existsSync(path.join(root,file)),file+' must remain absent before official execution/comparison authorization');
+const resultFreeze='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const officialReport='reports/p4_ymaze_consistency_simulation_v1.json';
+const executionProvenance='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const resultFrozen=fs.existsSync(path.join(root,resultFreeze));
+if(resultFrozen){
+  assert.strictEqual(blob(resultFreeze),'7651b5c50b7d0c752cc85a2af3225c1b5592a4fc');
+  assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23');
+  assert.strictEqual(blob(executionProvenance),'566801802fe434afbd27d48876caa2735a9442ac');
+  assert.strictEqual(read(resultFreeze).semantic_firewall.stage_B_biological_comparison_authorized,false);
+}else{
+  assert.ok(!fs.existsSync(path.join(root,officialReport)),officialReport+' must remain absent before Stage-A result freeze');
+  assert.ok(!fs.existsSync(path.join(root,executionProvenance)),executionProvenance+' must remain absent before Stage-A result freeze');
+}
+assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must remain absent before Stage-B authorization');
+assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must remain absent before its separate gate');
 
-console.log('p4-ymaze-consistency-protocol.test.js PASS '+JSON.stringify({protocol_blob:blob(rel),candidate:m.candidate_index,trials_per_side:d.trials_per_marked_side,neutral_trials:d.neutral_trials,validation_threshold:c.validation_pass_fail_threshold,implementation_authorization_present:fs.existsSync(path.join(root,implementationAuthorization)),simulation_authorized:false}));
+console.log('p4-ymaze-consistency-protocol.test.js PASS '+JSON.stringify({protocol_blob:blob(rel),candidate:m.candidate_index,trials_per_side:d.trials_per_marked_side,neutral_trials:d.neutral_trials,validation_threshold:c.validation_pass_fail_threshold,implementation_authorization_present:fs.existsSync(path.join(root,implementationAuthorization)),stage_A_result_frozen:resultFrozen,simulation_authorized:false}));
