@@ -82,8 +82,8 @@ assert.throws(()=>comparator.requireRealAuthorization(),/locked|authorization fi
 assert.throws(()=>comparator.main([]),/locked|authorization file is absent/i);
 
 for(const required of [
-  "GITHUB_RUN_ATTEMPT} = '1'",
-  "EVENT_BEFORE} = '7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a'",
+  "${GITHUB_RUN_ATTEMPT}\" = '1'",
+  "${EVENT_BEFORE}\" = '7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a'",
   "git cat-file -e HEAD:hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json",
   'Run permanent regression suite before Stage B',
   'Ephemerally materialize active Stage B authorization',
