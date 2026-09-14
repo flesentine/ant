@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "id": "P4_Y_maze_consistency_stage_B_authorization_v1",
+  "status": "prospective_stage_B_authorization_frozen_runtime_authorization_file_absent_execution_locked",
+  "freeze_date_local": "2026-09-14",
+  "prospective_authorization_file": "hypotheses/p4_Y_maze_consistency_stage_B_prospective_authorization_v1.json",
+  "runtime_authorization_file": "hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json",
+  "official_stage_B_comparison_authorized": false,
+  "prospective_official_stage_B_comparison_authorized": true,
+  "stage_A_result_lineage": {
+    "result_freeze_file": "hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json",
+    "result_freeze_git_blob_sha": "7651b5c50b7d0c752cc85a2af3225c1b5592a4fc",
+    "official_report_file": "reports/p4_ymaze_consistency_simulation_v1.json",
+    "official_report_git_blob_sha": "a7b3e33ce613254c182360947641c5ff03f5af23",
+    "execution_provenance_file": "reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json",
+    "execution_provenance_git_blob_sha": "566801802fe434afbd27d48876caa2735a9442ac",
+    "qualified_main_commit": "0be957edc5d82294fd96635c7df852823bee7944",
+    "qualified_main_workflow_run_id": 34864086374,
+    "qualified_main_workflow_run_number": 170,
+    "qualified_main_test_job_id": 104043436487,
+    "qualified_main_test_job_conclusion": "success",
+    "qualified_main_deploy_job_id": 104043729799,
+    "qualified_main_deploy_job_conclusion": "success"
+  },
+  "frozen_stage_A_artifact": {
+    "file": "reports/p4_ymaze_consistency_simulation_v1.json",
+    "git_blob_sha": "a7b3e33ce613254c182360947641c5ff03f5af23"
+  },
+  "frozen_stage_A_execution_provenance": {
+    "file": "reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json",
+    "git_blob_sha": "566801802fe434afbd27d48876caa2735a9442ac"
+  },
+  "stage_B_comparator": {
+    "file": "tools/compare-p4-ymaze-consistency.js",
+    "git_blob_sha": "75cf0ae6075695784e7c67c1473a50e0daaa98cc"
+  },
+  "frozen_observed_sources": [
+    {
+      "file": "reference/poissonnier2026_published_targets.json",
+      "git_blob_sha": "5836b5011d765043f94683fa761f3016e86643dc"
+    },
+    {
+      "file": "reference/poissonnier2026_inventory.json",
+      "git_blob_sha": "2ff7d9dcd27cf7609ce77b0f655a6520597c2432"
+    }
+  ],
+  "comparison_contract": {
+    "authorized_command_exact": "node tools/compare-p4-ymaze-consistency.js --out reports/p4_ymaze_consistency_comparison_v1.json",
+    "output_file": "reports/p4_ymaze_consistency_comparison_v1.json",
+    "cli_input_overrides_authorized": false,
+    "comparison_scope": "comprehensive_descriptive_only",
+    "required_row_count": 7,
+    "required_rows": [
+      "overall",
+      "outwards_naive",
+      "outwards_experienced",
+      "return_experienced",
+      "return_naive",
+      "pheromone_left",
+      "pheromone_right"
+    ],
+    "all_predeclared_comparisons_must_be_reported": true,
+    "signed_difference_model_minus_observed_required": true,
+    "absolute_difference_required": true,
+    "validation_pass_fail_threshold": null,
+    "promotion_rule": null,
+    "inferential_significance_test_authorized": false,
+    "best_subset_reporting_authorized": false,
+    "canonical_update_authorized": false
+  },
+  "execution_precondition": {
+    "runtime_authorization_file_must_remain_absent_in_committed_repository": true,
+    "prospective_authorization_may_be_frozen_on_review_branch": true,
+    "real_stage_B_execution_may_run_on_review_branch": false,
+    "activation_mode": "ephemeral_runtime_authorization_file_only_after_separate_post_merge_precondition_verification",
+    "ephemeral_runtime_authorization_file_must_not_be_committed": true,
+    "ephemeral_materialization_rule": "copy this exact prospective authorization record to the runtime authorization path and change only official_stage_B_comparison_authorized from false to true after exact precondition verification",
+    "future_execution_precondition_file": "hypotheses/p4_Y_maze_consistency_stage_B_execution_precondition_v1.json",
+    "future_execution_workflow_file": ".github/workflows/p4-v034q-ymaze-stage-b.yml",
+    "valid_stage_B_result_rerun_authorized": false
+  },
+  "semantic_firewall": {
+    "observed_biological_summary_values_may_be_used_for_authorization_decision": false,
+    "raw_Y_maze_choices_access_authorized": false,
+    "colony_level_Y_maze_outcomes_access_authorized": false,
+    "stage_A_may_be_rerun_or_modified": false,
+    "candidate_307_may_change": false,
+    "protocol_may_change": false,
+    "condition_specific_parameterization_authorized": false,
+    "validation_pass_fail_threshold_authorized": false,
+    "inferential_significance_test_authorized": false,
+    "best_subset_reporting_authorized": false,
+    "canonical_promotion_authorized": false,
+    "external_validation_claim_authorized": false
+  },
+  "next_gate": {
+    "id": "P4_Y_maze_consistency_stage_B_execution_precondition_v1",
+    "purpose": "verify this prospective authorization on permanent main, bind one-shot execution to exact lineage and blobs, then materialize only an ephemeral active runtime authorization file",
+    "may_execute_real_stage_B_at_this_review_gate": false,
+    "may_rerun_or_modify_stage_A": false,
+    "may_change_candidate_or_protocol": false,
+    "may_authorize_canonical_promotion": false
+  }
+}
