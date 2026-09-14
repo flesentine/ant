@@ -23,9 +23,10 @@ assert.strictEqual(r.lineage.permanent_main_test_job_id,103793242428);
 assert.strictEqual(r.lineage.permanent_main_deploy_job_id,103793368453);
 
 assert.deepStrictEqual(r.frozen_candidate,{candidate_index:307,sigma_field_mm:18.319554310908863,kappa_trail_per_s:6.342935528120713,theta_detect:0.9184});
-for(const spec of Object.values(r.qualified_implementation_blobs)){
+for(const [name,spec] of Object.entries(r.qualified_implementation_blobs)){
   assert.ok(fs.existsSync(path.join(root,spec.file)),spec.file+' missing');
-  assert.strictEqual(blob(spec.file),spec.git_blob_sha,spec.file+' blob drift');
+  if(name==='implementation_regression')assert.strictEqual(spec.git_blob_sha,'74ecec3c2a588e7decc04875fd814101b705abef','historical implementation regression pin drift');
+  else assert.strictEqual(blob(spec.file),spec.git_blob_sha,spec.file+' blob drift');
 }
 assert.strictEqual(r.qualified_implementation_blobs.runtime_p4.changed_in_this_gate,false);
 assert.strictEqual(r.qualified_implementation_blobs.runtime_p1_helper.changed_in_this_gate,false);
@@ -100,7 +101,9 @@ assert.strictEqual(rr.review_findings.length,2);
 assert.strictEqual(rr.stage_B_comparator_git_blob_sha,'75cf0ae6075695784e7c67c1473a50e0daaa98cc');
 assert.strictEqual(blob('tools/compare-p4-ymaze-consistency.js'),rr.stage_B_comparator_git_blob_sha);
 assert.strictEqual(rr.implementation_regression_git_blob_sha,'74ecec3c2a588e7decc04875fd814101b705abef');
-assert.strictEqual(blob('tests/p4-ymaze-consistency-implementation.test.js'),rr.implementation_regression_git_blob_sha);
+// This report freezes the exact implementation regression used for v0.3.4l qualification.
+// The historical SHA remains evidence; the live lifecycle regression may evolve at later gates.
+assert.ok(fs.existsSync(path.join(root,'tests/p4-ymaze-consistency-implementation.test.js')),'current implementation regression missing');
 assert.strictEqual(rr.implementation_authorization_lifecycle_test_git_blob_sha,'8907721d081665c40f485f3146b590b38f948c1c');
 // The report above freezes the exact lifecycle regression used for v0.3.4l qualification.
 // That historical blob must stay recorded, but the live regression is intentionally allowed to
@@ -157,8 +160,8 @@ assert.strictEqual(r.next_gate.may_access_biological_ymaze_summary_values,false)
 assert.strictEqual(r.next_gate.may_run_stage_B_comparison,false);
 assert.strictEqual(r.next_gate.may_change_P4_parameters_or_protocol,false);
 
-// Historical v0.3.4l truth remains frozen above. At later lifecycle gates the prospective official
-// Stage-A authorization may exist, but the committed repository must still be mechanically locked.
+// Historical v0.3.4l truth remains frozen above. Later lifecycle gates may freeze the exact Stage-A
+// report/provenance bytes, but the committed runner remains mechanically locked and Stage B stays absent.
 const prospective='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
 if(fs.existsSync(path.join(root,prospective))){
   assert.strictEqual(blob(prospective),'8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b');
@@ -173,7 +176,22 @@ if(fs.existsSync(path.join(root,prospective))){
   assert.strictEqual(pa.stage_A_dependency_closure.complete_bundle_loaded_model_apparatus_state_observation_scoring_inputs_pinned,true);
   assert.strictEqual(pa.stage_A_dependency_closure.future_one_shot_node_version_must_equal,'22.23.2');
 }else assert.ok(!fs.existsSync(path.join(root,prospective)),'prospective authorization absent before v0.3.4m');
+
+const resultFreeze='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const officialReport='reports/p4_ymaze_consistency_simulation_v1.json';
+const executionProvenance='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const resultFrozen=fs.existsSync(path.join(root,resultFreeze));
+if(resultFrozen){
+  assert.strictEqual(blob(resultFreeze),'7651b5c50b7d0c752cc85a2af3225c1b5592a4fc');
+  assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23');
+  assert.strictEqual(blob(executionProvenance),'566801802fe434afbd27d48876caa2735a9442ac');
+  const rf=read(resultFreeze);
+  assert.strictEqual(rf.semantic_firewall.stage_B_biological_comparison_authorized,false);
+  assert.strictEqual(rf.next_gate.stage_B_may_execute_at_this_result_freeze_gate,false);
+}else{
+  assert.ok(!fs.existsSync(path.join(root,officialReport)),'official Stage A report must not exist before result freeze');
+  assert.ok(!fs.existsSync(path.join(root,executionProvenance)),'official Stage A provenance must not exist before result freeze');
+}
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must not exist yet');
-assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')),'official Stage A report must not exist yet');
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must not exist yet');
-console.log('p4-ymaze-consistency-implementation-qualification-result.test.js PASS '+JSON.stringify({report_blob:blob(rel),node_run:n.workflow_run_id,chromium_run:c.workflow_run_id,hardening_run:h.workflow_run_id,review_remediation_run:rr.workflow_run_id,chrome:c.chrome_version,cases:c.case_count,max_abs_numeric_difference:c.max_abs_numeric_difference,network_forbidden:0,stage_B_input_overrides:false,official_stage_A_blob_pin_required:true,prospective_stage_A_authorization_present:fs.existsSync(path.join(root,prospective)),committed_official_stage_A:false,chromium_rerun_required:false,scientific_evidence:false,real_stage_B:false}));
+console.log('p4-ymaze-consistency-implementation-qualification-result.test.js PASS '+JSON.stringify({report_blob:blob(rel),node_run:n.workflow_run_id,chromium_run:c.workflow_run_id,hardening_run:h.workflow_run_id,review_remediation_run:rr.workflow_run_id,chrome:c.chrome_version,cases:c.case_count,max_abs_numeric_difference:c.max_abs_numeric_difference,network_forbidden:0,stage_B_input_overrides:false,official_stage_A_blob_pin_required:true,prospective_stage_A_authorization_present:fs.existsSync(path.join(root,prospective)),stage_A_result_frozen:resultFrozen,committed_official_stage_A:false,chromium_rerun_required:false,scientific_evidence:false,real_stage_B:false}));

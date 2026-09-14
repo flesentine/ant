@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "id": "P4_Y_maze_consistency_stage_A_simulation_v1",
+  "mode": "official",
+  "scientific_evidence": false,
+  "interpretation": "posthoc_same_study_cross_apparatus_descriptive_consistency_only",
+  "frozen_candidate": {
+    "index": 307,
+    "sigma_field_mm": 18.319554310908863,
+    "kappa_trail_per_s": 6.342935528120713,
+    "theta_detect": 0.9184
+  },
+  "seed_contract": {
+    "left_root": 8210000,
+    "right_root": 8210000,
+    "marked_count_per_side": 1000,
+    "neutral_root": 8310000,
+    "neutral_count": 1000,
+    "paired_left_right": true
+  },
+  "left_marked": {
+    "trials": 1000,
+    "first_seed": 8210000,
+    "last_seed": 8210999,
+    "left_choices": 753,
+    "right_choices": 238,
+    "timeouts": 9,
+    "timeout_fraction": 0.009,
+    "choices": 991,
+    "marked_side": "left",
+    "marked_arm_choices": 753,
+    "marked_arm_choice_fraction_among_choices": 0.7598385469223007,
+    "left_fraction_among_choices": 0.7598385469223007,
+    "wilson_95_marked_arm": {
+      "low": 0.7322712121580595,
+      "high": 0.7853992120424877
+    },
+    "wilson_95_left": null,
+    "P4_diagnostics": {
+      "evaluation_samples": 1156916,
+      "detected_samples": 473360,
+      "subthreshold_samples": 683556,
+      "nonzero_steering_samples": 473360,
+      "detected_fraction_of_evaluations": 0.40915675813974395,
+      "subthreshold_fraction_of_evaluations": 0.590843241860256,
+      "nonzero_steering_fraction_of_evaluations": 0.40915675813974395
+    }
+  },
+  "right_marked": {
+    "trials": 1000,
+    "first_seed": 8210000,
+    "last_seed": 8210999,
+    "left_choices": 275,
+    "right_choices": 714,
+    "timeouts": 11,
+    "timeout_fraction": 0.011,
+    "choices": 989,
+    "marked_side": "right",
+    "marked_arm_choices": 714,
+    "marked_arm_choice_fraction_among_choices": 0.7219413549039434,
+    "left_fraction_among_choices": 0.2780586450960566,
+    "wilson_95_marked_arm": {
+      "low": 0.693200022940659,
+      "high": 0.7489652352682883
+    },
+    "wilson_95_left": null,
+    "P4_diagnostics": {
+      "evaluation_samples": 1196464,
+      "detected_samples": 474100,
+      "subthreshold_samples": 722364,
+      "nonzero_steering_samples": 474100,
+      "detected_fraction_of_evaluations": 0.3962509528076064,
+      "subthreshold_fraction_of_evaluations": 0.6037490471923936,
+      "nonzero_steering_fraction_of_evaluations": 0.3962509528076064
+    }
+  },
+  "neutral": {
+    "trials": 1000,
+    "first_seed": 8310000,
+    "last_seed": 8310999,
+    "left_choices": 471,
+    "right_choices": 509,
+    "timeouts": 20,
+    "timeout_fraction": 0.02,
+    "choices": 980,
+    "marked_side": null,
+    "marked_arm_choices": null,
+    "marked_arm_choice_fraction_among_choices": null,
+    "left_fraction_among_choices": 0.4806122448979592,
+    "wilson_95_marked_arm": null,
+    "wilson_95_left": {
+      "low": 0.4494681482183236,
+      "high": 0.5119077425216849
+    },
+    "P4_diagnostics": {
+      "evaluation_samples": 0,
+      "detected_samples": 0,
+      "subthreshold_samples": 0,
+      "nonzero_steering_samples": 0,
+      "detected_fraction_of_evaluations": null,
+      "subthreshold_fraction_of_evaluations": null,
+      "nonzero_steering_fraction_of_evaluations": null
+    }
+  },
+  "predeclared_fields": {
+    "left_marked_trials": 1000,
+    "left_marked_left_choices": 753,
+    "left_marked_right_choices": 238,
+    "left_marked_timeouts": 9,
+    "left_marked_marked_arm_choice_fraction_among_choices": 0.7598385469223007,
+    "right_marked_trials": 1000,
+    "right_marked_left_choices": 275,
+    "right_marked_right_choices": 714,
+    "right_marked_timeouts": 11,
+    "right_marked_marked_arm_choice_fraction_among_choices": 0.7219413549039434,
+    "side_balanced_marked_arm_choice_fraction": 0.740889950913122,
+    "neutral_trials": 1000,
+    "neutral_left_choices": 471,
+    "neutral_right_choices": 509,
+    "neutral_timeouts": 20,
+    "neutral_left_fraction_among_choices": 0.4806122448979592,
+    "left_right_marked_side_difference": 0.037897192018357284,
+    "P4_detection_diagnostics_by_marked_side": {
+      "left": {
+        "evaluation_samples": 1156916,
+        "detected_samples": 473360,
+        "subthreshold_samples": 683556,
+        "nonzero_steering_samples": 473360,
+        "detected_fraction_of_evaluations": 0.40915675813974395,
+        "subthreshold_fraction_of_evaluations": 0.590843241860256,
+        "nonzero_steering_fraction_of_evaluations": 0.40915675813974395
+      },
+      "right": {
+        "evaluation_samples": 1196464,
+        "detected_samples": 474100,
+        "subthreshold_samples": 722364,
+        "nonzero_steering_samples": 474100,
+        "detected_fraction_of_evaluations": 0.3962509528076064,
+        "subthreshold_fraction_of_evaluations": 0.6037490471923936,
+        "nonzero_steering_fraction_of_evaluations": 0.3962509528076064
+      }
+    }
+  },
+  "decision_semantics": {
+    "validation_pass_fail_threshold": null,
+    "promotion_rule": null,
+    "canonical_update_authorized": false
+  }
+}

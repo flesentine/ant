@@ -88,8 +88,23 @@ if(prePresent){
 for(const k of ['known_biological_Y_maze_summary_access_authorized','raw_Y_maze_choice_access_authorized','colony_level_Y_maze_outcome_access_authorized','any_derivative_Y_maze_biological_target_access_authorized','stage_A_runner_may_import_or_parse_biological_summary_artifacts','stage_A_report_may_contain_observed_biological_rates'])assert.strictEqual(a.stage_A_semantic_firewall[k],false,k+' must remain false');
 for(const [k,v] of Object.entries(a.firewalls))assert.strictEqual(v,false,k+' must remain false');
 for(const k of ['official_stage_B_comparison_authorized','stage_B_authorization_file_may_be_created_before_stage_A_report_is_frozen','stage_B_may_rerun_or_modify_stage_A','stage_B_may_change_candidate_307','stage_B_may_change_protocol','validation_pass_fail_threshold_authorized','inferential_significance_test_authorized','best_subset_reporting_authorized','canonical_promotion_authorized','external_validation_claim_authorized'])assert.strictEqual(a.stage_B_and_promotion_firewall[k],false,k+' must remain false');
+
+const resultFreeze='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const officialReport='reports/p4_ymaze_consistency_simulation_v1.json';
+const executionProvenance='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const resultFrozen=fs.existsSync(path.join(root,resultFreeze));
+if(resultFrozen){
+  assert.strictEqual(blob(resultFreeze),'7651b5c50b7d0c752cc85a2af3225c1b5592a4fc');
+  assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23');
+  assert.strictEqual(blob(executionProvenance),'566801802fe434afbd27d48876caa2735a9442ac');
+  const rf=read(resultFreeze);
+  assert.strictEqual(rf.semantic_firewall.stage_B_biological_comparison_authorized,false);
+  assert.strictEqual(rf.next_gate.stage_B_may_execute_at_this_result_freeze_gate,false);
+}else{
+  assert.ok(!fs.existsSync(path.join(root,officialReport)),'official Stage A report must remain absent before result freeze');
+  assert.ok(!fs.existsSync(path.join(root,executionProvenance)),'official Stage A provenance must remain absent before result freeze');
+}
 assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')));
-assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_simulation_v1.json')));
 assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')));
 
 const probeRel='reports/.p4_ymaze_stage_A_lock_probe.json',probe=path.join(root,probeRel);
@@ -97,6 +112,7 @@ const cli=spawnSync(process.execPath,['tools/run-p4-ymaze-consistency.js','--off
 assert.notStrictEqual(cli.status,0,'official Stage A CLI must fail while committed authorization is inactive');
 assert.match((cli.stdout||'')+(cli.stderr||''),/authorization is not active|locked/i);
 assert.ok(!fs.existsSync(probe));
-assert.ok(!fs.existsSync(path.join(root,x.output_file)));
+if(resultFrozen)assert.strictEqual(blob(x.output_file),'a7b3e33ce613254c182360947641c5ff03f5af23','frozen official Stage A report drift after lock probe');
+else assert.ok(!fs.existsSync(path.join(root,x.output_file)));
 
-console.log('p4-ymaze-consistency-official-execution-authorization.test.js PASS '+JSON.stringify({authorization_blob:authBlob,frozen_stage_A_surface_files:18,execution_precondition_present:prePresent,expected_before:'71ef3857e775d11269246990b907994e3442e3b2',workflow_rerun_enabled:false,committed_execution_authorized:false,official_trials_executed:0,stage_B_authorized:false}));
+console.log('p4-ymaze-consistency-official-execution-authorization.test.js PASS '+JSON.stringify({authorization_blob:authBlob,frozen_stage_A_surface_files:18,execution_precondition_present:prePresent,expected_before:'71ef3857e775d11269246990b907994e3442e3b2',workflow_rerun_enabled:false,committed_execution_authorized:false,stage_A_result_frozen:resultFrozen,stage_B_authorized:false}));

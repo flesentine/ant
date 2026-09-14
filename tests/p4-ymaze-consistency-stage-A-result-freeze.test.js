@@ -1,0 +1,90 @@
+'use strict';
+const assert=require('assert'),fs=require('fs'),path=require('path'),crypto=require('crypto');
+const {execFileSync}=require('child_process');
+const root=path.resolve(__dirname,'..');
+const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
+const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
+const sha256=p=>crypto.createHash('sha256').update(fs.readFileSync(path.join(root,p))).digest('hex');
+
+const freezeRel='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const reportRel='reports/p4_ymaze_consistency_simulation_v1.json';
+const provenanceRel='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const freezeBlob='7651b5c50b7d0c752cc85a2af3225c1b5592a4fc';
+const reportBlob='a7b3e33ce613254c182360947641c5ff03f5af23';
+const provenanceBlob='566801802fe434afbd27d48876caa2735a9442ac';
+assert.strictEqual(blob(freezeRel),freezeBlob,'Stage-A result freeze blob drift');
+assert.strictEqual(blob(reportRel),reportBlob,'official Stage-A report blob drift');
+assert.strictEqual(blob(provenanceRel),provenanceBlob,'official Stage-A provenance blob drift');
+assert.strictEqual(sha256(reportRel),'ed61496f918ba9503f984587abc317fadca94df9626c14463caaa195abdc74a3');
+assert.strictEqual(sha256(provenanceRel),'2612288943e391d31328a73fdabc9072674d03fab919f6efb406eac6eb0c57e3');
+
+const f=read(freezeRel),r=read(reportRel),p=read(provenanceRel);
+assert.strictEqual(f.id,'P4_Y_maze_consistency_stage_A_result_freeze_v1');
+assert.strictEqual(f.status,'official_stage_A_artifact_frozen_stage_B_locked');
+assert.strictEqual(f.execution_gate.authorization_git_blob_sha,'8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b');
+assert.strictEqual(f.execution_gate.execution_precondition_git_blob_sha,'edaae2a2b2601fb0957287b3d76b1e4029683ea5');
+assert.strictEqual(f.execution_gate.execution_workflow_git_blob_sha,'d650438d88055fa5e91f45c72e71d5498ba8fed8');
+assert.strictEqual(f.execution_gate.execution_main_commit,'b660a3acd028219d122c07f5db87822be05a9716');
+assert.strictEqual(f.execution_gate.workflow_run_id,34812757309);
+assert.strictEqual(f.execution_gate.workflow_attempt,1);
+assert.strictEqual(f.execution_gate.execution_job_id,103877185733);
+assert.strictEqual(f.execution_gate.execution_job_conclusion,'success');
+assert.strictEqual(f.execution_gate.workflow_event_before,'71ef3857e775d11269246990b907994e3442e3b2');
+assert.strictEqual(f.execution_gate.node_version,'22.23.2');
+assert.strictEqual(f.permanent_main_qualification.run_id,34812754559);
+assert.strictEqual(f.permanent_main_qualification.test_job_id,103877177805);
+assert.strictEqual(f.permanent_main_qualification.test_job_conclusion,'success');
+assert.strictEqual(f.permanent_main_qualification.deploy_job_id,103877347197);
+assert.strictEqual(f.permanent_main_qualification.deploy_job_conclusion,'success');
+assert.strictEqual(f.uploaded_artifact.artifact_id,10335490755);
+assert.strictEqual(f.uploaded_artifact.digest,'sha256:24a445d0b302d07534351fa1d98f36e695af9fd801c78c9d378bf7b942890e40');
+assert.strictEqual(f.frozen_official_report.git_blob_sha,reportBlob);
+assert.strictEqual(f.frozen_execution_provenance.git_blob_sha,provenanceBlob);
+
+assert.strictEqual(r.id,'P4_Y_maze_consistency_stage_A_simulation_v1');
+assert.strictEqual(r.mode,'official');
+assert.strictEqual(r.scientific_evidence,false);
+assert.strictEqual(r.interpretation,'posthoc_same_study_cross_apparatus_descriptive_consistency_only');
+assert.deepStrictEqual(r.frozen_candidate,{index:307,sigma_field_mm:18.319554310908863,kappa_trail_per_s:6.342935528120713,theta_detect:0.9184});
+assert.deepStrictEqual(r.seed_contract,{left_root:8210000,right_root:8210000,marked_count_per_side:1000,neutral_root:8310000,neutral_count:1000,paired_left_right:true});
+assert.strictEqual(r.left_marked.left_choices,753);assert.strictEqual(r.left_marked.right_choices,238);assert.strictEqual(r.left_marked.timeouts,9);
+assert.strictEqual(r.left_marked.marked_arm_choice_fraction_among_choices,0.7598385469223007);
+assert.strictEqual(r.right_marked.left_choices,275);assert.strictEqual(r.right_marked.right_choices,714);assert.strictEqual(r.right_marked.timeouts,11);
+assert.strictEqual(r.right_marked.marked_arm_choice_fraction_among_choices,0.7219413549039434);
+assert.strictEqual(r.neutral.left_choices,471);assert.strictEqual(r.neutral.right_choices,509);assert.strictEqual(r.neutral.timeouts,20);
+assert.strictEqual(r.neutral.left_fraction_among_choices,0.4806122448979592);
+assert.strictEqual(r.predeclared_fields.side_balanced_marked_arm_choice_fraction,0.740889950913122);
+assert.strictEqual(r.predeclared_fields.left_right_marked_side_difference,0.037897192018357284);
+assert.strictEqual(r.decision_semantics.validation_pass_fail_threshold,null);
+assert.strictEqual(r.decision_semantics.promotion_rule,null);
+assert.strictEqual(r.decision_semantics.canonical_update_authorized,false);
+
+assert.strictEqual(p.id,'P4_Y_maze_consistency_stage_A_execution_provenance_v1');
+assert.strictEqual(p.workflow_run_id,34812757309);assert.strictEqual(p.workflow_attempt,1);
+assert.strictEqual(p.workflow_event_before,'71ef3857e775d11269246990b907994e3442e3b2');
+assert.strictEqual(p.workflow_head_sha,'b660a3acd028219d122c07f5db87822be05a9716');
+assert.strictEqual(p.official_report_git_blob_sha,reportBlob);
+assert.strictEqual(p.official_report_sha256,'ed61496f918ba9503f984587abc317fadca94df9626c14463caaa195abdc74a3');
+assert.strictEqual(p.official_total_trials,3000);
+assert.strictEqual(p.biological_Y_maze_summary_accessed_during_stage_A,false);
+assert.strictEqual(p.real_stage_B_executed,false);
+assert.strictEqual(p.canonical_promotion_authorized,false);
+assert.strictEqual(p.committed_repository_authorization_remained_false,true);
+assert.strictEqual(p.activation_was_ephemeral_working_copy_only,true);
+
+for(const [k,v] of Object.entries(f.semantic_firewall)){
+  if(k==='stage_A_is_posthoc_same_study_descriptive_consistency_only')assert.strictEqual(v,true);
+  else assert.strictEqual(v,false,k+' must remain false');
+}
+assert.strictEqual(f.result_immutability.valid_stage_A_result_must_be_accepted_exactly_as_produced,true);
+for(const k of ['valid_stage_A_rerun_authorized','report_bytes_may_change','provenance_bytes_may_change','result_subset_selection_authorized','precision_driven_rerun_authorized','discrepancy_driven_rerun_authorized'])assert.strictEqual(f.result_immutability[k],false,k+' must remain false');
+assert.strictEqual(f.next_gate.id,'P4_Y_maze_consistency_stage_B_authorization_v1');
+assert.strictEqual(f.next_gate.stage_B_may_execute_at_this_result_freeze_gate,false);
+assert.strictEqual(f.next_gate.biological_Y_maze_summary_values_may_be_accessed_at_this_result_freeze_gate,false);
+assert.strictEqual(f.next_gate.future_stage_B_authorization_must_pin_stage_A_report_git_blob_sha,reportBlob);
+assert.strictEqual(f.next_gate.future_stage_B_authorization_must_pin_stage_A_provenance_git_blob_sha,provenanceBlob);
+assert.strictEqual(f.next_gate.future_stage_B_authorization_must_preserve_predeclared_seven_rows,true);
+assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must remain absent at result freeze');
+assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'Stage B comparison must remain absent at result freeze');
+
+console.log('p4-ymaze-consistency-stage-A-result-freeze.test.js PASS '+JSON.stringify({freeze_blob:freezeBlob,report_blob:reportBlob,provenance_blob:provenanceBlob,workflow_run:34812757309,total_trials:3000,side_balanced_marked_arm_choice_fraction:0.740889950913122,stage_B_authorized:false,biological_summary_access:false}));
