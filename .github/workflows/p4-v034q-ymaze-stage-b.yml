@@ -1,0 +1,313 @@
+name: P4 v0.3.4q official Y-maze Stage B execution
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/p4-v034q-ymaze-stage-b.yml'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: p4-v034q-ymaze-stage-b
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+
+      - name: Verify one-shot Stage B execution preconditions
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          AUTH='hypotheses/p4_Y_maze_consistency_stage_B_prospective_authorization_v1.json'
+          RUNTIME='hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json'
+          PRE='hypotheses/p4_Y_maze_consistency_stage_B_execution_precondition_v1.json'
+          WORKFLOW='.github/workflows/p4-v034q-ymaze-stage-b.yml'
+          REPORT='reports/p4_ymaze_consistency_comparison_v1.json'
+          PROVENANCE='reports/p4_ymaze_consistency_stage_B_execution_provenance_v1.json'
+          EXPECTED_BEFORE='7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a'
+          EVENT_BEFORE="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));process.stdout.write(e.before||'')")"
+
+          test "${GITHUB_REF}" = 'refs/heads/main'
+          test "${GITHUB_EVENT_NAME}" = 'push'
+          test "${GITHUB_RUN_ATTEMPT}" = '1'
+          test "${EVENT_BEFORE}" = "${EXPECTED_BEFORE}"
+          test "$(node -p 'process.versions.node')" = '22.23.2'
+          test "$(git hash-object "${AUTH}")" = 'b973ee451687ccb8f6730d6dc11d09eb34d3e54b'
+          test ! -e "${RUNTIME}"
+          test ! -e "${REPORT}"
+          test ! -e "${PROVENANCE}"
+
+          node - <<'NODE'
+          (async()=>{
+            const cp=require('child_process');
+            const api=process.env.GITHUB_API_URL,repo=process.env.GITHUB_REPOSITORY,token=process.env.GITHUB_TOKEN;
+            const headers={Accept:'application/vnd.github+json',Authorization:`Bearer ${token}`,'X-GitHub-Api-Version':'2022-11-28'};
+            const get=async path=>{const r=await fetch(api+path,{headers});if(!r.ok)throw new Error(`GitHub API ${path} failed: ${r.status}`);return r.json();};
+            const pr=await get(`/repos/${repo}/pulls/52`);
+            const secondParent=cp.execFileSync('git',['rev-parse','HEAD^2'],{encoding:'utf8'}).trim();
+            if(pr.merged!==true)throw new Error('execution PR #52 is not merged');
+            if(pr.merge_commit_sha!==process.env.GITHUB_SHA)throw new Error('current SHA is not PR #52 merge commit');
+            if(pr.head?.sha!==secondParent)throw new Error('merge second parent is not PR #52 reviewed head');
+            const runs=await get(`/repos/${repo}/actions/workflows/p4-v034q-ymaze-stage-b.yml/runs?per_page=100`);
+            const prior=(runs.workflow_runs||[]).filter(r=>String(r.id)!==String(process.env.GITHUB_RUN_ID));
+            if(prior.length!==0)throw new Error('Stage-B one-shot already consumed by prior workflow run(s): '+prior.map(r=>r.id).join(','));
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process');
+          const AUTH='hypotheses/p4_Y_maze_consistency_stage_B_prospective_authorization_v1.json';
+          const RUNTIME='hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json';
+          const PRE='hypotheses/p4_Y_maze_consistency_stage_B_execution_precondition_v1.json';
+          const WORKFLOW='.github/workflows/p4-v034q-ymaze-stage-b.yml';
+          const EXPECTED_BEFORE='7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a';
+          const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+          const a=JSON.parse(fs.readFileSync(AUTH,'utf8'));
+          const p=JSON.parse(fs.readFileSync(PRE,'utf8'));
+          const hash=file=>cp.execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
+          const fail=m=>{throw new Error(m)};
+
+          if(event.before!==EXPECTED_BEFORE)fail('workflow is not running on the single intended main push');
+          if(a.id!=='P4_Y_maze_consistency_stage_B_authorization_v1')fail('authorization id drift');
+          if(hash(AUTH)!=='b973ee451687ccb8f6730d6dc11d09eb34d3e54b')fail('prospective authorization blob drift');
+          if(a.official_stage_B_comparison_authorized!==false||a.prospective_official_stage_B_comparison_authorized!==true)fail('prospective authorization lifecycle drift');
+          if(a.runtime_authorization_file!==RUNTIME)fail('runtime authorization path drift');
+          if(a.execution_precondition?.activation_mode!=='ephemeral_runtime_authorization_file_only_after_separate_post_merge_precondition_verification')fail('activation mode drift');
+          if(a.execution_precondition?.runtime_authorization_file_must_remain_absent_in_committed_repository!==true||a.execution_precondition?.ephemeral_runtime_authorization_file_must_not_be_committed!==true)fail('runtime authorization firewall drift');
+          if(a.comparison_contract?.authorized_command_exact!=='node tools/compare-p4-ymaze-consistency.js --out reports/p4_ymaze_consistency_comparison_v1.json')fail('Stage-B command drift');
+          if(a.comparison_contract?.required_row_count!==7||!Array.isArray(a.comparison_contract?.required_rows)||a.comparison_contract.required_rows.length!==7)fail('Stage-B row contract drift');
+          if(a.comparison_contract?.validation_pass_fail_threshold!==null||a.comparison_contract?.promotion_rule!==null||a.comparison_contract?.inferential_significance_test_authorized!==false||a.comparison_contract?.best_subset_reporting_authorized!==false||a.comparison_contract?.canonical_update_authorized!==false)fail('decision semantics drift');
+          for(const [k,v] of Object.entries(a.semantic_firewall||{}))if(v!==false)fail('semantic firewall drift: '+k);
+
+          if(p.id!=='P4_Y_maze_consistency_stage_B_execution_precondition_v1')fail('precondition id drift');
+          if(p.status!=='prospective_stage_B_authorization_merged_and_permanent_main_ci_green_before_one_shot_execution')fail('precondition status drift');
+          if(p.authorization_pr_number!==51||p.authorization_review_head!=='b11aea060dcd7a32ea6c1d9cca6155f6324f325b'||p.authorization_main_commit!==EXPECTED_BEFORE)fail('authorization lineage drift');
+          if(p.prospective_authorization_git_blob_sha!=='b973ee451687ccb8f6730d6dc11d09eb34d3e54b')fail('precondition authorization blob drift');
+          if(p.permanent_main_workflow?.run_id!==34893683401||p.permanent_main_workflow?.run_number!==171||p.permanent_main_workflow?.conclusion!=='success')fail('permanent-main workflow provenance drift');
+          if(p.permanent_main_workflow?.test_job_id!==104142262355||p.permanent_main_workflow?.test_job_conclusion!=='success')fail('permanent-main test provenance drift');
+          if(p.permanent_main_workflow?.deploy_job_id!==104142562658||p.permanent_main_workflow?.deploy_job_conclusion!=='success')fail('permanent-main deploy provenance drift');
+          if(p.execution_workflow_file!==WORKFLOW||p.execution_workflow_git_blob_sha!==hash(WORKFLOW))fail('execution workflow pin drift');
+          if(p.execution_trigger?.event!=='push'||p.execution_trigger?.branch!=='main'||p.execution_trigger?.path!==WORKFLOW||p.execution_trigger?.expected_before_commit!==EXPECTED_BEFORE||p.execution_trigger?.pull_request_enabled!==false||p.execution_trigger?.workflow_dispatch_enabled!==false||p.execution_trigger?.workflow_run_rerun_enabled!==false)fail('one-shot trigger drift');
+          if(p.reviewed_merge_binding?.execution_pr_number!==52||p.reviewed_merge_binding?.require_pr_merged!==true||p.reviewed_merge_binding?.require_github_sha_equals_pr_merge_commit_sha!==true||p.reviewed_merge_binding?.require_second_parent_equals_pr_head_sha!==true)fail('reviewed merge binding drift');
+          if(p.durable_consumed_state_guard?.backend!=='github_actions_workflow_run_history'||p.durable_consumed_state_guard?.no_prior_run_other_than_current_required!==true||p.durable_consumed_state_guard?.prior_run_conclusion_irrelevant!==true||p.durable_consumed_state_guard?.survives_main_history_rewrite!==true)fail('durable consumed-state guard drift');
+          if(p.activation_mode!=='ephemeral_runtime_authorization_file_only'||p.committed_runtime_authorization_file_must_remain_absent!==true)fail('precondition activation firewall drift');
+          if(p.exact_node_version!=='22.23.2'||process.versions.node!=='22.23.2')fail('Node pin drift');
+          if(p.frozen_execution_surface_entry_count!==7||p.verify_every_frozen_surface_blob_before_activation!==true)fail('surface-count drift');
+          if(p.real_stage_B_still_unrun_at_freeze!==true)fail('Stage B must be unrun at precondition freeze');
+          if(p.authorized_command_exact!==a.comparison_contract.authorized_command_exact)fail('precondition command drift');
+          if(!Array.isArray(p.cli_parameter_overrides)||p.cli_parameter_overrides.length!==0)fail('CLI overrides must remain empty');
+          if(p.biological_Y_maze_summary_access_authorized_during_review_gate!==false||p.biological_Y_maze_summary_access_authorized_during_stage_B_execution!==true)fail('biological access lifecycle drift');
+          if(p.stage_A_rerun_or_modification_authorized!==false||p.canonical_promotion_authorized!==false||p.external_validation_claim_authorized!==false)fail('scientific firewall drift');
+
+          const entries=Object.entries(p.frozen_execution_surface||{});
+          if(entries.length!==7)fail('frozen execution surface must contain exactly 7 entries');
+          for(const [name,spec] of entries){
+            if(!spec||typeof spec.file!=='string'||typeof spec.git_blob_sha!=='string')fail('invalid frozen surface entry '+name);
+            if(!fs.existsSync(spec.file))fail('missing frozen surface file '+spec.file);
+            if(hash(spec.file)!==spec.git_blob_sha)fail('frozen surface blob drift: '+name+' '+spec.file);
+          }
+          if(fs.existsSync(RUNTIME))fail('runtime authorization file must be absent before activation');
+          if(cp.spawnSync('git',['cat-file','-e','HEAD:'+RUNTIME]).status===0)fail('runtime authorization file must not exist in committed HEAD');
+          NODE
+
+          test -z "$(git status --porcelain)"
+
+      - name: Run permanent regression suite before Stage B
+        run: ./tests/run-tests.sh
+
+      - name: Re-verify exact state before ephemeral authorization
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          EVENT_BEFORE="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));process.stdout.write(e.before||'')")"
+          test -z "$(git status --porcelain)"
+          test "${GITHUB_RUN_ATTEMPT}" = '1'
+          test "${EVENT_BEFORE}" = '7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a'
+          test "$(git hash-object hypotheses/p4_Y_maze_consistency_stage_B_prospective_authorization_v1.json)" = 'b973ee451687ccb8f6730d6dc11d09eb34d3e54b'
+          test "$(git hash-object tools/compare-p4-ymaze-consistency.js)" = '75cf0ae6075695784e7c67c1473a50e0daaa98cc'
+          test "$(git hash-object reports/p4_ymaze_consistency_simulation_v1.json)" = 'a7b3e33ce613254c182360947641c5ff03f5af23'
+          test "$(git hash-object reference/poissonnier2026_published_targets.json)" = '5836b5011d765043f94683fa761f3016e86643dc'
+          test "$(git hash-object reference/poissonnier2026_inventory.json)" = '2ff7d9dcd27cf7609ce77b0f655a6520597c2432'
+          test "$(node -p 'process.versions.node')" = '22.23.2'
+          test ! -e hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
+          test ! -e reports/p4_ymaze_consistency_comparison_v1.json
+
+          node - <<'NODE'
+          (async()=>{
+            const cp=require('child_process');
+            const api=process.env.GITHUB_API_URL,repo=process.env.GITHUB_REPOSITORY,token=process.env.GITHUB_TOKEN;
+            const headers={Accept:'application/vnd.github+json',Authorization:`Bearer ${token}`,'X-GitHub-Api-Version':'2022-11-28'};
+            const get=async path=>{const r=await fetch(api+path,{headers});if(!r.ok)throw new Error(`GitHub API ${path} failed: ${r.status}`);return r.json();};
+            const pr=await get(`/repos/${repo}/pulls/52`);
+            const secondParent=cp.execFileSync('git',['rev-parse','HEAD^2'],{encoding:'utf8'}).trim();
+            if(pr.merged!==true)throw new Error('execution PR #52 is not merged');
+            if(pr.merge_commit_sha!==process.env.GITHUB_SHA)throw new Error('current SHA is not PR #52 merge commit');
+            if(pr.head?.sha!==secondParent)throw new Error('merge second parent is not PR #52 reviewed head');
+            const runs=await get(`/repos/${repo}/actions/workflows/p4-v034q-ymaze-stage-b.yml/runs?per_page=100`);
+            const prior=(runs.workflow_runs||[]).filter(r=>String(r.id)!==String(process.env.GITHUB_RUN_ID));
+            if(prior.length!==0)throw new Error('Stage-B one-shot already consumed by prior workflow run(s): '+prior.map(r=>r.id).join(','));
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Ephemerally materialize active Stage B authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process');
+          const source='hypotheses/p4_Y_maze_consistency_stage_B_prospective_authorization_v1.json';
+          const runtime='hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json';
+          if(fs.existsSync(runtime))throw new Error('runtime authorization unexpectedly exists before activation');
+          if(cp.spawnSync('git',['cat-file','-e','HEAD:'+runtime]).status===0)throw new Error('runtime authorization unexpectedly exists in committed HEAD');
+          const pristine=JSON.parse(cp.execFileSync('git',['show','HEAD:'+source],{encoding:'utf8'}));
+          if(pristine.official_stage_B_comparison_authorized!==false||pristine.prospective_official_stage_B_comparison_authorized!==true)throw new Error('prospective authorization is not locked');
+          const active=JSON.parse(JSON.stringify(pristine));
+          active.official_stage_B_comparison_authorized=true;
+          fs.writeFileSync(runtime,JSON.stringify(active,null,2)+'\n');
+          const written=JSON.parse(fs.readFileSync(runtime,'utf8'));
+          const expected=JSON.parse(JSON.stringify(pristine));
+          expected.official_stage_B_comparison_authorized=true;
+          if(JSON.stringify(written)!==JSON.stringify(expected))throw new Error('ephemeral runtime authorization write drift');
+          const status=cp.execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
+          if(status.length!==1||status[0]!==`?? ${runtime}`)throw new Error('ephemeral activation changed unexpected files: '+status.join(','));
+          NODE
+
+      - name: Run exact frozen P4 Y-maze Stage B comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/compare-p4-ymaze-consistency.js --out reports/p4_ymaze_consistency_comparison_v1.json
+
+      - name: Remove ephemeral runtime authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
+          test ! -e hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json
+          if git cat-file -e HEAD:hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json 2>/dev/null; then
+            echo "runtime authorization unexpectedly exists in committed HEAD" >&2
+            exit 1
+          fi
+
+      - name: Validate Stage B result and write execution provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs'),crypto=require('crypto'),cp=require('child_process');
+          const reportPath='reports/p4_ymaze_consistency_comparison_v1.json';
+          const provenancePath='reports/p4_ymaze_consistency_stage_B_execution_provenance_v1.json';
+          const prospectivePath='hypotheses/p4_Y_maze_consistency_stage_B_prospective_authorization_v1.json';
+          const runtimePath='hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json';
+          const prePath='hypotheses/p4_Y_maze_consistency_stage_B_execution_precondition_v1.json';
+          const workflowPath='.github/workflows/p4-v034q-ymaze-stage-b.yml';
+          const stageAPath='reports/p4_ymaze_consistency_simulation_v1.json';
+          const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+          const report=JSON.parse(fs.readFileSync(reportPath,'utf8'));
+          const auth=JSON.parse(fs.readFileSync(prospectivePath,'utf8'));
+          const hash=file=>cp.execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
+          const sha256=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+          const fail=m=>{throw new Error(m)};
+
+          if(event.before!=='7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a')fail('Stage-B result came from an unintended main push');
+          if(process.env.GITHUB_RUN_ATTEMPT!=='1')fail('Stage-B result came from a workflow rerun');
+          if(fs.existsSync(runtimePath))fail('ephemeral runtime authorization was not removed');
+          if(cp.spawnSync('git',['cat-file','-e','HEAD:'+runtimePath]).status===0)fail('runtime authorization exists in committed HEAD');
+          if(hash(prospectivePath)!=='b973ee451687ccb8f6730d6dc11d09eb34d3e54b')fail('prospective authorization blob drift');
+          if(hash(stageAPath)!=='a7b3e33ce613254c182360947641c5ff03f5af23')fail('Stage-A report drift');
+          if(hash('reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json')!=='566801802fe434afbd27d48876caa2735a9442ac')fail('Stage-A provenance drift');
+          if(hash('tools/compare-p4-ymaze-consistency.js')!=='75cf0ae6075695784e7c67c1473a50e0daaa98cc')fail('comparator drift');
+          if(hash('reference/poissonnier2026_published_targets.json')!=='5836b5011d765043f94683fa761f3016e86643dc')fail('published source drift');
+          if(hash('reference/poissonnier2026_inventory.json')!=='2ff7d9dcd27cf7609ce77b0f655a6520597c2432')fail('inventory source drift');
+
+          if(report.schema_version!==1||report.id!=='P4_Y_maze_consistency_descriptive_comparison_v1'||report.comparison_scope!=='comprehensive_descriptive_only')fail('Stage-B report identity drift');
+          if(report.row_count!==7||report.all_predeclared_comparisons_reported!==true||!Array.isArray(report.rows)||report.rows.length!==7)fail('Stage-B row-count drift');
+          const ids=['overall','outwards_naive','outwards_experienced','return_experienced','return_naive','pheromone_left','pheromone_right'];
+          if(JSON.stringify(report.rows.map(r=>r.id))!==JSON.stringify(ids))fail('Stage-B row identity/order drift');
+          const scopes=['overall','direction_experience_condition','direction_experience_condition','direction_experience_condition','direction_experience_condition','pheromone_side','pheromone_side'];
+          if(JSON.stringify(report.rows.map(r=>r.scope))!==JSON.stringify(scopes))fail('Stage-B row scope drift');
+          for(const r of report.rows){
+            for(const k of ['model_prediction','observed_rate','signed_difference_model_minus_observed','absolute_difference'])if(typeof r[k]!=='number'||!Number.isFinite(r[k]))fail(r.id+' invalid '+k);
+            if(r.model_prediction<0||r.model_prediction>1||r.observed_rate<0||r.observed_rate>1)fail(r.id+' rate outside [0,1]');
+            if(r.signed_difference_model_minus_observed!==r.model_prediction-r.observed_rate)fail(r.id+' signed-difference drift');
+            if(r.absolute_difference!==Math.abs(r.signed_difference_model_minus_observed))fail(r.id+' absolute-difference drift');
+          }
+          const prov=report.observed_source_provenance||{};
+          if(prov.normalized_from_frozen_counts!==true)fail('observed-source provenance drift');
+          if(prov.published_targets?.file!=='reference/poissonnier2026_published_targets.json'||prov.published_targets?.git_blob_sha!=='5836b5011d765043f94683fa761f3016e86643dc')fail('published-source provenance drift');
+          if(prov.inventory?.file!=='reference/poissonnier2026_inventory.json'||prov.inventory?.git_blob_sha!=='2ff7d9dcd27cf7609ce77b0f655a6520597c2432')fail('inventory-source provenance drift');
+          const forbidden=/(?:^|_)(?:pass|fail|pvalue|p_value|significance|threshold|promotion|canonical_update)(?:$|_)/i;
+          (function walk(v){if(!v||typeof v!=='object')return;for(const [k,x] of Object.entries(v)){if(forbidden.test(k))fail('forbidden decision-semantic key in Stage-B report: '+k);walk(x);}})(report);
+
+          const statusBefore=cp.execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean);
+          if(statusBefore.length!==1||statusBefore[0]!==`?? ${reportPath}`)fail('unexpected workspace state before provenance: '+statusBefore.join(','));
+
+          const provenance={
+            schema_version:1,
+            id:'P4_Y_maze_consistency_stage_B_execution_provenance_v1',
+            status:'official_stage_B_completed_artifact_not_yet_frozen_canonical_promotion_locked',
+            workflow_run_id:Number(process.env.GITHUB_RUN_ID),
+            workflow_run_number:Number(process.env.GITHUB_RUN_NUMBER),
+            workflow_attempt:Number(process.env.GITHUB_RUN_ATTEMPT),
+            workflow_event_before:event.before,
+            workflow_head_sha:process.env.GITHUB_SHA,
+            prospective_authorization_git_blob_sha:hash(prospectivePath),
+            execution_precondition_git_blob_sha:hash(prePath),
+            execution_workflow_git_blob_sha:hash(workflowPath),
+            comparator_git_blob_sha:hash('tools/compare-p4-ymaze-consistency.js'),
+            stage_A_report_git_blob_sha:hash(stageAPath),
+            stage_A_execution_provenance_git_blob_sha:hash('reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json'),
+            published_targets_git_blob_sha:hash('reference/poissonnier2026_published_targets.json'),
+            inventory_git_blob_sha:hash('reference/poissonnier2026_inventory.json'),
+            node_version:process.versions.node,
+            authorized_command_exact:auth.comparison_contract.authorized_command_exact,
+            official_report_file:reportPath,
+            official_report_git_blob_sha:hash(reportPath),
+            official_report_sha256:sha256(reportPath),
+            row_count:report.row_count,
+            all_predeclared_comparisons_reported:report.all_predeclared_comparisons_reported,
+            biological_Y_maze_summary_accessed_during_stage_B:true,
+            raw_Y_maze_choices_accessed_during_stage_B:false,
+            colony_level_Y_maze_outcomes_accessed_during_stage_B:false,
+            stage_A_rerun_or_modified:false,
+            runtime_authorization_materialized_ephemerally_only:true,
+            runtime_authorization_removed_before_provenance:true,
+            canonical_promotion_authorized:false,
+            external_validation_claim_authorized:false
+          };
+          fs.writeFileSync(provenancePath,JSON.stringify(provenance,null,2)+'\n');
+          if(provenance.workflow_attempt!==1)fail('provenance attempt drift');
+          if(provenance.node_version!=='22.23.2')fail('provenance Node drift');
+          if(provenance.row_count!==7||provenance.all_predeclared_comparisons_reported!==true)fail('provenance row contract drift');
+          const statusAfter=cp.execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(Boolean).sort();
+          const expectedAfter=[`?? ${provenancePath}`,`?? ${reportPath}`].sort();
+          if(JSON.stringify(statusAfter)!==JSON.stringify(expectedAfter))fail('unexpected workspace state after provenance: '+statusAfter.join(','));
+          NODE
+
+      - name: Upload immutable Stage B artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-v034q-ymaze-stage-b
+          path: |
+            reports/p4_ymaze_consistency_comparison_v1.json
+            reports/p4_ymaze_consistency_stage_B_execution_provenance_v1.json
+          if-no-files-found: error
+          retention-days: 90
