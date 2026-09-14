@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "P4_external_validation_source_discovery_v1",
-  "status": "published_source_screen_complete_no_uncontaminated_promotion_grade_holdout_new_prospective_dataset_required",
+  "status": "targeted_published_source_screen_complete_no_uncontaminated_promotion_grade_holdout_found_new_prospective_dataset_route_selected",
   "freeze_date_local": "2026-09-14",
   "criteria_lineage": {
     "file": "hypotheses/p4_external_validation_source_selection_criteria_v1.json",
@@ -19,7 +19,8 @@
   "search_scope": {
     "species": "Lasius niger",
     "domain": "pheromone trail following",
-    "publication_search_completed": true,
+    "search_classification": "targeted_high_relevance_screen_not_exhaustive_systematic_review",
+    "targeted_publication_screen_completed": true,
     "minimum_candidates_required_if_available": 3,
     "candidates_screened": 5,
     "candidate_ranking_used_candidate_307_outcome_agreement": false,
@@ -90,10 +91,11 @@
     }
   ],
   "discovery_conclusion": {
-    "eligible_existing_published_source_count_after_blinding_filter": 0,
+    "eligible_existing_published_source_count_found_in_targeted_screen_after_blinding_filter": 0,
     "selected_existing_published_source_count": 0,
     "forced_selection_of_contaminated_source_authorized": false,
-    "reason": "Every high-relevance published candidate screened had target outcome semantics exposed in searchable abstracts, result snippets, or tables before a source-specific validation protocol could be frozen. Selecting any of them now as a blind promotion-grade holdout would misrepresent the evidence lifecycle.",
+    "exhaustive_claim_that_no_other_eligible_published_source_exists": false,
+    "reason": "Every high-relevance published candidate screened had target outcome semantics exposed in searchable abstracts, result snippets, or tables before a source-specific validation protocol could be frozen. Rather than continue searching adaptively after seeing outcomes or misrepresent one of these sources as blind, this gate selects the prospectively clean new-dataset route.",
     "prospective_new_dataset_route_selected": true,
     "selected_route_id": "P4_external_validation_replication_dataset_v1",
     "selected_route_classification": "new_prospectively_preregistered_independent_replication_dataset_not_yet_collected",
@@ -103,7 +105,7 @@
   "criteria_contract_resolution": {
     "requested_selected_source_count": 1,
     "actual_existing_source_count_selected": 0,
-    "resolution": "fail_closed_no_eligible_existing_source_instead_of_forcing_an_ineligible_selection",
+    "resolution": "fail_closed_no_eligible_source_found_in_targeted_screen_instead_of_forcing_an_ineligible_selection",
     "scientific_reason": "The one-source target is subordinate to the mandatory blinding and independence criteria; no source may be selected by violating a mandatory criterion. A new dataset can satisfy the criteria prospectively after preregistration."
   },
   "new_dataset_requirements": {
