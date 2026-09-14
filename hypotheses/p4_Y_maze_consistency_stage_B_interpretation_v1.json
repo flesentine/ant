@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "id": "P4_Y_maze_consistency_stage_B_interpretation_v1",
+  "status": "frozen_stage_B_descriptive_interpretation_only_canonical_promotion_locked",
+  "freeze_date_local": "2026-09-14",
+  "lineage": {
+    "stage_B_result_freeze_file": "hypotheses/p4_Y_maze_consistency_stage_B_result_freeze_v1.json",
+    "stage_B_result_freeze_git_blob_sha": "0a17dd6d536e3ccc9487afe44ec3daeb24454b94",
+    "frozen_stage_B_report_file": "reports/frozen/p4_ymaze_consistency_comparison_v1.json",
+    "frozen_stage_B_report_git_blob_sha": "afaf2603bbd4a02f19bfe5aebc5f932a1e0c1615",
+    "frozen_stage_B_report_sha256": "c4b7f32f51c171a38c8a73e26dc73d803a197cc26799d9652a36eec8a255ca10",
+    "frozen_stage_B_provenance_file": "reports/frozen/p4_ymaze_consistency_stage_B_execution_provenance_v1.json",
+    "frozen_stage_B_provenance_git_blob_sha": "55e7894b71b064fdaf5ee5b7812d632231eb29dc",
+    "qualified_result_freeze_main_commit": "30d36ce51a70c040bd6d7aeb8fe78cb52c48b0e4",
+    "qualified_result_freeze_main_run_id": 34905959389,
+    "qualified_result_freeze_main_run_number": 173,
+    "qualified_result_freeze_test_job_id": 104182545484,
+    "qualified_result_freeze_deploy_job_id": 104182750584
+  },
+  "interpretation_scope": {
+    "source": "exact_frozen_seven_row_stage_B_report_only",
+    "new_simulation_authorized": false,
+    "stage_A_rerun_authorized": false,
+    "stage_B_rerun_authorized": false,
+    "new_biological_data_access_authorized": false,
+    "parameter_or_protocol_change_authorized": false,
+    "retrospective_validation_threshold_authorized": false,
+    "inferential_significance_test_authorized": false,
+    "best_subset_selection_authorized": false,
+    "canonical_promotion_authorized": false,
+    "external_validation_claim_authorized": false
+  },
+  "frozen_descriptive_findings": {
+    "row_count": 7,
+    "all_model_predictions_above_neutral_half": true,
+    "all_observed_rates_above_neutral_half": true,
+    "all_signed_differences_model_minus_observed_negative": true,
+    "overall": {
+      "model_prediction": 0.740889950913122,
+      "observed_rate": 0.8743718592964824,
+      "signed_difference_model_minus_observed": -0.13348190838336038,
+      "absolute_difference": 0.13348190838336038,
+      "percentage_point_gap": 13.348190838336038
+    },
+    "absolute_difference_range": {
+      "minimum": 0.0901614530776993,
+      "minimum_row": "pheromone_left",
+      "maximum": 0.1770485440859556,
+      "maximum_row": "pheromone_right"
+    },
+    "diagnostic_equal_row_weight_summary": {
+      "role": "descriptive_diagnostic_only_not_a_predeclared_validation_metric",
+      "mean_signed_difference_model_minus_observed": -0.13350083418118064,
+      "mean_absolute_difference": 0.13350083418118064,
+      "direction_experience_rows_mean_absolute_difference": 0.1334534834303123,
+      "pheromone_side_rows_mean_absolute_difference": 0.13360499858182745
+    }
+  },
+  "scientific_interpretation": {
+    "qualitative_preference_direction": "consistent_with_observed_marked_arm_preference_across_all_predeclared_rows",
+    "quantitative_effect_magnitude": "systematically_weaker_than_observed_across_all_predeclared_rows",
+    "summary": "Candidate 307 reproduces the direction of marked-arm preference in the complete frozen Stage-B comparison, but underpredicts the observed preference magnitude in every predeclared row. The overall model prediction is about 13.35 percentage points below the observed summary, and row-level absolute discrepancies span about 9.02 to 17.70 percentage points.",
+    "what_this_supports": "descriptive_cross_apparatus_consistency_in_preference_direction",
+    "what_this_does_not_support": [
+      "a retrospective pass/fail validation verdict",
+      "inferential statistical significance",
+      "parameter retuning from the observed discrepancies",
+      "canonical promotion",
+      "an external-validation claim"
+    ]
+  },
+  "decision": {
+    "validation_pass_fail_threshold": null,
+    "validation_pass_fail_verdict": null,
+    "canonical_update_authorized": false,
+    "candidate_307_promoted": false,
+    "candidate_307_rejected": false,
+    "candidate_307_retuning_authorized": false,
+    "stage_B_result_must_remain_exactly_frozen": true
+  },
+  "next_gate": {
+    "id": "P4_external_validation_source_discovery_v1",
+    "purpose": "Identify a genuinely independent promotion-grade biological validation source without using the frozen Stage-B discrepancy pattern to tune Candidate 307, the protocol, or the source-selection criteria.",
+    "source_must_be_independent_of_current_fit_and_same_study_Y_maze_summary": true,
+    "source_selection_may_not_optimize_for_candidate_307": true,
+    "candidate_or_protocol_change_before_source_freeze_authorized": false,
+    "canonical_promotion_before_independent_validation_authorized": false
+  }
+}
