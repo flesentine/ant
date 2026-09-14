@@ -22,7 +22,7 @@
     "deploy_job_conclusion": "success"
   },
   "execution_workflow_file": ".github/workflows/p4-v034q-ymaze-stage-b.yml",
-  "execution_workflow_git_blob_sha": "f09b73b8225e48137aa41345794ce70f4d9bfe61",
+  "execution_workflow_git_blob_sha": "b1a85646deaea2c0eac6cb4cea7c156841a3da80",
   "execution_trigger": {
     "event": "push",
     "branch": "main",
@@ -33,7 +33,23 @@
     "workflow_run_rerun_enabled": false,
     "later_unrelated_main_push_may_rerun": false
   },
-  "execution_trigger_rule": "The official Stage-B workflow may execute only for a push to main whose event.before commit is exactly 7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a, the qualified prospective-authorization main checkpoint. The paths filter is only an additional trigger reduction and is not trusted as the one-shot invariant. The workflow has no pull_request or workflow_dispatch trigger and fails closed unless GITHUB_RUN_ATTEMPT equals 1.",
+  "reviewed_merge_binding": {
+    "execution_pr_number": 52,
+    "require_pr_merged": true,
+    "require_github_sha_equals_pr_merge_commit_sha": true,
+    "require_second_parent_equals_pr_head_sha": true,
+    "binding_source": "GitHub pull request metadata queried at runtime"
+  },
+  "durable_consumed_state_guard": {
+    "backend": "github_actions_workflow_run_history",
+    "workflow_file": ".github/workflows/p4-v034q-ymaze-stage-b.yml",
+    "no_prior_run_other_than_current_required": true,
+    "prior_run_conclusion_irrelevant": true,
+    "survives_main_history_rewrite": true,
+    "guard_rechecked_immediately_before_activation": true,
+    "invalid_first_run_requires_new_gate": true
+  },
+  "execution_trigger_rule": "The official Stage-B workflow may execute only for the merge commit of reviewed PR #52, with GitHub pull-request metadata proving the current GITHUB_SHA is that PR's merge commit and HEAD^2 is that PR's reviewed head. The push event.before must also be exactly 7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a, and GITHUB_RUN_ATTEMPT must equal 1. The paths filter is only an additional trigger reduction and is not trusted as the one-shot invariant. GitHub Actions workflow-run history is a durable consumed-state guard: any prior run of this workflow other than the current run, regardless of conclusion, blocks execution and the guard is repeated immediately before activation. Therefore later unrelated pushes, force-reset/replay attempts, path-filter fallback behavior, and GitHub re-run attempts cannot repeat Stage B; an invalid first run requires a new reviewed gate.",
   "activation_mode": "ephemeral_runtime_authorization_file_only",
   "committed_runtime_authorization_file_must_remain_absent": true,
   "runtime_authorization_file": "hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json",
@@ -106,7 +122,7 @@
     "valid_result_must_be_accepted_exactly_as_produced": true,
     "report_and_provenance_must_be_frozen_in_separate_post_execution_gate": true
   },
-  "rerun_policy": "No rerun is authorized after a valid Stage-B result. The workflow is bound to the single intended push by requiring event.before=7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a and mechanically rejects GitHub workflow re-run attempts by requiring GITHUB_RUN_ATTEMPT=1. Any future execution after an invalid run requires a separate invalidation record and a separately reviewed execution gate.",
+  "rerun_policy": "No rerun is authorized after any Stage-B workflow run under this gate. A valid result is never rerun. An invalid first run consumes this gate because GitHub Actions workflow-run history is durable outside git history; recovery requires a separate invalidation record and a newly reviewed execution gate. The workflow additionally binds to reviewed PR #52 merge metadata, event.before=7ab56e3e4bfe1fc68659d6bad5bf13ebb716d66a, and GITHUB_RUN_ATTEMPT=1.",
   "biological_Y_maze_summary_access_authorized_during_review_gate": false,
   "biological_Y_maze_summary_access_authorized_during_stage_B_execution": true,
   "raw_Y_maze_choice_access_authorized": false,
