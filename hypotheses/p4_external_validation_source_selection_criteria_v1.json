@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "id": "P4_external_validation_source_selection_criteria_v1",
+  "status": "prospective_source_selection_criteria_frozen_before_external_literature_search",
+  "freeze_date_local": "2026-09-14",
+  "lineage": {
+    "stage_B_interpretation_file": "hypotheses/p4_Y_maze_consistency_stage_B_interpretation_v1.json",
+    "stage_B_interpretation_git_blob_sha": "6a9d837c81aa10fd8f53095fea0de7da2551c635",
+    "qualified_interpretation_main_commit": "31b293afd615bde9a9f2341a3966eac1b4dd8edf",
+    "qualified_interpretation_main_run_id": 34906439220,
+    "qualified_interpretation_main_run_number": 174,
+    "qualified_interpretation_test_job_id": 104184076531,
+    "qualified_interpretation_deploy_job_id": 104184296008,
+    "frozen_candidate_index": 307,
+    "candidate_parameters_may_change_during_source_discovery": false
+  },
+  "scientific_goal": "Identify a genuinely independent promotion-grade biological validation source for the frozen P4-v1 Lasius niger pheromone-trail-following mechanism, selected on source independence and reconstructability rather than agreement with Candidate 307.",
+  "selection_order": [
+    "verify independence from Poissonnier et al. 2026 and all P4 development/calibration sources",
+    "verify species and behavioral-domain eligibility",
+    "verify apparatus and stimulus are sufficiently reconstructable from outcome-free methods metadata",
+    "verify a model-comparable endpoint can be defined prospectively",
+    "verify outcome data can remain unaccessed until source identity and validation protocol are frozen",
+    "only then authorize outcome retrieval in a later gate"
+  ],
+  "mandatory_inclusion_criteria": {
+    "species": "Lasius niger",
+    "behavioral_domain": "individual or group trail-following response to a pheromone-marked versus unmarked or quantitatively varied trail stimulus",
+    "independent_publication_or_dataset_from_poissonnier2026": true,
+    "not_used_in_P4_model_development_parameter_estimation_or_candidate_selection": true,
+    "not_same_experiment_or_reanalysis_of_poissonnier2026_data": true,
+    "apparatus_or_spatial_stimulus_geometry_reconstructable_without_outcome_values": true,
+    "pheromone_stimulus_definition_reconstructable_without_outcome_values": true,
+    "model_comparable_behavioral_endpoint_definable_before_outcome_access": true,
+    "biological_outcome_surface_can_remain_unread_until_protocol_freeze": true,
+    "source_identity_stable_and_citable": true
+  },
+  "preferred_criteria_not_required": {
+    "raw_or_trial_level_data_publicly_available": true,
+    "supplementary_methods_or_machine_readable_data_available": true,
+    "binary_choice_endpoint": true,
+    "explicit_pheromone_side_or_dose_randomization": true,
+    "multiple_colonies_or_independent biological replicates": true,
+    "apparatus_conditions_overlap_frozen_P4_domain_without_new_context_specific_parameters": true
+  },
+  "exclusion_criteria": {
+    "same_publication_as_poissonnier2026": true,
+    "same_underlying_dataset_as_any_P4_development_source": true,
+    "different_ant_species": true,
+    "pheromone_deposition_only_without_a_trail_following_response_endpoint": true,
+    "collective_route_choice_only_if_individual_or_model_comparable trail response cannot be reconstructed": true,
+    "requires_parameter_refitting_or_condition_specific_response_parameters_before prediction": true,
+    "methods_insufficient_to_construct_a_pre-outcome_validation_protocol": true,
+    "outcome_values_or_effect_direction_intentionally_inspected_before_source_and_protocol_freeze": true,
+    "selected_because_observed_outcome_is_close_to_candidate_307": true
+  },
+  "outcome_blinding_policy": {
+    "bibliographic_identity_access_authorized": true,
+    "title_author_year_doi_journal_access_authorized": true,
+    "methods_and_apparatus_metadata_access_authorized": true,
+    "abstract_access_authorized_only_if_needed_for_domain_eligibility": true,
+    "numerical_outcome_values_access_authorized": false,
+    "result_tables_figures_supplementary_outcome_data_access_authorized": false,
+    "candidate_307_prediction_may_not_be_compared_to_any_candidate_source_outcome_during_discovery": true,
+    "if_material_outcome_information_is_inadvertently_exposed": "record the exposure; do not use the exposed information for source ranking or protocol design; if exposure reveals enough of the target outcome to undermine a blind holdout, classify that source as contaminated for promotion-grade validation and continue discovery"
+  },
+  "source_ranking_rule": {
+    "primary": "independence_and_pre_outcome_reconstructability",
+    "secondary": "directness_of_behavioral_endpoint_match_to_frozen_P4_mechanism",
+    "tertiary": "data_accessibility_and_reproducibility",
+    "outcome_agreement_with_candidate_307": "forbidden_ranking_feature",
+    "publication_recency": "not_a_ranking_feature",
+    "citation_count": "not_a_ranking_feature"
+  },
+  "discovery_output_contract": {
+    "minimum_candidates_to_screen_if_available": 3,
+    "record_inclusion_exclusion_reason_for_each_candidate": true,
+    "selected_source_count": 1,
+    "selected_source_identity_may_be_frozen_before_outcome_access": true,
+    "selected_source_outcome_values_must_remain_unrecorded": true,
+    "selected_source_validation_protocol_must_be_a_separate_later_gate": true
+  },
+  "firewalls": {
+    "P4_parameter_change_authorized": false,
+    "P4_candidate_change_authorized": false,
+    "P4_runtime_change_authorized": false,
+    "Stage_A_or_Stage_B_rerun_authorized": false,
+    "same_study_Y_maze_discrepancy_use_for_source_selection_authorized": false,
+    "external_source_outcome_use_for_source_selection_authorized": false,
+    "external_source_outcome_use_for_protocol_design_authorized": false,
+    "canonical_promotion_authorized": false
+  },
+  "next_gate": {
+    "id": "P4_external_validation_source_discovery_v1",
+    "purpose": "Screen independent Lasius niger trail-following sources against these frozen criteria using bibliographic and methods metadata only, record contamination if any outcome semantics are inadvertently exposed, and freeze one source identity before a validation protocol or outcome access exists."
+  }
+}
