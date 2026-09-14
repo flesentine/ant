@@ -36,10 +36,13 @@ jobs:
           WORKFLOW='.github/workflows/p4-v034n-ymaze-official-stage-a.yml'
           REPORT='reports/p4_ymaze_consistency_simulation_v1.json'
           PROVENANCE='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json'
+          EXPECTED_BEFORE='71ef3857e775d11269246990b907994e3442e3b2'
+          EVENT_BEFORE="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));process.stdout.write(e.before||'')")"
 
           test "${GITHUB_REF}" = 'refs/heads/main'
           test "${GITHUB_EVENT_NAME}" = 'push'
           test "${GITHUB_RUN_ATTEMPT}" = '1'
+          test "${EVENT_BEFORE}" = "${EXPECTED_BEFORE}"
           git merge-base --is-ancestor 71ef3857e775d11269246990b907994e3442e3b2 HEAD
           test "$(git hash-object "${AUTH}")" = '8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b'
           test "$(node -p 'process.versions.node')" = '22.23.2'
@@ -53,11 +56,14 @@ jobs:
           const AUTH='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
           const PRE='hypotheses/p4_Y_maze_consistency_official_execution_precondition_v1.json';
           const WORKFLOW='.github/workflows/p4-v034n-ymaze-official-stage-a.yml';
+          const EXPECTED_BEFORE='71ef3857e775d11269246990b907994e3442e3b2';
+          const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
           const a=JSON.parse(fs.readFileSync(AUTH,'utf8'));
           const p=JSON.parse(fs.readFileSync(PRE,'utf8'));
           const hash=file=>cp.execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
           const fail=m=>{throw new Error(m)};
 
+          if(event.before!==EXPECTED_BEFORE)fail('workflow is not running on the single intended main push');
           if(a.id!=='P4_Y_maze_consistency_official_execution_authorization_v1')fail('authorization id drift');
           if(hash(AUTH)!=='8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b')fail('authorization blob drift');
           if(a.official_stage_A_execution_authorized!==false)fail('committed authorization must remain inactive');
@@ -89,14 +95,14 @@ jobs:
           if(p.status!=='authorization_merged_and_permanent_main_ci_green_before_official_stage_A_execution')fail('precondition status drift');
           if(p.authorization_pr_number!==48)fail('authorization PR drift');
           if(p.authorization_review_head!=='7b12d6383fa031d9e462ce8131427d8a84be369c')fail('authorization review head drift');
-          if(p.authorization_main_commit!=='71ef3857e775d11269246990b907994e3442e3b2')fail('authorization main commit drift');
+          if(p.authorization_main_commit!==EXPECTED_BEFORE)fail('authorization main commit drift');
           if(p.authorization_git_blob_sha!=='8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b')fail('precondition authorization blob drift');
           if(p.permanent_main_workflow?.run_id!==34795850404||p.permanent_main_workflow?.run_number!==168||p.permanent_main_workflow?.conclusion!=='success')fail('permanent-main workflow provenance drift');
           if(p.permanent_main_workflow?.test_job_id!==103828674565||p.permanent_main_workflow?.test_job_conclusion!=='success')fail('permanent-main test provenance drift');
           if(p.permanent_main_workflow?.deploy_job_id!==103828787871||p.permanent_main_workflow?.deploy_job_conclusion!=='success')fail('permanent-main deploy provenance drift');
           if(p.execution_workflow_file!==WORKFLOW)fail('workflow path drift');
           if(p.execution_workflow_git_blob_sha!==hash(WORKFLOW))fail('workflow blob does not match frozen precondition');
-          if(p.execution_trigger?.event!=='push'||p.execution_trigger?.branch!=='main'||p.execution_trigger?.path!==WORKFLOW||p.execution_trigger?.pull_request_enabled!==false||p.execution_trigger?.workflow_dispatch_enabled!==false||p.execution_trigger?.workflow_run_rerun_enabled!==false)fail('one-shot trigger drift');
+          if(p.execution_trigger?.event!=='push'||p.execution_trigger?.branch!=='main'||p.execution_trigger?.path!==WORKFLOW||p.execution_trigger?.expected_before_commit!==EXPECTED_BEFORE||p.execution_trigger?.pull_request_enabled!==false||p.execution_trigger?.workflow_dispatch_enabled!==false||p.execution_trigger?.workflow_run_rerun_enabled!==false)fail('one-shot trigger drift');
           if(p.activation_mode!=='ephemeral_working_copy_only'||p.committed_authorization_flag_must_remain_false!==true)fail('precondition activation firewall drift');
           if(p.exact_node_version!=='22.23.2')fail('precondition Node pin drift');
           if(p.frozen_execution_surface_entry_count!==18||p.verify_every_authorization_surface_blob_before_activation!==true)fail('precondition frozen-surface verification drift');
@@ -115,8 +121,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          EVENT_BEFORE="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));process.stdout.write(e.before||'')")"
           test -z "$(git status --porcelain)"
           test "${GITHUB_RUN_ATTEMPT}" = '1'
+          test "${EVENT_BEFORE}" = '71ef3857e775d11269246990b907994e3442e3b2'
           test "$(git hash-object hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json)" = '8cf7ddb3218836aec1e18eaf7f3ea0c3c2a92a6b'
           test "$(node -p 'process.versions.node')" = '22.23.2'
 
@@ -161,11 +169,13 @@ jobs:
           const authPath='hypotheses/p4_Y_maze_consistency_official_execution_authorization_v1.json';
           const prePath='hypotheses/p4_Y_maze_consistency_official_execution_precondition_v1.json';
           const workflowPath='.github/workflows/p4-v034n-ymaze-official-stage-a.yml';
+          const event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
           const report=JSON.parse(fs.readFileSync(reportPath,'utf8'));
           const hash=file=>cp.execFileSync('git',['hash-object',file],{encoding:'utf8'}).trim();
           const sha256=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
           const fail=m=>{throw new Error(m)};
 
+          if(event.before!=='71ef3857e775d11269246990b907994e3442e3b2')fail('official result came from an unintended main push');
           if(report.schema_version!==1||report.id!=='P4_Y_maze_consistency_stage_A_simulation_v1'||report.mode!=='official')fail('official Stage-A identity drift');
           if(report.scientific_evidence!==false||report.interpretation!=='posthoc_same_study_cross_apparatus_descriptive_consistency_only')fail('official Stage-A interpretation drift');
           const c=report.frozen_candidate||{};
@@ -199,6 +209,7 @@ jobs:
             workflow_run_id:Number(process.env.GITHUB_RUN_ID),
             workflow_run_number:Number(process.env.GITHUB_RUN_NUMBER),
             workflow_attempt:Number(process.env.GITHUB_RUN_ATTEMPT),
+            workflow_event_before:event.before,
             workflow_head_sha:process.env.GITHUB_SHA,
             authorization_main_commit:'71ef3857e775d11269246990b907994e3442e3b2',
             authorization_git_blob_sha:committedAuthBlob,
@@ -218,6 +229,7 @@ jobs:
             activation_was_ephemeral_working_copy_only:true
           };
           if(provenance.workflow_attempt!==1)fail('official workflow rerun attempt is forbidden');
+          if(provenance.workflow_event_before!=='71ef3857e775d11269246990b907994e3442e3b2')fail('official workflow before-SHA provenance drift');
           if(provenance.node_version!=='22.23.2')fail('provenance Node drift');
           fs.writeFileSync(provenancePath,JSON.stringify(provenance,null,2)+'\n');
           NODE
