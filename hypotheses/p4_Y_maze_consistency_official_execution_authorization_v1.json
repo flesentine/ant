@@ -3,6 +3,7 @@
   "id": "P4_Y_maze_consistency_official_execution_authorization_v1",
   "status": "prospective_official_stage_A_authorization_frozen_pending_merge_and_permanent_main_green_stage_B_locked",
   "freeze_date_local": "2026-09-13",
+  "official_stage_A_execution_authorized": false,
   "qualification_lineage": {
     "implementation_authorization_file": "hypotheses/p4_Y_maze_consistency_implementation_authorization_v1.json",
     "implementation_authorization_git_blob_sha": "db64b72830c3715b3dd26d5ad3422655e50e8828",
@@ -75,6 +76,11 @@
     "future_execution_workflow_must_be_main_only": true,
     "future_execution_workflow_must_not_have_pull_request_trigger": true,
     "future_execution_workflow_must_not_have_workflow_dispatch_trigger": true,
+    "repository_authorization_flag_must_remain_false": true,
+    "activation_mode": "ephemeral_working_copy_only_after_exact_precondition_verification",
+    "future_one_shot_workflow_may_ephemerally_set_top_level_official_stage_A_execution_authorized_true": true,
+    "future_one_shot_workflow_may_ephemerally_set_nested_lifecycle_mirror_true": true,
+    "ephemeral_activation_must_not_be_committed": true,
     "official_result_still_unrun_at_authorization_freeze": true
   },
   "stage_A_semantic_firewall": {
@@ -123,7 +129,7 @@
   },
   "next_gate": {
     "id": "P4_Y_maze_consistency_official_execution_precondition_v1",
-    "purpose": "After this prospective authorization is merged and its permanent main CI is green, activate the exact frozen Stage A authorization and freeze a main-only one-shot execution workflow before the official command may execute.",
+    "purpose": "After this prospective authorization is merged and its permanent main CI is green, freeze the exact authorization commit/run provenance and a main-only one-shot workflow that may activate only an ephemeral verified working copy before the official command executes.",
     "may_execute_official_stage_A_at_this_review_gate": false,
     "may_access_biological_Y_maze_summaries": false,
     "may_run_stage_B": false,
