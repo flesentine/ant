@@ -123,8 +123,8 @@ assert.strictEqual(d.promotion_grade_next_gate.required_before_canonical_promoti
 assert.match(d.future_promotion_requirement,/cannot establish external validity or authorize canonical promotion/i);
 
 // Historical v0.3.4i truth: protocol/runner/reports did not exist at that gate. Later lifecycle
-// states may materialize them only behind the exact frozen authorization lineage. Official Stage A
-// and real Stage B reports remain forbidden until later execution/comparison authorizations.
+// states may materialize them only behind the exact frozen authorization lineage. The official
+// Stage-A artifact may exist only after its separately reviewed exact-byte result freeze; Stage B stays locked.
 const laterProtocol='hypotheses/p4_cross_apparatus_Y_maze_consistency_protocol_v1.json';
 if(fs.existsSync(path.join(root,laterProtocol))){
   assert.strictEqual(blob(laterProtocol),'22515a3fe0945c0f19b6fb2166923f027bbf1b54');
@@ -143,11 +143,25 @@ if(fs.existsSync(path.join(root,laterImplementationAuthorization))){
   assert.ok(fs.existsSync(path.join(root,laterRunner)),'runner may appear only after implementation authorization');
   assert.strictEqual(blob(laterRunner),'fe3bff285290d0d612a5b9ab665e887c728e3d2e');
 }else assert.ok(!fs.existsSync(path.join(root,laterRunner)),'runner must be absent before implementation authorization');
-for(const file of [
-  'reports/p4_ymaze_consistency_v1.json',
-  'reports/p4_ymaze_consistency_simulation_v1.json',
-  'reports/p4_ymaze_consistency_comparison_v1.json'
-]) assert.ok(!fs.existsSync(path.join(root,file)),`${file} must remain absent before its execution/comparison authorization`);
+
+assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_v1.json')),'retired aggregate consistency report path must remain absent');
+const resultFreeze='hypotheses/p4_Y_maze_consistency_stage_A_result_freeze_v1.json';
+const officialReport='reports/p4_ymaze_consistency_simulation_v1.json';
+const executionProvenance='reports/p4_ymaze_consistency_stage_A_execution_provenance_v1.json';
+const resultFrozen=fs.existsSync(path.join(root,resultFreeze));
+if(resultFrozen){
+  assert.strictEqual(blob(resultFreeze),'7651b5c50b7d0c752cc85a2af3225c1b5592a4fc');
+  assert.strictEqual(blob(officialReport),'a7b3e33ce613254c182360947641c5ff03f5af23');
+  assert.strictEqual(blob(executionProvenance),'566801802fe434afbd27d48876caa2735a9442ac');
+  const rf=read(resultFreeze);
+  assert.strictEqual(rf.semantic_firewall.stage_B_biological_comparison_authorized,false);
+  assert.strictEqual(rf.next_gate.stage_B_may_execute_at_this_result_freeze_gate,false);
+}else{
+  assert.ok(!fs.existsSync(path.join(root,officialReport)),'official Stage A report must remain absent before Stage-A result freeze');
+  assert.ok(!fs.existsSync(path.join(root,executionProvenance)),'official Stage A provenance must remain absent before Stage-A result freeze');
+}
+assert.ok(!fs.existsSync(path.join(root,'hypotheses/p4_Y_maze_consistency_stage_B_authorization_v1.json')),'Stage B authorization must remain absent before its separate gate');
+assert.ok(!fs.existsSync(path.join(root,'reports/p4_ymaze_consistency_comparison_v1.json')),'real Stage B report must remain absent before Stage-B authorization');
 
 assert.strictEqual(blob('src/p4.js'),'bf7d5781bd69ec4568450ebbd3bdc284897b6f61');
 assert.strictEqual(blob('models/lasius_niger_painted_trail_p4_v1.json'),'3d8460b6916a90d06e70768f696ee3f0d48fccf4');
@@ -155,4 +169,4 @@ assert.strictEqual(blob('tools/p4-estimation-core.js'),'4d985cd7258fc26eb06be75f
 assert.strictEqual(blob('tools/run-p4-estimation.js'),'e57b554c0ad56a0034f4f79ec8090d3e863e3d11');
 assert.ok(!fs.existsSync(path.join(root,'hypotheses','p4_highres_authorization_v1.json')),'development high-res authorization must remain retired');
 
-console.log('p4-cross-apparatus-validation-source-design.test.js PASS '+JSON.stringify({design_blob:blob(rel),classification:s.classification,triplet:{sigma:t.sigma_field_mm,kappa:t.kappa_trail_per_s,theta:t.theta_detect},preexisting_outcome_artifacts:d.preexisting_Y_maze_outcome_artifacts.length,raw_choices_loaded:false,later_protocol_present:fs.existsSync(path.join(root,laterProtocol)),later_implementation_authorization_present:fs.existsSync(path.join(root,laterImplementationAuthorization)),simulation_authorized:false,promotion_authorized:false}));
+console.log('p4-cross-apparatus-validation-source-design.test.js PASS '+JSON.stringify({design_blob:blob(rel),classification:s.classification,triplet:{sigma:t.sigma_field_mm,kappa:t.kappa_trail_per_s,theta:t.theta_detect},preexisting_outcome_artifacts:d.preexisting_Y_maze_outcome_artifacts.length,raw_choices_loaded:false,later_protocol_present:fs.existsSync(path.join(root,laterProtocol)),later_implementation_authorization_present:fs.existsSync(path.join(root,laterImplementationAuthorization)),stage_A_result_frozen:resultFrozen,simulation_authorized:false,promotion_authorized:false}));
