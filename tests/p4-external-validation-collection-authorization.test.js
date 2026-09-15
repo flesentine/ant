@@ -18,12 +18,12 @@ const simCoreRel='src/sim-core.js';
 const neutralRel='experiments/neutral_y_maze.json';
 
 assert.strictEqual(blob(preregRel),'b8a683e0199e6564a1fedc6f54391a535c32e0e4','preregistration blob drift');
-assert.strictEqual(blob(authRel),'9796eab1eea641ba9d0e5882ff329055dd50f0dd','collection authorization blob drift');
+assert.strictEqual(blob(authRel),'8e29f24c5632ccb9b271c3d03be85f75158488ba','collection authorization blob drift');
 assert.strictEqual(blob(sideRel),'9ffd7ef45a611c93eac35626399632b4f822225a','marked-side schedule blob drift');
 assert.strictEqual(blob(poseManifestRel),'ee5f1b46bbca780196117d554f8b708b3f2ed34e','release-pose manifest blob drift');
 assert.strictEqual(blob(chemicalRel),'61c8c97cb1ff47083a67640bbd38600559498b91','chemical template blob drift');
 assert.strictEqual(blob(videoRel),'07a375a675ebf6f1be2ad628be223f50fb39ce43','video/calibration template blob drift');
-assert.strictEqual(blob(trialRel),'69395ad5da8e23c4f637fc6834ff999e061fc184','trial schema blob drift');
+assert.strictEqual(blob(trialRel),'9c0748f7a7c346888f3fa761c9d2218b9bc58ad2','trial schema blob drift');
 assert.strictEqual(blob(collectorRel),'02289bed5ef4785bbadc584ef5077b633779d089','collector independence record blob drift');
 assert.strictEqual(blob(checklistRel),'16d31bcc7bd09db27ea6c5f2505515cf042ca085','collection activation checklist blob drift');
 assert.strictEqual(blob(simCoreRel),'24777aac3577d442893e4779d70aee4e27761fe8','frozen RNG/runtime blob drift');
@@ -129,6 +129,7 @@ assert.strictEqual(video.endpoint_processing_contract.manual_body_part_or_crossi
 assert.strictEqual(trial.one_record_per_planned_trial,true);
 for(const field of prereg.raw_data_and_provenance.required_trial_fields) assert.ok(trial.required_fields.includes(field),'trial schema missing preregistered field '+field);
 for(const field of ['session_id','video_file_id','scorer_identity','release_occurred','t0_pose_measurement_available']) assert.ok(trial.required_fields.includes(field),'trial schema missing provenance/failure-state field '+field);
+assert.ok(trial.field_contracts.colony_id.includes('must exactly equal the C## colony prefix encoded by trial_id'),'colony_id must be mechanically bound to canonical trial_id');
 assert.ok(trial.field_contracts.session_id.includes('chemical session-use record')&&trial.field_contracts.session_id.includes('video/calibration session record'),'session_id must bind both session records');
 assert.ok(trial.field_contracts.video_file_id.includes('must exactly match'),'video_file_id must bind raw video provenance');
 assert.ok(trial.field_contracts.scorer_identity.includes('must exactly match'),'scorer identity must bind blinded scoring provenance');
@@ -137,6 +138,7 @@ assert.ok(trial.field_contracts.application_to_release_delay_s.includes('null on
 for(const field of ['measured_release_x_mm','measured_release_y_mm','measured_release_heading_rad','release_position_error_mm','release_heading_error_rad']) assert.ok(trial.field_contracts[field].includes('otherwise null'),'unavailable '+field+' must be nullable');
 assert.deepStrictEqual(trial.allowed_exclusion_reasons,prereg.predeclared_exclusions_and_quality.allowed_trial_exclusion_reasons);
 const rules=trial.consistency_rules.join('\n');
+assert.ok(rules.includes('colony_id must exactly equal the C## colony prefix encoded by trial_id'),'canonical trial-to-colony binding must be enforced');
 assert.ok(rules.includes('both terminal first-entry times are null')&&rules.includes('timeout must be true'),'no-entry trials must deterministically timeout');
 assert.ok(rules.includes('exactly one terminal first-entry time is non-null')&&rules.includes('scored_choice must equal that terminal side'),'single-entry trials must deterministically choose that side');
 assert.ok(rules.includes('both terminal first-entry times are non-null')&&rules.includes('strictly earlier first-entry time'),'dual-entry trials must deterministically choose earliest side');
