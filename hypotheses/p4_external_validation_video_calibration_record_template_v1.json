@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "id": "P4_external_validation_video_calibration_record_template_v1",
+  "status": "frozen_template_before_biological_collection",
+  "preregistration_git_blob_sha": "b8a683e0199e6564a1fedc6f54391a535c32e0e4",
+  "record_scope": "one biological collection session",
+  "required_fields": {
+    "session_id": "nonempty string",
+    "session_timestamp_local": "ISO-8601 local timestamp with offset",
+    "camera_id": "nonempty string",
+    "camera_mount_locked": "boolean true",
+    "video_nominal_fps": "number exactly 100",
+    "actual_frame_timestamps_available": "boolean true",
+    "timestamp_source": "nonempty string describing hardware/software timestamp source",
+    "video_file_id": "nonempty string",
+    "video_file_sha256": "64 lowercase hex characters",
+    "maze_fiducial_definition_id": "nonempty string",
+    "coordinate_calibration_method": "nonempty string",
+    "coordinate_calibration_rms_error_mm": "number <= 0.1",
+    "launch_fixture_id": "nonempty string",
+    "launch_fixture_xytheta_calibration_record": "nonempty reference",
+    "tracking_software": "nonempty string",
+    "tracking_software_version": "nonempty string",
+    "tracking_configuration_hash": "nonempty immutable hash",
+    "tracked_point": "exact string thorax_or_mesosoma_centroid",
+    "scorer_identity": "nonempty string",
+    "scorer_blinded_to_marked_side": "boolean true",
+    "scorer_blinded_to_candidate_307_prediction": "boolean true",
+    "session_temperature_c": "number in [21,26]",
+    "session_relative_humidity_percent": "number in [0,100]",
+    "session_deviation": "null or text; any deviation preserved"
+  },
+  "endpoint_processing_contract": {
+    "terminal_circle_radius_mm": 7,
+    "maximum_interpolation_gap_s": 0.05,
+    "actual_frame_timestamps_required": true,
+    "crossing_rule": "linearly interpolate each consecutive valid thorax/mesosoma centroid segment over actual timestamps and solve earliest outside-to-inside segment-circle intersection; boundary distance <=7.0 mm counts as inside",
+    "timeout_s": 90,
+    "manual_body_part_or_crossing_override_authorized": false,
+    "tracking_gap_over_possible_entry_is_technical_exclusion": true
+  },
+  "firewall": {
+    "outcome_dependent_recalibration_authorized": false,
+    "manual_endpoint_override_authorized": false
+  }
+}

@@ -87,6 +87,7 @@ node tests/p4-ymaze-consistency-stage-B-result-freeze.test.js
 node tests/p4-ymaze-consistency-stage-B-interpretation.test.js
 node tests/p4-external-validation-source-discovery.test.js
 node tests/p4-external-validation-preregistration.test.js
+node tests/p4-external-validation-collection-authorization.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
@@ -120,4 +121,4 @@ node --check tools/run-p4-ymaze-consistency.js
 node --check tools/compare-p4-ymaze-consistency.js
 node --check tools/load-bundle.js
 python3 -m py_compile tools/inventory-reference.py tools/reconstruct-poissonnier2026.py tools/derive-poissonnier2026-control-effects.py tools/derive-h2-estimation-targets.py tools/derive-pheromone-response-targets.py
-echo "All ANTLAB H0-H5 + P1/P2/P3 implementation + P4 development-closure + corrected cross-apparatus source-design + Y-maze consistency-protocol + implementation-authorization + implementation + qualification-result + prospective official Stage-A authorization + official Stage-A execution-precondition + Stage-A result-freeze + prospective Stage-B authorization + Stage-B execution-precondition + Stage-B result-freeze + Stage-B interpretation + external-validation source-discovery + external-validation preregistration tests PASS"
+echo "All ANTLAB H0-H5 + P1/P2/P3 implementation + P4 development-closure + corrected cross-apparatus source-design + Y-maze consistency-protocol + implementation-authorization + implementation + qualification-result + prospective official Stage-A authorization + official Stage-A execution-precondition + Stage-A result-freeze + prospective Stage-B authorization + Stage-B execution-precondition + Stage-B result-freeze + Stage-B interpretation + external-validation source-discovery + external-validation preregistration + collection-preauthorization tests PASS"

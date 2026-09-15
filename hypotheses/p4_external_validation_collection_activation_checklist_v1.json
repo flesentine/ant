@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "P4_external_validation_collection_activation_checklist_v1",
+  "status": "frozen_before_biological_collection",
+  "purpose": "Final prospective checklist to convert the fail-closed preauthorization into active biological collection authorization without changing any preregistered scientific contract.",
+  "must_all_be_true_before_first_trial": [
+    "collector_identity_is_real_nonempty_and_frozen",
+    "collector_team_or_affiliation_is_recorded",
+    "all_collector_independence_attestations_are_true",
+    "marked_side_schedule_blob_is_unchanged",
+    "release_pose_schedule_manifest_and_all_part_blobs_are_unchanged",
+    "chemical_batch_template_blob_is_unchanged",
+    "video_calibration_template_blob_is_unchanged",
+    "trial_record_schema_blob_is_unchanged",
+    "no_biological_collection_has_started",
+    "no_new_biological_outcome_has_been_accessed",
+    "candidate_307_prediction_has_not_been_disclosed_to_collector",
+    "activation_regression_passes_on_exact_head",
+    "fresh_codex_review_is_clean_on_exact_head",
+    "activation_commit_is_qualified_on_permanent_main"
+  ],
+  "activation_may_change": [
+    "collector_identity_and_affiliation_fields",
+    "collector_independence_attestations_from_null_to_true",
+    "collector_identity_frozen_from_false_to_true",
+    "authorization_status_from_pending_to_active",
+    "collection_authorized_from_false_to_true",
+    "prospective_activation_metadata_and_qualification_ids"
+  ],
+  "activation_may_not_change": [
+    "preregistration",
+    "Candidate_307_parameters_or_prediction",
+    "marked_side_schedule",
+    "release_pose_schedule",
+    "apparatus_or_stimulus_contract",
+    "wet_lab_recipe",
+    "environment_or_husbandry_contract",
+    "endpoint_translation",
+    "sample_size",
+    "quality_thresholds",
+    "statistical_comparison_or_promotion_rule"
+  ]
+}
