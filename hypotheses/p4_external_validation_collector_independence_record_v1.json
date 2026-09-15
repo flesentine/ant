@@ -10,18 +10,19 @@
   "required_attestations_before_authorization": {
     "did_not_participate_in_P4_parameter_estimation": null,
     "did_not_participate_in_Candidate_307_selection": null,
-    "will_not_participate_in_dataset_outcome_analysis_before_raw_dataset_hash_freeze": null,
+    "will_not_participate_in_this_dataset_outcome_analysis": null,
     "has_not_been_given_Candidate_307_primary_prediction": null,
     "will_follow_frozen_marked_side_and_release_pose_schedules_without_regeneration": null,
     "will_not_monitor_or_adapt_protocol_to_interim_behavioral_outcomes": null,
     "will_preserve_all_attempts_exclusions_timeouts_and_protocol_deviations": null
   },
-  "authorization_rule": "collection may be authorized only after collector_identity is nonempty, collector_team_or_affiliation is recorded, identity_frozen=true, and every required attestation is exactly true before any biological trial begins",
+  "authorization_rule": "collection may be authorized only after collector_identity is nonempty, collector_team_or_affiliation is recorded, identity_frozen=true, and every required attestation is exactly true before any biological trial begins; promotion-grade independence requires the collector not to participate in this dataset's outcome analysis at any time",
   "current_authorization_condition_satisfied": false,
   "firewall": {
     "placeholder_identity_counts_as_frozen_identity": false,
     "collection_before_identity_freeze_authorized": false,
     "collector_identity_change_after_collection_starts_authorized": false,
+    "collector_participation_in_this_dataset_outcome_analysis_authorized": false,
     "candidate_prediction_disclosure_to_collector_before_dataset_hash_freeze_authorized": false
   }
 }
