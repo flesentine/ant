@@ -1,8 +1,0 @@
-{
-  "schema_version": 1,
-  "id": "P4_external_validation_collection_preauthorization_readme_v1",
-  "status": "informational",
-  "collection_authorized": false,
-  "plain_language": "This package freezes every collection input that can be frozen before a real independent collector is identified. It does not authorize biological collection. The only remaining activation step is to prospectively bind a real independent collector/team and their attestations, then qualify that activation change before the first trial.",
-  "do_not_collect_until": "hypotheses/p4_external_validation_collection_authorization_v1.json has collection_authorized=true on a qualified permanent-main commit"
-}
