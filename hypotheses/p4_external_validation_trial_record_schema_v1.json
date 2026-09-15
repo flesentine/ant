@@ -9,7 +9,7 @@
   ],
   "field_contracts": {
     "trial_id": "exact canonical ID C01-T01 through C12-T40; unique",
-    "colony_id": "C01 through C12",
+    "colony_id": "C01 through C12; must exactly equal the C## colony prefix encoded by trial_id",
     "ant_id": "nonempty observed identity; unique across planned trials unless exclusion_reason is verified_wrong_species_or_duplicate_ant_identity, in which case preserve the observed repeated/invalid identity rather than inventing a unique replacement",
     "session_id": "nonempty string; must match exactly one chemical session-use record and exactly one video/calibration session record",
     "video_file_id": "nonempty string; must exactly match the video_file_id in the trial's session_id video/calibration record",
@@ -50,6 +50,7 @@
   ],
   "consistency_rules": [
     "behavior-based exclusion is forbidden",
+    "colony_id must exactly equal the C## colony prefix encoded by trial_id; a trial record may never be reassigned to another colony",
     "session_id must join the trial to exactly one chemical session-use record and exactly one video/calibration session record; video_file_id and scorer_identity must exactly match that video/calibration record",
     "timeouts are not exclusions",
     "technical exclusions are absent from choice and timeout denominators but remain fully reported",
