@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "id": "p4_external_validation_replication_release_pose_schedule_v1",
+  "status": "frozen_before_biological_collection",
+  "preregistration_file": "hypotheses/p4_external_validation_new_dataset_preregistration_v1.json",
+  "preregistration_git_blob_sha": "b8a683e0199e6564a1fedc6f54391a535c32e0e4",
+  "simulation_initialization_file": "experiments/neutral_y_maze.json",
+  "simulation_initialization_git_blob_sha": "e61793266a7716587ef11fc96e0959f86103931c",
+  "rng_file": "src/sim-core.js",
+  "rng_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+  "seed": 93442001,
+  "canonical_trial_order": "C01-T01 through C12-T40",
+  "generation_rule": "Instantiate the frozen sim-core RNG once with seed 93442001. For each of exactly 480 trials in canonical order, consume RNG.next for angle U1, RNG.next for radius U2, then RNG.normal (two further RNG.next calls): angle=2*pi*U1; radius=0.4*sqrt(U2); x=30+radius*cos(angle); y=120+radius*sin(angle); heading=0.05*Z.",
+  "materialization": "The complete 480-pose schedule is materialized in twelve immutable 40-trial colony slices. This manifest binds every slice by exact Git blob SHA; concatenating slices 01..12 in file order yields the complete canonical schedule.",
+  "columns_in_each_slice": ["trial", "x_mm", "y_mm", "heading_rad"],
+  "parts": [
+    {"colony":1,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_01.json","git_blob_sha":"0ff472bfb3a7b452b063c7dec39ba3c65abd4cc9"},
+    {"colony":2,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_02.json","git_blob_sha":"36e042bb67f47898b6004602481ee3941852027b"},
+    {"colony":3,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_03.json","git_blob_sha":"7bc57b5ec35ae48c2affd44f0cfbfc5535eb5815"},
+    {"colony":4,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_04.json","git_blob_sha":"ff7aee15b0ed72cbd34934b40550b0ba146486c1"},
+    {"colony":5,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_05.json","git_blob_sha":"a228484a72cec3fd1ffd2c346edae5f4439d64cd"},
+    {"colony":6,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_06.json","git_blob_sha":"c77ec64f2535f315f827035fbc184f1ab71f8f75"},
+    {"colony":7,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_07.json","git_blob_sha":"810619996e36c3cf3ad0c597ab94f162d961c851"},
+    {"colony":8,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_08.json","git_blob_sha":"2fbb82558c48de5c3d64306a9e21ee86d86646b5"},
+    {"colony":9,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_09.json","git_blob_sha":"4aec97a8ee103d8fc2b7e527a8581f0b0482f04a"},
+    {"colony":10,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_10.json","git_blob_sha":"21126119fde95d69eec27e61086c9a529505f517"},
+    {"colony":11,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_11.json","git_blob_sha":"0f8fc22fa2d41c41cf13b8471d5d41602392c771"},
+    {"colony":12,"file":"experiments/p4_external_validation_replication_release_pose_schedule_v1_colony_12.json","git_blob_sha":"e9a0fbc3ac93778c3fc55a2ed7ecd02fdbb67086"}
+  ],
+  "checks": {
+    "parts": 12,
+    "trials_per_part": 40,
+    "total_trials": 480,
+    "nominal_x_mm": 30,
+    "nominal_y_mm": 120,
+    "position_jitter_radius_mm": 0.4,
+    "heading_jitter_sd_rad": 0.05,
+    "first_pose": [30.2273845682822,119.97428040448965,-0.04804150950680135],
+    "last_pose": [29.899561721949166,119.76354423034671,0.04370315332493291]
+  },
+  "firewall": {
+    "biological_outcomes_used_to_generate_or_select_schedule": false,
+    "schedule_regeneration_after_collection_starts_authorized": false,
+    "schedule_change_after_collection_starts_authorized": false
+  }
+}
