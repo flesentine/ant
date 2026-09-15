@@ -8,7 +8,7 @@ const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).t
 const criteriaRel='hypotheses/p4_external_validation_source_selection_criteria_v1.json';
 const discoveryRel='hypotheses/p4_external_validation_source_discovery_v1.json';
 assert.strictEqual(blob(criteriaRel),'61af25d95595dcb2b27c33797cd5de01b818ac47','external-validation source-selection criteria blob drift');
-assert.strictEqual(blob(discoveryRel),'be4afc88e54d6d2667489ad4b62654b791215170','external-validation source-discovery blob drift');
+assert.strictEqual(blob(discoveryRel),'a98e7ec2d11ede680aab2d6bf04b0ebcd905fe44','external-validation source-discovery blob drift');
 
 const c=read(criteriaRel),d=read(discoveryRel);
 assert.strictEqual(c.id,'P4_external_validation_source_selection_criteria_v1');
@@ -52,12 +52,29 @@ assert.deepStrictEqual(Object.fromEntries(d.screened_candidates.map(x=>[x.id,x.d
 for(const x of d.screened_candidates){
   assert.strictEqual(x.species_match,true,x.id+' species mismatch');
   assert.strictEqual(x.direct_trail_following_endpoint,true,x.id+' endpoint mismatch');
-  assert.strictEqual(x.independent_dataset_from_poissonnier2026,true,x.id+' independence mismatch');
-  assert.strictEqual(x.promotion_grade_blinding_survived,false,x.id+' must be contamination-locked');
+  assert.strictEqual(x.independent_dataset_from_poissonnier2026,true,x.id+' Poissonnier-independence mismatch');
+  assert.strictEqual(x.promotion_grade_blinding_survived,false,x.id+' must be exclusion-locked');
   assert.strictEqual(x.selected,false,x.id+' must not be selected');
-  assert.ok(typeof x.contamination==='string'&&x.contamination.length>20,x.id+' contamination record missing');
+  assert.ok(Array.isArray(x.exclusion_reasons)&&x.exclusion_reasons.length>=1,x.id+' exclusion history missing');
 }
 assert.ok(d.screened_candidates.some(x=>x.independent_research_group_from_poissonnier2026===true),'screen must include an independent-research-group candidate');
+
+const ober=d.screened_candidates.find(x=>x.id==='oberhauser2020_concentration_attraction');
+assert.strictEqual(ober.prior_P4_development_use,true);
+assert.strictEqual(ober.not_used_in_P4_model_development_parameter_estimation_or_candidate_selection,false);
+assert.strictEqual(ober.prior_P4_development_provenance.mechanism_evidence_file,'hypotheses/p4_painted_trail_mechanism_v1.json');
+assert.strictEqual(ober.prior_P4_development_provenance.mechanism_evidence_git_blob_sha,'609551836e540c341365db9cc987d2ca340cc053');
+assert.strictEqual(ober.prior_P4_development_provenance.numerical_evidence_file,'docs/P4_INDEPENDENT_EVIDENCE.md');
+assert.strictEqual(ober.prior_P4_development_provenance.numerical_evidence_git_blob_sha,'d1bab9bcd4f0663424c6ea1ee564cb9c11d99cb1');
+assert.ok(ober.exclusion_reasons.some(x=>x.includes('already used as direct P4 mechanism-development evidence')));
+
+const koch=d.screened_candidates.find(x=>x.id==='koch2021_repeat_following');
+assert.strictEqual(koch.prior_P4_development_use,true);
+assert.strictEqual(koch.not_used_in_P4_model_development_parameter_estimation_or_candidate_selection,false);
+assert.strictEqual(koch.prior_P4_development_provenance.candidate_class_evidence_file,'hypotheses/p4_painted_trail_candidate_class_evidence_v1.json');
+assert.strictEqual(koch.prior_P4_development_provenance.candidate_class_evidence_git_blob_sha,'262f332062f271bbf111d0572f83b2faaf2cfd74');
+assert.ok(koch.exclusion_reasons.some(x=>x.includes('already used in P4 candidate-class development')));
+assert.strictEqual(d.screened_candidates.filter(x=>x.prior_P4_development_use===true).length,2,'exactly two screened candidates have documented prior P4-development use');
 
 assert.strictEqual(d.discovery_conclusion.eligible_existing_published_source_count_found_in_targeted_screen_after_blinding_filter,0);
 assert.strictEqual(d.discovery_conclusion.selected_existing_published_source_count,0);
@@ -82,4 +99,4 @@ assert.strictEqual(d.next_gate.may_collect_or_view_new_outcomes_before_preregist
 const serialized=JSON.stringify(d);
 for(const forbidden of ['observed_rate','model_prediction','signed_difference_model_minus_observed','absolute_difference'])assert.ok(!serialized.includes('"'+forbidden+'"'),'discovery record must not embed candidate outcome comparison field '+forbidden);
 
-console.log('p4-external-validation-source-discovery.test.js PASS '+JSON.stringify({criteria_blob:blob(criteriaRel),discovery_blob:blob(discoveryRel),search_scope:d.search_scope.search_classification,candidates_screened:d.search_scope.candidates_screened,eligible_existing_sources_found:0,new_dataset_route:true,outcome_exists:false,candidate_307_changed:false,canonical_promotion:false,next_gate:d.next_gate.id}));
+console.log('p4-external-validation-source-discovery.test.js PASS '+JSON.stringify({criteria_blob:blob(criteriaRel),discovery_blob:blob(discoveryRel),search_scope:d.search_scope.search_classification,candidates_screened:d.search_scope.candidates_screened,prior_P4_sources:2,eligible_existing_sources_found:0,new_dataset_route:true,outcome_exists:false,candidate_307_changed:false,canonical_promotion:false,next_gate:d.next_gate.id}));
