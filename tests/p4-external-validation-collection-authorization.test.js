@@ -13,21 +13,23 @@ const chemicalRel='hypotheses/p4_external_validation_chemical_batch_record_templ
 const videoRel='hypotheses/p4_external_validation_video_calibration_record_template_v1.json';
 const trialRel='hypotheses/p4_external_validation_trial_record_schema_v1.json';
 const collectorRel='hypotheses/p4_external_validation_collector_independence_record_v1.json';
+const checklistRel='hypotheses/p4_external_validation_collection_activation_checklist_v1.json';
 const simCoreRel='src/sim-core.js';
 const neutralRel='experiments/neutral_y_maze.json';
 
 assert.strictEqual(blob(preregRel),'b8a683e0199e6564a1fedc6f54391a535c32e0e4','preregistration blob drift');
-assert.strictEqual(blob(authRel),'a46e1bcc1ac6aac84bddebb319a6244f55c16b89','collection authorization blob drift');
+assert.strictEqual(blob(authRel),'fbf73659d88fdcce4eb3c1d721c43f1d0f7bc3cf','collection authorization blob drift');
 assert.strictEqual(blob(sideRel),'9ffd7ef45a611c93eac35626399632b4f822225a','marked-side schedule blob drift');
 assert.strictEqual(blob(poseManifestRel),'ee5f1b46bbca780196117d554f8b708b3f2ed34e','release-pose manifest blob drift');
 assert.strictEqual(blob(chemicalRel),'61c8c97cb1ff47083a67640bbd38600559498b91','chemical template blob drift');
 assert.strictEqual(blob(videoRel),'07a375a675ebf6f1be2ad628be223f50fb39ce43','video/calibration template blob drift');
 assert.strictEqual(blob(trialRel),'3d3e4ceec616733c405b171df1b2c1725379098a','trial schema blob drift');
 assert.strictEqual(blob(collectorRel),'925afb08f0b1e0d6a0b417fc11e4b725d7911988','collector independence record blob drift');
+assert.strictEqual(blob(checklistRel),'16d31bcc7bd09db27ea6c5f2505515cf042ca085','collection activation checklist blob drift');
 assert.strictEqual(blob(simCoreRel),'24777aac3577d442893e4779d70aee4e27761fe8','frozen RNG/runtime blob drift');
 assert.strictEqual(blob(neutralRel),'e61793266a7716587ef11fc96e0959f86103931c','neutral initialization blob drift');
 
-const prereg=read(preregRel),auth=read(authRel),side=read(sideRel),manifest=read(poseManifestRel),chemical=read(chemicalRel),video=read(videoRel),trial=read(trialRel),collector=read(collectorRel);
+const prereg=read(preregRel),auth=read(authRel),side=read(sideRel),manifest=read(poseManifestRel),chemical=read(chemicalRel),video=read(videoRel),trial=read(trialRel),collector=read(collectorRel),checklist=read(checklistRel);
 assert.strictEqual(auth.id,'P4_external_validation_collection_authorization_v1');
 assert.strictEqual(auth.status,'preauthorization_frozen_pending_collector_identity');
 assert.strictEqual(auth.qualified_preregistration.git_blob_sha,blob(preregRel));
@@ -45,7 +47,8 @@ for(const [fileKey,shaKey,rel] of [
   ['chemical_batch_record_template_file','chemical_batch_record_template_git_blob_sha',chemicalRel],
   ['video_calibration_record_template_file','video_calibration_record_template_git_blob_sha',videoRel],
   ['trial_record_schema_file','trial_record_schema_git_blob_sha',trialRel],
-  ['collector_independence_record_file','collector_independence_record_git_blob_sha',collectorRel]
+  ['collector_independence_record_file','collector_independence_record_git_blob_sha',collectorRel],
+  ['collection_activation_checklist_file','collection_activation_checklist_git_blob_sha',checklistRel]
 ]){
   assert.strictEqual(auth.frozen_collection_inputs[fileKey],rel);
   assert.strictEqual(auth.frozen_collection_inputs[shaKey],blob(rel));
@@ -141,18 +144,25 @@ assert.strictEqual(collector.firewall.collection_before_identity_freeze_authoriz
 assert.strictEqual(collector.firewall.collector_identity_change_after_collection_starts_authorized,false);
 assert.strictEqual(collector.firewall.candidate_prediction_disclosure_to_collector_before_dataset_hash_freeze_authorized,false);
 
+assert.strictEqual(checklist.status,'frozen_before_biological_collection');
+for(const required of ['collector_identity_is_real_nonempty_and_frozen','all_collector_independence_attestations_are_true','marked_side_schedule_blob_is_unchanged','release_pose_schedule_manifest_and_all_part_blobs_are_unchanged','no_biological_collection_has_started','no_new_biological_outcome_has_been_accessed','fresh_codex_review_is_clean_on_exact_head','activation_commit_is_qualified_on_permanent_main']) assert.ok(checklist.must_all_be_true_before_first_trial.includes(required),'activation checklist missing '+required);
+for(const frozen of ['preregistration','Candidate_307_parameters_or_prediction','marked_side_schedule','release_pose_schedule','statistical_comparison_or_promotion_rule']) assert.ok(checklist.activation_may_not_change.includes(frozen),'activation checklist must freeze '+frozen);
+
 assert.strictEqual(auth.gate_checks.preregistration_qualified_on_permanent_main,true);
 assert.strictEqual(auth.gate_checks.marked_side_schedule_materialized_and_frozen,true);
 assert.strictEqual(auth.gate_checks.release_pose_schedule_materialized_and_frozen,true);
 assert.strictEqual(auth.gate_checks.chemical_batch_record_template_frozen,true);
 assert.strictEqual(auth.gate_checks.video_calibration_record_template_frozen,true);
 assert.strictEqual(auth.gate_checks.trial_record_schema_frozen,true);
+assert.strictEqual(auth.gate_checks.collection_activation_checklist_frozen,true);
 assert.strictEqual(auth.gate_checks.collector_identity_frozen,false);
 assert.strictEqual(auth.gate_checks.collector_independence_attestations_all_true,false);
 assert.strictEqual(auth.gate_checks.new_biological_outcomes_known_to_exist_at_gate,false);
 assert.strictEqual(auth.gate_checks.new_biological_outcome_access_authorized_at_gate,false);
+assert.strictEqual(auth.activation_rule.checklist_file,checklistRel);
+assert.strictEqual(auth.activation_rule.checklist_git_blob_sha,blob(checklistRel));
 assert.strictEqual(auth.collection_authorized,false);
 assert.ok(auth.authorization_blocker.includes('real independent collector'),'authorization must name the identity blocker');
 for(const v of Object.values(auth.semantic_firewall)) assert.strictEqual(v,false,'collection preauthorization firewall must remain false');
 
-console.log('p4-external-validation-collection-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(authRel),side_schedule_blob:blob(sideRel),release_manifest_blob:blob(poseManifestRel),release_poses:globalCount,collection_authorized:auth.collection_authorized,blocker:'collector_identity',next_action:auth.next_action}));
+console.log('p4-external-validation-collection-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(authRel),side_schedule_blob:blob(sideRel),release_manifest_blob:blob(poseManifestRel),activation_checklist_blob:blob(checklistRel),release_poses:globalCount,collection_authorized:auth.collection_authorized,blocker:'collector_identity',next_action:auth.next_action}));
