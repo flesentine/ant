@@ -70,7 +70,8 @@ assert.strictEqual(p.wet_lab_stimulus_preparation.application_to_ant_release_del
 assert.strictEqual(p.wet_lab_stimulus_preparation.application_to_release_tolerance_s,15);
 assert.strictEqual(p.wet_lab_stimulus_preparation.chemical_recipe_change_after_collection_starts_authorized,false);
 assert.strictEqual(p.wet_lab_stimulus_preparation.published_candidate_behavioral_outcomes_used_to_set_recipe,false);
-assert.strictEqual((p.wet_lab_stimulus_preparation.stock_concentration_hindgut_equivalents_per_ml*(p.wet_lab_stimulus_preparation.marked_arm_volume_ul/1000))/10,p.apparatus_and_stimulus.marked_arm_nominal_dose_hindgut_equivalents_per_cm);
+const physicalDose=(p.wet_lab_stimulus_preparation.stock_concentration_hindgut_equivalents_per_ml*(p.wet_lab_stimulus_preparation.marked_arm_volume_ul/1000))/10;
+assert.ok(Math.abs(physicalDose-p.apparatus_and_stimulus.marked_arm_nominal_dose_hindgut_equivalents_per_cm)<1e-12,'wet-lab recipe must reproduce frozen nominal dose');
 
 assert.strictEqual(p.colony_husbandry_and_test_environment.test_colonies_required,12);
 assert.strictEqual(p.colony_husbandry_and_test_environment.distinct_wild_source_colonies_required,true);
