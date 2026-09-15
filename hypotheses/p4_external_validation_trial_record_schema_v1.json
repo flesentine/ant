@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "id": "P4_external_validation_trial_record_schema_v1",
+  "status": "frozen_schema_before_biological_collection",
+  "preregistration_git_blob_sha": "b8a683e0199e6564a1fedc6f54391a535c32e0e4",
+  "one_record_per_planned_trial": true,
+  "required_fields": [
+    "trial_id","colony_id","ant_id","marked_side_randomization_code","collection_order","trial_start_timestamp","pheromone_batch_id","substrate_lot_id","session_temperature_C","session_relative_humidity","application_to_release_delay_s","scheduled_release_x_mm","scheduled_release_y_mm","scheduled_release_heading_rad","measured_release_x_mm","measured_release_y_mm","measured_release_heading_rad","release_position_error_mm","release_heading_error_rad","coordinate_calibration_rms_error_mm","video_nominal_fps","left_terminal_first_entry_time_s","right_terminal_first_entry_time_s","scored_choice","timeout","exclusion_flag","exclusion_reason","protocol_deviation"
+  ],
+  "field_contracts": {
+    "trial_id": "exact canonical ID C01-T01 through C12-T40; unique",
+    "colony_id": "C01 through C12",
+    "ant_id": "nonempty identity unique across all 480 planned trials",
+    "marked_side_randomization_code": "L or R and must match frozen marked-side schedule",
+    "collection_order": "integer 1..480 matching actual chronological attempt order",
+    "trial_start_timestamp": "ISO-8601 local timestamp with offset",
+    "pheromone_batch_id": "nonempty batch record reference",
+    "substrate_lot_id": "nonempty string",
+    "session_temperature_C": "number in [21,26]",
+    "session_relative_humidity": "number in [0,100]",
+    "application_to_release_delay_s": "number in [105,135]",
+    "scheduled_release_x_mm": "must exactly match frozen release-pose schedule",
+    "scheduled_release_y_mm": "must exactly match frozen release-pose schedule",
+    "scheduled_release_heading_rad": "must exactly match frozen release-pose schedule",
+    "measured_release_x_mm": "number from calibrated video at t=0",
+    "measured_release_y_mm": "number from calibrated video at t=0",
+    "measured_release_heading_rad": "number from thorax/mesosoma-to-head vector at t=0",
+    "release_position_error_mm": "Euclidean distance from scheduled x/y; compliant iff <=0.2",
+    "release_heading_error_rad": "absolute normalized angular error; compliant iff <=0.025",
+    "coordinate_calibration_rms_error_mm": "number <=0.1 for valid session",
+    "video_nominal_fps": "number exactly 100",
+    "left_terminal_first_entry_time_s": "null or earliest interpolated entry time in [0,90]",
+    "right_terminal_first_entry_time_s": "null or earliest interpolated entry time in [0,90]",
+    "scored_choice": "left, right, or null",
+    "timeout": "boolean; true iff neither terminal has valid entry at or before 90.000 s and trial is not technically excluded",
+    "exclusion_flag": "boolean",
+    "exclusion_reason": "null or one exact allowed exclusion reason",
+    "protocol_deviation": "null or text; never silently discard deviations"
+  },
+  "allowed_exclusion_reasons": [
+    "verified_video_or_tracking_failure_preventing_endpoint_determination",
+    "verified_apparatus_or_stimulus_preparation_failure_logged_without_consulting_behavioral_outcome",
+    "verified_wrong_species_or_duplicate_ant_identity",
+    "verified_release_pose_outside_preregistered_tolerance_scored_before_endpoint_and_without_treatment_unblinding"
+  ],
+  "consistency_rules": [
+    "behavior-based exclusion is forbidden",
+    "timeouts are not exclusions",
+    "technical exclusions are absent from choice and timeout denominators but remain fully reported",
+    "if exclusion_flag=false and scored_choice is null then timeout must be true",
+    "if scored_choice is left or right then timeout must be false",
+    "release-pose compliance must be assessed before endpoint scoring and without marked-side/Candidate access",
+    "no adaptive replacement of failed or timeout trials"
+  ],
+  "dataset_freeze_rule": "After all planned attempts and preregistered records are complete, serialize the complete raw trial dataset, compute and record its cryptographic hash, and freeze that hash before Candidate-307 comparison is unblinded or calculated.",
+  "firewall": {
+    "interim_outcome_monitoring_authorized": false,
+    "outcome_dependent_schema_change_authorized": false,
+    "best_subset_reporting_authorized": false
+  }
+}
