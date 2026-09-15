@@ -18,13 +18,13 @@ const simCoreRel='src/sim-core.js';
 const neutralRel='experiments/neutral_y_maze.json';
 
 assert.strictEqual(blob(preregRel),'b8a683e0199e6564a1fedc6f54391a535c32e0e4','preregistration blob drift');
-assert.strictEqual(blob(authRel),'ba81b15e9fe8a0f23f6f4ef47e726a3f16c4a175','collection authorization blob drift');
+assert.strictEqual(blob(authRel),'9796eab1eea641ba9d0e5882ff329055dd50f0dd','collection authorization blob drift');
 assert.strictEqual(blob(sideRel),'9ffd7ef45a611c93eac35626399632b4f822225a','marked-side schedule blob drift');
 assert.strictEqual(blob(poseManifestRel),'ee5f1b46bbca780196117d554f8b708b3f2ed34e','release-pose manifest blob drift');
 assert.strictEqual(blob(chemicalRel),'61c8c97cb1ff47083a67640bbd38600559498b91','chemical template blob drift');
 assert.strictEqual(blob(videoRel),'07a375a675ebf6f1be2ad628be223f50fb39ce43','video/calibration template blob drift');
 assert.strictEqual(blob(trialRel),'69395ad5da8e23c4f637fc6834ff999e061fc184','trial schema blob drift');
-assert.strictEqual(blob(collectorRel),'925afb08f0b1e0d6a0b417fc11e4b725d7911988','collector independence record blob drift');
+assert.strictEqual(blob(collectorRel),'02289bed5ef4785bbadc584ef5077b633779d089','collector independence record blob drift');
 assert.strictEqual(blob(checklistRel),'16d31bcc7bd09db27ea6c5f2505515cf042ca085','collection activation checklist blob drift');
 assert.strictEqual(blob(simCoreRel),'24777aac3577d442893e4779d70aee4e27761fe8','frozen RNG/runtime blob drift');
 assert.strictEqual(blob(neutralRel),'e61793266a7716587ef11fc96e0959f86103931c','neutral initialization blob drift');
@@ -159,10 +159,14 @@ assert.strictEqual(collector.collector_identity,null);
 assert.strictEqual(collector.collector_team_or_affiliation,null);
 assert.strictEqual(collector.identity_frozen,false);
 assert.strictEqual(collector.current_authorization_condition_satisfied,false);
+assert.ok(Object.prototype.hasOwnProperty.call(collector.required_attestations_before_authorization,'will_not_participate_in_this_dataset_outcome_analysis'),'collector must attest to complete exclusion from outcome analysis');
+assert.strictEqual(collector.required_attestations_before_authorization.will_not_participate_in_dataset_outcome_analysis_before_raw_dataset_hash_freeze,undefined,'time-limited outcome-analysis attestation must not exist');
 for(const v of Object.values(collector.required_attestations_before_authorization)) assert.strictEqual(v,null,'collector attestation must remain unset before identity freeze');
+assert.ok(collector.authorization_rule.includes('not to participate in this dataset\'s outcome analysis at any time'),'authorization rule must preserve promotion-grade collector independence');
 assert.strictEqual(collector.firewall.placeholder_identity_counts_as_frozen_identity,false);
 assert.strictEqual(collector.firewall.collection_before_identity_freeze_authorized,false);
 assert.strictEqual(collector.firewall.collector_identity_change_after_collection_starts_authorized,false);
+assert.strictEqual(collector.firewall.collector_participation_in_this_dataset_outcome_analysis_authorized,false);
 assert.strictEqual(collector.firewall.candidate_prediction_disclosure_to_collector_before_dataset_hash_freeze_authorized,false);
 
 assert.strictEqual(checklist.status,'frozen_before_biological_collection');
@@ -182,8 +186,10 @@ assert.strictEqual(auth.gate_checks.new_biological_outcomes_known_to_exist_at_ga
 assert.strictEqual(auth.gate_checks.new_biological_outcome_access_authorized_at_gate,false);
 assert.strictEqual(auth.activation_rule.checklist_file,checklistRel);
 assert.strictEqual(auth.activation_rule.checklist_git_blob_sha,blob(checklistRel));
+assert.strictEqual(auth.activation_rule.requires_collector_exclusion_from_this_dataset_outcome_analysis,true);
 assert.strictEqual(auth.collection_authorized,false);
 assert.ok(auth.authorization_blocker.includes('real independent collector'),'authorization must name the identity blocker');
+assert.ok(auth.authorization_blocker.includes('will not participate in this dataset\'s outcome analysis'),'authorization blocker must preserve unconditional outcome-analysis independence');
 for(const v of Object.values(auth.semantic_firewall)) assert.strictEqual(v,false,'collection preauthorization firewall must remain false');
 
 console.log('p4-external-validation-collection-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(authRel),side_schedule_blob:blob(sideRel),release_manifest_blob:blob(poseManifestRel),activation_checklist_blob:blob(checklistRel),release_poses:globalCount,collection_authorized:auth.collection_authorized,blocker:'collector_identity',next_action:auth.next_action}));
