@@ -15,7 +15,7 @@ const leftAppRel='apparatus/poissonnier2026_y_maze_p4_left_v1.json';
 const rightAppRel='apparatus/poissonnier2026_y_maze_p4_right_v1.json';
 const scoringRel='scoring/y_maze_endpoint_engineering_v1.json';
 
-assert.strictEqual(blob(preregRel),'f7f57127d7ab0307d8cc6f49e852543702d07cdd','external-validation preregistration blob drift');
+assert.strictEqual(blob(preregRel),'4095694f9ad3d511459925a488ff1aa968ca8d86','external-validation preregistration blob drift');
 assert.strictEqual(blob(discoveryRel),'a98e7ec2d11ede680aab2d6bf04b0ebcd905fe44','qualified discovery blob drift');
 assert.strictEqual(blob(criteriaRel),'61af25d95595dcb2b27c33797cd5de01b818ac47','source-selection criteria blob drift');
 assert.strictEqual(blob(stageARel),'a7b3e33ce613254c182360947641c5ff03f5af23','frozen Stage-A prediction blob drift');
@@ -60,6 +60,28 @@ assert.strictEqual(p.apparatus_and_stimulus.marked_arm_nominal_dose_hindgut_equi
 assert.strictEqual(p.apparatus_and_stimulus.marked_arm_nominal_dose_hindgut_equivalents_per_cm,right.external_fields.painted_trail.nominal_dose_hindgut_equivalents_per_cm);
 assert.strictEqual(p.apparatus_and_stimulus.apparatus_or_dose_change_after_collection_starts_authorized,false);
 
+assert.strictEqual(p.wet_lab_stimulus_preparation.master_stock_hindguts,32);
+assert.strictEqual(p.wet_lab_stimulus_preparation.master_stock_DCM_ml,8);
+assert.strictEqual(p.wet_lab_stimulus_preparation.stock_concentration_hindgut_equivalents_per_ml,4);
+assert.strictEqual(p.wet_lab_stimulus_preparation.marked_arm_volume_ul,12);
+assert.strictEqual(p.wet_lab_stimulus_preparation.control_arm_DCM_volume_ul,12);
+assert.strictEqual(p.wet_lab_stimulus_preparation.donor_colonies_minimum,4);
+assert.strictEqual(p.wet_lab_stimulus_preparation.application_to_ant_release_delay_s,120);
+assert.strictEqual(p.wet_lab_stimulus_preparation.application_to_release_tolerance_s,15);
+assert.strictEqual(p.wet_lab_stimulus_preparation.chemical_recipe_change_after_collection_starts_authorized,false);
+assert.strictEqual(p.wet_lab_stimulus_preparation.published_candidate_behavioral_outcomes_used_to_set_recipe,false);
+assert.strictEqual((p.wet_lab_stimulus_preparation.stock_concentration_hindgut_equivalents_per_ml*(p.wet_lab_stimulus_preparation.marked_arm_volume_ul/1000))/10,p.apparatus_and_stimulus.marked_arm_nominal_dose_hindgut_equivalents_per_cm);
+
+assert.strictEqual(p.colony_husbandry_and_test_environment.test_colonies_required,12);
+assert.strictEqual(p.colony_husbandry_and_test_environment.distinct_wild_source_colonies_required,true);
+assert.strictEqual(p.colony_husbandry_and_test_environment.minimum_lab_acclimation_days,7);
+assert.strictEqual(p.colony_husbandry_and_test_environment.food_deprivation_before_test_hours,96);
+assert.strictEqual(p.colony_husbandry_and_test_environment.food_deprivation_tolerance_hours,2);
+assert.deepStrictEqual(p.colony_husbandry_and_test_environment.permitted_room_temperature_C,{min:21,max:26});
+assert.strictEqual(p.colony_husbandry_and_test_environment.no_food_reward_present_in_test_maze,true);
+assert.strictEqual(p.colony_husbandry_and_test_environment.all_40_trials_for_a_colony_must_be_completed_within_one_test_day,true);
+assert.strictEqual(p.colony_husbandry_and_test_environment.environmental_protocol_change_after_collection_starts_authorized,false);
+
 assert.strictEqual(p.biological_sampling.planned_colonies,12);
 assert.strictEqual(p.biological_sampling.unique_worker_ants_per_colony,40);
 assert.strictEqual(p.biological_sampling.planned_total_unique_worker_ants,p.biological_sampling.planned_colonies*p.biological_sampling.unique_worker_ants_per_colony);
@@ -68,6 +90,7 @@ assert.strictEqual(p.biological_sampling.trials_per_ant,1);
 assert.strictEqual(p.biological_sampling.individual_ant_reuse_authorized,false);
 assert.strictEqual(p.biological_sampling.colony_is_biological_replicate,true);
 assert.strictEqual(p.biological_sampling.power_or_sample_size_inputs_from_contaminated_published_outcomes_used,false);
+assert.ok(p.biological_sampling.sample_size_rationale.includes('p=0.5'),'sample-size rationale must preserve outcome-independent worst-case benchmark');
 
 assert.strictEqual(p.randomization_and_blinding.balance_constraint,'exactly_20_left_marked_and_20_right_marked_per_colony');
 assert.strictEqual(p.randomization_and_blinding.schedule_must_be_frozen_before_collection,true);
@@ -107,6 +130,7 @@ assert.strictEqual(p.statistical_comparison.post_outcome_margin_change_authorize
 assert.strictEqual(p.statistical_comparison.post_outcome_analysis_family_change_authorized,false);
 assert.deepStrictEqual(p.future_promotion_rule.promotion_grade_external_validation_pass_requires_all,[
   'exact_preregistered_apparatus_stimulus_endpoint_and_sampling_contract_used',
+  'exact_preregistered_wet_lab_stimulus_and_environment_contract_used',
   '12_independent_colonies_attempted_with_40_unique_workers_each',
   'independent_data_collector_requirement_satisfied',
   'no_interim_outcome_adaptation_or_discrepancy_driven_retuning',
@@ -121,6 +145,7 @@ assert.strictEqual(p.future_promotion_rule.canonical_promotion_authorized_at_thi
 assert.strictEqual(p.future_promotion_rule.future_result_must_be_frozen_before_any_promotion_decision,true);
 
 for(const key of ['raw_trial_level_data_required','raw_video_or_tracking_record_required','dataset_hash_required_before_unblinding_model_comparison','randomization_schedule_hash_required_before_collection','all_protocol_deviations_must_be_preserved','colony_level_results_must_be_reported_comprehensively'])assert.strictEqual(p.raw_data_and_provenance[key],true,key+' must remain required');
+for(const field of ['pheromone_batch_id','substrate_lot_id','session_temperature_C','session_relative_humidity','application_to_release_delay_s'])assert.ok(p.raw_data_and_provenance.required_trial_fields.includes(field),'missing required wet-lab provenance field '+field);
 for(const v of Object.values(p.semantic_firewall))assert.strictEqual(v,false,'preregistration semantic firewall must remain false');
 assert.strictEqual(p.next_gate.id,'P4_external_validation_collection_authorization_v1');
 assert.strictEqual(p.next_gate.may_change_preregistration,false);
@@ -129,4 +154,4 @@ assert.strictEqual(p.next_gate.may_rerun_model_prediction,false);
 assert.strictEqual(p.next_gate.may_access_new_biological_outcomes_before_authorization,false);
 assert.strictEqual(p.next_gate.may_authorize_canonical_promotion,false);
 
-console.log('p4-external-validation-preregistration.test.js PASS '+JSON.stringify({prereg_blob:blob(preregRel),candidate:307,prediction:p.statistical_comparison.primary_prediction,colonies:p.biological_sampling.planned_colonies,ants:p.biological_sampling.planned_total_unique_worker_ants,equivalence_margin:p.statistical_comparison.predictive_equivalence_margin_absolute_probability,min_nonexcluded_per_side:p.predeclared_exclusions_and_quality.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,collection_authorized:false,canonical_promotion:false,next_gate:p.next_gate.id}));
+console.log('p4-external-validation-preregistration.test.js PASS '+JSON.stringify({prereg_blob:blob(preregRel),candidate:307,prediction:p.statistical_comparison.primary_prediction,colonies:p.biological_sampling.planned_colonies,ants:p.biological_sampling.planned_total_unique_worker_ants,equivalence_margin:p.statistical_comparison.predictive_equivalence_margin_absolute_probability,min_nonexcluded_per_side:p.predeclared_exclusions_and_quality.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,wet_lab_recipe_frozen:true,collection_authorized:false,canonical_promotion:false,next_gate:p.next_gate.id}));
