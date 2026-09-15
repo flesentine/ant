@@ -15,7 +15,7 @@ const leftAppRel='apparatus/poissonnier2026_y_maze_p4_left_v1.json';
 const rightAppRel='apparatus/poissonnier2026_y_maze_p4_right_v1.json';
 const scoringRel='scoring/y_maze_endpoint_engineering_v1.json';
 
-assert.strictEqual(blob(preregRel),'4095694f9ad3d511459925a488ff1aa968ca8d86','external-validation preregistration blob drift');
+assert.strictEqual(blob(preregRel),'6d339fbf55a366c1495441e222f1b0ee12b3c6cc','external-validation preregistration blob drift');
 assert.strictEqual(blob(discoveryRel),'a98e7ec2d11ede680aab2d6bf04b0ebcd905fe44','qualified discovery blob drift');
 assert.strictEqual(blob(criteriaRel),'61af25d95595dcb2b27c33797cd5de01b818ac47','source-selection criteria blob drift');
 assert.strictEqual(blob(stageARel),'a7b3e33ce613254c182360947641c5ff03f5af23','frozen Stage-A prediction blob drift');
@@ -111,15 +111,19 @@ assert.strictEqual(p.endpoint.right_terminal_region.y_mm,scoring.regions[1].shap
 assert.strictEqual(p.endpoint.right_terminal_region.radius_mm,scoring.regions[1].shape.radius);
 assert.strictEqual(p.endpoint.endpoint_change_after_collection_starts_authorized,false);
 
-assert.strictEqual(p.predeclared_exclusions_and_quality.behavior_based_trial_exclusion_authorized,false);
-assert.strictEqual(p.predeclared_exclusions_and_quality.timeout_exclusion_from_attempt_count_authorized,false);
-assert.strictEqual(p.predeclared_exclusions_and_quality.technical_exclusions_are_removed_from_choice_denominator_but_never_hidden,true);
-assert.strictEqual(p.predeclared_exclusions_and_quality.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,18);
-assert.strictEqual(p.predeclared_exclusions_and_quality.promotion_inconclusive_if_any_colony_side_has_fewer_than_minimum_nonexcluded_attempts,true);
-assert.strictEqual(p.predeclared_exclusions_and_quality.overall_timeout_fraction_inconclusive_if_greater_than,0.2);
-assert.strictEqual(p.predeclared_exclusions_and_quality.per_colony_timeout_fraction_inconclusive_if_greater_than,0.3);
-assert.strictEqual(p.predeclared_exclusions_and_quality.quality_thresholds_selected_from_published_candidate_outcomes,false);
-assert.strictEqual(p.predeclared_exclusions_and_quality.adaptive_replacement_of_failed_or_timeout_trials_authorized,false);
+const q=p.predeclared_exclusions_and_quality;
+assert.strictEqual(q.behavior_based_trial_exclusion_authorized,false);
+assert.strictEqual(q.timeout_exclusion_from_attempt_count_authorized,false);
+assert.strictEqual(q.technical_exclusions_are_removed_from_choice_denominator_but_never_hidden,true);
+assert.strictEqual(q.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,18);
+assert.strictEqual(q.promotion_inconclusive_if_any_colony_side_has_fewer_than_minimum_nonexcluded_attempts,true);
+assert.ok(q.timeout_fraction_scope.includes('nonexcluded attempted trials'),'timeout denominator must be explicitly nonexcluded attempts');
+assert.ok(q.overall_timeout_fraction_formula.includes('nonexcluded attempts'),'overall timeout formula missing nonexcluded denominator');
+assert.ok(q.per_colony_timeout_fraction_formula.includes('nonexcluded attempts'),'per-colony timeout formula missing nonexcluded denominator');
+assert.strictEqual(q.overall_timeout_fraction_inconclusive_if_greater_than,0.2);
+assert.strictEqual(q.per_colony_timeout_fraction_inconclusive_if_greater_than,0.3);
+assert.strictEqual(q.quality_thresholds_selected_from_published_candidate_outcomes,false);
+assert.strictEqual(q.adaptive_replacement_of_failed_or_timeout_trials_authorized,false);
 
 assert.strictEqual(p.primary_estimand.name,'equal_colony_weighted_side_balanced_marked_arm_choice_probability');
 assert.strictEqual(p.statistical_comparison.primary_prediction,stageA.predeclared_fields.side_balanced_marked_arm_choice_fraction);
@@ -136,8 +140,8 @@ assert.deepStrictEqual(p.future_promotion_rule.promotion_grade_external_validati
   'independent_data_collector_requirement_satisfied',
   'no_interim_outcome_adaptation_or_discrepancy_driven_retuning',
   'at_least_18_nonexcluded_attempts_on_each_marked_side_in_every_colony',
-  'overall_timeout_fraction_not_greater_than_0.2',
-  'no_colony_timeout_fraction_greater_than_0.3',
+  'overall_timeout_fraction_not_greater_than_0.2_using_nonexcluded_attempt_denominator',
+  'no_colony_timeout_fraction_greater_than_0.3_using_nonexcluded_attempt_denominator',
   'entire_90_percent_primary_discrepancy_interval_within_minus_0.1_to_plus_0.1',
   'lower_bound_of_95_percent_direction_interval_strictly_greater_than_0.5'
 ]);
@@ -155,4 +159,4 @@ assert.strictEqual(p.next_gate.may_rerun_model_prediction,false);
 assert.strictEqual(p.next_gate.may_access_new_biological_outcomes_before_authorization,false);
 assert.strictEqual(p.next_gate.may_authorize_canonical_promotion,false);
 
-console.log('p4-external-validation-preregistration.test.js PASS '+JSON.stringify({prereg_blob:blob(preregRel),candidate:307,prediction:p.statistical_comparison.primary_prediction,colonies:p.biological_sampling.planned_colonies,ants:p.biological_sampling.planned_total_unique_worker_ants,equivalence_margin:p.statistical_comparison.predictive_equivalence_margin_absolute_probability,min_nonexcluded_per_side:p.predeclared_exclusions_and_quality.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,wet_lab_recipe_frozen:true,collection_authorized:false,canonical_promotion:false,next_gate:p.next_gate.id}));
+console.log('p4-external-validation-preregistration.test.js PASS '+JSON.stringify({prereg_blob:blob(preregRel),candidate:307,prediction:p.statistical_comparison.primary_prediction,colonies:p.biological_sampling.planned_colonies,ants:p.biological_sampling.planned_total_unique_worker_ants,equivalence_margin:p.statistical_comparison.predictive_equivalence_margin_absolute_probability,min_nonexcluded_per_side:q.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,timeout_denominator:'nonexcluded_attempts',wet_lab_recipe_frozen:true,collection_authorized:false,canonical_promotion:false,next_gate:p.next_gate.id}));
