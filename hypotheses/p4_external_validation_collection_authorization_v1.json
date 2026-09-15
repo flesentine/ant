@@ -26,7 +26,9 @@
     "trial_record_schema_file": "hypotheses/p4_external_validation_trial_record_schema_v1.json",
     "trial_record_schema_git_blob_sha": "3d3e4ceec616733c405b171df1b2c1725379098a",
     "collector_independence_record_file": "hypotheses/p4_external_validation_collector_independence_record_v1.json",
-    "collector_independence_record_git_blob_sha": "925afb08f0b1e0d6a0b417fc11e4b725d7911988"
+    "collector_independence_record_git_blob_sha": "925afb08f0b1e0d6a0b417fc11e4b725d7911988",
+    "collection_activation_checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
+    "collection_activation_checklist_git_blob_sha": "16d31bcc7bd09db27ea6c5f2505515cf042ca085"
   },
   "gate_checks": {
     "preregistration_qualified_on_permanent_main": true,
@@ -35,6 +37,7 @@
     "chemical_batch_record_template_frozen": true,
     "video_calibration_record_template_frozen": true,
     "trial_record_schema_frozen": true,
+    "collection_activation_checklist_frozen": true,
     "collector_identity_frozen": false,
     "collector_independence_attestations_all_true": false,
     "new_biological_outcomes_known_to_exist_at_gate": false,
@@ -44,6 +47,8 @@
   "collection_authorized": false,
   "authorization_blocker": "A real independent collector or collection team has not yet been identified and frozen. Collection must not begin until the collector identity/affiliation fields are nonempty, identity_frozen=true, every preregistered independence attestation is true, this authorization record is updated prospectively, regression/Codex review is clean on the exact head, and the activation change is qualified on permanent main before the first biological trial.",
   "activation_rule": {
+    "checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
+    "checklist_git_blob_sha": "16d31bcc7bd09db27ea6c5f2505515cf042ca085",
     "requires_real_collector_identity": true,
     "requires_collector_affiliation_or_team_record": true,
     "requires_all_independence_attestations_true": true,
