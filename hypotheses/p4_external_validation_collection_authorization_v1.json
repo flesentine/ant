@@ -24,7 +24,7 @@
     "video_calibration_record_template_file": "hypotheses/p4_external_validation_video_calibration_record_template_v1.json",
     "video_calibration_record_template_git_blob_sha": "07a375a675ebf6f1be2ad628be223f50fb39ce43",
     "trial_record_schema_file": "hypotheses/p4_external_validation_trial_record_schema_v1.json",
-    "trial_record_schema_git_blob_sha": "3d3e4ceec616733c405b171df1b2c1725379098a",
+    "trial_record_schema_git_blob_sha": "a37a83c407e00a3dd2c15417334c2e78d61ab476",
     "collector_independence_record_file": "hypotheses/p4_external_validation_collector_independence_record_v1.json",
     "collector_independence_record_git_blob_sha": "925afb08f0b1e0d6a0b417fc11e4b725d7911988",
     "collection_activation_checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
