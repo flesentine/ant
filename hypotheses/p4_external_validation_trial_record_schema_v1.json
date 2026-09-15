@@ -5,12 +5,15 @@
   "preregistration_git_blob_sha": "b8a683e0199e6564a1fedc6f54391a535c32e0e4",
   "one_record_per_planned_trial": true,
   "required_fields": [
-    "trial_id","colony_id","ant_id","marked_side_randomization_code","collection_order","trial_start_timestamp","pheromone_batch_id","substrate_lot_id","session_temperature_C","session_relative_humidity","application_to_release_delay_s","scheduled_release_x_mm","scheduled_release_y_mm","scheduled_release_heading_rad","measured_release_x_mm","measured_release_y_mm","measured_release_heading_rad","release_position_error_mm","release_heading_error_rad","coordinate_calibration_rms_error_mm","video_nominal_fps","left_terminal_first_entry_time_s","right_terminal_first_entry_time_s","scored_choice","timeout","exclusion_flag","exclusion_reason","protocol_deviation"
+    "trial_id","colony_id","ant_id","session_id","video_file_id","scorer_identity","marked_side_randomization_code","collection_order","trial_start_timestamp","pheromone_batch_id","substrate_lot_id","session_temperature_C","session_relative_humidity","application_to_release_delay_s","scheduled_release_x_mm","scheduled_release_y_mm","scheduled_release_heading_rad","measured_release_x_mm","measured_release_y_mm","measured_release_heading_rad","release_position_error_mm","release_heading_error_rad","coordinate_calibration_rms_error_mm","video_nominal_fps","left_terminal_first_entry_time_s","right_terminal_first_entry_time_s","scored_choice","timeout","exclusion_flag","exclusion_reason","protocol_deviation"
   ],
   "field_contracts": {
     "trial_id": "exact canonical ID C01-T01 through C12-T40; unique",
     "colony_id": "C01 through C12",
     "ant_id": "nonempty identity unique across all 480 planned trials",
+    "session_id": "nonempty string; must match exactly one chemical session-use record and exactly one video/calibration session record",
+    "video_file_id": "nonempty string; must exactly match the video_file_id in the trial's session_id video/calibration record",
+    "scorer_identity": "nonempty string; must exactly match scorer_identity in the trial's session_id video/calibration record",
     "marked_side_randomization_code": "L or R and must match frozen marked-side schedule",
     "collection_order": "integer 1..480 matching actual chronological attempt order",
     "trial_start_timestamp": "ISO-8601 local timestamp with offset",
@@ -31,8 +34,8 @@
     "video_nominal_fps": "number exactly 100",
     "left_terminal_first_entry_time_s": "null or earliest interpolated entry time in [0,90]",
     "right_terminal_first_entry_time_s": "null or earliest interpolated entry time in [0,90]",
-    "scored_choice": "left, right, or null",
-    "timeout": "boolean; true iff neither terminal has valid entry at or before 90.000 s and trial is not technically excluded",
+    "scored_choice": "derived field: left, right, or null under consistency_rules; never manually assigned contrary to entry times",
+    "timeout": "derived boolean under consistency_rules; timeouts are never exclusions",
     "exclusion_flag": "boolean",
     "exclusion_reason": "null or one exact allowed exclusion reason",
     "protocol_deviation": "null or text; never silently discard deviations"
@@ -45,10 +48,17 @@
   ],
   "consistency_rules": [
     "behavior-based exclusion is forbidden",
+    "session_id must join the trial to exactly one chemical session-use record and exactly one video/calibration session record; video_file_id and scorer_identity must exactly match that video/calibration record",
     "timeouts are not exclusions",
     "technical exclusions are absent from choice and timeout denominators but remain fully reported",
-    "if exclusion_flag=false and scored_choice is null then timeout must be true",
-    "if scored_choice is left or right then timeout must be false",
+    "if exclusion_flag=true then exclusion_reason must be one exact allowed exclusion reason, scored_choice must be null, and timeout must be false",
+    "if exclusion_flag=false then exclusion_reason must be null",
+    "if exclusion_flag=false and both terminal first-entry times are null then scored_choice must be null and timeout must be true",
+    "if exclusion_flag=false and exactly one terminal first-entry time is non-null then scored_choice must equal that terminal side and timeout must be false",
+    "if exclusion_flag=false and both terminal first-entry times are non-null then scored_choice must equal the side with the strictly earlier first-entry time and timeout must be false",
+    "if both terminal first-entry times are equal or otherwise cannot yield a unique earliest terminal, classify a verified video_or_tracking failure technical exclusion rather than manually choosing a side",
+    "if release_position_error_mm > 0.2 or release_heading_error_rad > 0.025 then exclusion_flag must be true and exclusion_reason must equal verified_release_pose_outside_preregistered_tolerance_scored_before_endpoint_and_without_treatment_unblinding",
+    "if exclusion_reason equals verified_release_pose_outside_preregistered_tolerance_scored_before_endpoint_and_without_treatment_unblinding then release_position_error_mm > 0.2 or release_heading_error_rad > 0.025 must be true",
     "release-pose compliance must be assessed before endpoint scoring and without marked-side/Candidate access",
     "no adaptive replacement of failed or timeout trials"
   ],
