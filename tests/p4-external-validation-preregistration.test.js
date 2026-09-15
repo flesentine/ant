@@ -15,7 +15,7 @@ const leftAppRel='apparatus/poissonnier2026_y_maze_p4_left_v1.json';
 const rightAppRel='apparatus/poissonnier2026_y_maze_p4_right_v1.json';
 const scoringRel='scoring/y_maze_endpoint_engineering_v1.json';
 
-assert.strictEqual(blob(preregRel),'b85e5188daccfb2ebbb4975e14d139167546d865','external-validation preregistration blob drift');
+assert.strictEqual(blob(preregRel),'f7f57127d7ab0307d8cc6f49e852543702d07cdd','external-validation preregistration blob drift');
 assert.strictEqual(blob(discoveryRel),'a98e7ec2d11ede680aab2d6bf04b0ebcd905fe44','qualified discovery blob drift');
 assert.strictEqual(blob(criteriaRel),'61af25d95595dcb2b27c33797cd5de01b818ac47','source-selection criteria blob drift');
 assert.strictEqual(blob(stageARel),'a7b3e33ce613254c182360947641c5ff03f5af23','frozen Stage-A prediction blob drift');
@@ -73,6 +73,7 @@ assert.strictEqual(p.randomization_and_blinding.balance_constraint,'exactly_20_l
 assert.strictEqual(p.randomization_and_blinding.schedule_must_be_frozen_before_collection,true);
 assert.strictEqual(p.randomization_and_blinding.outcome_scorer_blinded_to_marked_side_code,true);
 assert.strictEqual(p.randomization_and_blinding.outcome_scorer_blinded_to_candidate_307_prediction,true);
+assert.strictEqual(p.randomization_and_blinding.independent_data_collector_required_for_promotion_grade,true);
 assert.strictEqual(p.randomization_and_blinding.protocol_change_based_on_interim_outcomes_authorized,false);
 assert.strictEqual(p.randomization_and_blinding.interim_outcome_monitoring_authorized,false);
 
@@ -88,6 +89,9 @@ assert.strictEqual(p.endpoint.endpoint_change_after_collection_starts_authorized
 
 assert.strictEqual(p.predeclared_exclusions_and_quality.behavior_based_trial_exclusion_authorized,false);
 assert.strictEqual(p.predeclared_exclusions_and_quality.timeout_exclusion_from_attempt_count_authorized,false);
+assert.strictEqual(p.predeclared_exclusions_and_quality.technical_exclusions_are_removed_from_choice_denominator_but_never_hidden,true);
+assert.strictEqual(p.predeclared_exclusions_and_quality.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,18);
+assert.strictEqual(p.predeclared_exclusions_and_quality.promotion_inconclusive_if_any_colony_side_has_fewer_than_minimum_nonexcluded_attempts,true);
 assert.strictEqual(p.predeclared_exclusions_and_quality.overall_timeout_fraction_inconclusive_if_greater_than,0.2);
 assert.strictEqual(p.predeclared_exclusions_and_quality.per_colony_timeout_fraction_inconclusive_if_greater_than,0.3);
 assert.strictEqual(p.predeclared_exclusions_and_quality.quality_thresholds_selected_from_published_candidate_outcomes,false);
@@ -104,7 +108,9 @@ assert.strictEqual(p.statistical_comparison.post_outcome_analysis_family_change_
 assert.deepStrictEqual(p.future_promotion_rule.promotion_grade_external_validation_pass_requires_all,[
   'exact_preregistered_apparatus_stimulus_endpoint_and_sampling_contract_used',
   '12_independent_colonies_attempted_with_40_unique_workers_each',
+  'independent_data_collector_requirement_satisfied',
   'no_interim_outcome_adaptation_or_discrepancy_driven_retuning',
+  'at_least_18_nonexcluded_attempts_on_each_marked_side_in_every_colony',
   'overall_timeout_fraction_not_greater_than_0.2',
   'no_colony_timeout_fraction_greater_than_0.3',
   'entire_90_percent_primary_discrepancy_interval_within_minus_0.1_to_plus_0.1',
@@ -123,4 +129,4 @@ assert.strictEqual(p.next_gate.may_rerun_model_prediction,false);
 assert.strictEqual(p.next_gate.may_access_new_biological_outcomes_before_authorization,false);
 assert.strictEqual(p.next_gate.may_authorize_canonical_promotion,false);
 
-console.log('p4-external-validation-preregistration.test.js PASS '+JSON.stringify({prereg_blob:blob(preregRel),candidate:307,prediction:p.statistical_comparison.primary_prediction,colonies:p.biological_sampling.planned_colonies,ants:p.biological_sampling.planned_total_unique_worker_ants,equivalence_margin:p.statistical_comparison.predictive_equivalence_margin_absolute_probability,collection_authorized:false,canonical_promotion:false,next_gate:p.next_gate.id}));
+console.log('p4-external-validation-preregistration.test.js PASS '+JSON.stringify({prereg_blob:blob(preregRel),candidate:307,prediction:p.statistical_comparison.primary_prediction,colonies:p.biological_sampling.planned_colonies,ants:p.biological_sampling.planned_total_unique_worker_ants,equivalence_margin:p.statistical_comparison.predictive_equivalence_margin_absolute_probability,min_nonexcluded_per_side:p.predeclared_exclusions_and_quality.minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion,collection_authorized:false,canonical_promotion:false,next_gate:p.next_gate.id}));
