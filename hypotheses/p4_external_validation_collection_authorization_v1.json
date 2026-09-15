@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "id": "P4_external_validation_collection_authorization_v1",
+  "status": "preauthorization_frozen_pending_collector_identity",
+  "freeze_date_local": "2026-09-14",
+  "qualified_preregistration": {
+    "file": "hypotheses/p4_external_validation_new_dataset_preregistration_v1.json",
+    "git_blob_sha": "b8a683e0199e6564a1fedc6f54391a535c32e0e4",
+    "qualified_main_commit": "913a0e7e93092779059e6b9967dc97c503e4c9e7",
+    "qualified_main_run_id": 34934333396,
+    "qualified_main_run_number": 176,
+    "qualified_test_job_id": 104268917214,
+    "qualified_test_job_conclusion": "success",
+    "qualified_deploy_job_id": 104269108607,
+    "qualified_deploy_job_conclusion": "success"
+  },
+  "frozen_collection_inputs": {
+    "marked_side_schedule_file": "experiments/p4_external_validation_replication_randomization_v1.json",
+    "marked_side_schedule_git_blob_sha": "9ffd7ef45a611c93eac35626399632b4f822225a",
+    "release_pose_schedule_manifest_file": "experiments/p4_external_validation_replication_release_pose_schedule_v1.json",
+    "release_pose_schedule_manifest_git_blob_sha": "ee5f1b46bbca780196117d554f8b708b3f2ed34e",
+    "chemical_batch_record_template_file": "hypotheses/p4_external_validation_chemical_batch_record_template_v1.json",
+    "chemical_batch_record_template_git_blob_sha": "61c8c97cb1ff47083a67640bbd38600559498b91",
+    "video_calibration_record_template_file": "hypotheses/p4_external_validation_video_calibration_record_template_v1.json",
+    "video_calibration_record_template_git_blob_sha": "07a375a675ebf6f1be2ad628be223f50fb39ce43",
+    "trial_record_schema_file": "hypotheses/p4_external_validation_trial_record_schema_v1.json",
+    "trial_record_schema_git_blob_sha": "3d3e4ceec616733c405b171df1b2c1725379098a",
+    "collector_independence_record_file": "hypotheses/p4_external_validation_collector_independence_record_v1.json",
+    "collector_independence_record_git_blob_sha": "925afb08f0b1e0d6a0b417fc11e4b725d7911988"
+  },
+  "gate_checks": {
+    "preregistration_qualified_on_permanent_main": true,
+    "marked_side_schedule_materialized_and_frozen": true,
+    "release_pose_schedule_materialized_and_frozen": true,
+    "chemical_batch_record_template_frozen": true,
+    "video_calibration_record_template_frozen": true,
+    "trial_record_schema_frozen": true,
+    "collector_identity_frozen": false,
+    "collector_independence_attestations_all_true": false,
+    "new_biological_outcomes_known_to_exist_at_gate": false,
+    "new_biological_outcome_access_authorized_at_gate": false,
+    "candidate_307_prediction_disclosure_to_collector_authorized": false
+  },
+  "collection_authorized": false,
+  "authorization_blocker": "A real independent collector or collection team has not yet been identified and frozen. Collection must not begin until the collector identity/affiliation fields are nonempty, identity_frozen=true, every preregistered independence attestation is true, this authorization record is updated prospectively, regression/Codex review is clean on the exact head, and the activation change is qualified on permanent main before the first biological trial.",
+  "activation_rule": {
+    "requires_real_collector_identity": true,
+    "requires_collector_affiliation_or_team_record": true,
+    "requires_all_independence_attestations_true": true,
+    "requires_no_biological_collection_before_activation": true,
+    "requires_no_new_biological_outcome_access_before_activation": true,
+    "requires_exact_frozen_schedule_and_template_blobs_unchanged": true,
+    "requires_exact_head_regression_and_code_review": true,
+    "requires_permanent_main_qualification_before_first_trial": true
+  },
+  "semantic_firewall": {
+    "may_change_preregistration": false,
+    "may_change_candidate_307": false,
+    "may_rerun_model_prediction": false,
+    "may_regenerate_marked_side_schedule": false,
+    "may_regenerate_release_pose_schedule": false,
+    "may_use_interim_outcomes": false,
+    "may_adapt_protocol_from_behavioral_outcomes": false,
+    "may_access_candidate_prediction_during_collection": false,
+    "may_authorize_canonical_promotion": false
+  },
+  "next_action": "Freeze a real independent collector/team identity and all required attestations in the collector-independence record; then prospectively activate collection under these unchanged schedules/templates before any biological trial begins."
+}
