@@ -97,6 +97,7 @@
     "outcome_scorer_blinded_to_candidate_307_prediction": true,
     "collector_should_not_receive_candidate_307_prediction": true,
     "independent_data_collector_preferred": true,
+    "independent_data_collector_required_for_promotion_grade": true,
     "protocol_change_based_on_interim_outcomes_authorized": false,
     "interim_outcome_monitoring_authorized": false
   },
@@ -116,10 +117,13 @@
     "timeout_exclusion_from_attempt_count_authorized": false,
     "allowed_trial_exclusion_reasons": [
       "verified_video_or_tracking_failure_preventing_endpoint_determination",
-      "verified_apparatus_or_stimulus_preparation_failure_logged_without consulting_behavioral_outcome",
-      "verified_wrong_species_or duplicate_ant_identity"
+      "verified_apparatus_or_stimulus_preparation_failure_logged_without_consulting_behavioral_outcome",
+      "verified_wrong_species_or_duplicate_ant_identity"
     ],
+    "technical_exclusions_are_removed_from_choice_denominator_but_never_hidden": true,
     "all_exclusions_must_be_reported_with_trial_id_and_reason": true,
+    "minimum_nonexcluded_attempts_per_marked_side_per_colony_for_promotion": 18,
+    "promotion_inconclusive_if_any_colony_side_has_fewer_than_minimum_nonexcluded_attempts": true,
     "overall_timeout_fraction_inconclusive_if_greater_than": 0.2,
     "per_colony_timeout_fraction_inconclusive_if_greater_than": 0.3,
     "missing_colony_or_ant_identity_makes_trial_ineligible_for_promotion_analysis": true,
@@ -128,9 +132,9 @@
   },
   "primary_estimand": {
     "name": "equal_colony_weighted_side_balanced_marked_arm_choice_probability",
-    "per_colony_left_marked_fraction": "marked-arm choices divided by completed choices among the 20 left-marked attempts",
-    "per_colony_right_marked_fraction": "marked-arm choices divided by completed choices among the 20 right-marked attempts",
-    "per_colony_side_balanced_fraction": "mean of the colony left-marked and right-marked completed-choice fractions",
+    "per_colony_left_marked_fraction": "marked-arm choices divided by eligible completed choices among the 20 planned left-marked attempts after only preregistered technical exclusions",
+    "per_colony_right_marked_fraction": "marked-arm choices divided by eligible completed choices among the 20 planned right-marked attempts after only preregistered technical exclusions",
+    "per_colony_side_balanced_fraction": "mean of the colony left-marked and right-marked eligible completed-choice fractions",
     "overall_estimate": "arithmetic mean of the 12 colony side-balanced fractions; each colony receives equal weight",
     "zero_completed_choices_on_either_side_within_any_colony": "dataset_inconclusive_for_promotion",
     "primary_discrepancy": "overall_estimate_minus_0.740889950913122",
@@ -157,7 +161,9 @@
     "promotion_grade_external_validation_pass_requires_all": [
       "exact_preregistered_apparatus_stimulus_endpoint_and_sampling_contract_used",
       "12_independent_colonies_attempted_with_40_unique_workers_each",
+      "independent_data_collector_requirement_satisfied",
       "no_interim_outcome_adaptation_or_discrepancy_driven_retuning",
+      "at_least_18_nonexcluded_attempts_on_each_marked_side_in_every_colony",
       "overall_timeout_fraction_not_greater_than_0.2",
       "no_colony_timeout_fraction_greater_than_0.3",
       "entire_90_percent_primary_discrepancy_interval_within_minus_0.1_to_plus_0.1",
