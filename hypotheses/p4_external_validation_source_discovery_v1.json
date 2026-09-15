@@ -36,7 +36,9 @@
       "apparatus_reconstructable": true,
       "independent_dataset_from_poissonnier2026": true,
       "promotion_grade_blinding_survived": false,
-      "contamination": "numerical branch-choice outcomes were exposed by the literature search result before a source-specific validation protocol could be frozen",
+      "exclusion_reasons": [
+        "numerical branch-choice outcomes were exposed by the literature search result before a source-specific validation protocol could be frozen"
+      ],
       "selected": false
     },
     {
@@ -48,7 +50,9 @@
       "dataset_reported_as_available": true,
       "independent_dataset_from_poissonnier2026": true,
       "promotion_grade_blinding_survived": false,
-      "contamination": "the publication abstract/search result exposed numerical trail-following accuracy for the target conditions",
+      "exclusion_reasons": [
+        "the publication abstract/search result exposed numerical trail-following accuracy for the target conditions"
+      ],
       "selected": false
     },
     {
@@ -60,8 +64,20 @@
       "apparatus_reconstructable": true,
       "raw_data_reported_as_available": true,
       "independent_dataset_from_poissonnier2026": true,
+      "prior_P4_development_use": true,
+      "not_used_in_P4_model_development_parameter_estimation_or_candidate_selection": false,
+      "prior_P4_development_provenance": {
+        "mechanism_evidence_file": "hypotheses/p4_painted_trail_mechanism_v1.json",
+        "mechanism_evidence_git_blob_sha": "609551836e540c341365db9cc987d2ca340cc053",
+        "role": "direct evidence motivating absolute pheromone concentration dependence in the selected P4 mechanism",
+        "numerical_evidence_file": "docs/P4_INDEPENDENT_EVIDENCE.md",
+        "numerical_evidence_git_blob_sha": "d1bab9bcd4f0663424c6ea1ee564cb9c11d99cb1"
+      },
       "promotion_grade_blinding_survived": false,
-      "contamination": "a methods-only inspection unexpectedly returned the adjacent results table and numerical concentration-dependent attraction outcomes",
+      "exclusion_reasons": [
+        "the source was already used as direct P4 mechanism-development evidence, so it fails the frozen no-prior-P4-development-use criterion",
+        "a methods-only inspection during discovery unexpectedly returned the adjacent results table and numerical concentration-dependent attraction outcomes"
+      ],
       "selected": false
     },
     {
@@ -74,7 +90,9 @@
       "independent_research_group_from_poissonnier2026": true,
       "independent_dataset_from_poissonnier2026": true,
       "promotion_grade_blinding_survived": false,
-      "contamination": "the abstract/search result exposed the direction and numerical distance outcomes of the Lasius niger trail-following bioassay",
+      "exclusion_reasons": [
+        "the abstract/search result exposed the direction and numerical distance outcomes of the Lasius niger trail-following bioassay"
+      ],
       "selected": false
     },
     {
@@ -85,8 +103,18 @@
       "direct_trail_following_endpoint": true,
       "apparatus_reconstructable": true,
       "independent_dataset_from_poissonnier2026": true,
+      "prior_P4_development_use": true,
+      "not_used_in_P4_model_development_parameter_estimation_or_candidate_selection": false,
+      "prior_P4_development_provenance": {
+        "candidate_class_evidence_file": "hypotheses/p4_painted_trail_candidate_class_evidence_v1.json",
+        "candidate_class_evidence_git_blob_sha": "262f332062f271bbf111d0572f83b2faaf2cfd74",
+        "role": "P4 candidate-class evidence used to exclude the already-tested signal-independent transient-lapse class from being treated as a fresh P4 class"
+      },
       "promotion_grade_blinding_survived": false,
-      "contamination": "search metadata and an accessible literature table exposed the target pheromone-following rate before protocol freeze",
+      "exclusion_reasons": [
+        "the source was already used in P4 candidate-class development, so it fails the frozen no-prior-P4-development-use criterion",
+        "search metadata and an accessible literature table exposed the target pheromone-following rate before protocol freeze"
+      ],
       "selected": false
     }
   ],
@@ -95,7 +123,7 @@
     "selected_existing_published_source_count": 0,
     "forced_selection_of_contaminated_source_authorized": false,
     "exhaustive_claim_that_no_other_eligible_published_source_exists": false,
-    "reason": "Every high-relevance published candidate screened had target outcome semantics exposed in searchable abstracts, result snippets, or tables before a source-specific validation protocol could be frozen. Rather than continue searching adaptively after seeing outcomes or misrepresent one of these sources as blind, this gate selects the prospectively clean new-dataset route.",
+    "reason": "Every high-relevance published candidate screened failed at least one mandatory promotion-grade criterion: target outcome semantics were exposed before a source-specific protocol freeze, and two candidates also had documented prior P4-development use. Rather than continue searching adaptively after seeing outcomes or misrepresent one of these sources as independent and blind, this gate selects the prospectively clean new-dataset route.",
     "prospective_new_dataset_route_selected": true,
     "selected_route_id": "P4_external_validation_replication_dataset_v1",
     "selected_route_classification": "new_prospectively_preregistered_independent_replication_dataset_not_yet_collected",
