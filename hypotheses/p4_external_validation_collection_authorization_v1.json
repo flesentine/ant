@@ -30,7 +30,7 @@
     "collector_independence_record_file": "hypotheses/p4_external_validation_collector_independence_record_v1.json",
     "collector_independence_record_git_blob_sha": "02289bed5ef4785bbadc584ef5077b633779d089",
     "collection_activation_checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
-    "collection_activation_checklist_git_blob_sha": "16d31bcc7bd09db27ea6c5f2505515cf042ca085"
+    "collection_activation_checklist_git_blob_sha": "faf8d09a440960388d7f9aad46e38df3486b76ef"
   },
   "gate_checks": {
     "preregistration_qualified_on_permanent_main": true,
@@ -52,7 +52,7 @@
   "authorization_blocker": "A real independent collector or collection team has not yet been identified and frozen, and the 12 prospective colony husbandry/source records have not yet been completed. Collection must not begin until collector identity/affiliation is nonempty and frozen, every independence attestation is true including complete exclusion from this dataset's outcome analysis, all 12 colony records satisfy the frozen wild-source, source-nest, acclimation, feeding, deprivation, water, light-cycle, lights-on test-window, and no-food-reward contracts, this authorization is updated prospectively, regression/Codex review is clean on the exact head, and the activation change is qualified on permanent main before the first biological trial.",
   "activation_rule": {
     "checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
-    "checklist_git_blob_sha": "16d31bcc7bd09db27ea6c5f2505515cf042ca085",
+    "checklist_git_blob_sha": "faf8d09a440960388d7f9aad46e38df3486b76ef",
     "requires_real_collector_identity": true,
     "requires_collector_affiliation_or_team_record": true,
     "requires_all_independence_attestations_true": true,
