@@ -22,8 +22,9 @@
     "preparation_deviation": "null or text; any deviation preserved"
   },
   "session_use_required_fields": {
-    "session_id": "nonempty string",
-    "aliquot_id": "one frozen aliquot ID",
+    "session_id": "nonempty string unique within dataset",
+    "batch_id": "must exactly equal the parent master-stock batch_id containing this session-use record",
+    "aliquot_id": "one frozen aliquot ID from the same parent batch_id",
     "thaw_timestamp_local": "ISO-8601 local timestamp with offset",
     "thaw_count_for_aliquot": "integer exactly 1",
     "kept_on_ice_during_application": "boolean true",
@@ -42,6 +43,7 @@
     "donor colonies must be distinct from all 12 test colonies",
     "32 hindguts / 8.000 mL DCM must equal 4 hindgut-equivalents/mL",
     "4 eq/mL * 0.012 mL / 10 cm must equal 0.0048 eq/cm",
+    "each session-use batch_id must exactly equal the parent master-stock batch_id and its aliquot_id must belong to that same batch",
     "an aliquot may be thawed exactly once",
     "no recipe or application change is permitted after collection starts"
   ],
