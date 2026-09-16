@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "id": "P4_external_validation_colony_husbandry_record_template_v1",
+  "status": "frozen_template_before_biological_collection",
+  "preregistration_git_blob_sha": "b8a683e0199e6564a1fedc6f54391a535c32e0e4",
+  "record_scope": "one record for each of the 12 test colonies",
+  "required_fields": {
+    "colony_id": "exactly one canonical test-colony ID C01 through C12; unique",
+    "wild_source_colony_id": "nonempty immutable source-colony identifier",
+    "source_nest_id": "nonempty immutable source-nest identifier; all 12 test colonies must have distinct source_nest_id values because fragments from one source nest count as one colony",
+    "lab_acclimation_start_timestamp_local": "ISO-8601 local timestamp with offset",
+    "first_trial_timestamp_local": "ISO-8601 local timestamp with offset; must match the earliest trial_start_timestamp for this colony",
+    "lab_acclimation_days_before_first_trial": "derived number >= 7 from lab_acclimation_start_timestamp_local to first_trial_timestamp_local",
+    "pre_deprivation_sucrose_molarity_M": "number exactly 0.5",
+    "pre_deprivation_sucrose_ad_libitum": "boolean true",
+    "pre_deprivation_chopped_cockroach_feedings_per_week": "number exactly 3",
+    "food_deprivation_start_timestamp_local": "ISO-8601 local timestamp with offset",
+    "food_deprivation_hours_before_first_trial": "derived number in [94,98] from food_deprivation_start_timestamp_local to first_trial_timestamp_local",
+    "water_ad_libitum_during_deprivation": "boolean true",
+    "light_dark_cycle_hours": "exact string 12:12",
+    "test_date_local": "YYYY-MM-DD equal to the local date of all 40 trial_start_timestamp values for this colony",
+    "test_day_lights_on_timestamp_local": "ISO-8601 local timestamp with offset on test_date_local",
+    "all_trials_within_2_to_10_hours_after_lights_on": "boolean true and mechanically verified against all 40 trial_start_timestamp values",
+    "no_food_reward_present_in_test_maze": "boolean true",
+    "husbandry_or_environment_deviation": "null or text; any deviation preserved"
+  },
+  "validation_rules": [
+    "exactly 12 colony records are required, one each for C01 through C12",
+    "all wild_source_colony_id values must identify distinct wild-source colonies",
+    "all source_nest_id values must be distinct across the 12 test colonies; fragments from the same source nest cannot be counted as separate colonies",
+    "lab_acclimation_days_before_first_trial must be at least 7 days",
+    "pre-deprivation feeding must be 0.5 M sucrose ad libitum plus chopped cockroach protein three times per week",
+    "food_deprivation_hours_before_first_trial must be 96 plus or minus 2 hours with water ad libitum",
+    "light_dark_cycle_hours must be 12:12",
+    "all 40 trials for a colony must share test_date_local and each trial_start_timestamp must fall 2 through 10 hours after test_day_lights_on_timestamp_local",
+    "session room temperature and relative humidity remain recorded per trial/session under the trial schema",
+    "no food reward may be present in the test maze",
+    "no environmental or husbandry protocol change is permitted after collection starts"
+  ],
+  "firewall": {
+    "behavioral_outcomes_may_change_husbandry": false,
+    "behavioral_outcomes_may_change_test_environment": false,
+    "source_colony_identity_change_after_collection_starts_authorized": false
+  }
+}
