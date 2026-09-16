@@ -10,13 +10,14 @@
     "camera_id": "nonempty string",
     "camera_mount_locked": "boolean true",
     "video_nominal_fps": "number exactly 100",
-    "actual_frame_timestamps_available": "boolean true",
-    "timestamp_source": "nonempty string describing hardware/software timestamp source",
-    "video_file_id": "nonempty string",
-    "video_file_sha256": "64 lowercase hex characters",
+    "video_capture_status": "exact string usable or failed",
+    "actual_frame_timestamps_available": "boolean; true for usable capture, false permitted only for failed capture",
+    "timestamp_source": "nonempty string describing hardware/software timestamp source for usable capture; null permitted only for failed capture",
+    "video_file_id": "nonempty string for usable capture; null permitted only for failed capture when no usable file exists",
+    "video_file_sha256": "64 lowercase hex characters for usable capture; null permitted only for failed capture when no usable file exists",
     "maze_fiducial_definition_id": "nonempty string",
     "coordinate_calibration_method": "nonempty string",
-    "coordinate_calibration_rms_error_mm": "number <= 0.1",
+    "coordinate_calibration_rms_error_mm": "number <=0.1 for a valid calibrated session",
     "launch_fixture_id": "nonempty string",
     "launch_fixture_xytheta_calibration_record": "nonempty reference",
     "tracking_software": "nonempty string",
@@ -28,12 +29,19 @@
     "scorer_blinded_to_candidate_307_prediction": "boolean true",
     "session_temperature_c": "number in [21,26]",
     "session_relative_humidity_percent": "number in [0,100]",
-    "session_deviation": "null or text; any deviation preserved"
+    "session_deviation": "null or text; any deviation preserved, and failed capture must describe the failure"
   },
+  "consistency_rules": [
+    "if video_capture_status=usable then actual_frame_timestamps_available must be true, timestamp_source and video_file_id must be nonempty, and video_file_sha256 must be 64 lowercase hex characters",
+    "if video_capture_status=failed then actual_frame_timestamps_available may be false and timestamp_source, video_file_id, and video_file_sha256 may be null when unavailable; never fabricate file identifiers, hashes, or timestamps",
+    "if video_capture_status=failed then session_deviation must nonemptily describe the capture/tracking failure and any affected trial must use the preregistered verified_video_or_tracking_failure_preventing_endpoint_determination technical exclusion",
+    "a failed-capture record remains a conforming session provenance record and is joined by session_id even when no usable video file exists",
+    "no endpoint choice or timeout may be inferred from a failed capture without valid endpoint evidence"
+  ],
   "endpoint_processing_contract": {
     "terminal_circle_radius_mm": 7,
     "maximum_interpolation_gap_s": 0.05,
-    "actual_frame_timestamps_required": true,
+    "actual_frame_timestamps_required_for_usable_endpoint_scoring": true,
     "crossing_rule": "linearly interpolate each consecutive valid thorax/mesosoma centroid segment over actual timestamps and solve earliest outside-to-inside segment-circle intersection; boundary distance <=7.0 mm counts as inside",
     "timeout_s": 90,
     "manual_body_part_or_crossing_override_authorized": false,
@@ -41,6 +49,7 @@
   },
   "firewall": {
     "outcome_dependent_recalibration_authorized": false,
-    "manual_endpoint_override_authorized": false
+    "manual_endpoint_override_authorized": false,
+    "fabricated_video_provenance_authorized": false
   }
 }
