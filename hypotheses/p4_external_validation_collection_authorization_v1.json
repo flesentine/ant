@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "P4_external_validation_collection_authorization_v1",
-  "status": "preauthorization_frozen_pending_collector_identity_and_colony_husbandry_records",
+  "status": "preauthorization_frozen_pending_collector_identity_and_colony_husbandry_setup",
   "freeze_date_local": "2026-09-14",
   "qualified_preregistration": {
     "file": "hypotheses/p4_external_validation_new_dataset_preregistration_v1.json",
@@ -20,17 +20,17 @@
     "release_pose_schedule_manifest_file": "experiments/p4_external_validation_replication_release_pose_schedule_v1.json",
     "release_pose_schedule_manifest_git_blob_sha": "ee5f1b46bbca780196117d554f8b708b3f2ed34e",
     "chemical_batch_record_template_file": "hypotheses/p4_external_validation_chemical_batch_record_template_v1.json",
-    "chemical_batch_record_template_git_blob_sha": "c74dd24db1fad3d64f0a7dc49c2f9be2d2eedeb6",
+    "chemical_batch_record_template_git_blob_sha": "7fc4188e5b4c454c944d555e957f3c2885ab4a30",
     "colony_husbandry_record_template_file": "hypotheses/p4_external_validation_colony_husbandry_record_template_v1.json",
-    "colony_husbandry_record_template_git_blob_sha": "aa7b62ec10aed4899b6c60071dea9e608524a407",
+    "colony_husbandry_record_template_git_blob_sha": "b0a3a9bac49093c8650e5625666be387519895a4",
     "video_calibration_record_template_file": "hypotheses/p4_external_validation_video_calibration_record_template_v1.json",
-    "video_calibration_record_template_git_blob_sha": "472fcb5708c9b279f94cdbd2bc56a8e7eca6abed",
+    "video_calibration_record_template_git_blob_sha": "231fd746f5aae187e67e7959c9907791a1cc07de",
     "trial_record_schema_file": "hypotheses/p4_external_validation_trial_record_schema_v1.json",
-    "trial_record_schema_git_blob_sha": "da0cfd39a0bbe592833be0a56576d8c2ac7347b7",
+    "trial_record_schema_git_blob_sha": "4072b72f7c3ea2de3a4eb24a37c850bd8b1d1193",
     "collector_independence_record_file": "hypotheses/p4_external_validation_collector_independence_record_v1.json",
     "collector_independence_record_git_blob_sha": "02289bed5ef4785bbadc584ef5077b633779d089",
     "collection_activation_checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
-    "collection_activation_checklist_git_blob_sha": "b843b1522ca0e9619b695579f0a15007ceb11aa3"
+    "collection_activation_checklist_git_blob_sha": "1d983b319dc3946e6942a019981a490b20c3d049"
   },
   "gate_checks": {
     "preregistration_qualified_on_permanent_main": true,
@@ -43,21 +43,20 @@
     "collection_activation_checklist_frozen": true,
     "collector_identity_frozen": false,
     "collector_independence_attestations_all_true": false,
-    "all_12_colony_husbandry_records_complete_and_valid": false,
     "new_biological_outcomes_known_to_exist_at_gate": false,
     "new_biological_outcome_access_authorized_at_gate": false,
-    "candidate_307_prediction_disclosure_to_collector_authorized": false
+    "candidate_307_prediction_disclosure_to_collector_authorized": false,
+    "all_12_colony_husbandry_prospective_setup_fields_complete_and_valid": false
   },
   "collection_authorized": false,
-  "authorization_blocker": "A real independent collector or collection team has not yet been identified and frozen, and the 12 prospective colony husbandry/source records have not yet been completed. Collection must not begin until collector identity/affiliation is nonempty and frozen, every independence attestation is true including complete exclusion from this dataset's outcome analysis, all 12 colony records satisfy the frozen wild-source, source-nest, acclimation, feeding, deprivation, water, light-cycle, lights-on test-window, and no-food-reward contracts, this authorization is updated prospectively, regression/Codex review is clean on the exact head, and the activation change is qualified on permanent main before the first biological trial.",
+  "authorization_blocker": "A real independent collector or collection team has not yet been identified and frozen, and the 12 colonies' prospective husbandry/source setup fields have not yet been completed. Collection must not begin until collector identity/affiliation is nonempty and frozen, every independence attestation is true including complete exclusion from this dataset's outcome analysis, all 12 prospective colony setup records satisfy the frozen source-nest/acclimation/feeding/deprivation/water/light-cycle setup requirements, the single master-stock batch and all failure-provenance rules remain frozen, regression/Codex review is clean on the exact head, and the activation change is qualified on permanent main before the first biological trial. Observed first-trial/test-day/lights-on-window evidence is recorded during collection rather than prefilled at activation.",
   "activation_rule": {
     "checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
-    "checklist_git_blob_sha": "b843b1522ca0e9619b695579f0a15007ceb11aa3",
+    "checklist_git_blob_sha": "1d983b319dc3946e6942a019981a490b20c3d049",
     "requires_real_collector_identity": true,
     "requires_collector_affiliation_or_team_record": true,
     "requires_all_independence_attestations_true": true,
     "requires_collector_exclusion_from_this_dataset_outcome_analysis": true,
-    "requires_complete_valid_12_colony_husbandry_records": true,
     "requires_chemical_session_batch_binding": true,
     "requires_failed_video_provenance_without_fabrication": true,
     "requires_one_local_test_day_per_colony": true,
@@ -68,7 +67,12 @@
     "requires_permanent_main_qualification_before_first_trial": true,
     "requires_worker_assay_naivety_field_and_enforcement_frozen_at_activation": true,
     "requires_per_trial_fresh_substrate_and_cleaning_fields_and_enforcement_frozen_at_activation": true,
-    "requires_per_trial_naivety_substrate_and_cleaning_evidence_recorded_prospectively_during_collection": true
+    "requires_per_trial_naivety_substrate_and_cleaning_evidence_recorded_prospectively_during_collection": true,
+    "requires_complete_valid_12_colony_husbandry_prospective_setup_fields": true,
+    "requires_exactly_one_chemical_master_stock_batch": true,
+    "requires_failed_chemical_application_provenance_without_fabrication": true,
+    "requires_failed_calibration_provenance_without_fabrication": true,
+    "requires_husbandry_observed_fields_recorded_during_collection_not_prefilled": true
   },
   "semantic_firewall": {
     "may_change_preregistration": false,
@@ -81,5 +85,5 @@
     "may_access_candidate_prediction_during_collection": false,
     "may_authorize_canonical_promotion": false
   },
-  "next_action": "Prospectively bind a real independent collector/team and complete all 12 colony husbandry/source records under the frozen template; then activate collection under these unchanged schedules/templates before any biological trial begins."
+  "next_action": "Prospectively bind a real independent collector/team and complete the 12 colonies' activation-time husbandry/source setup fields under the frozen template; then activate collection under the unchanged schedules/templates. Record first-trial timestamps, observed test dates/lights-on compliance, and other observation-dependent husbandry fields prospectively as collection occurs."
 }
