@@ -26,11 +26,11 @@
     "video_calibration_record_template_file": "hypotheses/p4_external_validation_video_calibration_record_template_v1.json",
     "video_calibration_record_template_git_blob_sha": "472fcb5708c9b279f94cdbd2bc56a8e7eca6abed",
     "trial_record_schema_file": "hypotheses/p4_external_validation_trial_record_schema_v1.json",
-    "trial_record_schema_git_blob_sha": "89bacdef0a4a000f6892af27d84e971d1cd7328f",
+    "trial_record_schema_git_blob_sha": "5b97e96d298f8856206e6fe14adfcf839a4df051",
     "collector_independence_record_file": "hypotheses/p4_external_validation_collector_independence_record_v1.json",
     "collector_independence_record_git_blob_sha": "02289bed5ef4785bbadc584ef5077b633779d089",
     "collection_activation_checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
-    "collection_activation_checklist_git_blob_sha": "faf8d09a440960388d7f9aad46e38df3486b76ef"
+    "collection_activation_checklist_git_blob_sha": "cd981f0a2af07d232021f019f30301b833dfd711"
   },
   "gate_checks": {
     "preregistration_qualified_on_permanent_main": true,
@@ -52,7 +52,7 @@
   "authorization_blocker": "A real independent collector or collection team has not yet been identified and frozen, and the 12 prospective colony husbandry/source records have not yet been completed. Collection must not begin until collector identity/affiliation is nonempty and frozen, every independence attestation is true including complete exclusion from this dataset's outcome analysis, all 12 colony records satisfy the frozen wild-source, source-nest, acclimation, feeding, deprivation, water, light-cycle, lights-on test-window, and no-food-reward contracts, this authorization is updated prospectively, regression/Codex review is clean on the exact head, and the activation change is qualified on permanent main before the first biological trial.",
   "activation_rule": {
     "checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
-    "checklist_git_blob_sha": "faf8d09a440960388d7f9aad46e38df3486b76ef",
+    "checklist_git_blob_sha": "cd981f0a2af07d232021f019f30301b833dfd711",
     "requires_real_collector_identity": true,
     "requires_collector_affiliation_or_team_record": true,
     "requires_all_independence_attestations_true": true,
@@ -65,7 +65,9 @@
     "requires_no_new_biological_outcome_access_before_activation": true,
     "requires_exact_frozen_schedule_and_template_blobs_unchanged": true,
     "requires_exact_head_regression_and_code_review": true,
-    "requires_permanent_main_qualification_before_first_trial": true
+    "requires_permanent_main_qualification_before_first_trial": true,
+    "requires_worker_assay_naivety_verification": true,
+    "requires_per_trial_fresh_substrate_and_cleaning_provenance": true
   },
   "semantic_firewall": {
     "may_change_preregistration": false,
