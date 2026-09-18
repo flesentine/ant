@@ -37,7 +37,13 @@
     "control_arm_dcm_total_volume_ul": "number exactly 12",
     "application_to_release_target_s": "number exactly 120",
     "application_to_release_tolerance_s": "number exactly 15",
-    "remaining_thawed_aliquot_discarded_at_session_end": "boolean true"
+    "remaining_thawed_aliquot_discarded_at_session_end": "boolean true",
+    "application_status": "exact string complete or failed",
+    "marked_arm_passes_completed": "integer 0..6 or null only when the observed count is unavailable under application_status=failed",
+    "control_arm_passes_completed": "integer 0..6 or null only when the observed count is unavailable under application_status=failed",
+    "marked_arm_actual_volume_ul": "number in [0,12] or null only when unavailable under application_status=failed",
+    "control_arm_actual_volume_ul": "number in [0,12] or null only when unavailable under application_status=failed",
+    "application_failure_description": "null when application_status=complete; nonempty text when application_status=failed"
   },
   "validation_rules": [
     "donor colonies must be distinct from all 12 test colonies",
@@ -45,10 +51,14 @@
     "4 eq/mL * 0.012 mL / 10 cm must equal 0.0048 eq/cm",
     "each session-use batch_id must exactly equal the parent master-stock batch_id and its aliquot_id must belong to that same batch",
     "an aliquot may be thawed exactly once",
-    "no recipe or application change is permitted after collection starts"
+    "no recipe or application change is permitted after collection starts",
+    "exactly one master-stock batch record may exist for the dataset and all session-use records must reference that one batch_id",
+    "if application_status=complete then marked_arm_passes_completed=6, control_arm_passes_completed=6, marked_arm_actual_volume_ul=12, control_arm_actual_volume_ul=12, and application_failure_description=null",
+    "if application_status=failed then partial or unavailable observed pass counts and volumes must be preserved honestly, application_failure_description must be nonempty, and affected trials must use verified_apparatus_or_stimulus_preparation_failure_logged_without_consulting_behavioral_outcome; never fabricate six passes or 12 uL"
   ],
   "firewall": {
     "behavioral_outcomes_may_change_recipe": false,
     "behavioral_outcomes_may_change_application_method": false
-  }
+  },
+  "dataset_cardinality_rule": "Exactly one master-stock batch record is permitted for the entire 480-trial dataset; every chemical session-use record and every trial must reference that single batch_id."
 }
