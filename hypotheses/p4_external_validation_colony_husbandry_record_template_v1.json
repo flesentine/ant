@@ -35,11 +35,35 @@
     "all 40 trials for a colony must share test_date_local and each trial_start_timestamp must fall 2 through 10 hours after test_day_lights_on_timestamp_local",
     "session room temperature and relative humidity remain recorded per trial/session under the trial schema",
     "no food reward may be present in the test maze",
-    "no environmental or husbandry protocol change is permitted after collection starts"
+    "no environmental or husbandry protocol change is permitted after collection starts",
+    "activation validates only the prospective setup fields that can truthfully exist before trial 1; first-trial time, observed test date, observed lights-on relation, and derived durations are validated during collection and final dataset qualification"
   ],
   "firewall": {
     "behavioral_outcomes_may_change_husbandry": false,
     "behavioral_outcomes_may_change_test_environment": false,
     "source_colony_identity_change_after_collection_starts_authorized": false
-  }
+  },
+  "activation_required_prospective_fields": [
+    "colony_id",
+    "wild_source_colony_id",
+    "source_nest_id",
+    "lab_acclimation_start_timestamp_local",
+    "pre_deprivation_sucrose_molarity_M",
+    "pre_deprivation_sucrose_ad_libitum",
+    "pre_deprivation_chopped_cockroach_feedings_per_week",
+    "food_deprivation_start_timestamp_local",
+    "water_ad_libitum_during_deprivation",
+    "light_dark_cycle_hours",
+    "no_food_reward_present_in_test_maze"
+  ],
+  "collection_observed_or_derived_fields": [
+    "first_trial_timestamp_local",
+    "lab_acclimation_days_before_first_trial",
+    "food_deprivation_hours_before_first_trial",
+    "test_date_local",
+    "test_day_lights_on_timestamp_local",
+    "all_trials_within_2_to_10_hours_after_lights_on",
+    "husbandry_or_environment_deviation"
+  ],
+  "activation_rule": "Before the first biological trial, all 12 records must exist with every activation_required_prospective_fields value complete and valid, including distinct source nests. Fields in collection_observed_or_derived_fields must not be prefilled from future observations; they are recorded or derived prospectively as each colony is tested."
 }
