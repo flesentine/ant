@@ -20,15 +20,15 @@ const neutralRel='experiments/neutral_y_maze.json';
 
 for(const [rel,sha] of [
   [preregRel,'b8a683e0199e6564a1fedc6f54391a535c32e0e4'],
-  [authRel,'bf76e546c2beac5190e561b79749f8161b823846'],
+  [authRel,'0df255fe204b17ce9fdb0252ebf9d3fa7c5e2a5a'],
   [sideRel,'9ffd7ef45a611c93eac35626399632b4f822225a'],
   [poseManifestRel,'ee5f1b46bbca780196117d554f8b708b3f2ed34e'],
   [chemicalRel,'c74dd24db1fad3d64f0a7dc49c2f9be2d2eedeb6'],
   [husbandryRel,'aa7b62ec10aed4899b6c60071dea9e608524a407'],
   [videoRel,'472fcb5708c9b279f94cdbd2bc56a8e7eca6abed'],
-  [trialRel,'5b97e96d298f8856206e6fe14adfcf839a4df051'],
+  [trialRel,'da0cfd39a0bbe592833be0a56576d8c2ac7347b7'],
   [collectorRel,'02289bed5ef4785bbadc584ef5077b633779d089'],
-  [checklistRel,'cd981f0a2af07d232021f019f30301b833dfd711'],
+  [checklistRel,'b843b1522ca0e9619b695579f0a15007ceb11aa3'],
   [simCoreRel,'24777aac3577d442893e4779d70aee4e27761fe8'],
   [neutralRel,'e61793266a7716587ef11fc96e0959f86103931c']
 ]) assert.strictEqual(blob(rel),sha,rel+' blob drift');
@@ -149,7 +149,8 @@ assert.ok(trial.required_fields.includes('fresh_substrate_installed_for_trial'),
 assert.ok(trial.required_fields.includes('reusable_maze_base_cleaned_with_70_percent_ethanol_before_trial'),'ethanol cleaning compliance missing');
 assert.ok(trial.required_fields.includes('reusable_maze_base_fully_dry_before_fresh_substrate_installation'),'base drying compliance missing');
 assert.ok(trial.field_contracts.worker_assay_naive_before_trial.includes('must be true for promotion-grade execution'),'naivety contract missing');
-assert.ok(trial.field_contracts.substrate_piece_id.includes('unique across all 480 planned trials'),'substrate uniqueness contract missing');
+assert.ok(trial.field_contracts.substrate_piece_id.includes('unique across all non-null planned trial records'),'substrate uniqueness contract missing');
+assert.ok(trial.field_contracts.substrate_piece_id.includes('null only when no paper overlay was installed'),'pre-installation substrate null exception missing');
 assert.deepStrictEqual(trial.allowed_exclusion_reasons,prereg.predeclared_exclusions_and_quality.allowed_trial_exclusion_reasons);
 const rules=trial.consistency_rules.join('\n');
 assert.ok(rules.includes('colony_id must exactly equal the C## colony prefix encoded by trial_id'));
@@ -161,7 +162,9 @@ assert.ok(rules.includes('pheromone_batch_id must exactly equal the batch_id sto
 assert.ok(rules.includes('video_capture_status=usable')&&rules.includes('video_file_id must be nonempty'));
 assert.ok(rules.includes('video_capture_status=failed')&&rules.includes('video_file_id may be null only when exclusion_flag=true'));
 assert.ok(rules.includes('worker_assay_naive_before_trial must be true for a promotion-grade conforming trial'),'worker-naivety rule missing');
-assert.ok(rules.includes('substrate_piece_id must be unique across all 480 planned trials'),'unique substrate rule missing');
+assert.ok(rules.includes('every non-null substrate_piece_id must be unique across all planned trial records'),'unique substrate rule missing');
+assert.ok(rules.includes('substrate_piece_id may be null only when fresh_substrate_installed_for_trial=false'),'pre-installation substrate null rule missing');
+assert.ok(rules.includes('if fresh_substrate_installed_for_trial=true then substrate_piece_id must be nonempty'),'installed substrate must retain ID');
 assert.ok(rules.includes('fresh_substrate_installed_for_trial')&&rules.includes('reusable_maze_base_cleaned_with_70_percent_ethanol_before_trial')&&rules.includes('reusable_maze_base_fully_dry_before_fresh_substrate_installation'),'cleaning/substrate compliance rule missing');
 assert.ok(rules.includes('both terminal first-entry times are null')&&rules.includes('timeout must be true'));
 assert.ok(rules.includes('exactly one terminal first-entry time is non-null')&&rules.includes('scored_choice must equal that terminal side'));
@@ -188,7 +191,9 @@ assert.strictEqual(collector.firewall.candidate_prediction_disclosure_to_collect
 assert.strictEqual(checklist.status,'frozen_before_biological_collection');
 for(const required of ['collector_identity_is_real_nonempty_and_frozen','all_collector_independence_attestations_are_true','all_12_colony_husbandry_records_are_complete_and_valid','all_12_colony_source_nest_ids_are_distinct','marked_side_schedule_blob_is_unchanged','release_pose_schedule_manifest_and_all_part_blobs_are_unchanged','chemical_batch_template_blob_is_unchanged','colony_husbandry_template_blob_is_unchanged','chemical_session_batch_binding_is_enforced','fresh_codex_review_is_clean_on_exact_head','activation_commit_is_qualified_on_permanent_main']) assert.ok(checklist.must_all_be_true_before_first_trial.includes(required),required+' missing from activation checklist');
 assert.ok(checklist.activation_may_change.includes('prospective_colony_husbandry_records_from_absent_to_complete'));
-for(const required of ['worker_assay_naivety_is_verified_before_every_trial','fresh_unique_substrate_and_between_trial_cleaning_provenance_is_complete_for_every_trial']) assert.ok(checklist.must_all_be_true_before_first_trial.includes(required),required+' missing from activation checklist');
+for(const required of ['worker_assay_naivety_field_and_enforcement_are_frozen','per_trial_fresh_substrate_and_cleaning_fields_and_enforcement_are_frozen']) assert.ok(checklist.must_all_be_true_before_first_trial.includes(required),required+' missing from activation checklist');
+assert.ok(!checklist.must_all_be_true_before_first_trial.includes('worker_assay_naivety_is_verified_before_every_trial'),'future naivety evidence cannot be prefilled at activation');
+assert.ok(!checklist.must_all_be_true_before_first_trial.includes('fresh_unique_substrate_and_between_trial_cleaning_provenance_is_complete_for_every_trial'),'future cleaning evidence cannot be prefilled at activation');
 for(const frozen of ['preregistration','Candidate_307_parameters_or_prediction','marked_side_schedule','release_pose_schedule','environment_or_husbandry_contract','statistical_comparison_or_promotion_rule']) assert.ok(checklist.activation_may_not_change.includes(frozen));
 
 assert.strictEqual(auth.activation_rule.requires_collector_exclusion_from_this_dataset_outcome_analysis,true);
@@ -196,8 +201,9 @@ assert.strictEqual(auth.activation_rule.requires_complete_valid_12_colony_husban
 assert.strictEqual(auth.activation_rule.requires_chemical_session_batch_binding,true);
 assert.strictEqual(auth.activation_rule.requires_failed_video_provenance_without_fabrication,true);
 assert.strictEqual(auth.activation_rule.requires_one_local_test_day_per_colony,true);
-assert.strictEqual(auth.activation_rule.requires_worker_assay_naivety_verification,true);
-assert.strictEqual(auth.activation_rule.requires_per_trial_fresh_substrate_and_cleaning_provenance,true);
+assert.strictEqual(auth.activation_rule.requires_worker_assay_naivety_field_and_enforcement_frozen_at_activation,true);
+assert.strictEqual(auth.activation_rule.requires_per_trial_fresh_substrate_and_cleaning_fields_and_enforcement_frozen_at_activation,true);
+assert.strictEqual(auth.activation_rule.requires_per_trial_naivety_substrate_and_cleaning_evidence_recorded_prospectively_during_collection,true);
 assert.strictEqual(auth.gate_checks.collector_identity_frozen,false);
 assert.strictEqual(auth.gate_checks.collector_independence_attestations_all_true,false);
 assert.strictEqual(auth.gate_checks.all_12_colony_husbandry_records_complete_and_valid,false);
