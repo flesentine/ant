@@ -65,6 +65,7 @@ assert.match(app,/P4_local_sector_hard_detection_weber_steering_v1/);
 assert.match(app,/return window\.AntLabP4\.Simulation/);
 assert.match(app,/return window\.AntLabIntegrity\.Simulation/);
 assert.match(app,/drawExternalFields/);
+assert.match(app,/p4DoseRatio\)>0/,'zero-dose overlay guard missing');
 assert.match(app,/PHEROMONE TRAIL/);
 assert.match(app,/noncanonical descriptive visualization only/);
 assert.ok(!/Candidate 307[^\n]*should choose/i.test(app),'UI must not imply deterministic individual choice');
