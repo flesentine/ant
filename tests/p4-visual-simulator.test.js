@@ -47,6 +47,12 @@ assert.strictEqual(neutral.protocol.painted_trail.applied_hindgut_equivalents_pe
 assert.strictEqual(neutral.metadata.evidence_class,'synthetic_control_not_biological_fit');
 
 const html=read('index.html'),app=read('src/app.js');
+const pages=read('.github/workflows/pages.yml');
+assert.match(pages,/cp src\/app\.js[^\n]*src\/p1\.js[^\n]*src\/p4\.js[^\n]*_site\/src\//,'Pages artifact must ship P1 helper and P4 runtime');
+assert.ok(html.includes('H5-v1 failed promotion'),'frozen H5 failed-promotion disclosure missing');
+assert.ok(html.includes('official result frozen'),'frozen H5 result disclosure missing');
+assert.ok(html.includes('H5-v1 closed'),'frozen H5 closure disclosure missing');
+
 for(const name of [
   'y_maze_p4_left_consistency_v1.json',
   'y_maze_p4_right_consistency_v1.json',
