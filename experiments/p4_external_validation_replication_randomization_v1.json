@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "id": "p4_external_validation_replication_randomization_v1",
+  "status": "frozen_before_biological_collection",
+  "preregistration_git_blob_sha": "b8a683e0199e6564a1fedc6f54391a535c32e0e4",
+  "rng_git_blob_sha": "24777aac3577d442893e4779d70aee4e27761fe8",
+  "algorithm": "Per colony: start with L*20 + R*20; Fisher-Yates i=39..1, j=floor(RNG.next()*(i+1)); RNG is frozen src/sim-core.js; seed=93441001+(colony_index-1).",
+  "canonical_trial_order": "C01-T01..C01-T40,C02-T01..C12-T40",
+  "encoding": "Each colony_schedule string has 40 characters; character i is marked side for trial i+1.",
+  "seed_root": 93441001,
+  "colony_schedules": [
+    "RLRRRRLRLLRLRRLRRRLLLRLRLLRLLLLLRRRLRLLR",
+    "RLRRRLLLRLLRLLRLLLLRRRRLRLRRLLLLLRLRRRRR",
+    "RRLRRLLLLRLLLRRRLRLLLLRRRRRRRLRLLLRRLLRL",
+    "RRRRLRRLLRRRRLLRRLLLRLRRRRLRLLLLLRLLLRLL",
+    "LLLLRLRRLRRRLRLLLRLRRRLRLLLRRRRRLRRRLLLL",
+    "RRLRRLLLRLLLLRLLRLRRRLLRRLLRRRLRLRRRLLLR",
+    "RRRRLLRLLLLLRLRLRLLRRLLLRLRRRLLRLRLRRLRR",
+    "RLRRRRLRLRRLLRLRLLRRLLLRLLRLRRRLLLRLLLRR",
+    "LRLRRRRLLRLRLLLLRLRLRRRRLRLLRLRRLLRLLRLR",
+    "RLLRRRLLLRLRRLRLLRLRRLLLLRLLRLRRLRLLRRRR",
+    "LRRLRLLLLRLRLRRLRLRRLLRLLRLRRLLRRRRRLRLL",
+    "RLLLLRRLLLLRRRLRRRRLLLLRRRLRLLRRRLRLRLLR"
+  ],
+  "checks": {
+    "colonies": 12,
+    "trials_per_colony": 40,
+    "L_per_colony": 20,
+    "R_per_colony": 20,
+    "total_trials": 480
+  },
+  "firewall": {
+    "outcomes_used": false,
+    "rerandomization_after_collection_starts": false
+  }
+}
