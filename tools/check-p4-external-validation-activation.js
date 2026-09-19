@@ -3,6 +3,7 @@
 const fs=require('fs');
 const path=require('path');
 const {execFileSync}=require('child_process');
+const {isDeepStrictEqual}=require('util');
 
 const COLLECTOR_ATTESTATIONS=[
   'did_not_participate_in_P4_parameter_estimation',
@@ -49,9 +50,22 @@ function isPlaceholder(value){
 }
 
 function isOffsetTimestamp(value){
-  return typeof value==='string' &&
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?[+-]\d{2}:\d{2}$/.test(value) &&
-    Number.isFinite(Date.parse(value));
+  if(typeof value!=='string') return false;
+  const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?([+-])(\d{2}):(\d{2})$/.exec(value);
+  if(!m) return false;
+  const year=Number(m[1]),month=Number(m[2]),day=Number(m[3]);
+  const hour=Number(m[4]),minute=Number(m[5]),second=Number(m[6]||0);
+  const offsetHour=Number(m[9]),offsetMinute=Number(m[10]);
+  if(month<1||month>12||hour>23||minute>59||second>59||offsetMinute>59) return false;
+  if(offsetHour>14||(offsetHour===14&&offsetMinute!==0)) return false;
+  const calendar=new Date(Date.UTC(year,month-1,day,hour,minute,second));
+  if(calendar.getUTCFullYear()!==year||
+     calendar.getUTCMonth()!==month-1||
+     calendar.getUTCDate()!==day||
+     calendar.getUTCHours()!==hour||
+     calendar.getUTCMinutes()!==minute||
+     calendar.getUTCSeconds()!==second) return false;
+  return Number.isFinite(Date.parse(value));
 }
 
 function assertBlob(errors,root,rel,expected,label=rel){
@@ -94,6 +108,7 @@ function validateFrozenRepository(root){
     ['colony_husbandry_record_template_file','colony_husbandry_record_template_git_blob_sha','colony husbandry template'],
     ['video_calibration_record_template_file','video_calibration_record_template_git_blob_sha','video calibration template'],
     ['trial_record_schema_file','trial_record_schema_git_blob_sha','trial record schema'],
+    ['collector_independence_record_file','collector_independence_record_git_blob_sha','collector independence record'],
     ['collection_activation_checklist_file','collection_activation_checklist_git_blob_sha','activation checklist']
   ];
   for(const [fileKey,shaKey,label] of pinned) assertBlob(errors,root,frozen[fileKey],frozen[shaKey],label);
@@ -112,7 +127,7 @@ function validateFrozenRepository(root){
   return {errors,authorization:auth};
 }
 
-function validateCollector(record,preregBlob){
+function validateCollector(record,frozenRecord,preregBlob){
   const errors=[];
   if(!record||typeof record!=='object'||Array.isArray(record)) return ['collector record must be a JSON object'];
   if(record.schema_version!==1) errors.push('collector schema_version must be 1');
@@ -141,6 +156,26 @@ function validateCollector(record,preregBlob){
 
   if(record.current_authorization_condition_satisfied!==true){
     errors.push('collector current_authorization_condition_satisfied must be true after identity/attestations are completed');
+  }
+
+  if(frozenRecord&&typeof frozenRecord==='object'&&!Array.isArray(frozenRecord)){
+    const expectedKeys=Object.keys(frozenRecord.required_attestations_before_authorization||{}).sort();
+    const actualKeys=Object.keys(record.required_attestations_before_authorization||{}).sort();
+    if(!isDeepStrictEqual(actualKeys,expectedKeys)) errors.push('collector attestation keys must exactly match the frozen record');
+
+    const normalized=JSON.parse(JSON.stringify(record));
+    const frozenNormalized=JSON.parse(JSON.stringify(frozenRecord));
+    for(const key of ['collector_identity','collector_team_or_affiliation','identity_frozen','status','current_authorization_condition_satisfied']){
+      normalized[key]=frozenNormalized[key];
+    }
+    if(normalized.required_attestations_before_authorization&&frozenNormalized.required_attestations_before_authorization){
+      for(const key of expectedKeys){
+        normalized.required_attestations_before_authorization[key]=frozenNormalized.required_attestations_before_authorization[key];
+      }
+    }
+    if(!isDeepStrictEqual(normalized,frozenNormalized)){
+      errors.push('collector record changes immutable frozen fields outside identity, affiliation, attestations, or authorization state');
+    }
   }
 
   return errors;
@@ -183,11 +218,19 @@ function validateHusbandry(input,template){
     if(!requiredIds.includes(r.colony_id)) errors.push(`${where}.colony_id must be C01..C12`);
     if(isPlaceholder(r.wild_source_colony_id)) errors.push(`${where}.wild_source_colony_id must be non-placeholder`);
     if(isPlaceholder(r.source_nest_id)) errors.push(`${where}.source_nest_id must be non-placeholder`);
-    if(!isOffsetTimestamp(r.lab_acclimation_start_timestamp_local)) errors.push(`${where}.lab_acclimation_start_timestamp_local must be ISO-8601 with explicit offset`);
+    if(!isOffsetTimestamp(r.lab_acclimation_start_timestamp_local)) errors.push(`${where}.lab_acclimation_start_timestamp_local must be ISO-8601 with explicit offset and a valid calendar date`);
     if(r.pre_deprivation_sucrose_molarity_M!==0.5) errors.push(`${where}.pre_deprivation_sucrose_molarity_M must equal 0.5`);
     if(r.pre_deprivation_sucrose_ad_libitum!==true) errors.push(`${where}.pre_deprivation_sucrose_ad_libitum must be true`);
     if(r.pre_deprivation_chopped_cockroach_feedings_per_week!==3) errors.push(`${where}.pre_deprivation_chopped_cockroach_feedings_per_week must equal 3`);
-    if(!isOffsetTimestamp(r.food_deprivation_start_timestamp_local)) errors.push(`${where}.food_deprivation_start_timestamp_local must be ISO-8601 with explicit offset`);
+    if(!isOffsetTimestamp(r.food_deprivation_start_timestamp_local)) errors.push(`${where}.food_deprivation_start_timestamp_local must be ISO-8601 with explicit offset and a valid calendar date`);
+    if(isOffsetTimestamp(r.lab_acclimation_start_timestamp_local)&&isOffsetTimestamp(r.food_deprivation_start_timestamp_local)){
+      const acclimationStart=Date.parse(r.lab_acclimation_start_timestamp_local);
+      const deprivationStart=Date.parse(r.food_deprivation_start_timestamp_local);
+      const minimumSeparationMs=70*60*60*1000;
+      if(deprivationStart-acclimationStart<minimumSeparationMs){
+        errors.push(`${where} has no feasible first-trial time satisfying both >=7 days acclimation and 94-98 hours food deprivation; deprivation start must be at least 70 hours after acclimation start`);
+      }
+    }
     if(r.water_ad_libitum_during_deprivation!==true) errors.push(`${where}.water_ad_libitum_during_deprivation must be true`);
     if(r.light_dark_cycle_hours!=='12:12') errors.push(`${where}.light_dark_cycle_hours must equal 12:12`);
     if(r.no_food_reward_present_in_test_maze!==true) errors.push(`${where}.no_food_reward_present_in_test_maze must be true`);
@@ -224,12 +267,13 @@ function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath}){
   const frozen=validateFrozenRepository(root);
   const auth=frozen.authorization;
   const husbandryTemplate=readJson(path.join(root,auth.frozen_collection_inputs.colony_husbandry_record_template_file));
+  const frozenCollector=readJson(path.join(root,auth.frozen_collection_inputs.collector_independence_record_file));
   const collector=readJson(collectorPath);
   const husbandry=readJson(husbandryPath);
   const declaration=readJson(declarationPath);
 
   const errors=[...frozen.errors];
-  errors.push(...validateCollector(collector,auth.qualified_preregistration.git_blob_sha));
+  errors.push(...validateCollector(collector,frozenCollector,auth.qualified_preregistration.git_blob_sha));
   errors.push(...validateHusbandry(husbandry,husbandryTemplate));
   errors.push(...validateDeclaration(declaration));
 
