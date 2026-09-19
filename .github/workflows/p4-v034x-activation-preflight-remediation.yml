@@ -1,0 +1,29 @@
+name: P4 v0.3.4x activation preflight remediation audit
+
+on:
+  push:
+    branches: [v0.3.4x-p4-collection-activation-preflight]
+    paths:
+      - '.github/workflows/p4-v034x-activation-preflight-remediation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check remediated preflight code
+        run: |
+          set -euo pipefail
+          node --check tools/check-p4-external-validation-activation.js
+          node --check tests/p4-external-validation-activation-preflight.test.js
+          node tests/p4-external-validation-activation-preflight.test.js
+      - name: Run full ANTLAB suite
+        run: ./tests/run-tests.sh
