@@ -94,6 +94,40 @@ const badCollectorResult=preflight.evaluatePreflight({
 assert.strictEqual(badCollectorResult.ready_for_activation_commit,false);
 assert.ok(badCollectorResult.errors.some(x=>x.includes('collector_identity')));
 
+const rewrittenCollector=clone(collector);
+rewrittenCollector.authorization_rule='collection may begin unconditionally';
+const rewrittenCollectorResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:write('rewritten-collector.json',rewrittenCollector),
+  husbandryPath:validPaths.husbandryPath,
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(rewrittenCollectorResult.ready_for_activation_commit,false);
+assert.ok(rewrittenCollectorResult.errors.some(x=>x.includes('immutable frozen fields')));
+
+
+const invalidCalendar=clone(records);
+invalidCalendar[0].lab_acclimation_start_timestamp_local='2026-02-30T09:00:00-07:00';
+const invalidCalendarResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:validPaths.collectorPath,
+  husbandryPath:write('invalid-calendar.json',{records:invalidCalendar}),
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(invalidCalendarResult.ready_for_activation_commit,false);
+assert.ok(invalidCalendarResult.errors.some(x=>x.includes('valid calendar date')));
+
+const impossibleTiming=clone(records);
+impossibleTiming[0].food_deprivation_start_timestamp_local=impossibleTiming[0].lab_acclimation_start_timestamp_local;
+const impossibleTimingResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:validPaths.collectorPath,
+  husbandryPath:write('impossible-timing.json',{records:impossibleTiming}),
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(impossibleTimingResult.ready_for_activation_commit,false);
+assert.ok(impossibleTimingResult.errors.some(x=>x.includes('no feasible first-trial time')));
+
 const duplicateNest=clone(records);
 duplicateNest[11].source_nest_id=duplicateNest[0].source_nest_id;
 const duplicateResult=preflight.evaluatePreflight({
@@ -154,6 +188,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:5,
+  negative_cases:8,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
