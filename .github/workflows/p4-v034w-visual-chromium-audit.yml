@@ -167,6 +167,10 @@ jobs:
       - name: Verify actual ANTLAB P4 visual entries load in Chrome
         run: |
           set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/ui-http.log 2>&1 &
+          UI_SERVER_PID=$!
+          trap 'kill $UI_SERVER_PID || true' EXIT
+          sleep 1
           python3 <<'PY'
           from pathlib import Path
           src=Path('index.html').read_text()
