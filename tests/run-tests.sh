@@ -88,6 +88,7 @@ node tests/p4-ymaze-consistency-stage-B-interpretation.test.js
 node tests/p4-external-validation-source-discovery.test.js
 node tests/p4-external-validation-preregistration.test.js
 node tests/p4-external-validation-collection-authorization.test.js
+node tests/p4-visual-simulator.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
@@ -98,6 +99,7 @@ node --check src/p1.js
 node --check src/p2.js
 node --check src/p4.js
 node --check src/app.js
+node --check tests/p4-visual-simulator.test.js
 node --check tools/run-benchmark.js
 node --check tools/run-model-competition.js
 node --check tools/run-h2-mechanism.js
