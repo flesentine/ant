@@ -84,6 +84,14 @@ assert.deepStrictEqual(ready.post_commit_gates_remaining,[
 ]);
 assert.ok(ready.manual_verification_required.includes('collector_identity_and_affiliation_are_real_and_truthful'));
 
+const invalidClockResult=preflight.evaluatePreflight({
+  root,
+  ...validPaths,
+  preflightTimeMs:NaN
+});
+assert.strictEqual(invalidClockResult.ready_for_activation_commit,false);
+assert.ok(invalidClockResult.errors.some(x=>x.includes('preflightTimeMs must be a finite')));
+
 const cli=spawnSync(process.execPath,[
   path.join(root,'tools/check-p4-external-validation-activation.js'),
   '--collector',validPaths.collectorPath,
@@ -274,6 +282,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:15,
+  negative_cases:16,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
