@@ -131,13 +131,19 @@ function scaffoldReadme(){
     '',
     'The husbandry file pre-populates only immutable protocol constants from the already-frozen husbandry contract.',
     '',
-    'After the real prospective values are complete, run:',
+    'Collector edits are limited to the real collector identity and affiliation, identity_frozen=true, the seven required attestations=true, and current_authorization_condition_satisfied=true. Do not rewrite status, role, preregistration binding, authorization_rule, or firewall fields.',
+    '',
+    'For each husbandry row, supply only the real wild-source colony ID, distinct source-nest ID, lab acclimation start timestamp, and food-deprivation start timestamp. Do not add future observed or derived fields before collection.',
+    '',
+    'Complete the precollection declaration only when its identity, timestamp, and all three assertions are truthful.',
+    '',
+    'After the real prospective values are complete, run this from the ANTLAB repository root using the packet paths:',
     '',
     '~~~bash',
     'node tools/check-p4-external-validation-activation.js \\',
-    '  --collector ./collector.json \\',
-    '  --husbandry ./husbandry.json \\',
-    '  --declaration ./precollection-declaration.json \\',
+    '  --collector /path/to/p4-activation-packet/collector.json \\',
+    '  --husbandry /path/to/p4-activation-packet/husbandry.json \\',
+    '  --declaration /path/to/p4-activation-packet/precollection-declaration.json \\',
     '  --json',
     '~~~',
     '',
@@ -185,23 +191,33 @@ function writePacket(options){
   const readme=scaffoldReadme();
 
   fs.mkdirSync(resolvedOut,{recursive:true});
-  writeJson(targets['collector.json'],collector);
-  writeJson(targets['husbandry.json'],husbandry);
-  writeJson(targets['precollection-declaration.json'],declaration);
-  fs.writeFileSync(targets['README.md'],readme,{encoding:'utf8',flag:'wx'});
+  const created=[];
+  let preflight;
+  try{
+    writeJson(targets['collector.json'],collector);
+    created.push(targets['collector.json']);
+    writeJson(targets['husbandry.json'],husbandry);
+    created.push(targets['husbandry.json']);
+    writeJson(targets['precollection-declaration.json'],declaration);
+    created.push(targets['precollection-declaration.json']);
+    fs.writeFileSync(targets['README.md'],readme,{encoding:'utf8',flag:'wx'});
+    created.push(targets['README.md']);
 
-  const preflight=evaluatePreflight({
-    root:resolvedRoot,
-    collectorPath:targets['collector.json'],
-    husbandryPath:targets['husbandry.json'],
-    declarationPath:targets['precollection-declaration.json']
-  });
+    preflight=evaluatePreflight({
+      root:resolvedRoot,
+      collectorPath:targets['collector.json'],
+      husbandryPath:targets['husbandry.json'],
+      declarationPath:targets['precollection-declaration.json']
+    });
 
-  if(preflight.ready_for_activation_commit!==false||preflight.collection_authorized!==false){
-    for(const file of Object.values(targets)){
+    if(preflight.ready_for_activation_commit!==false||preflight.collection_authorized!==false){
+      throw new Error('generated scaffold unexpectedly passed activation preflight');
+    }
+  }catch(err){
+    for(const file of created){
       try{fs.rmSync(file,{force:true});}catch(_err){}
     }
-    throw new Error('generated scaffold unexpectedly passed activation preflight; generated files were removed');
+    throw err;
   }
 
   return {
