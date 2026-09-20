@@ -77,6 +77,14 @@ function gitHeadBlob(root,rel){
   }
 }
 
+function gitIndexBlob(root,rel){
+  try{
+    return execFileSync('git',['rev-parse',`:${rel}`],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+  }catch{
+    return null;
+  }
+}
+
 function isPlaceholder(value){
   if(typeof value!=='string'||!value.trim()) return true;
   const s=value.trim().toLowerCase();
@@ -124,6 +132,9 @@ function assertBlob(errors,root,rel,expected,label=rel){
   const committed=gitHeadBlob(root,rel);
   if(committed===null) errors.push(`${label}: file is not present at committed HEAD: ${rel}`);
   else if(committed!==expected) errors.push(`${label}: committed blob drift ${committed} != ${expected}`);
+  const staged=gitIndexBlob(root,rel);
+  if(staged===null) errors.push(`${label}: file is not present in the Git index: ${rel}`);
+  else if(staged!==expected) errors.push(`${label}: staged blob drift ${staged} != ${expected}`);
   const actual=gitBlob(root,rel);
   if(actual!==expected) errors.push(`${label}: working-tree blob drift ${actual} != ${expected}`);
 }
