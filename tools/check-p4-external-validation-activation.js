@@ -187,7 +187,7 @@ function husbandryRecords(value){
   return null;
 }
 
-function validateHusbandry(input,template){
+function validateHusbandry(input,template,preflightTimeMs=Date.now()){
   const errors=[];
   const records=husbandryRecords(input);
   if(!records) return ['husbandry input must be an array or an object with a records array'];
@@ -230,6 +230,10 @@ function validateHusbandry(input,template){
       if(deprivationStart-acclimationStart<minimumSeparationMs){
         errors.push(`${where} has no feasible first-trial time satisfying both >=7 days acclimation and 94-98 hours food deprivation; deprivation start must be at least 70 hours after acclimation start`);
       }
+      const latestFirstTrialMs=deprivationStart+(98*60*60*1000);
+      if(latestFirstTrialMs<=preflightTimeMs){
+        errors.push(`${where} has no feasible first-trial time remaining at preflight; the 98-hour food-deprivation window has already expired`);
+      }
     }
     if(r.water_ad_libitum_during_deprivation!==true) errors.push(`${where}.water_ad_libitum_during_deprivation must be true`);
     if(r.light_dark_cycle_hours!=='12:12') errors.push(`${where}.light_dark_cycle_hours must equal 12:12`);
@@ -263,7 +267,7 @@ function validateDeclaration(record){
   return errors;
 }
 
-function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath}){
+function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath,preflightTimeMs=Date.now()}){
   const frozen=validateFrozenRepository(root);
   const auth=frozen.authorization;
   const husbandryTemplate=readJson(path.join(root,auth.frozen_collection_inputs.colony_husbandry_record_template_file));
@@ -274,7 +278,7 @@ function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath}){
 
   const errors=[...frozen.errors];
   errors.push(...validateCollector(collector,frozenCollector,auth.qualified_preregistration.git_blob_sha));
-  errors.push(...validateHusbandry(husbandry,husbandryTemplate));
+  errors.push(...validateHusbandry(husbandry,husbandryTemplate,preflightTimeMs));
   errors.push(...validateDeclaration(declaration));
 
   return {
