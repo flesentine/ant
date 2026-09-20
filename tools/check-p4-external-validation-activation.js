@@ -249,7 +249,7 @@ function validateCollector(record,frozenRecord,preregBlob){
 
     const normalized=JSON.parse(JSON.stringify(record));
     const frozenNormalized=JSON.parse(JSON.stringify(frozenRecord));
-    for(const key of ['collector_identity','collector_team_or_affiliation','identity_frozen','status','current_authorization_condition_satisfied']){
+    for(const key of ['collector_identity','collector_team_or_affiliation','identity_frozen','current_authorization_condition_satisfied']){
       normalized[key]=frozenNormalized[key];
     }
     if(normalized.required_attestations_before_authorization&&frozenNormalized.required_attestations_before_authorization){
