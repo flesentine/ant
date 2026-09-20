@@ -30,6 +30,29 @@ The precollection declaration must contain:
 }
 ```
 
+## Create a fail-closed activation packet scaffold
+
+Before real collector and colony-source information is available, generate an editable packet with:
+
+~~~bash
+node tools/create-p4-external-validation-activation-packet.js \
+  --out /path/to/p4-activation-packet \
+  --json
+~~~
+
+The scaffolder creates `collector.json`, `husbandry.json`, `precollection-declaration.json`, and a packet README. It copies the frozen collector record unchanged, creates C01–C12 husbandry rows, and pre-populates only frozen protocol constants such as 0.5 M sucrose, three chopped-cockroach feedings per week, water ad libitum, the 12:12 light/dark cycle, and no food reward in the maze.
+
+It deliberately leaves real collector identity/affiliation, independence attestations, source-colony/source-nest identifiers, acclimation/deprivation timestamps, and the precollection declaration unset. It also omits every field that can only be observed or derived during collection.
+
+The generator refuses to overwrite an existing packet and runs the activation preflight immediately after generation. A newly generated scaffold must remain fail-closed:
+
+~~~text
+ready_for_activation_commit=false
+collection_authorized=false
+~~~
+
+If a blank scaffold ever passes activation preflight, the generator removes the generated files and fails.
+
 ## What the preflight verifies
 
 The tool also verifies the frozen preregistration, marked-side schedule, release-pose manifest and all 12 release-pose slices, release initialization/RNG blobs, chemical template, husbandry template, calibration template, trial schema, and activation checklist against their pinned Git blob SHAs.
