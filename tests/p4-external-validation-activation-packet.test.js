@@ -63,6 +63,10 @@ try{
   const readme=fs.readFileSync(path.join(out,'README.md'),'utf8');
   assert.match(readme,/not an activation record/i);
   assert.match(readme,/collection_authorized=false/);
+  assert.match(readme,/Collector edits are limited to/);
+  assert.match(readme,/Do not rewrite status, role, preregistration binding/);
+  assert.match(readme,/Do not add future observed or derived fields before collection/);
+  assert.match(readme,/--collector \/path\/to\/p4-activation-packet\/collector\.json/);
   assert.ok(!readme.includes('0.740889950913122'),'scaffold must not disclose Candidate 307 prediction');
 
   const evaluated=preflight.evaluatePreflight({
