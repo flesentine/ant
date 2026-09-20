@@ -148,6 +148,17 @@ const whitespaceCollectorResult=preflight.evaluatePreflight({
 assert.strictEqual(whitespaceCollectorResult.ready_for_activation_commit,false);
 assert.ok(whitespaceCollectorResult.errors.some(x=>x.includes('collector_identity must not contain leading or trailing whitespace')));
 
+const rewrittenCollectorStatus=clone(collector);
+rewrittenCollectorStatus.status='collector_active_collection_authorized';
+const rewrittenCollectorStatusResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:write('rewritten-collector-status.json',rewrittenCollectorStatus),
+  husbandryPath:validPaths.husbandryPath,
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(rewrittenCollectorStatusResult.ready_for_activation_commit,false);
+assert.ok(rewrittenCollectorStatusResult.errors.some(x=>x.includes('immutable frozen fields')));
+
 const rewrittenCollector=clone(collector);
 rewrittenCollector.authorization_rule='collection may begin unconditionally';
 const rewrittenCollectorResult=preflight.evaluatePreflight({
@@ -304,6 +315,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:18,
+  negative_cases:19,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
