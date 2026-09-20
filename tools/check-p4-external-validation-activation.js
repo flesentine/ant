@@ -365,6 +365,7 @@ function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath,pre
   const declaration=readJson(declarationPath);
 
   const errors=[...frozen.errors];
+  if(!Number.isFinite(preflightTimeMs)) errors.push('preflightTimeMs must be a finite epoch-millisecond number');
   errors.push(...validateCollector(collector,frozenCollector,TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha));
   errors.push(...validateHusbandry(husbandry,husbandryTemplate,preflightTimeMs));
   errors.push(...validateDeclaration(declaration,preflightTimeMs));
