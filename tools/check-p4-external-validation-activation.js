@@ -80,7 +80,16 @@ function gitHeadBlob(root,rel){
 function isPlaceholder(value){
   if(typeof value!=='string'||!value.trim()) return true;
   const s=value.trim().toLowerCase();
-  return ['tbd','todo','unknown','pending','placeholder','n/a','na','none','null'].includes(s);
+  if(['tbd','todo','unknown','pending','placeholder','n/a','na','none','null'].includes(s)) return true;
+  return /^(?:tbd|todo|unknown|pending|placeholder|n\/a|na|none|null)(?:\b|[-_:])/i.test(s);
+}
+
+function hasOuterWhitespace(value){
+  return typeof value==='string' && value!==value.trim();
+}
+
+function normalizedIdentifier(value){
+  return typeof value==='string'?value.trim():value;
 }
 
 function isOffsetTimestamp(value){
@@ -252,6 +261,11 @@ function validateHusbandry(input,template,preflightTimeMs=Date.now()){
   const errors=[];
   const records=husbandryRecords(input);
   if(!records) return ['husbandry input must be an array or an object with a records array'];
+  if(!Array.isArray(input)){
+    for(const key of Object.keys(input)){
+      if(key!=='records') errors.push(`husbandry input contains unknown top-level field ${key}`);
+    }
+  }
   if(records.length!==12) errors.push(`exactly 12 husbandry records required; got ${records.length}`);
 
   const requiredIds=Array.from({length:12},(_,i)=>`C${String(i+1).padStart(2,'0')}`);
@@ -260,6 +274,7 @@ function validateHusbandry(input,template,preflightTimeMs=Date.now()){
   const nests=[];
   const prospective=template.activation_required_prospective_fields||[];
   const observed=template.collection_observed_or_derived_fields||[];
+  const allowedFields=new Set(Object.keys(template.required_fields||{}));
 
   for(let i=0;i<records.length;i++){
     const r=records[i];
@@ -272,11 +287,17 @@ function validateHusbandry(input,template,preflightTimeMs=Date.now()){
     wild.push(r.wild_source_colony_id);
     nests.push(r.source_nest_id);
 
+    for(const key of Object.keys(r)){
+      if(!allowedFields.has(key)) errors.push(`${where} contains unknown field ${key}`);
+    }
+
     for(const field of prospective){
       if(!(field in r)||r[field]===null||r[field]===undefined||r[field]==='') errors.push(`${where} missing prospective field ${field}`);
     }
 
     if(!requiredIds.includes(r.colony_id)) errors.push(`${where}.colony_id must be C01..C12`);
+    if(hasOuterWhitespace(r.wild_source_colony_id)) errors.push(`${where}.wild_source_colony_id must not contain leading or trailing whitespace`);
+    if(hasOuterWhitespace(r.source_nest_id)) errors.push(`${where}.source_nest_id must not contain leading or trailing whitespace`);
     if(isPlaceholder(r.wild_source_colony_id)) errors.push(`${where}.wild_source_colony_id must be non-placeholder`);
     if(isPlaceholder(r.source_nest_id)) errors.push(`${where}.source_nest_id must be non-placeholder`);
     if(!isOffsetTimestamp(r.lab_acclimation_start_timestamp_local)) errors.push(`${where}.lab_acclimation_start_timestamp_local must be ISO-8601 with explicit offset and a valid calendar date`);
@@ -310,9 +331,9 @@ function validateHusbandry(input,template,preflightTimeMs=Date.now()){
   if(new Set(ids).size!==ids.length) errors.push('colony_id values must be unique');
   if(records.length===12 && requiredIds.some(id=>!ids.includes(id))) errors.push('husbandry records must contain exactly one each of C01..C12');
   if(wild.some(isPlaceholder)) errors.push('all wild_source_colony_id values must be real non-placeholder identifiers');
-  if(new Set(wild).size!==wild.length) errors.push('all wild_source_colony_id values must be distinct');
+  if(new Set(wild.map(normalizedIdentifier)).size!==wild.length) errors.push('all wild_source_colony_id values must be distinct');
   if(nests.some(isPlaceholder)) errors.push('all source_nest_id values must be real non-placeholder identifiers');
-  if(new Set(nests).size!==nests.length) errors.push('all 12 source_nest_id values must be distinct');
+  if(new Set(nests.map(normalizedIdentifier)).size!==nests.length) errors.push('all 12 source_nest_id values must be distinct');
 
   return errors;
 }
@@ -320,6 +341,11 @@ function validateHusbandry(input,template,preflightTimeMs=Date.now()){
 function validateDeclaration(record,preflightTimeMs=Date.now()){
   const errors=[];
   if(!record||typeof record!=='object'||Array.isArray(record)) return ['precollection declaration must be a JSON object'];
+  const allowedFields=new Set(['attested_by','attested_at_local',...DECLARATION_TRUE_FIELDS]);
+  for(const key of Object.keys(record)){
+    if(!allowedFields.has(key)) errors.push(`declaration contains unknown field ${key}`);
+  }
+  if(hasOuterWhitespace(record.attested_by)) errors.push('declaration attested_by must not contain leading or trailing whitespace');
   if(isPlaceholder(record.attested_by)) errors.push('declaration attested_by must be non-placeholder');
   if(!isOffsetTimestamp(record.attested_at_local)) errors.push('declaration attested_at_local must be ISO-8601 with explicit offset');
   else if(Date.parse(record.attested_at_local)>preflightTimeMs) errors.push('declaration attested_at_local must not be in the future relative to preflight');
@@ -415,6 +441,8 @@ module.exports={
   TRUSTED_FROZEN_COLLECTION_INPUTS,
   validateFrozenAuthorizationContract,
   isPlaceholder,
+  hasOuterWhitespace,
+  normalizedIdentifier,
   isOffsetTimestamp,
   validateFrozenRepository,
   validateCollector,
