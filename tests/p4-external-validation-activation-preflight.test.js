@@ -65,6 +65,14 @@ const validPaths={
 const frozen=preflight.validateFrozenRepository(root);
 assert.deepStrictEqual(frozen.errors,[],'frozen repository preflight contracts must still match exact pinned blobs');
 
+const authorizationTemplate=JSON.parse(fs.readFileSync(path.join(root,'hypotheses/p4_external_validation_collection_authorization_v1.json'),'utf8'));
+const pairedTamper=clone(authorizationTemplate);
+pairedTamper.frozen_collection_inputs.marked_side_schedule_file='experiments/tampered_marked_side_schedule.json';
+pairedTamper.frozen_collection_inputs.marked_side_schedule_git_blob_sha='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const pairedTamperErrors=preflight.validateFrozenAuthorizationContract(pairedTamper);
+assert.ok(pairedTamperErrors.some(x=>x.includes('marked_side_schedule_file differs from trusted frozen contract')));
+assert.ok(pairedTamperErrors.some(x=>x.includes('marked_side_schedule_git_blob_sha differs from trusted frozen contract')));
+
 const ready=preflight.evaluatePreflight({root,...validPaths});
 assert.strictEqual(ready.ready_for_activation_commit,true);
 assert.strictEqual(ready.collection_authorized,false);
@@ -220,6 +228,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:10,
+  negative_cases:11,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
