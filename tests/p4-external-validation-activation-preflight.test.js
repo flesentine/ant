@@ -128,6 +128,21 @@ const impossibleTimingResult=preflight.evaluatePreflight({
 assert.strictEqual(impossibleTimingResult.ready_for_activation_commit,false);
 assert.ok(impossibleTimingResult.errors.some(x=>x.includes('no feasible first-trial time')));
 
+const expiredTiming=clone(records);
+for(const r of expiredTiming){
+  r.lab_acclimation_start_timestamp_local='2020-01-01T09:00:00-08:00';
+  r.food_deprivation_start_timestamp_local='2020-01-08T09:00:00-08:00';
+}
+const expiredTimingResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:validPaths.collectorPath,
+  husbandryPath:write('expired-timing.json',{records:expiredTiming}),
+  declarationPath:validPaths.declarationPath,
+  preflightTimeMs:Date.parse('2026-09-19T21:00:00-07:00')
+});
+assert.strictEqual(expiredTimingResult.ready_for_activation_commit,false);
+assert.ok(expiredTimingResult.errors.some(x=>x.includes('98-hour food-deprivation window has already expired')));
+
 const duplicateNest=clone(records);
 duplicateNest[11].source_nest_id=duplicateNest[0].source_nest_id;
 const duplicateResult=preflight.evaluatePreflight({
@@ -188,6 +203,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:8,
+  negative_cases:9,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
