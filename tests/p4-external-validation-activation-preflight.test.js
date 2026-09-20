@@ -126,6 +126,28 @@ const prefixedPlaceholderCollectorResult=preflight.evaluatePreflight({
 assert.strictEqual(prefixedPlaceholderCollectorResult.ready_for_activation_commit,false);
 assert.ok(prefixedPlaceholderCollectorResult.errors.some(x=>x.includes('collector_identity')));
 
+const missingStatusCollector=clone(collector);
+delete missingStatusCollector.status;
+const missingStatusCollectorResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:write('missing-status-collector.json',missingStatusCollector),
+  husbandryPath:validPaths.husbandryPath,
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(missingStatusCollectorResult.ready_for_activation_commit,false);
+assert.ok(missingStatusCollectorResult.errors.some(x=>x.includes('collector status must be present')));
+
+const whitespaceCollector=clone(collector);
+whitespaceCollector.collector_identity=' '+whitespaceCollector.collector_identity+' ';
+const whitespaceCollectorResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:write('whitespace-collector.json',whitespaceCollector),
+  husbandryPath:validPaths.husbandryPath,
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(whitespaceCollectorResult.ready_for_activation_commit,false);
+assert.ok(whitespaceCollectorResult.errors.some(x=>x.includes('collector_identity must not contain leading or trailing whitespace')));
+
 const rewrittenCollector=clone(collector);
 rewrittenCollector.authorization_rule='collection may begin unconditionally';
 const rewrittenCollectorResult=preflight.evaluatePreflight({
@@ -282,6 +304,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:16,
+  negative_cases:18,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
