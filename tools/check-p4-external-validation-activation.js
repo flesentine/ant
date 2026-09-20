@@ -35,6 +35,27 @@ const POST_COMMIT_GATES=[
   'activation_commit_is_qualified_on_permanent_main'
 ];
 
+
+const TRUSTED_QUALIFIED_PREREGISTRATION=Object.freeze({
+  file:'hypotheses/p4_external_validation_new_dataset_preregistration_v1.json',
+  git_blob_sha:'b8a683e0199e6564a1fedc6f54391a535c32e0e4'
+});
+
+const TRUSTED_FROZEN_COLLECTION_INPUTS=Object.freeze([
+  Object.freeze({fileKey:'marked_side_schedule_file',shaKey:'marked_side_schedule_git_blob_sha',label:'marked-side schedule',file:'experiments/p4_external_validation_replication_randomization_v1.json',git_blob_sha:'9ffd7ef45a611c93eac35626399632b4f822225a'}),
+  Object.freeze({fileKey:'release_pose_schedule_manifest_file',shaKey:'release_pose_schedule_manifest_git_blob_sha',label:'release-pose manifest',file:'experiments/p4_external_validation_replication_release_pose_schedule_v1.json',git_blob_sha:'ee5f1b46bbca780196117d554f8b708b3f2ed34e'}),
+  Object.freeze({fileKey:'chemical_batch_record_template_file',shaKey:'chemical_batch_record_template_git_blob_sha',label:'chemical batch template',file:'hypotheses/p4_external_validation_chemical_batch_record_template_v1.json',git_blob_sha:'7fc4188e5b4c454c944d555e957f3c2885ab4a30'}),
+  Object.freeze({fileKey:'colony_husbandry_record_template_file',shaKey:'colony_husbandry_record_template_git_blob_sha',label:'colony husbandry template',file:'hypotheses/p4_external_validation_colony_husbandry_record_template_v1.json',git_blob_sha:'b0a3a9bac49093c8650e5625666be387519895a4'}),
+  Object.freeze({fileKey:'video_calibration_record_template_file',shaKey:'video_calibration_record_template_git_blob_sha',label:'video calibration template',file:'hypotheses/p4_external_validation_video_calibration_record_template_v1.json',git_blob_sha:'231fd746f5aae187e67e7959c9907791a1cc07de'}),
+  Object.freeze({fileKey:'trial_record_schema_file',shaKey:'trial_record_schema_git_blob_sha',label:'trial record schema',file:'hypotheses/p4_external_validation_trial_record_schema_v1.json',git_blob_sha:'4072b72f7c3ea2de3a4eb24a37c850bd8b1d1193'}),
+  Object.freeze({fileKey:'collector_independence_record_file',shaKey:'collector_independence_record_git_blob_sha',label:'collector independence record',file:'hypotheses/p4_external_validation_collector_independence_record_v1.json',git_blob_sha:'02289bed5ef4785bbadc584ef5077b633779d089'}),
+  Object.freeze({fileKey:'collection_activation_checklist_file',shaKey:'collection_activation_checklist_git_blob_sha',label:'activation checklist',file:'hypotheses/p4_external_validation_collection_activation_checklist_v1.json',git_blob_sha:'1d983b319dc3946e6942a019981a490b20c3d049'})
+]);
+
+function trustedFrozenInput(fileKey){
+  return TRUSTED_FROZEN_COLLECTION_INPUTS.find(x=>x.fileKey===fileKey);
+}
+
 function readJson(file){
   return JSON.parse(fs.readFileSync(file,'utf8'));
 }
@@ -82,12 +103,43 @@ function assertBlob(errors,root,rel,expected,label=rel){
   if(actual!==expected) errors.push(`${label}: blob drift ${actual} != ${expected}`);
 }
 
+function validateFrozenAuthorizationContract(auth){
+  const errors=[];
+  if(!auth||typeof auth!=='object'||Array.isArray(auth)) return ['authorization record must be a JSON object'];
+  if(auth.id!=='P4_external_validation_collection_authorization_v1') errors.push('authorization id mismatch');
+  if(auth.qualified_preregistration?.file!==TRUSTED_QUALIFIED_PREREGISTRATION.file){
+    errors.push('authorization qualified preregistration file differs from trusted frozen contract');
+  }
+  if(auth.qualified_preregistration?.git_blob_sha!==TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha){
+    errors.push('authorization qualified preregistration blob differs from trusted frozen contract');
+  }
+
+  const frozen=auth.frozen_collection_inputs||{};
+  for(const item of TRUSTED_FROZEN_COLLECTION_INPUTS){
+    if(frozen[item.fileKey]!==item.file){
+      errors.push(`authorization ${item.fileKey} differs from trusted frozen contract`);
+    }
+    if(frozen[item.shaKey]!==item.git_blob_sha){
+      errors.push(`authorization ${item.shaKey} differs from trusted frozen contract`);
+    }
+  }
+
+  const checklist=trustedFrozenInput('collection_activation_checklist_file');
+  if(auth.activation_rule?.checklist_file!==checklist.file){
+    errors.push('authorization activation_rule checklist file differs from trusted frozen contract');
+  }
+  if(auth.activation_rule?.checklist_git_blob_sha!==checklist.git_blob_sha){
+    errors.push('authorization activation_rule checklist blob differs from trusted frozen contract');
+  }
+  return errors;
+}
+
 function validateFrozenRepository(root){
   const errors=[];
   const authRel='hypotheses/p4_external_validation_collection_authorization_v1.json';
   const auth=readJson(path.join(root,authRel));
 
-  if(auth.id!=='P4_external_validation_collection_authorization_v1') errors.push('authorization id mismatch');
+  errors.push(...validateFrozenAuthorizationContract(auth));
   if(auth.collection_authorized!==false) errors.push('preflight requires collection_authorized=false before activation commit');
   if(auth.gate_checks?.new_biological_outcomes_known_to_exist_at_gate!==false) errors.push('authorization gate says biological outcomes are already known');
   if(auth.gate_checks?.new_biological_outcome_access_authorized_at_gate!==false) errors.push('authorization gate permits biological outcome access');
@@ -95,26 +147,18 @@ function validateFrozenRepository(root){
 
   assertBlob(
     errors,root,
-    auth.qualified_preregistration?.file,
-    auth.qualified_preregistration?.git_blob_sha,
+    TRUSTED_QUALIFIED_PREREGISTRATION.file,
+    TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha,
     'qualified preregistration'
   );
 
-  const frozen=auth.frozen_collection_inputs||{};
-  const pinned=[
-    ['marked_side_schedule_file','marked_side_schedule_git_blob_sha','marked-side schedule'],
-    ['release_pose_schedule_manifest_file','release_pose_schedule_manifest_git_blob_sha','release-pose manifest'],
-    ['chemical_batch_record_template_file','chemical_batch_record_template_git_blob_sha','chemical batch template'],
-    ['colony_husbandry_record_template_file','colony_husbandry_record_template_git_blob_sha','colony husbandry template'],
-    ['video_calibration_record_template_file','video_calibration_record_template_git_blob_sha','video calibration template'],
-    ['trial_record_schema_file','trial_record_schema_git_blob_sha','trial record schema'],
-    ['collector_independence_record_file','collector_independence_record_git_blob_sha','collector independence record'],
-    ['collection_activation_checklist_file','collection_activation_checklist_git_blob_sha','activation checklist']
-  ];
-  for(const [fileKey,shaKey,label] of pinned) assertBlob(errors,root,frozen[fileKey],frozen[shaKey],label);
+  for(const item of TRUSTED_FROZEN_COLLECTION_INPUTS){
+    assertBlob(errors,root,item.file,item.git_blob_sha,item.label);
+  }
 
-  const releasePath=frozen.release_pose_schedule_manifest_file;
-  if(releasePath && fs.existsSync(path.join(root,releasePath))){
+  const releaseContract=trustedFrozenInput('release_pose_schedule_manifest_file');
+  const releasePath=releaseContract.file;
+  if(fs.existsSync(path.join(root,releasePath))){
     const release=readJson(path.join(root,releasePath));
     assertBlob(errors,root,release.simulation_initialization_file,release.simulation_initialization_git_blob_sha,'release initialization');
     assertBlob(errors,root,release.rng_file,release.rng_git_blob_sha,'release RNG');
@@ -271,14 +315,14 @@ function validateDeclaration(record,preflightTimeMs=Date.now()){
 function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath,preflightTimeMs=Date.now()}){
   const frozen=validateFrozenRepository(root);
   const auth=frozen.authorization;
-  const husbandryTemplate=readJson(path.join(root,auth.frozen_collection_inputs.colony_husbandry_record_template_file));
-  const frozenCollector=readJson(path.join(root,auth.frozen_collection_inputs.collector_independence_record_file));
+  const husbandryTemplate=readJson(path.join(root,trustedFrozenInput('colony_husbandry_record_template_file').file));
+  const frozenCollector=readJson(path.join(root,trustedFrozenInput('collector_independence_record_file').file));
   const collector=readJson(collectorPath);
   const husbandry=readJson(husbandryPath);
   const declaration=readJson(declarationPath);
 
   const errors=[...frozen.errors];
-  errors.push(...validateCollector(collector,frozenCollector,auth.qualified_preregistration.git_blob_sha));
+  errors.push(...validateCollector(collector,frozenCollector,TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha));
   errors.push(...validateHusbandry(husbandry,husbandryTemplate,preflightTimeMs));
   errors.push(...validateDeclaration(declaration,preflightTimeMs));
 
@@ -349,6 +393,9 @@ module.exports={
   COLLECTOR_ATTESTATIONS,
   DECLARATION_TRUE_FIELDS,
   POST_COMMIT_GATES,
+  TRUSTED_QUALIFIED_PREREGISTRATION,
+  TRUSTED_FROZEN_COLLECTION_INPUTS,
+  validateFrozenAuthorizationContract,
   isPlaceholder,
   isOffsetTimestamp,
   validateFrozenRepository,
