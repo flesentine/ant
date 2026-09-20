@@ -215,6 +215,9 @@ function validateCollector(record,frozenRecord,preregBlob){
   if(record.id!=='P4_external_validation_collector_independence_record_v1') errors.push('collector id mismatch');
   if(record.preregistration_git_blob_sha!==preregBlob) errors.push('collector preregistration blob mismatch');
   if(record.role!=='physical collection of the 480 preregistered biological trials') errors.push('collector role contract changed');
+  if(isPlaceholder(record.status)) errors.push('collector status must be present and non-placeholder');
+  if(hasOuterWhitespace(record.collector_identity)) errors.push('collector_identity must not contain leading or trailing whitespace');
+  if(hasOuterWhitespace(record.collector_team_or_affiliation)) errors.push('collector_team_or_affiliation must not contain leading or trailing whitespace');
   if(isPlaceholder(record.collector_identity)) errors.push('collector_identity must be a real non-placeholder nonempty identity');
   if(isPlaceholder(record.collector_team_or_affiliation)) errors.push('collector_team_or_affiliation must be recorded and non-placeholder');
   if(record.identity_frozen!==true) errors.push('collector identity_frozen must be true');
