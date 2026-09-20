@@ -256,11 +256,12 @@ function validateHusbandry(input,template,preflightTimeMs=Date.now()){
   return errors;
 }
 
-function validateDeclaration(record){
+function validateDeclaration(record,preflightTimeMs=Date.now()){
   const errors=[];
   if(!record||typeof record!=='object'||Array.isArray(record)) return ['precollection declaration must be a JSON object'];
   if(isPlaceholder(record.attested_by)) errors.push('declaration attested_by must be non-placeholder');
   if(!isOffsetTimestamp(record.attested_at_local)) errors.push('declaration attested_at_local must be ISO-8601 with explicit offset');
+  else if(Date.parse(record.attested_at_local)>preflightTimeMs) errors.push('declaration attested_at_local must not be in the future relative to preflight');
   for(const field of DECLARATION_TRUE_FIELDS){
     if(record[field]!==true) errors.push(`declaration must be true: ${field}`);
   }
@@ -279,7 +280,7 @@ function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath,pre
   const errors=[...frozen.errors];
   errors.push(...validateCollector(collector,frozenCollector,auth.qualified_preregistration.git_blob_sha));
   errors.push(...validateHusbandry(husbandry,husbandryTemplate,preflightTimeMs));
-  errors.push(...validateDeclaration(declaration));
+  errors.push(...validateDeclaration(declaration,preflightTimeMs));
 
   return {
     schema_version:1,
