@@ -16,6 +16,11 @@ function write(name,value){
   return p;
 }
 function clone(v){return JSON.parse(JSON.stringify(v));}
+function offsetTimestamp(ms){return new Date(ms).toISOString().replace('Z','+00:00');}
+const fixtureNowMs=Date.now();
+const fixtureAcclimation=offsetTimestamp(fixtureNowMs-(8*24*60*60*1000));
+const fixtureDeprivation=offsetTimestamp(fixtureNowMs-(95*60*60*1000));
+const fixtureAttestation=offsetTimestamp(fixtureNowMs-(60*60*1000));
 
 const collectorTemplate=JSON.parse(fs.readFileSync(path.join(root,'hypotheses/p4_external_validation_collector_independence_record_v1.json'),'utf8'));
 const collector=clone(collectorTemplate);
@@ -32,11 +37,11 @@ for(let i=1;i<=12;i++){
     colony_id:id,
     wild_source_colony_id:'WILD-'+String(i).padStart(2,'0'),
     source_nest_id:'NEST-'+String(i).padStart(2,'0'),
-    lab_acclimation_start_timestamp_local:`2026-10-${String(i).padStart(2,'0')}T09:00:00-07:00`,
+    lab_acclimation_start_timestamp_local:fixtureAcclimation,
     pre_deprivation_sucrose_molarity_M:0.5,
     pre_deprivation_sucrose_ad_libitum:true,
     pre_deprivation_chopped_cockroach_feedings_per_week:3,
-    food_deprivation_start_timestamp_local:`2026-10-${String(i+7).padStart(2,'0')}T09:00:00-07:00`,
+    food_deprivation_start_timestamp_local:fixtureDeprivation,
     water_ad_libitum_during_deprivation:true,
     light_dark_cycle_hours:'12:12',
     no_food_reward_present_in_test_maze:true
@@ -45,7 +50,7 @@ for(let i=1;i<=12;i++){
 
 const declaration={
   attested_by:'Precollection Gatekeeper Example',
-  attested_at_local:'2026-10-01T08:00:00-07:00',
+  attested_at_local:fixtureAttestation,
   no_biological_collection_has_started:true,
   no_new_biological_outcome_has_been_accessed:true,
   candidate_307_prediction_has_not_been_disclosed_to_collector:true
@@ -138,7 +143,7 @@ const expiredTimingResult=preflight.evaluatePreflight({
   collectorPath:validPaths.collectorPath,
   husbandryPath:write('expired-timing.json',{records:expiredTiming}),
   declarationPath:validPaths.declarationPath,
-  preflightTimeMs:Date.parse('2026-09-19T21:00:00-07:00')
+  preflightTimeMs:fixtureNowMs
 });
 assert.strictEqual(expiredTimingResult.ready_for_activation_commit,false);
 assert.ok(expiredTimingResult.errors.some(x=>x.includes('98-hour food-deprivation window has already expired')));
@@ -188,6 +193,18 @@ const badDeclarationResult=preflight.evaluatePreflight({
 assert.strictEqual(badDeclarationResult.ready_for_activation_commit,false);
 assert.ok(badDeclarationResult.errors.some(x=>x.includes('no_new_biological_outcome_has_been_accessed')));
 
+const futureDeclaration=clone(declaration);
+futureDeclaration.attested_at_local=offsetTimestamp(fixtureNowMs+(60*60*1000));
+const futureDeclarationResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:validPaths.collectorPath,
+  husbandryPath:validPaths.husbandryPath,
+  declarationPath:write('future-declaration.json',futureDeclaration),
+  preflightTimeMs:fixtureNowMs
+});
+assert.strictEqual(futureDeclarationResult.ready_for_activation_commit,false);
+assert.ok(futureDeclarationResult.errors.some(x=>x.includes('must not be in the future relative to preflight')));
+
 const blockedCli=spawnSync(process.execPath,[
   path.join(root,'tools/check-p4-external-validation-activation.js'),
   '--collector',validPaths.collectorPath,
@@ -203,6 +220,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:9,
+  negative_cases:10,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
