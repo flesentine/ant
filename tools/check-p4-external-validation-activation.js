@@ -36,6 +36,11 @@ const POST_COMMIT_GATES=[
 ];
 
 
+const TRUSTED_PREAUTHORIZATION_RECORD=Object.freeze({
+  file:'hypotheses/p4_external_validation_collection_authorization_v1.json',
+  git_blob_sha:'1a40e684313df4259c94a13ef4382eeeb45f391e'
+});
+
 const TRUSTED_QUALIFIED_PREREGISTRATION=Object.freeze({
   file:'hypotheses/p4_external_validation_new_dataset_preregistration_v1.json',
   git_blob_sha:'b8a683e0199e6564a1fedc6f54391a535c32e0e4'
@@ -62,6 +67,14 @@ function readJson(file){
 
 function gitBlob(root,rel){
   return execFileSync('git',['hash-object',rel],{cwd:root,encoding:'utf8'}).trim();
+}
+
+function gitHeadBlob(root,rel){
+  try{
+    return execFileSync('git',['rev-parse',`HEAD:${rel}`],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+  }catch{
+    return null;
+  }
 }
 
 function isPlaceholder(value){
@@ -99,8 +112,11 @@ function assertBlob(errors,root,rel,expected,label=rel){
     errors.push(`${label}: missing file ${rel}`);
     return;
   }
+  const committed=gitHeadBlob(root,rel);
+  if(committed===null) errors.push(`${label}: file is not present at committed HEAD: ${rel}`);
+  else if(committed!==expected) errors.push(`${label}: committed blob drift ${committed} != ${expected}`);
   const actual=gitBlob(root,rel);
-  if(actual!==expected) errors.push(`${label}: blob drift ${actual} != ${expected}`);
+  if(actual!==expected) errors.push(`${label}: working-tree blob drift ${actual} != ${expected}`);
 }
 
 function validateFrozenAuthorizationContract(auth){
@@ -136,9 +152,10 @@ function validateFrozenAuthorizationContract(auth){
 
 function validateFrozenRepository(root){
   const errors=[];
-  const authRel='hypotheses/p4_external_validation_collection_authorization_v1.json';
+  const authRel=TRUSTED_PREAUTHORIZATION_RECORD.file;
   const auth=readJson(path.join(root,authRel));
 
+  assertBlob(errors,root,TRUSTED_PREAUTHORIZATION_RECORD.file,TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,'frozen preauthorization record');
   errors.push(...validateFrozenAuthorizationContract(auth));
   if(auth.collection_authorized!==false) errors.push('preflight requires collection_authorized=false before activation commit');
   if(auth.gate_checks?.new_biological_outcomes_known_to_exist_at_gate!==false) errors.push('authorization gate says biological outcomes are already known');
@@ -393,6 +410,7 @@ module.exports={
   COLLECTOR_ATTESTATIONS,
   DECLARATION_TRUE_FIELDS,
   POST_COMMIT_GATES,
+  TRUSTED_PREAUTHORIZATION_RECORD,
   TRUSTED_QUALIFIED_PREREGISTRATION,
   TRUSTED_FROZEN_COLLECTION_INPUTS,
   validateFrozenAuthorizationContract,
