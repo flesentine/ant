@@ -107,6 +107,17 @@ const badCollectorResult=preflight.evaluatePreflight({
 assert.strictEqual(badCollectorResult.ready_for_activation_commit,false);
 assert.ok(badCollectorResult.errors.some(x=>x.includes('collector_identity')));
 
+const prefixedPlaceholderCollector=clone(collector);
+prefixedPlaceholderCollector.collector_identity='TBD collector';
+const prefixedPlaceholderCollectorResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:write('prefixed-placeholder-collector.json',prefixedPlaceholderCollector),
+  husbandryPath:validPaths.husbandryPath,
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(prefixedPlaceholderCollectorResult.ready_for_activation_commit,false);
+assert.ok(prefixedPlaceholderCollectorResult.errors.some(x=>x.includes('collector_identity')));
+
 const rewrittenCollector=clone(collector);
 rewrittenCollector.authorization_rule='collection may begin unconditionally';
 const rewrittenCollectorResult=preflight.evaluatePreflight({
@@ -167,6 +178,29 @@ const duplicateResult=preflight.evaluatePreflight({
 assert.strictEqual(duplicateResult.ready_for_activation_commit,false);
 assert.ok(duplicateResult.errors.some(x=>x.includes('source_nest_id values must be distinct')));
 
+const whitespaceDuplicateNest=clone(records);
+whitespaceDuplicateNest[11].source_nest_id=' '+whitespaceDuplicateNest[0].source_nest_id+' ';
+const whitespaceDuplicateResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:validPaths.collectorPath,
+  husbandryPath:write('whitespace-duplicate-nest.json',{records:whitespaceDuplicateNest}),
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(whitespaceDuplicateResult.ready_for_activation_commit,false);
+assert.ok(whitespaceDuplicateResult.errors.some(x=>x.includes('leading or trailing whitespace')));
+assert.ok(whitespaceDuplicateResult.errors.some(x=>x.includes('source_nest_id values must be distinct')));
+
+const unknownHusbandryField=clone(records);
+unknownHusbandryField[0].feeding_schedule_override='daily';
+const unknownHusbandryResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:validPaths.collectorPath,
+  husbandryPath:write('unknown-husbandry-field.json',{records:unknownHusbandryField}),
+  declarationPath:validPaths.declarationPath
+});
+assert.strictEqual(unknownHusbandryResult.ready_for_activation_commit,false);
+assert.ok(unknownHusbandryResult.errors.some(x=>x.includes('unknown field feeding_schedule_override')));
+
 const prefilled=clone(records);
 prefilled[0].first_trial_timestamp_local='2026-10-20T10:00:00-07:00';
 const prefilledResult=preflight.evaluatePreflight({
@@ -213,6 +247,18 @@ const futureDeclarationResult=preflight.evaluatePreflight({
 assert.strictEqual(futureDeclarationResult.ready_for_activation_commit,false);
 assert.ok(futureDeclarationResult.errors.some(x=>x.includes('must not be in the future relative to preflight')));
 
+const unknownDeclaration=clone(declaration);
+unknownDeclaration.collection_authorized=true;
+const unknownDeclarationResult=preflight.evaluatePreflight({
+  root,
+  collectorPath:validPaths.collectorPath,
+  husbandryPath:validPaths.husbandryPath,
+  declarationPath:write('unknown-declaration-field.json',unknownDeclaration),
+  preflightTimeMs:fixtureNowMs
+});
+assert.strictEqual(unknownDeclarationResult.ready_for_activation_commit,false);
+assert.ok(unknownDeclarationResult.errors.some(x=>x.includes('unknown field collection_authorized')));
+
 const blockedCli=spawnSync(process.execPath,[
   path.join(root,'tools/check-p4-external-validation-activation.js'),
   '--collector',validPaths.collectorPath,
@@ -228,6 +274,6 @@ console.log('p4-external-validation-activation-preflight.test.js PASS '+JSON.str
   frozen_repository:true,
   valid_preflight_ready:true,
   collection_authorized:false,
-  negative_cases:11,
+  negative_cases:15,
   remaining_post_commit_gates:ready.post_commit_gates_remaining.length
 }));
