@@ -213,6 +213,35 @@ function gitWorkingBlob(root,rel){
   }
 }
 
+function gitIndexMode(root,rel){
+  try{
+    const out=execFileSync('git',['ls-files','-s','--',rel],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+    if(!out) return null;
+    const first=out.split(/\s+/)[0];
+    return first||null;
+  }catch(_err){
+    return null;
+  }
+}
+
+function assertCanonicalTrackedRegularFile(errors,root,rel,label){
+  const abs=path.join(root,rel);
+  let stat;
+  try{
+    stat=fs.lstatSync(abs);
+  }catch(_err){
+    errors.push((label||rel)+': missing canonical file '+rel);
+    return;
+  }
+  if(!stat.isFile()){
+    errors.push((label||rel)+': canonical path must be a regular file, not symlink/directory/special file');
+  }
+  const mode=gitIndexMode(root,rel);
+  if(mode!=='100644'&&mode!=='100755'){
+    errors.push((label||rel)+': canonical path must be tracked as a regular Git file; index mode='+String(mode));
+  }
+}
+
 function assertPinnedBlob(errors,root,rel,expected,label){
   const abs=path.join(root,rel);
   if(!fs.existsSync(abs)){
@@ -241,6 +270,9 @@ function validateTransitionRepository(root,options){
 
   const baselineAuthErrors=validateFrozenAuthorizationContract(TRUSTED_BASE_AUTHORIZATION);
   if(baselineAuthErrors.length) errors.push(...baselineAuthErrors.map(function(e){return 'trusted baseline authorization: '+e;}));
+
+  assertCanonicalTrackedRegularFile(errors,root,CANONICAL_AUTHORIZATION_REL,'canonical authorization');
+  assertCanonicalTrackedRegularFile(errors,root,CANONICAL_COLLECTOR_REL,'canonical collector');
 
   if(suppliedCandidateAuthAbs!==canonicalAuthAbs){
     assertPinnedBlob(
@@ -534,6 +566,8 @@ module.exports={
   ACTIVATION_METADATA_KEYS:ACTIVATION_METADATA_KEYS,
   gitBlobShaForBuffer:gitBlobShaForBuffer,
   gitBlobShaForFile:gitBlobShaForFile,
+  gitIndexMode:gitIndexMode,
+  assertCanonicalTrackedRegularFile:assertCanonicalTrackedRegularFile,
   validateTransitionRepository:validateTransitionRepository,
   buildActivationMetadata:buildActivationMetadata,
   buildCandidateAuthorization:buildCandidateAuthorization,
