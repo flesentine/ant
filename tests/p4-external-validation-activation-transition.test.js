@@ -285,6 +285,57 @@ try{
   assert.strictEqual(observedResult.ready_for_activation_commit,false);
   assert.ok(observedResult.errors.some(function(x){return x.includes('must not prefill future observed/derived field');}));
 
+  const racePacket=validPacket(nowMs);
+  const raceCollectorPath=path.join(tmp,'race-collector.json');
+  const raceHusbandryPath=path.join(tmp,'race-husbandry.json');
+  const raceDeclarationPath=path.join(tmp,'race-declaration.json');
+  writeJson(raceCollectorPath,racePacket.collector);
+  writeJson(raceHusbandryPath,racePacket.husbandry);
+  writeJson(raceDeclarationPath,racePacket.declaration);
+
+  const validatedCollectorBytes=fs.readFileSync(raceCollectorPath);
+  const validatedCollectorBlob=transition.gitBlobShaForBuffer(validatedCollectorBytes);
+  const replacementCollector=clone(racePacket.collector);
+  replacementCollector.collector_identity=null;
+  const replacementBytes=Buffer.from(JSON.stringify(replacementCollector,null,2)+'\n','utf8');
+
+  const originalReadFileSync=fs.readFileSync;
+  let collectorReadCount=0;
+  try{
+    fs.readFileSync=function(file,...args){
+      const value=originalReadFileSync.call(fs,file,...args);
+      if(path.resolve(String(file))===path.resolve(raceCollectorPath)){
+        collectorReadCount++;
+        if(collectorReadCount===1){
+          fs.writeFileSync(raceCollectorPath,replacementBytes);
+        }
+      }
+      return value;
+    };
+
+    const raceResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:raceCollectorPath,
+      husbandryPath:raceHusbandryPath,
+      declarationPath:raceDeclarationPath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(raceResult.ready_for_activation_commit,true,raceResult.errors.join('\n'));
+    assert.strictEqual(collectorReadCount,1,'collector packet must be read exactly once');
+    assert.strictEqual(
+      raceResult.candidate_authorization.activation_metadata.collector_record_git_blob_sha,
+      validatedCollectorBlob,
+      'candidate must bind the same collector bytes that were parsed and validated'
+    );
+    assert.notStrictEqual(
+      raceResult.candidate_authorization.activation_metadata.collector_record_git_blob_sha,
+      transition.gitBlobShaForBuffer(replacementBytes),
+      'candidate must not bind replacement bytes written after validation read'
+    );
+  }finally{
+    fs.readFileSync=originalReadFileSync;
+  }
+
   const cliPacket=validPacket(Date.now());
   const cliCollector=path.join(tmp,'cli-collector.json');
   const cliHusbandry=path.join(tmp,'cli-husbandry.json');
@@ -358,6 +409,7 @@ try{
     frozen_repository_auth_drift_rejected:true,
     canonical_authorization_symlink_rejected:true,
     canonical_ancestor_symlink_rejected:true,
+    validated_packet_bytes_bound_without_reopen:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
     overwrite_refused:true,
