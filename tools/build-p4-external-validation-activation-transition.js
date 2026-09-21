@@ -19,6 +19,10 @@ const {
   validateDeclaration
 }=require('./check-p4-external-validation-activation');
 
+const CANONICAL_AUTHORIZATION_REL=TRUSTED_PREAUTHORIZATION_RECORD.file;
+const CANONICAL_COLLECTOR_REL=TRUSTED_FROZEN_COLLECTION_INPUTS.find(function(x){return x.fileKey==='collector_independence_record_file';}).file;
+const CANONICAL_COLLECTOR_BLOB=TRUSTED_FROZEN_COLLECTION_INPUTS.find(function(x){return x.fileKey==='collector_independence_record_file';}).git_blob_sha;
+
 const ACTIVE_STATUS='active_collection_authorization_prospective_effective_only_after_permanent_main_qualification_before_trial_1';
 const ACTIVE_NEXT_ACTION='Biological collection may begin only after this exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed before trial 1. Until then collection remains forbidden; once effective, record all observation-dependent husbandry and trial provenance prospectively under the frozen contracts.';
 
@@ -227,11 +231,33 @@ function trustedFrozenInput(fileKey){
   return TRUSTED_FROZEN_COLLECTION_INPUTS.find(function(x){return x.fileKey===fileKey;});
 }
 
-function validateTransitionRepository(root){
+function validateTransitionRepository(root,options){
   const errors=[];
+  const opts=options||{};
+  const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
+  const canonicalCollectorAbs=path.resolve(root,CANONICAL_COLLECTOR_REL);
+  const suppliedCollectorAbs=opts.collectorPath?path.resolve(opts.collectorPath):null;
+  const suppliedCandidateAuthAbs=opts.candidateAuthorizationPath?path.resolve(opts.candidateAuthorizationPath):null;
 
   const baselineAuthErrors=validateFrozenAuthorizationContract(TRUSTED_BASE_AUTHORIZATION);
   if(baselineAuthErrors.length) errors.push(...baselineAuthErrors.map(function(e){return 'trusted baseline authorization: '+e;}));
+
+  if(suppliedCandidateAuthAbs!==canonicalAuthAbs){
+    assertPinnedBlob(
+      errors,root,
+      CANONICAL_AUTHORIZATION_REL,
+      TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,
+      'frozen preauthorization record'
+    );
+  }
+  if(suppliedCollectorAbs!==canonicalCollectorAbs){
+    assertPinnedBlob(
+      errors,root,
+      CANONICAL_COLLECTOR_REL,
+      CANONICAL_COLLECTOR_BLOB,
+      'frozen collector baseline'
+    );
+  }
 
   assertPinnedBlob(
     errors,root,
@@ -375,7 +401,10 @@ function evaluateActivationTransition(options){
   const declarationPath=path.resolve(options.declarationPath);
   const preflightTimeMs=options.preflightTimeMs===undefined?Date.now():options.preflightTimeMs;
 
-  const errors=validateTransitionRepository(root);
+  const errors=validateTransitionRepository(root,{
+    collectorPath:collectorPath,
+    candidateAuthorizationPath:options.candidateAuthorizationPath?path.resolve(options.candidateAuthorizationPath):null
+  });
   if(!Number.isFinite(preflightTimeMs)) errors.push('preflightTimeMs must be a finite epoch-millisecond number');
 
   const husbandryTemplate=readJson(path.join(root,trustedFrozenInput('colony_husbandry_record_template_file').file));
@@ -494,6 +523,9 @@ function main(){
 if(require.main===module) main();
 
 module.exports={
+  CANONICAL_AUTHORIZATION_REL:CANONICAL_AUTHORIZATION_REL,
+  CANONICAL_COLLECTOR_REL:CANONICAL_COLLECTOR_REL,
+  CANONICAL_COLLECTOR_BLOB:CANONICAL_COLLECTOR_BLOB,
   ACTIVE_STATUS:ACTIVE_STATUS,
   ACTIVE_NEXT_ACTION:ACTIVE_NEXT_ACTION,
   TRUSTED_BASE_AUTHORIZATION:TRUSTED_BASE_AUTHORIZATION,
