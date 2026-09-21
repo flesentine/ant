@@ -4,6 +4,7 @@ const fs=require('fs');
 const path=require('path');
 const {
   DECLARATION_TRUE_FIELDS,
+  validateFrozenRepository,
   evaluatePreflight
 }=require('./check-p4-external-validation-activation');
 
@@ -177,6 +178,11 @@ function writePacket(options){
   const resolvedRoot=path.resolve(root);
   const resolvedOut=path.resolve(outDir);
   const targets=targetPaths(resolvedOut);
+
+  const frozen=validateFrozenRepository(resolvedRoot);
+  if(frozen.errors.length){
+    throw new Error('frozen repository integrity check failed: '+frozen.errors.join('; '));
+  }
 
   const existing=Object.entries(targets).filter(function(entry){
     return fs.existsSync(entry[1]);
