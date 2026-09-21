@@ -186,6 +186,26 @@ try{
   assert.strictEqual(badStatusResult.ready_for_activation_commit,false);
   assert.ok(badStatusResult.errors.some(function(x){return x.includes('status must equal');}));
 
+  const canonicalAuthPath=path.join(root,transition.CANONICAL_AUTHORIZATION_REL);
+  const canonicalAuthOriginal=fs.readFileSync(canonicalAuthPath,'utf8');
+  try{
+    const driftedAuth=JSON.parse(canonicalAuthOriginal);
+    driftedAuth.semantic_firewall.may_change_candidate_307=true;
+    fs.writeFileSync(canonicalAuthPath,JSON.stringify(driftedAuth,null,2)+'\n','utf8');
+
+    const repoDriftResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(repoDriftResult.ready_for_activation_commit,false);
+    assert.ok(repoDriftResult.errors.some(function(x){return x.includes('frozen preauthorization record: working-tree blob drift');}));
+  }finally{
+    fs.writeFileSync(canonicalAuthPath,canonicalAuthOriginal,'utf8');
+  }
+
   const badDeclaration=clone(packet.declaration);
   badDeclaration.no_biological_collection_has_started=false;
   const badDeclarationPath=path.join(tmp,'bad-declaration.json');
@@ -284,6 +304,7 @@ try{
     packet_blobs_bound:true,
     synthetic_valid_candidate_ready:true,
     immutable_tamper_rejected:true,
+    frozen_repository_auth_drift_rejected:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
     overwrite_refused:true,
