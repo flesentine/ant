@@ -189,6 +189,65 @@ function readJsonSnapshot(file){
   };
 }
 
+function readCanonicalJsonSnapshot(root,rel,label){
+  const name=label||rel;
+  const pathErrors=[];
+  assertCanonicalTrackedRegularFile(pathErrors,root,rel,name);
+  if(pathErrors.length) throw new Error(pathErrors.join('; '));
+  if(typeof fs.constants.O_NOFOLLOW!=='number'){
+    throw new Error(name+': O_NOFOLLOW is unavailable on this platform');
+  }
+
+  const resolvedRoot=path.resolve(root);
+  const abs=path.join(resolvedRoot,rel);
+  let fd;
+  try{
+    fd=fs.openSync(abs,fs.constants.O_RDONLY|fs.constants.O_NOFOLLOW);
+    const openedStat=fs.fstatSync(fd);
+    if(!openedStat.isFile()) throw new Error(name+': opened canonical input is not a regular file');
+    const buffer=fs.readFileSync(fd);
+
+    const postErrors=[];
+    assertCanonicalTrackedRegularFile(postErrors,root,rel,name);
+    if(postErrors.length) throw new Error(postErrors.join('; '));
+
+    const currentStat=fs.statSync(abs);
+    if(openedStat.dev!==currentStat.dev||openedStat.ino!==currentStat.ino){
+      throw new Error(name+': canonical path changed while its snapshot was being read');
+    }
+
+    const realRoot=fs.realpathSync(resolvedRoot);
+    const realFile=fs.realpathSync(abs);
+    const relative=path.relative(realRoot,realFile);
+    if(relative===''||relative.startsWith('..'+path.sep)||path.isAbsolute(relative)){
+      throw new Error(name+': opened canonical input resolves outside the real repository tree');
+    }
+
+    return {
+      buffer:buffer,
+      json:JSON.parse(buffer.toString('utf8')),
+      git_blob_sha:gitBlobShaForBuffer(buffer),
+      dev:openedStat.dev,
+      ino:openedStat.ino
+    };
+  }finally{
+    if(fd!==undefined) fs.closeSync(fd);
+  }
+}
+
+function readPinnedCanonicalJsonSnapshot(root,rel,expected,label){
+  const name=label||rel;
+  const snapshot=readCanonicalJsonSnapshot(root,rel,name);
+  const head=gitHeadBlob(root,rel);
+  const index=gitIndexBlob(root,rel);
+  if(head!==expected) throw new Error(name+': committed blob drift '+head+' != '+expected);
+  if(index!==expected) throw new Error(name+': staged blob drift '+index+' != '+expected);
+  if(snapshot.git_blob_sha!==expected){
+    throw new Error(name+': snapshot blob drift '+snapshot.git_blob_sha+' != '+expected);
+  }
+  return snapshot;
+}
+
 function gitBlobShaForBuffer(buffer){
   const header=Buffer.from('blob '+buffer.length+'\0','utf8');
   return crypto.createHash('sha1').update(header).update(buffer).digest('hex');
@@ -357,14 +416,27 @@ function validateTransitionRepository(root,options){
   const releaseContract=trustedFrozenInput('release_pose_schedule_manifest_file');
   const releasePath=releaseContract.file;
   if(fs.existsSync(path.join(root,releasePath))){
-    const release=readJson(path.join(root,releasePath));
-    assertPinnedBlob(errors,root,release.simulation_initialization_file,release.simulation_initialization_git_blob_sha,'release initialization');
-    assertPinnedBlob(errors,root,release.rng_file,release.rng_git_blob_sha,'release RNG');
-    if(!Array.isArray(release.parts)||release.parts.length!==12){
-      errors.push('release-pose manifest must bind exactly 12 parts');
-    }else{
-      for(const part of release.parts){
-        assertPinnedBlob(errors,root,part.file,part.git_blob_sha,'release-pose part colony '+part.colony);
+    let release;
+    try{
+      release=readPinnedCanonicalJsonSnapshot(
+        root,
+        releasePath,
+        releaseContract.git_blob_sha,
+        'release-pose schedule manifest'
+      ).json;
+    }catch(err){
+      errors.push(String(err&&err.message||err));
+      release=null;
+    }
+    if(release){
+      assertPinnedBlob(errors,root,release.simulation_initialization_file,release.simulation_initialization_git_blob_sha,'release initialization');
+      assertPinnedBlob(errors,root,release.rng_file,release.rng_git_blob_sha,'release RNG');
+      if(!Array.isArray(release.parts)||release.parts.length!==12){
+        errors.push('release-pose manifest must bind exactly 12 parts');
+      }else{
+        for(const part of release.parts){
+          assertPinnedBlob(errors,root,part.file,part.git_blob_sha,'release-pose part colony '+part.colony);
+        }
       }
     }
   }
@@ -484,16 +556,53 @@ function evaluateActivationTransition(options){
   const declarationPath=path.resolve(options.declarationPath);
   const preflightTimeMs=options.preflightTimeMs===undefined?Date.now():options.preflightTimeMs;
 
+  const candidateAuthorizationPath=options.candidateAuthorizationPath?path.resolve(options.candidateAuthorizationPath):null;
   const errors=validateTransitionRepository(root,{
     collectorPath:collectorPath,
-    candidateAuthorizationPath:options.candidateAuthorizationPath?path.resolve(options.candidateAuthorizationPath):null
+    candidateAuthorizationPath:candidateAuthorizationPath
   });
   if(!Number.isFinite(preflightTimeMs)) errors.push('preflightTimeMs must be a finite epoch-millisecond number');
 
-  const husbandryTemplate=readJson(path.join(root,trustedFrozenInput('colony_husbandry_record_template_file').file));
-  const collectorSnapshot=readJsonSnapshot(collectorPath);
-  const husbandrySnapshot=readJsonSnapshot(husbandryPath);
-  const declarationSnapshot=readJsonSnapshot(declarationPath);
+  const husbandryTemplateContract=trustedFrozenInput('colony_husbandry_record_template_file');
+  let husbandryTemplate;
+  try{
+    husbandryTemplate=readPinnedCanonicalJsonSnapshot(
+      root,
+      husbandryTemplateContract.file,
+      husbandryTemplateContract.git_blob_sha,
+      'colony husbandry template'
+    ).json;
+  }catch(err){
+    errors.push(String(err&&err.message||err));
+    husbandryTemplate={};
+  }
+
+  const canonicalCollectorAbs=path.resolve(root,CANONICAL_COLLECTOR_REL);
+  let collectorSnapshot;
+  try{
+    collectorSnapshot=collectorPath===canonicalCollectorAbs
+      ?readCanonicalJsonSnapshot(root,CANONICAL_COLLECTOR_REL,'canonical collector')
+      :readJsonSnapshot(collectorPath);
+  }catch(err){
+    errors.push('collector snapshot: '+String(err&&err.message||err));
+    collectorSnapshot={json:null,git_blob_sha:null};
+  }
+
+  let husbandrySnapshot;
+  let declarationSnapshot;
+  try{
+    husbandrySnapshot=readJsonSnapshot(husbandryPath);
+  }catch(err){
+    errors.push('husbandry snapshot: '+String(err&&err.message||err));
+    husbandrySnapshot={json:null,git_blob_sha:null};
+  }
+  try{
+    declarationSnapshot=readJsonSnapshot(declarationPath);
+  }catch(err){
+    errors.push('precollection declaration snapshot: '+String(err&&err.message||err));
+    declarationSnapshot={json:null,git_blob_sha:null};
+  }
+
   const collector=collectorSnapshot.json;
   const husbandry=husbandrySnapshot.json;
   const declaration=declarationSnapshot.json;
@@ -513,8 +622,16 @@ function evaluateActivationTransition(options){
   };
 
   let candidate;
-  if(options.candidateAuthorizationPath){
-    candidate=readJson(path.resolve(options.candidateAuthorizationPath));
+  if(candidateAuthorizationPath){
+    const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
+    try{
+      candidate=candidateAuthorizationPath===canonicalAuthAbs
+        ?readCanonicalJsonSnapshot(root,CANONICAL_AUTHORIZATION_REL,'canonical authorization candidate').json
+        :readJsonSnapshot(candidateAuthorizationPath).json;
+    }catch(err){
+      errors.push('candidate authorization snapshot: '+String(err&&err.message||err));
+      candidate=null;
+    }
   }else{
     candidate=buildCandidateAuthorization(packetBinding);
   }
@@ -623,6 +740,8 @@ module.exports={
   gitBlobShaForBuffer:gitBlobShaForBuffer,
   gitBlobShaForFile:gitBlobShaForFile,
   readJsonSnapshot:readJsonSnapshot,
+  readCanonicalJsonSnapshot:readCanonicalJsonSnapshot,
+  readPinnedCanonicalJsonSnapshot:readPinnedCanonicalJsonSnapshot,
   gitIndexMode:gitIndexMode,
   assertCanonicalTrackedRegularFile:assertCanonicalTrackedRegularFile,
   validateTransitionRepository:validateTransitionRepository,
