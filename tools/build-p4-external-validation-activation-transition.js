@@ -475,15 +475,6 @@ function validateTransitionRepository(root,options){
     );
   }
 
-  if(suppliedCollectorAbs!==canonicalCollectorAbs){
-    capturePinned(
-      'frozen_collector_baseline',
-      CANONICAL_COLLECTOR_REL,
-      CANONICAL_COLLECTOR_BLOB,
-      'frozen collector baseline'
-    );
-  }
-
   capturePinned(
     'qualified_preregistration',
     TRUSTED_QUALIFIED_PREREGISTRATION.file,
@@ -492,11 +483,7 @@ function validateTransitionRepository(root,options){
   );
 
   for(const item of TRUSTED_FROZEN_COLLECTION_INPUTS){
-    if(item.fileKey==='collector_independence_record_file'){
-      if(suppliedCollectorAbs===canonicalCollectorAbs) continue;
-      if(snapshots.frozen_collector_baseline) snapshots[item.fileKey]=snapshots.frozen_collector_baseline;
-      continue;
-    }
+    if(item.fileKey==='collector_independence_record_file') continue;
     const snapshot=capturePinned(item.fileKey,item.file,item.git_blob_sha,item.label);
     if(snapshot) snapshots[item.fileKey]=snapshot;
   }
@@ -691,6 +678,30 @@ function evaluateActivationTransition(options){
     collectorSnapshot={json:null,git_blob_sha:null};
   }
 
+  let canonicalCollectorCommitSnapshot=null;
+  try{
+    canonicalCollectorCommitSnapshot=collectorPath===canonicalCollectorAbs
+      ?collectorSnapshot
+      :readCanonicalJsonSnapshot(
+        root,
+        CANONICAL_COLLECTOR_REL,
+        'canonical collector activation record'
+      );
+    if(
+      collectorSnapshot&&collectorSnapshot.git_blob_sha&&
+      canonicalCollectorCommitSnapshot&&canonicalCollectorCommitSnapshot.git_blob_sha&&
+      canonicalCollectorCommitSnapshot.git_blob_sha!==collectorSnapshot.git_blob_sha
+    ){
+      errors.push(
+        'canonical collector activation record: staged canonical collector blob '+
+        canonicalCollectorCommitSnapshot.git_blob_sha+
+        ' != validated collector blob '+collectorSnapshot.git_blob_sha
+      );
+    }
+  }catch(err){
+    errors.push('canonical collector activation binding: '+String(err&&err.message||err));
+  }
+
   let husbandrySnapshot;
   let declarationSnapshot;
   try{
@@ -750,8 +761,8 @@ function evaluateActivationTransition(options){
   errors.push(...validateCandidateAuthorization(candidate,packetBinding));
 
   const finalStagedSnapshots=Object.values(frozenSnapshots);
-  if(collectorPath===canonicalCollectorAbs&&collectorSnapshot&&collectorSnapshot.rel){
-    finalStagedSnapshots.push(collectorSnapshot);
+  if(canonicalCollectorCommitSnapshot&&canonicalCollectorCommitSnapshot.rel){
+    finalStagedSnapshots.push(canonicalCollectorCommitSnapshot);
   }
   if(candidateAuthorizationPath===path.resolve(root,CANONICAL_AUTHORIZATION_REL)&&candidateSnapshot&&candidateSnapshot.rel){
     finalStagedSnapshots.push(candidateSnapshot);
