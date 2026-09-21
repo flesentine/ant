@@ -234,6 +234,8 @@ function readCanonicalSnapshot(root,rel,label){
     }
 
     return {
+      rel:rel,
+      label:name,
       buffer:buffer,
       git_blob_sha:gitBlobSha,
       staged_git_blob_sha:indexAfter,
@@ -387,6 +389,54 @@ function assertPinnedBlob(errors,root,rel,expected,label){
   if(head!==expected) errors.push((label||rel)+': committed blob drift '+head+' != '+expected);
   if(index!==expected) errors.push((label||rel)+': staged blob drift '+index+' != '+expected);
   if(working!==expected) errors.push((label||rel)+': working-tree blob drift '+working+' != '+expected);
+}
+
+function gitIndexTree(root){
+  try{
+    return execFileSync('git',['write-tree'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+  }catch(_err){
+    return null;
+  }
+}
+
+function validateFinalStagedBindings(root,snapshots){
+  const errors=[];
+  const unique=new Map();
+  for(const snapshot of snapshots||[]){
+    if(!snapshot||!snapshot.rel||!snapshot.git_blob_sha) continue;
+    unique.set(snapshot.rel,snapshot);
+  }
+
+  const treeBefore=gitIndexTree(root);
+  if(!treeBefore){
+    errors.push('final staged binding check: unable to read stage-0 index tree');
+    return errors;
+  }
+
+  for(const [rel,snapshot] of unique){
+    const current=gitIndexBlob(root,rel);
+    if(current!==snapshot.git_blob_sha){
+      errors.push(
+        (snapshot.label||rel)+': final staged blob '+String(current)+
+        ' != validated snapshot blob '+snapshot.git_blob_sha
+      );
+    }
+    const mode=gitIndexMode(root,rel);
+    if(mode!=='100644'&&mode!=='100755'){
+      errors.push(
+        (snapshot.label||rel)+': final staged path is not a regular Git file; index mode='+String(mode)
+      );
+    }
+  }
+
+  const treeAfter=gitIndexTree(root);
+  if(treeAfter!==treeBefore){
+    errors.push(
+      'final staged binding check: stage-0 index tree changed during final validation '+
+      String(treeBefore)+' != '+String(treeAfter)
+    );
+  }
+  return errors;
 }
 
 function trustedFrozenInput(fileKey){
@@ -675,12 +725,20 @@ function evaluateActivationTransition(options){
   };
 
   let candidate;
+  let candidateSnapshot=null;
   if(candidateAuthorizationPath){
     const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
     try{
-      candidate=candidateAuthorizationPath===canonicalAuthAbs
-        ?readCanonicalJsonSnapshot(root,CANONICAL_AUTHORIZATION_REL,'canonical authorization candidate').json
-        :readJsonSnapshot(candidateAuthorizationPath).json;
+      if(candidateAuthorizationPath===canonicalAuthAbs){
+        candidateSnapshot=readCanonicalJsonSnapshot(
+          root,
+          CANONICAL_AUTHORIZATION_REL,
+          'canonical authorization candidate'
+        );
+      }else{
+        candidateSnapshot=readJsonSnapshot(candidateAuthorizationPath);
+      }
+      candidate=candidateSnapshot.json;
     }catch(err){
       errors.push('candidate authorization snapshot: '+String(err&&err.message||err));
       candidate=null;
@@ -690,6 +748,15 @@ function evaluateActivationTransition(options){
   }
 
   errors.push(...validateCandidateAuthorization(candidate,packetBinding));
+
+  const finalStagedSnapshots=Object.values(frozenSnapshots);
+  if(collectorPath===canonicalCollectorAbs&&collectorSnapshot&&collectorSnapshot.rel){
+    finalStagedSnapshots.push(collectorSnapshot);
+  }
+  if(candidateAuthorizationPath===path.resolve(root,CANONICAL_AUTHORIZATION_REL)&&candidateSnapshot&&candidateSnapshot.rel){
+    finalStagedSnapshots.push(candidateSnapshot);
+  }
+  errors.push(...validateFinalStagedBindings(root,finalStagedSnapshots));
 
   return {
     schema_version:1,
@@ -797,6 +864,8 @@ module.exports={
   readCanonicalJsonSnapshot:readCanonicalJsonSnapshot,
   readPinnedCanonicalSnapshot:readPinnedCanonicalSnapshot,
   readPinnedCanonicalJsonSnapshot:readPinnedCanonicalJsonSnapshot,
+  gitIndexTree:gitIndexTree,
+  validateFinalStagedBindings:validateFinalStagedBindings,
   gitIndexMode:gitIndexMode,
   assertCanonicalTrackedRegularFile:assertCanonicalTrackedRegularFile,
   validateTransitionRepository:validateTransitionRepository,
