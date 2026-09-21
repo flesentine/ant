@@ -117,6 +117,26 @@ try{
   assert.match(cliAgain.stderr,/refusing to overwrite existing activation packet files/);
   assert.strictEqual(fs.readFileSync(sentinelPath,'utf8'),sentinel,'refused overwrite must preserve existing packet');
 
+  const frozenCollectorPath=path.join(root,'hypotheses/p4_external_validation_collector_independence_record_v1.json');
+  const frozenCollectorOriginal=fs.readFileSync(frozenCollectorPath,'utf8');
+  const driftOut=path.join(tmp,'drift-packet');
+  try{
+    const drifted=JSON.parse(frozenCollectorOriginal);
+    drifted.firewall.collection_before_identity_freeze_authorized=true;
+    fs.writeFileSync(frozenCollectorPath,JSON.stringify(drifted,null,2)+'\n','utf8');
+
+    assert.throws(
+      function(){scaffolder.writePacket({root:root,outDir:driftOut});},
+      /frozen repository integrity check failed/
+    );
+    assert.ok(!fs.existsSync(path.join(driftOut,'collector.json')),'integrity failure must not emit collector scaffold');
+    assert.ok(!fs.existsSync(path.join(driftOut,'husbandry.json')),'integrity failure must not emit husbandry scaffold');
+    assert.ok(!fs.existsSync(path.join(driftOut,'precollection-declaration.json')),'integrity failure must not emit declaration scaffold');
+    assert.ok(!fs.existsSync(path.join(driftOut,'README.md')),'integrity failure must not emit README');
+  }finally{
+    fs.writeFileSync(frozenCollectorPath,frozenCollectorOriginal,'utf8');
+  }
+
   console.log('p4-external-validation-activation-packet.test.js PASS '+JSON.stringify({
     generated_files:4,
     colonies:12,
@@ -124,6 +144,7 @@ try{
     real_world_values_unset:true,
     observed_fields_prefilled:false,
     overwrite_refused:true,
+    frozen_drift_rejected_before_output:true,
     ready_for_activation_commit:false,
     collection_authorized:false
   }));
