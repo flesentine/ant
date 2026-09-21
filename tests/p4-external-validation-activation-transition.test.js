@@ -353,6 +353,55 @@ try{
     fs.writeFileSync(husbandryTemplatePath,husbandryTemplateOriginal);
   }
 
+  const stagedMismatchOriginal=fs.readFileSync(canonicalCandidatePath);
+  try{
+    fs.writeFileSync(canonicalCandidatePath,JSON.stringify(candidate,null,2)+'\n','utf8');
+    const stagedMismatchResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      candidateAuthorizationPath:canonicalCandidatePath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(stagedMismatchResult.ready_for_activation_commit,false);
+    assert.ok(stagedMismatchResult.errors.some(function(x){
+      return x.includes('canonical snapshot blob')&&x.includes('does not match staged blob');
+    }));
+  }finally{
+    fs.writeFileSync(canonicalCandidatePath,stagedMismatchOriginal);
+  }
+
+  const markedSideRel='experiments/p4_external_validation_replication_randomization_v1.json';
+  const markedSidePath=path.join(root,markedSideRel);
+  const markedSideOriginal=fs.readFileSync(markedSidePath);
+  const markedSideTampered=Buffer.from(markedSideOriginal.toString('utf8').replace(/\n?$/,'')+' \n','utf8');
+  const originalOpenSyncForFrozenInput=fs.openSync;
+  let frozenInputSwapInjected=false;
+  try{
+    fs.openSync=function(file,flags,...args){
+      if(!frozenInputSwapInjected&&path.resolve(String(file))===path.resolve(markedSidePath)){
+        frozenInputSwapInjected=true;
+        fs.writeFileSync(markedSidePath,markedSideTampered);
+      }
+      return originalOpenSyncForFrozenInput.call(fs,file,flags,...args);
+    };
+    const frozenInputRaceResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(frozenInputRaceResult.ready_for_activation_commit,false);
+    assert.ok(frozenInputRaceResult.errors.some(function(x){
+      return x.includes('marked-side schedule')||x.includes('snapshot blob');
+    }));
+  }finally{
+    fs.openSync=originalOpenSyncForFrozenInput;
+    fs.writeFileSync(markedSidePath,markedSideOriginal);
+  }
+
   const racePacket=validPacket(nowMs);
   const raceCollectorPath=path.join(tmp,'race-collector.json');
   const raceHusbandryPath=path.join(tmp,'race-husbandry.json');
@@ -479,6 +528,8 @@ try{
     canonical_ancestor_symlink_rejected:true,
     canonical_candidate_read_race_rejected:true,
     pinned_husbandry_template_snapshot_enforced:true,
+    canonical_snapshot_must_match_staged_blob:true,
+    every_frozen_input_uses_guarded_pinned_snapshot:true,
     validated_packet_bytes_bound_without_reopen:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
