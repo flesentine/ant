@@ -404,6 +404,53 @@ try{
     fs.writeFileSync(markedSidePath,markedSideOriginal);
   }
 
+  const canonicalCollectorPath=path.join(root,transition.CANONICAL_COLLECTOR_REL);
+  const canonicalCollectorOriginal=fs.readFileSync(canonicalCollectorPath);
+  const canonicalCollectorValid=validPacket(nowMs).collector;
+  const canonicalCollectorLateTamper=clone(canonicalCollectorValid);
+  canonicalCollectorLateTamper.collector_identity=null;
+  const lateRaceHusbandryPath=path.join(tmp,'late-index-race-husbandry.json');
+  const lateRaceDeclarationPath=path.join(tmp,'late-index-race-declaration.json');
+  writeJson(lateRaceHusbandryPath,packet.husbandry);
+  writeJson(lateRaceDeclarationPath,packet.declaration);
+  const originalReadFileSyncForLateIndex=fs.readFileSync;
+  let lateIndexMutationInjected=false;
+  try{
+    writeJson(canonicalCollectorPath,canonicalCollectorValid);
+    let staged=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(staged.status,0,staged.stderr);
+
+    fs.readFileSync=function(file,...args){
+      const value=originalReadFileSyncForLateIndex.call(fs,file,...args);
+      if(!lateIndexMutationInjected&&path.resolve(String(file))===path.resolve(lateRaceDeclarationPath)){
+        lateIndexMutationInjected=true;
+        writeJson(canonicalCollectorPath,canonicalCollectorLateTamper);
+        staged=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+        assert.strictEqual(staged.status,0,staged.stderr);
+      }
+      return value;
+    };
+
+    const lateIndexRaceResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:canonicalCollectorPath,
+      husbandryPath:lateRaceHusbandryPath,
+      declarationPath:lateRaceDeclarationPath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(lateIndexMutationInjected,true);
+    assert.strictEqual(lateIndexRaceResult.ready_for_activation_commit,false);
+    assert.ok(lateIndexRaceResult.errors.some(function(x){
+      return x.includes('canonical collector: final staged blob')&&
+        x.includes('!= validated snapshot blob');
+    }));
+  }finally{
+    fs.readFileSync=originalReadFileSyncForLateIndex;
+    fs.writeFileSync(canonicalCollectorPath,canonicalCollectorOriginal);
+    const restored=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(restored.status,0,restored.stderr);
+  }
+
   const racePacket=validPacket(nowMs);
   const raceCollectorPath=path.join(tmp,'race-collector.json');
   const raceHusbandryPath=path.join(tmp,'race-husbandry.json');
@@ -532,6 +579,7 @@ try{
     pinned_husbandry_template_snapshot_enforced:true,
     canonical_snapshot_must_match_staged_blob:true,
     every_frozen_input_uses_guarded_pinned_snapshot:true,
+    final_staged_bindings_rechecked_together:true,
     validated_packet_bytes_bound_without_reopen:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
