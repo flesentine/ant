@@ -180,6 +180,15 @@ function readJson(file){
   return JSON.parse(fs.readFileSync(file,'utf8'));
 }
 
+function readJsonSnapshot(file){
+  const buffer=fs.readFileSync(file);
+  return {
+    buffer:buffer,
+    json:JSON.parse(buffer.toString('utf8')),
+    git_blob_sha:gitBlobShaForBuffer(buffer)
+  };
+}
+
 function gitBlobShaForBuffer(buffer){
   const header=Buffer.from('blob '+buffer.length+'\0','utf8');
   return crypto.createHash('sha1').update(header).update(buffer).digest('hex');
@@ -368,9 +377,9 @@ function buildActivationMetadata(options){
     schema_version:1,
     activation_candidate_kind:'prospective_collection_activation',
     frozen_preauthorization_git_blob_sha:TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,
-    collector_record_git_blob_sha:gitBlobShaForFile(options.collectorPath),
-    husbandry_records_git_blob_sha:gitBlobShaForFile(options.husbandryPath),
-    precollection_declaration_git_blob_sha:gitBlobShaForFile(options.declarationPath),
+    collector_record_git_blob_sha:options.collectorGitBlobSha,
+    husbandry_records_git_blob_sha:options.husbandryGitBlobSha,
+    precollection_declaration_git_blob_sha:options.declarationGitBlobSha,
     preflight_ready_for_activation_commit:true,
     collection_authorized_in_candidate:true,
     collection_effective_only_after_permanent_main_qualification_before_trial_1:true,
@@ -482,9 +491,12 @@ function evaluateActivationTransition(options){
   if(!Number.isFinite(preflightTimeMs)) errors.push('preflightTimeMs must be a finite epoch-millisecond number');
 
   const husbandryTemplate=readJson(path.join(root,trustedFrozenInput('colony_husbandry_record_template_file').file));
-  const collector=readJson(collectorPath);
-  const husbandry=readJson(husbandryPath);
-  const declaration=readJson(declarationPath);
+  const collectorSnapshot=readJsonSnapshot(collectorPath);
+  const husbandrySnapshot=readJsonSnapshot(husbandryPath);
+  const declarationSnapshot=readJsonSnapshot(declarationPath);
+  const collector=collectorSnapshot.json;
+  const husbandry=husbandrySnapshot.json;
+  const declaration=declarationSnapshot.json;
 
   errors.push(...validateCollector(
     collector,
@@ -494,18 +506,20 @@ function evaluateActivationTransition(options){
   errors.push(...validateHusbandry(husbandry,husbandryTemplate,preflightTimeMs));
   errors.push(...validateDeclaration(declaration,preflightTimeMs));
 
+  const packetBinding={
+    collectorGitBlobSha:collectorSnapshot.git_blob_sha,
+    husbandryGitBlobSha:husbandrySnapshot.git_blob_sha,
+    declarationGitBlobSha:declarationSnapshot.git_blob_sha
+  };
+
   let candidate;
   if(options.candidateAuthorizationPath){
     candidate=readJson(path.resolve(options.candidateAuthorizationPath));
   }else{
-    candidate=buildCandidateAuthorization({collectorPath:collectorPath,husbandryPath:husbandryPath,declarationPath:declarationPath});
+    candidate=buildCandidateAuthorization(packetBinding);
   }
 
-  errors.push(...validateCandidateAuthorization(candidate,{
-    collectorPath:collectorPath,
-    husbandryPath:husbandryPath,
-    declarationPath:declarationPath
-  }));
+  errors.push(...validateCandidateAuthorization(candidate,packetBinding));
 
   return {
     schema_version:1,
@@ -608,6 +622,7 @@ module.exports={
   ACTIVATION_METADATA_KEYS:ACTIVATION_METADATA_KEYS,
   gitBlobShaForBuffer:gitBlobShaForBuffer,
   gitBlobShaForFile:gitBlobShaForFile,
+  readJsonSnapshot:readJsonSnapshot,
   gitIndexMode:gitIndexMode,
   assertCanonicalTrackedRegularFile:assertCanonicalTrackedRegularFile,
   validateTransitionRepository:validateTransitionRepository,
