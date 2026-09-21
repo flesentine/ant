@@ -225,20 +225,62 @@ function gitIndexMode(root,rel){
 }
 
 function assertCanonicalTrackedRegularFile(errors,root,rel,label){
-  const abs=path.join(root,rel);
-  let stat;
+  const name=label||rel;
+  const resolvedRoot=path.resolve(root);
+  let rootStat;
   try{
-    stat=fs.lstatSync(abs);
+    rootStat=fs.lstatSync(resolvedRoot);
   }catch(_err){
-    errors.push((label||rel)+': missing canonical file '+rel);
+    errors.push(name+': repository root is missing');
     return;
   }
-  if(!stat.isFile()){
-    errors.push((label||rel)+': canonical path must be a regular file, not symlink/directory/special file');
+  if(rootStat.isSymbolicLink()){
+    errors.push(name+': repository root must not be a symlink');
+    return;
   }
+
+  const segments=rel.split(/[\\/]+/).filter(Boolean);
+  let current=resolvedRoot;
+  for(let i=0;i<segments.length;i++){
+    current=path.join(current,segments[i]);
+    let stat;
+    try{
+      stat=fs.lstatSync(current);
+    }catch(_err){
+      errors.push(name+': missing canonical path component '+segments.slice(0,i+1).join('/'));
+      return;
+    }
+    if(stat.isSymbolicLink()){
+      errors.push(name+': canonical path component must not be a symlink: '+segments.slice(0,i+1).join('/'));
+      return;
+    }
+    if(i<segments.length-1&&!stat.isDirectory()){
+      errors.push(name+': canonical path ancestor must be a directory: '+segments.slice(0,i+1).join('/'));
+      return;
+    }
+    if(i===segments.length-1&&!stat.isFile()){
+      errors.push(name+': canonical path must be a regular file, not directory/special file');
+      return;
+    }
+  }
+
+  let real;
+  try{
+    real=fs.realpathSync(path.join(resolvedRoot,rel));
+  }catch(_err){
+    errors.push(name+': canonical path realpath resolution failed');
+    return;
+  }
+  const realRoot=fs.realpathSync(resolvedRoot);
+  const relative=path.relative(realRoot,real);
+  if(relative===''||relative.startsWith('..'+path.sep)||path.isAbsolute(relative)){
+    errors.push(name+': canonical path resolves outside the real repository tree');
+    return;
+  }
+
   const mode=gitIndexMode(root,rel);
   if(mode!=='100644'&&mode!=='100755'){
-    errors.push((label||rel)+': canonical path must be tracked as a regular Git file; index mode='+String(mode));
+    errors.push(name+': canonical path must be tracked as a regular Git file; index mode='+String(mode));
   }
 }
 
