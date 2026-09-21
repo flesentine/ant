@@ -89,6 +89,7 @@ node tests/p4-external-validation-source-discovery.test.js
 node tests/p4-external-validation-preregistration.test.js
 node tests/p4-external-validation-collection-authorization.test.js
 node tests/p4-external-validation-activation-preflight.test.js
+node tests/p4-external-validation-activation-packet.test.js
 node tests/p4-visual-simulator.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
@@ -102,7 +103,9 @@ node --check src/p4.js
 node --check src/app.js
 node --check tests/p4-visual-simulator.test.js
 node --check tests/p4-external-validation-activation-preflight.test.js
+node --check tests/p4-external-validation-activation-packet.test.js
 node --check tools/check-p4-external-validation-activation.js
+node --check tools/create-p4-external-validation-activation-packet.js
 node --check tools/run-benchmark.js
 node --check tools/run-model-competition.js
 node --check tools/run-h2-mechanism.js
