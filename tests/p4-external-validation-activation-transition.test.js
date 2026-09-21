@@ -201,7 +201,9 @@ try{
       preflightTimeMs:nowMs
     });
     assert.strictEqual(repoDriftResult.ready_for_activation_commit,false);
-    assert.ok(repoDriftResult.errors.some(function(x){return x.includes('frozen preauthorization record: working-tree blob drift');}));
+    assert.ok(repoDriftResult.errors.some(function(x){
+      return x.includes('frozen preauthorization record: canonical snapshot blob')&&x.includes('does not match staged blob');
+    }));
   }finally{
     fs.writeFileSync(canonicalAuthPath,canonicalAuthOriginal,'utf8');
   }
