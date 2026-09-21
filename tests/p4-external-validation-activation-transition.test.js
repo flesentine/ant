@@ -231,6 +231,32 @@ try{
     fs.writeFileSync(canonicalCandidatePath,canonicalOriginal,'utf8');
   }
 
+  const hypothesesPath=path.join(root,'hypotheses');
+  const hypothesesBackup=path.join(root,'.p4-hypotheses-backup-for-transition-test');
+  const externalHypotheses=path.join(tmp,'external-hypotheses');
+  fs.cpSync(hypothesesPath,externalHypotheses,{recursive:true});
+  writeJson(path.join(externalHypotheses,'p4_external_validation_collection_authorization_v1.json'),candidate);
+  try{
+    fs.renameSync(hypothesesPath,hypothesesBackup);
+    fs.symlinkSync(externalHypotheses,hypothesesPath,'dir');
+
+    const ancestorSymlinkResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      candidateAuthorizationPath:path.join(hypothesesPath,'p4_external_validation_collection_authorization_v1.json'),
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(ancestorSymlinkResult.ready_for_activation_commit,false);
+    assert.ok(ancestorSymlinkResult.errors.some(function(x){
+      return x.includes('canonical path component must not be a symlink: hypotheses');
+    }));
+  }finally{
+    try{fs.rmSync(hypothesesPath,{recursive:true,force:true});}catch(_err){}
+    if(fs.existsSync(hypothesesBackup)) fs.renameSync(hypothesesBackup,hypothesesPath);
+  }
+
   const badDeclaration=clone(packet.declaration);
   badDeclaration.no_biological_collection_has_started=false;
   const badDeclarationPath=path.join(tmp,'bad-declaration.json');
@@ -331,6 +357,7 @@ try{
     immutable_tamper_rejected:true,
     frozen_repository_auth_drift_rejected:true,
     canonical_authorization_symlink_rejected:true,
+    canonical_ancestor_symlink_rejected:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
     overwrite_refused:true,
