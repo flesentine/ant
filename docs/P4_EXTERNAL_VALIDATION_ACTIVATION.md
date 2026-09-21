@@ -53,6 +53,34 @@ collection_authorized=false
 
 If a blank scaffold ever passes activation preflight, the generator removes the generated files and fails.
 
+## Build or validate a prospective activation transition
+
+Once a real packet passes the precollection checks, build a proposed authorization transition outside the repository:
+
+~~~bash
+node tools/build-p4-external-validation-activation-transition.js \
+  --collector /path/to/collector.json \
+  --husbandry /path/to/husbandry.json \
+  --declaration /path/to/precollection-declaration.json \
+  --out /path/to/candidate-authorization.json \
+  --json
+~~~
+
+The transition builder is intentionally stricter than a generic JSON patch. It embeds the trusted preactivation authorization and collector baselines, verifies every still-immutable frozen repository input, validates the real packet, and then normalizes only the explicit activation-mutable authorization surface. Any change outside that surface fails closed.
+
+The candidate authorization may update only operational activation state: the authorization status, the three collector/husbandry gate mirrors, `collection_authorized`, the resolved preactivation blocker, the durable next-action rule, and a fixed activation-metadata object binding the collector, husbandry, and declaration Git-blob hashes. Preregistration, Candidate 307, schedules, templates, apparatus/stimulus contracts, wet-lab recipe, sample size, thresholds, statistical rules, and semantic firewalls remain byte-for-byte semantically unchanged after normalization.
+
+A passing candidate deliberately has:
+
+~~~text
+candidate_collection_authorized=true
+biological_collection_may_begin=false
+~~~
+
+The first value means the proposed activation commit contains the allowed authorization transition. The second remains false because the frozen post-commit gates still apply. Biological trial 1 remains forbidden until that exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed.
+
+An already-built candidate can be revalidated with `--candidate /path/to/candidate-authorization.json` instead of `--out`. The builder refuses to overwrite an existing candidate file and never writes a candidate when packet or transition validation fails.
+
 ## What the preflight verifies
 
 The tool also verifies the frozen preregistration, marked-side schedule, release-pose manifest and all 12 release-pose slices, release initialization/RNG blobs, chemical template, husbandry template, calibration template, trial schema, and activation checklist against their pinned Git blob SHAs.
