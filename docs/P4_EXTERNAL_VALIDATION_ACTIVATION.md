@@ -68,6 +68,8 @@ node tools/build-p4-external-validation-activation-transition.js \
 
 The transition builder is intentionally stricter than a generic JSON patch. It embeds the trusted preactivation authorization and collector baselines, verifies every still-immutable frozen repository input, validates the real packet, and then normalizes only the explicit activation-mutable authorization surface. Any change outside that surface fails closed.
 
+Before the builder can report `ready_for_activation_commit=true`, the exact validated collector record must also be copied to the canonical repository path `hypotheses/p4_external_validation_collector_independence_record_v1.json` and staged. An external `--collector` path may be used as the source packet, but its Git-blob SHA must exactly match the guarded canonical stage-0 collector blob that the activation commit would record. This prevents an authorization commit from claiming frozen collector identity/attestations while leaving the repository's durable collector record at the placeholder baseline.
+
 The candidate authorization may update only operational activation state: the authorization status, the three collector/husbandry gate mirrors, `collection_authorized`, the resolved preactivation blocker, the durable next-action rule, and a fixed activation-metadata object binding the collector, husbandry, and declaration Git-blob hashes. Preregistration, Candidate 307, schedules, templates, apparatus/stimulus contracts, wet-lab recipe, sample size, thresholds, statistical rules, and semantic firewalls remain byte-for-byte semantically unchanged after normalization.
 
 A passing candidate deliberately has:
