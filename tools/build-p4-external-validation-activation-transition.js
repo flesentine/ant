@@ -189,7 +189,7 @@ function readJsonSnapshot(file){
   };
 }
 
-function readCanonicalJsonSnapshot(root,rel,label){
+function readCanonicalSnapshot(root,rel,label){
   const name=label||rel;
   const pathErrors=[];
   assertCanonicalTrackedRegularFile(pathErrors,root,rel,name);
@@ -198,6 +198,7 @@ function readCanonicalJsonSnapshot(root,rel,label){
     throw new Error(name+': O_NOFOLLOW is unavailable on this platform');
   }
 
+  const indexBefore=gitIndexBlob(root,rel);
   const resolvedRoot=path.resolve(root);
   const abs=path.join(resolvedRoot,rel);
   let fd;
@@ -206,6 +207,7 @@ function readCanonicalJsonSnapshot(root,rel,label){
     const openedStat=fs.fstatSync(fd);
     if(!openedStat.isFile()) throw new Error(name+': opened canonical input is not a regular file');
     const buffer=fs.readFileSync(fd);
+    const gitBlobSha=gitBlobShaForBuffer(buffer);
 
     const postErrors=[];
     assertCanonicalTrackedRegularFile(postErrors,root,rel,name);
@@ -223,10 +225,18 @@ function readCanonicalJsonSnapshot(root,rel,label){
       throw new Error(name+': opened canonical input resolves outside the real repository tree');
     }
 
+    const indexAfter=gitIndexBlob(root,rel);
+    if(indexBefore!==indexAfter){
+      throw new Error(name+': staged blob changed while canonical snapshot was being read');
+    }
+    if(gitBlobSha!==indexAfter){
+      throw new Error(name+': canonical snapshot blob '+gitBlobSha+' does not match staged blob '+String(indexAfter));
+    }
+
     return {
       buffer:buffer,
-      json:JSON.parse(buffer.toString('utf8')),
-      git_blob_sha:gitBlobShaForBuffer(buffer),
+      git_blob_sha:gitBlobSha,
+      staged_git_blob_sha:indexAfter,
       dev:openedStat.dev,
       ino:openedStat.ino
     };
@@ -235,16 +245,29 @@ function readCanonicalJsonSnapshot(root,rel,label){
   }
 }
 
-function readPinnedCanonicalJsonSnapshot(root,rel,expected,label){
+function readCanonicalJsonSnapshot(root,rel,label){
+  const snapshot=readCanonicalSnapshot(root,rel,label);
+  snapshot.json=JSON.parse(snapshot.buffer.toString('utf8'));
+  return snapshot;
+}
+
+function readPinnedCanonicalSnapshot(root,rel,expected,label){
   const name=label||rel;
-  const snapshot=readCanonicalJsonSnapshot(root,rel,name);
+  const snapshot=readCanonicalSnapshot(root,rel,name);
   const head=gitHeadBlob(root,rel);
-  const index=gitIndexBlob(root,rel);
   if(head!==expected) throw new Error(name+': committed blob drift '+head+' != '+expected);
-  if(index!==expected) throw new Error(name+': staged blob drift '+index+' != '+expected);
+  if(snapshot.staged_git_blob_sha!==expected){
+    throw new Error(name+': staged blob drift '+snapshot.staged_git_blob_sha+' != '+expected);
+  }
   if(snapshot.git_blob_sha!==expected){
     throw new Error(name+': snapshot blob drift '+snapshot.git_blob_sha+' != '+expected);
   }
+  return snapshot;
+}
+
+function readPinnedCanonicalJsonSnapshot(root,rel,expected,label){
+  const snapshot=readPinnedCanonicalSnapshot(root,rel,expected,label);
+  snapshot.json=JSON.parse(snapshot.buffer.toString('utf8'));
   return snapshot;
 }
 
@@ -372,6 +395,7 @@ function trustedFrozenInput(fileKey){
 
 function validateTransitionRepository(root,options){
   const errors=[];
+  const snapshots={};
   const opts=options||{};
   const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
   const canonicalCollectorAbs=path.resolve(root,CANONICAL_COLLECTOR_REL);
@@ -381,67 +405,95 @@ function validateTransitionRepository(root,options){
   const baselineAuthErrors=validateFrozenAuthorizationContract(TRUSTED_BASE_AUTHORIZATION);
   if(baselineAuthErrors.length) errors.push(...baselineAuthErrors.map(function(e){return 'trusted baseline authorization: '+e;}));
 
-  assertCanonicalTrackedRegularFile(errors,root,CANONICAL_AUTHORIZATION_REL,'canonical authorization');
-  assertCanonicalTrackedRegularFile(errors,root,CANONICAL_COLLECTOR_REL,'canonical collector');
+  function capturePinned(key,rel,expected,label){
+    try{
+      const snapshot=readPinnedCanonicalSnapshot(root,rel,expected,label);
+      snapshots[key]=snapshot;
+      return snapshot;
+    }catch(err){
+      errors.push(String(err&&err.message||err));
+      return null;
+    }
+  }
 
   if(suppliedCandidateAuthAbs!==canonicalAuthAbs){
-    assertPinnedBlob(
-      errors,root,
+    capturePinned(
+      'frozen_preauthorization',
       CANONICAL_AUTHORIZATION_REL,
       TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,
       'frozen preauthorization record'
     );
   }
+
   if(suppliedCollectorAbs!==canonicalCollectorAbs){
-    assertPinnedBlob(
-      errors,root,
+    capturePinned(
+      'frozen_collector_baseline',
       CANONICAL_COLLECTOR_REL,
       CANONICAL_COLLECTOR_BLOB,
       'frozen collector baseline'
     );
   }
 
-  assertPinnedBlob(
-    errors,root,
+  capturePinned(
+    'qualified_preregistration',
     TRUSTED_QUALIFIED_PREREGISTRATION.file,
     TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha,
     'qualified preregistration'
   );
 
   for(const item of TRUSTED_FROZEN_COLLECTION_INPUTS){
-    if(item.fileKey==='collector_independence_record_file') continue;
-    assertPinnedBlob(errors,root,item.file,item.git_blob_sha,item.label);
+    if(item.fileKey==='collector_independence_record_file'){
+      if(suppliedCollectorAbs===canonicalCollectorAbs) continue;
+      if(snapshots.frozen_collector_baseline) snapshots[item.fileKey]=snapshots.frozen_collector_baseline;
+      continue;
+    }
+    const snapshot=capturePinned(item.fileKey,item.file,item.git_blob_sha,item.label);
+    if(snapshot) snapshots[item.fileKey]=snapshot;
   }
 
   const releaseContract=trustedFrozenInput('release_pose_schedule_manifest_file');
-  const releasePath=releaseContract.file;
-  if(fs.existsSync(path.join(root,releasePath))){
+  const releaseSnapshot=snapshots.release_pose_schedule_manifest_file;
+  if(releaseSnapshot){
     let release;
     try{
-      release=readPinnedCanonicalJsonSnapshot(
-        root,
-        releasePath,
-        releaseContract.git_blob_sha,
-        'release-pose schedule manifest'
-      ).json;
+      release=JSON.parse(releaseSnapshot.buffer.toString('utf8'));
+      releaseSnapshot.json=release;
     }catch(err){
-      errors.push(String(err&&err.message||err));
+      errors.push('release-pose schedule manifest: invalid JSON: '+String(err&&err.message||err));
       release=null;
     }
+
     if(release){
-      assertPinnedBlob(errors,root,release.simulation_initialization_file,release.simulation_initialization_git_blob_sha,'release initialization');
-      assertPinnedBlob(errors,root,release.rng_file,release.rng_git_blob_sha,'release RNG');
+      capturePinned(
+        'release_initialization',
+        release.simulation_initialization_file,
+        release.simulation_initialization_git_blob_sha,
+        'release initialization'
+      );
+      capturePinned(
+        'release_rng',
+        release.rng_file,
+        release.rng_git_blob_sha,
+        'release RNG'
+      );
       if(!Array.isArray(release.parts)||release.parts.length!==12){
         errors.push('release-pose manifest must bind exactly 12 parts');
       }else{
         for(const part of release.parts){
-          assertPinnedBlob(errors,root,part.file,part.git_blob_sha,'release-pose part colony '+part.colony);
+          capturePinned(
+            'release_pose_part_'+part.colony,
+            part.file,
+            part.git_blob_sha,
+            'release-pose part colony '+part.colony
+          );
         }
       }
     }
+  }else if(releaseContract){
+    errors.push('release-pose schedule manifest snapshot unavailable');
   }
 
-  return errors;
+  return {errors:errors,snapshots:snapshots};
 }
 
 function buildActivationMetadata(options){
@@ -557,24 +609,25 @@ function evaluateActivationTransition(options){
   const preflightTimeMs=options.preflightTimeMs===undefined?Date.now():options.preflightTimeMs;
 
   const candidateAuthorizationPath=options.candidateAuthorizationPath?path.resolve(options.candidateAuthorizationPath):null;
-  const errors=validateTransitionRepository(root,{
+  const repositoryValidation=validateTransitionRepository(root,{
     collectorPath:collectorPath,
     candidateAuthorizationPath:candidateAuthorizationPath
   });
+  const errors=repositoryValidation.errors;
+  const frozenSnapshots=repositoryValidation.snapshots;
   if(!Number.isFinite(preflightTimeMs)) errors.push('preflightTimeMs must be a finite epoch-millisecond number');
 
-  const husbandryTemplateContract=trustedFrozenInput('colony_husbandry_record_template_file');
-  let husbandryTemplate;
-  try{
-    husbandryTemplate=readPinnedCanonicalJsonSnapshot(
-      root,
-      husbandryTemplateContract.file,
-      husbandryTemplateContract.git_blob_sha,
-      'colony husbandry template'
-    ).json;
-  }catch(err){
-    errors.push(String(err&&err.message||err));
-    husbandryTemplate={};
+  let husbandryTemplate={};
+  const husbandryTemplateSnapshot=frozenSnapshots.colony_husbandry_record_template_file;
+  if(husbandryTemplateSnapshot){
+    try{
+      husbandryTemplate=JSON.parse(husbandryTemplateSnapshot.buffer.toString('utf8'));
+      husbandryTemplateSnapshot.json=husbandryTemplate;
+    }catch(err){
+      errors.push('colony husbandry template: invalid JSON: '+String(err&&err.message||err));
+    }
+  }else{
+    errors.push('colony husbandry template snapshot unavailable');
   }
 
   const canonicalCollectorAbs=path.resolve(root,CANONICAL_COLLECTOR_REL);
@@ -740,7 +793,9 @@ module.exports={
   gitBlobShaForBuffer:gitBlobShaForBuffer,
   gitBlobShaForFile:gitBlobShaForFile,
   readJsonSnapshot:readJsonSnapshot,
+  readCanonicalSnapshot:readCanonicalSnapshot,
   readCanonicalJsonSnapshot:readCanonicalJsonSnapshot,
+  readPinnedCanonicalSnapshot:readPinnedCanonicalSnapshot,
   readPinnedCanonicalJsonSnapshot:readPinnedCanonicalJsonSnapshot,
   gitIndexMode:gitIndexMode,
   assertCanonicalTrackedRegularFile:assertCanonicalTrackedRegularFile,
