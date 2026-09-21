@@ -348,7 +348,7 @@ try{
     });
     assert.strictEqual(templateRaceResult.ready_for_activation_commit,false);
     assert.ok(templateRaceResult.errors.some(function(x){
-      return x.includes('colony husbandry template: snapshot blob drift');
+      return x.includes('colony husbandry template: canonical snapshot blob')&&x.includes('does not match staged blob');
     }));
   }finally{
     fs.openSync=originalOpenSyncForTemplate;
