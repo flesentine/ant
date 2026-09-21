@@ -224,7 +224,7 @@ try{
     });
     assert.strictEqual(symlinkResult.ready_for_activation_commit,false);
     assert.ok(symlinkResult.errors.some(function(x){
-      return x.includes('canonical authorization: canonical path must be a regular file');
+      return x.includes('canonical authorization: canonical path component must not be a symlink');
     }));
   }finally{
     try{fs.rmSync(canonicalCandidatePath);}catch(_err){}
