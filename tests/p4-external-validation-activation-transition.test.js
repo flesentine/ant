@@ -285,6 +285,74 @@ try{
   assert.strictEqual(observedResult.ready_for_activation_commit,false);
   assert.ok(observedResult.errors.some(function(x){return x.includes('must not prefill future observed/derived field');}));
 
+  const candidateReadRaceOriginal=fs.readFileSync(canonicalCandidatePath);
+  const candidateReadRaceExternal=path.join(tmp,'candidate-read-race-external.json');
+  writeJson(candidateReadRaceExternal,candidate);
+  const originalOpenSyncForCandidate=fs.openSync;
+  let candidateSwapInjected=false;
+  try{
+    fs.openSync=function(file,flags,...args){
+      if(!candidateSwapInjected&&path.resolve(String(file))===path.resolve(canonicalCandidatePath)){
+        candidateSwapInjected=true;
+        fs.rmSync(canonicalCandidatePath);
+        fs.symlinkSync(candidateReadRaceExternal,canonicalCandidatePath);
+      }
+      return originalOpenSyncForCandidate.call(fs,file,flags,...args);
+    };
+    const candidateReadRaceResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      candidateAuthorizationPath:canonicalCandidatePath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(candidateReadRaceResult.ready_for_activation_commit,false);
+    assert.ok(candidateReadRaceResult.errors.some(function(x){
+      return x.includes('candidate authorization snapshot');
+    }));
+  }finally{
+    fs.openSync=originalOpenSyncForCandidate;
+    try{fs.rmSync(canonicalCandidatePath);}catch(_err){}
+    fs.writeFileSync(canonicalCandidatePath,candidateReadRaceOriginal);
+  }
+
+  const husbandryTemplateRel='hypotheses/p4_external_validation_colony_husbandry_record_template_v1.json';
+  const husbandryTemplatePath=path.join(root,husbandryTemplateRel);
+  const husbandryTemplateOriginal=fs.readFileSync(husbandryTemplatePath);
+  const tamperedTemplate=JSON.parse(husbandryTemplateOriginal.toString('utf8'));
+  tamperedTemplate.collection_observed_or_derived_fields=[];
+  const tamperedTemplateBytes=Buffer.from(JSON.stringify(tamperedTemplate,null,2)+'\n','utf8');
+  const originalOpenSyncForTemplate=fs.openSync;
+  let templateSwapInjected=false;
+  try{
+    fs.openSync=function(file,flags,...args){
+      if(!templateSwapInjected&&path.resolve(String(file))===path.resolve(husbandryTemplatePath)){
+        templateSwapInjected=true;
+        fs.writeFileSync(husbandryTemplatePath,tamperedTemplateBytes);
+      }
+      return originalOpenSyncForTemplate.call(fs,file,flags,...args);
+    };
+    const observedPacket=clone(packet.husbandry);
+    observedPacket.records[0].first_trial_timestamp_local=offsetIso(nowMs+(72*60*60*1000));
+    const observedPacketPath=path.join(tmp,'template-race-observed-husbandry.json');
+    writeJson(observedPacketPath,observedPacket);
+    const templateRaceResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:observedPacketPath,
+      declarationPath:declarationPath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(templateRaceResult.ready_for_activation_commit,false);
+    assert.ok(templateRaceResult.errors.some(function(x){
+      return x.includes('colony husbandry template: snapshot blob drift');
+    }));
+  }finally{
+    fs.openSync=originalOpenSyncForTemplate;
+    fs.writeFileSync(husbandryTemplatePath,husbandryTemplateOriginal);
+  }
+
   const racePacket=validPacket(nowMs);
   const raceCollectorPath=path.join(tmp,'race-collector.json');
   const raceHusbandryPath=path.join(tmp,'race-husbandry.json');
@@ -409,6 +477,8 @@ try{
     frozen_repository_auth_drift_rejected:true,
     canonical_authorization_symlink_rejected:true,
     canonical_ancestor_symlink_rejected:true,
+    canonical_candidate_read_race_rejected:true,
+    pinned_husbandry_template_snapshot_enforced:true,
     validated_packet_bytes_bound_without_reopen:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
