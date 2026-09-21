@@ -9,6 +9,8 @@ const transition=require('../tools/build-p4-external-validation-activation-trans
 
 const root=path.resolve(__dirname,'..');
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'antlab-p4-activation-transition-'));
+const canonicalCollectorPath=path.join(root,transition.CANONICAL_COLLECTOR_REL);
+const canonicalCollectorBaselineOriginal=fs.readFileSync(canonicalCollectorPath);
 
 function clone(value){
   return JSON.parse(JSON.stringify(value));
@@ -71,6 +73,10 @@ try{
   writeJson(husbandryPath,packet.husbandry);
   writeJson(declarationPath,packet.declaration);
 
+  writeJson(canonicalCollectorPath,packet.collector);
+  const stageCanonicalCollector=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+  assert.strictEqual(stageCanonicalCollector.status,0,stageCanonicalCollector.stderr);
+
   const built=transition.evaluateActivationTransition({
     root:root,
     collectorPath:collectorPath,
@@ -113,6 +119,30 @@ try{
   assert.strictEqual(metadata.no_biological_collection_has_started,true);
   assert.strictEqual(metadata.no_new_biological_outcome_has_been_accessed,true);
   assert.strictEqual(metadata.candidate_307_prediction_has_not_been_disclosed_to_collector,true);
+
+  const canonicalCollectorValidBytes=fs.readFileSync(canonicalCollectorPath);
+  try{
+    fs.writeFileSync(canonicalCollectorPath,canonicalCollectorBaselineOriginal);
+    const stagePlaceholderCollector=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(stagePlaceholderCollector.status,0,stagePlaceholderCollector.stderr);
+
+    const externalOnlyCollectorResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(externalOnlyCollectorResult.ready_for_activation_commit,false);
+    assert.ok(externalOnlyCollectorResult.errors.some(function(x){
+      return x.includes('canonical collector activation record: staged canonical collector blob')&&
+        x.includes('!= validated collector blob');
+    }));
+  }finally{
+    fs.writeFileSync(canonicalCollectorPath,canonicalCollectorValidBytes);
+    const restageValidCollector=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(restageValidCollector.status,0,restageValidCollector.stderr);
+  }
 
   const candidatePath=path.join(tmp,'candidate.json');
   writeJson(candidatePath,candidate);
@@ -404,7 +434,6 @@ try{
     fs.writeFileSync(markedSidePath,markedSideOriginal);
   }
 
-  const canonicalCollectorPath=path.join(root,transition.CANONICAL_COLLECTOR_REL);
   const canonicalCollectorOriginal=fs.readFileSync(canonicalCollectorPath);
   const canonicalCollectorValid=validPacket(nowMs).collector;
   const canonicalCollectorLateTamper=clone(canonicalCollectorValid);
@@ -580,6 +609,7 @@ try{
     canonical_snapshot_must_match_staged_blob:true,
     every_frozen_input_uses_guarded_pinned_snapshot:true,
     final_staged_bindings_rechecked_together:true,
+    validated_collector_must_be_staged_canonically:true,
     validated_packet_bytes_bound_without_reopen:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
@@ -590,5 +620,9 @@ try{
     remaining_post_commit_gates:built.post_commit_gates_remaining.length
   }));
 }finally{
+  try{
+    fs.writeFileSync(canonicalCollectorPath,canonicalCollectorBaselineOriginal);
+    spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+  }catch(_err){}
   fs.rmSync(tmp,{recursive:true,force:true});
 }
