@@ -206,6 +206,31 @@ try{
     fs.writeFileSync(canonicalAuthPath,canonicalAuthOriginal,'utf8');
   }
 
+  const canonicalCandidatePath=path.join(root,transition.CANONICAL_AUTHORIZATION_REL);
+  const canonicalOriginal=fs.readFileSync(canonicalCandidatePath,'utf8');
+  const externalCandidatePath=path.join(tmp,'external-valid-candidate.json');
+  writeJson(externalCandidatePath,candidate);
+  try{
+    fs.rmSync(canonicalCandidatePath);
+    fs.symlinkSync(externalCandidatePath,canonicalCandidatePath);
+
+    const symlinkResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      candidateAuthorizationPath:canonicalCandidatePath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(symlinkResult.ready_for_activation_commit,false);
+    assert.ok(symlinkResult.errors.some(function(x){
+      return x.includes('canonical authorization: canonical path must be a regular file');
+    }));
+  }finally{
+    try{fs.rmSync(canonicalCandidatePath);}catch(_err){}
+    fs.writeFileSync(canonicalCandidatePath,canonicalOriginal,'utf8');
+  }
+
   const badDeclaration=clone(packet.declaration);
   badDeclaration.no_biological_collection_has_started=false;
   const badDeclarationPath=path.join(tmp,'bad-declaration.json');
@@ -305,6 +330,7 @@ try{
     synthetic_valid_candidate_ready:true,
     immutable_tamper_rejected:true,
     frozen_repository_auth_drift_rejected:true,
+    canonical_authorization_symlink_rejected:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
     overwrite_refused:true,
