@@ -55,7 +55,7 @@ If a blank scaffold ever passes activation preflight, the generator removes the 
 
 ## Build or validate a prospective activation transition
 
-Once a real packet passes the precollection checks, build a proposed authorization transition outside the repository:
+Once a real packet passes the precollection checks, build a proposed authorization transition outside the repository. This first step creates a candidate **for staging**; it does not yet make the activation commit ready:
 
 ~~~bash
 node tools/build-p4-external-validation-activation-transition.js \
@@ -70,18 +70,22 @@ The transition builder is intentionally stricter than a generic JSON patch. It e
 
 Before the builder can report `ready_for_activation_commit=true`, the exact validated collector record must also be copied to the canonical repository path `hypotheses/p4_external_validation_collector_independence_record_v1.json` and staged. An external `--collector` path may be used as the source packet, but its Git-blob SHA must exactly match the guarded canonical stage-0 collector blob that the activation commit would record. This prevents an authorization commit from claiming frozen collector identity/attestations while leaving the repository's durable collector record at the placeholder baseline.
 
+Likewise, the exact generated/validated authorization candidate must be copied to `hypotheses/p4_external_validation_collection_authorization_v1.json` and staged. The initial `--out` build succeeds when `candidate_ready_for_staging=true` even though `ready_for_activation_commit=false`; after both canonical collector and authorization blobs are staged, rerun with `--candidate /path/to/candidate-authorization.json` (or the canonical authorization path). Only an exact blob match at both canonical stage-0 paths can produce `ready_for_activation_commit=true`.
+
 The candidate authorization may update only operational activation state: the authorization status, the three collector/husbandry gate mirrors, `collection_authorized`, the resolved preactivation blocker, the durable next-action rule, and a fixed activation-metadata object binding the collector, husbandry, and declaration Git-blob hashes. Preregistration, Candidate 307, schedules, templates, apparatus/stimulus contracts, wet-lab recipe, sample size, thresholds, statistical rules, and semantic firewalls remain byte-for-byte semantically unchanged after normalization.
 
-A passing candidate deliberately has:
+A successfully built candidate for staging deliberately has:
 
 ~~~text
+candidate_ready_for_staging=true
+ready_for_activation_commit=false
 candidate_collection_authorized=true
 biological_collection_may_begin=false
 ~~~
 
-The first value means the proposed activation commit contains the allowed authorization transition. The second remains false because the frozen post-commit gates still apply. Biological trial 1 remains forbidden until that exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed.
+After the exact candidate blob is copied to the canonical authorization path and staged, a clean revalidation may advance `ready_for_activation_commit` to `true`. `candidate_collection_authorized=true` describes the proposed authorization content; `biological_collection_may_begin` remains false because the frozen post-commit gates still apply. Biological trial 1 remains forbidden until that exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed.
 
-An already-built candidate can be revalidated with `--candidate /path/to/candidate-authorization.json` instead of `--out`. The builder refuses to overwrite an existing candidate file and never writes a candidate when packet or transition validation fails.
+An already-built candidate can be revalidated with `--candidate /path/to/candidate-authorization.json` instead of `--out`. Revalidation requires that exact candidate Git-blob SHA to match the guarded canonical staged authorization blob. The builder refuses to overwrite an existing candidate file and never writes a candidate when the packet or candidate semantics are invalid.
 
 ## What the preflight verifies
 
