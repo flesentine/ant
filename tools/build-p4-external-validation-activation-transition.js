@@ -466,15 +466,6 @@ function validateTransitionRepository(root,options){
     }
   }
 
-  if(suppliedCandidateAuthAbs!==canonicalAuthAbs){
-    capturePinned(
-      'frozen_preauthorization',
-      CANONICAL_AUTHORIZATION_REL,
-      TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,
-      'frozen preauthorization record'
-    );
-  }
-
   capturePinned(
     'qualified_preregistration',
     TRUSTED_QUALIFIED_PREREGISTRATION.file,
@@ -737,8 +728,9 @@ function evaluateActivationTransition(options){
 
   let candidate;
   let candidateSnapshot=null;
+  let candidateGitBlobSha=null;
+  const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
   if(candidateAuthorizationPath){
-    const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
     try{
       if(candidateAuthorizationPath===canonicalAuthAbs){
         candidateSnapshot=readCanonicalJsonSnapshot(
@@ -750,28 +742,62 @@ function evaluateActivationTransition(options){
         candidateSnapshot=readJsonSnapshot(candidateAuthorizationPath);
       }
       candidate=candidateSnapshot.json;
+      candidateGitBlobSha=candidateSnapshot.git_blob_sha;
     }catch(err){
       errors.push('candidate authorization snapshot: '+String(err&&err.message||err));
       candidate=null;
     }
   }else{
     candidate=buildCandidateAuthorization(packetBinding);
+    candidateGitBlobSha=gitBlobShaForBuffer(
+      Buffer.from(JSON.stringify(candidate,null,2)+'\n','utf8')
+    );
   }
 
   errors.push(...validateCandidateAuthorization(candidate,packetBinding));
 
-  const finalStagedSnapshots=Object.values(frozenSnapshots);
+  const stagingSnapshots=Object.values(frozenSnapshots);
   if(canonicalCollectorCommitSnapshot&&canonicalCollectorCommitSnapshot.rel){
-    finalStagedSnapshots.push(canonicalCollectorCommitSnapshot);
+    stagingSnapshots.push(canonicalCollectorCommitSnapshot);
   }
-  if(candidateAuthorizationPath===path.resolve(root,CANONICAL_AUTHORIZATION_REL)&&candidateSnapshot&&candidateSnapshot.rel){
-    finalStagedSnapshots.push(candidateSnapshot);
+  errors.push(...validateFinalStagedBindings(root,stagingSnapshots));
+  const candidateReadyForStaging=errors.length===0;
+
+  let canonicalAuthorizationCommitSnapshot=null;
+  try{
+    canonicalAuthorizationCommitSnapshot=
+      candidateAuthorizationPath===canonicalAuthAbs&&candidateSnapshot&&candidateSnapshot.rel
+        ?candidateSnapshot
+        :readCanonicalJsonSnapshot(
+          root,
+          CANONICAL_AUTHORIZATION_REL,
+          'canonical authorization activation record'
+        );
+    if(
+      candidateGitBlobSha&&
+      canonicalAuthorizationCommitSnapshot&&
+      canonicalAuthorizationCommitSnapshot.git_blob_sha!==candidateGitBlobSha
+    ){
+      errors.push(
+        'canonical authorization activation record: staged canonical authorization blob '+
+        canonicalAuthorizationCommitSnapshot.git_blob_sha+
+        ' != validated candidate blob '+candidateGitBlobSha
+      );
+    }
+  }catch(err){
+    errors.push('canonical authorization activation binding: '+String(err&&err.message||err));
+  }
+
+  const finalStagedSnapshots=stagingSnapshots.slice();
+  if(canonicalAuthorizationCommitSnapshot&&canonicalAuthorizationCommitSnapshot.rel){
+    finalStagedSnapshots.push(canonicalAuthorizationCommitSnapshot);
   }
   errors.push(...validateFinalStagedBindings(root,finalStagedSnapshots));
 
   return {
     schema_version:1,
     id:'P4_external_validation_activation_transition_candidate_v1',
+    candidate_ready_for_staging:candidateReadyForStaging,
     ready_for_activation_commit:errors.length===0,
     candidate_collection_authorized:candidate&&candidate.collection_authorized===true,
     biological_collection_may_begin:false,
@@ -785,7 +811,7 @@ function evaluateActivationTransition(options){
     ],
     post_commit_gates_remaining:Array.from(POST_COMMIT_GATES),
     candidate_authorization:candidate,
-    note:'A passing transition only validates a prospective activation commit candidate. Biological collection remains forbidden until that exact activation commit receives clean exact-head regression/Codex review, is merged, and is qualified by successful permanent-main test and deploy before trial 1.'
+    note:'candidate_ready_for_staging means the candidate may be copied to the canonical authorization path and staged. ready_for_activation_commit becomes true only when the exact validated collector and authorization candidate blobs are both present in the guarded canonical stage-0 paths. Biological collection remains forbidden until that exact activation commit receives clean exact-head regression/Codex review, is merged, and is qualified by successful permanent-main test and deploy before trial 1.'
   };
 }
 
@@ -830,7 +856,7 @@ function main(){
       candidateAuthorizationPath:candidatePath
     });
 
-    if(args.out&&result.ready_for_activation_commit){
+    if(args.out&&result.candidate_ready_for_staging){
       const outPath=path.resolve(args.out);
       if(fs.existsSync(outPath)) throw new Error('refusing to overwrite existing candidate authorization: '+outPath);
       fs.mkdirSync(path.dirname(outPath),{recursive:true});
@@ -842,14 +868,22 @@ function main(){
     if(args.json){
       process.stdout.write(JSON.stringify(printable,null,2)+'\n');
     }else{
-      console.log(result.ready_for_activation_commit?'P4 ACTIVATION TRANSITION CANDIDATE READY':'P4 ACTIVATION TRANSITION CANDIDATE BLOCKED');
+      console.log(
+        result.ready_for_activation_commit
+          ?'P4 ACTIVATION TRANSITION COMMIT READY'
+          :(args.out&&result.candidate_ready_for_staging
+            ?'P4 ACTIVATION TRANSITION CANDIDATE BUILT FOR STAGING'
+            :'P4 ACTIVATION TRANSITION CANDIDATE BLOCKED')
+      );
       for(const e of result.errors) console.log('- '+e);
       console.log('candidate_collection_authorized='+(result.candidate_collection_authorized?'true':'false'));
       console.log('biological_collection_may_begin=false');
       console.log('remaining post-commit gates: '+result.post_commit_gates_remaining.join(', '));
     }
 
-    process.exitCode=result.ready_for_activation_commit?0:2;
+    process.exitCode=args.out
+      ?(result.candidate_ready_for_staging?0:2)
+      :(result.ready_for_activation_commit?0:2);
   }catch(err){
     console.error(String(err&&err.stack||err));
     process.exitCode=1;
