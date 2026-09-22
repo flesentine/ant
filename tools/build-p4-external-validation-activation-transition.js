@@ -290,6 +290,26 @@ function gitHeadBlob(root,rel){
   }
 }
 
+function validateCommittedActivationBaselines(root){
+  const errors=[];
+  const authHead=gitHeadBlob(root,CANONICAL_AUTHORIZATION_REL);
+  if(authHead!==TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha){
+    errors.push(
+      'frozen preauthorization HEAD blob drift '+
+      String(authHead)+' != '+TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha
+    );
+  }
+
+  const collectorHead=gitHeadBlob(root,CANONICAL_COLLECTOR_REL);
+  if(collectorHead!==CANONICAL_COLLECTOR_BLOB){
+    errors.push(
+      'frozen collector HEAD blob drift '+
+      String(collectorHead)+' != '+CANONICAL_COLLECTOR_BLOB
+    );
+  }
+  return errors;
+}
+
 function gitIndexBlob(root,rel){
   try{
     return execFileSync('git',['rev-parse',':'+rel],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
@@ -454,6 +474,7 @@ function validateTransitionRepository(root,options){
 
   const baselineAuthErrors=validateFrozenAuthorizationContract(TRUSTED_BASE_AUTHORIZATION);
   if(baselineAuthErrors.length) errors.push(...baselineAuthErrors.map(function(e){return 'trusted baseline authorization: '+e;}));
+  errors.push(...validateCommittedActivationBaselines(root));
 
   function capturePinned(key,rel,expected,label){
     try{
@@ -904,6 +925,7 @@ module.exports={
   ACTIVATION_METADATA_KEYS:ACTIVATION_METADATA_KEYS,
   gitBlobShaForBuffer:gitBlobShaForBuffer,
   gitBlobShaForFile:gitBlobShaForFile,
+  validateCommittedActivationBaselines:validateCommittedActivationBaselines,
   readJsonSnapshot:readJsonSnapshot,
   readCanonicalSnapshot:readCanonicalSnapshot,
   readCanonicalJsonSnapshot:readCanonicalJsonSnapshot,
