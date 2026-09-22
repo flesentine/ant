@@ -96,7 +96,9 @@ try{
   git=spawnSync('git',['commit','-m','drift auth'],{cwd:baselineRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   const authHeadDrift=transition.validateCommittedActivationBaselines(baselineRepo);
-  assert.ok(authHeadDrift.some(function(x){return x.includes('frozen preauthorization HEAD blob drift');}));
+  assert.ok(authHeadDrift.some(function(x){
+    return x.includes('activation HEAD authorization:')||x.includes('activation HEAD authorization collector binding');
+  }));
 
   fs.writeFileSync(path.join(baselineRepo,transition.CANONICAL_AUTHORIZATION_REL),canonicalAuthBaselineOriginal);
   const driftedHeadCollector=JSON.parse(canonicalCollectorBaselineOriginal.toString('utf8'));
@@ -134,11 +136,6 @@ try{
   git=spawnSync('git',['commit','-m','frozen baseline'],{cwd:activationRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
 
-  const activatedAuth=JSON.parse(canonicalAuthBaselineOriginal.toString('utf8'));
-  activatedAuth.status=transition.ACTIVE_STATUS;
-  activatedAuth.collection_authorized=true;
-  activatedAuth.authorization_blocker=null;
-  activatedAuth.next_action=transition.ACTIVE_NEXT_ACTION;
   const activatedCollector=JSON.parse(canonicalCollectorBaselineOriginal.toString('utf8'));
   activatedCollector.collector_identity='Synthetic Activation Head Collector';
   activatedCollector.collector_team_or_affiliation='Synthetic Activation Head Team';
@@ -147,9 +144,23 @@ try{
     activatedCollector.required_attestations_before_authorization[key]=true;
   }
   activatedCollector.current_authorization_condition_satisfied=true;
+  const activatedCollectorBytes=Buffer.from(JSON.stringify(activatedCollector,null,2)+'\n','utf8');
+  const activatedCollectorBlob=transition.gitBlobShaForBuffer(activatedCollectorBytes);
+  const activatedAuth=transition.buildCandidateAuthorization({
+    collectorGitBlobSha:activatedCollectorBlob,
+    husbandryGitBlobSha:'1111111111111111111111111111111111111111',
+    declarationGitBlobSha:'2222222222222222222222222222222222222222'
+  });
 
-  writeJson(path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),activatedAuth);
-  writeJson(path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollector);
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    JSON.stringify(activatedAuth,null,2)+'\n',
+    'utf8'
+  );
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),
+    activatedCollectorBytes
+  );
   git=spawnSync('git',['add','.'],{cwd:activationRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   git=spawnSync('git',['commit','-m','activation head'],{cwd:activationRepo,encoding:'utf8'});
