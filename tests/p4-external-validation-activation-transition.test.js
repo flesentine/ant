@@ -107,7 +107,58 @@ try{
   git=spawnSync('git',['commit','-m','restore auth drift collector'],{cwd:baselineRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   const collectorHeadDrift=transition.validateCommittedActivationBaselines(baselineRepo);
-  assert.ok(collectorHeadDrift.some(function(x){return x.includes('frozen collector HEAD blob drift');}));
+  assert.ok(collectorHeadDrift.some(function(x){
+    return x.includes('frozen collector parent blob drift')||x.includes('frozen collector HEAD blob drift');
+  }));
+
+  // Fresh isolated repository: an activation HEAD may differ from the frozen blobs
+  // only when its first parent is exactly the reviewed frozen baseline.
+  const activationRepo=path.join(tmp,'activation-head-repo');
+  fs.mkdirSync(path.join(activationRepo,path.dirname(transition.CANONICAL_AUTHORIZATION_REL)),{recursive:true});
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    canonicalAuthBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),
+    canonicalCollectorBaselineOriginal
+  );
+  git=spawnSync('git',['init'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.name','ANTLAB Test'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['add','.'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','frozen baseline'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+
+  const activatedAuth=JSON.parse(canonicalAuthBaselineOriginal.toString('utf8'));
+  activatedAuth.status=transition.ACTIVE_STATUS;
+  activatedAuth.collection_authorized=true;
+  activatedAuth.authorization_blocker=null;
+  activatedAuth.next_action=transition.ACTIVE_NEXT_ACTION;
+  const activatedCollector=JSON.parse(canonicalCollectorBaselineOriginal.toString('utf8'));
+  activatedCollector.collector_identity='Synthetic Activation Head Collector';
+  activatedCollector.collector_team_or_affiliation='Synthetic Activation Head Team';
+  activatedCollector.identity_frozen=true;
+  for(const key of Object.keys(activatedCollector.required_attestations_before_authorization)){
+    activatedCollector.required_attestations_before_authorization[key]=true;
+  }
+  activatedCollector.current_authorization_condition_satisfied=true;
+
+  writeJson(path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),activatedAuth);
+  writeJson(path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollector);
+  git=spawnSync('git',['add','.'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','activation head'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  assert.deepStrictEqual(
+    transition.validateCommittedActivationBaselines(activationRepo),
+    [],
+    'exact activation HEAD must be allowed when HEAD^1 contains both frozen baselines'
+  );
 
   const nowMs=Date.parse('2026-09-21T04:00:00Z');
   const packet=validPacket(nowMs);
@@ -695,6 +746,7 @@ try{
     immutable_tamper_rejected:true,
     frozen_repository_auth_drift_rejected:true,
     committed_activation_parent_baselines_required:true,
+    exact_activation_head_allowed_when_parent_is_frozen:true,
     canonical_authorization_symlink_rejected:true,
     canonical_ancestor_symlink_rejected:true,
     canonical_candidate_read_race_rejected:true,
