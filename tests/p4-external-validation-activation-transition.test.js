@@ -11,6 +11,8 @@ const root=path.resolve(__dirname,'..');
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'antlab-p4-activation-transition-'));
 const canonicalCollectorPath=path.join(root,transition.CANONICAL_COLLECTOR_REL);
 const canonicalCollectorBaselineOriginal=fs.readFileSync(canonicalCollectorPath);
+const canonicalAuthPath=path.join(root,transition.CANONICAL_AUTHORIZATION_REL);
+const canonicalAuthBaselineOriginal=fs.readFileSync(canonicalAuthPath);
 
 function clone(value){
   return JSON.parse(JSON.stringify(value));
@@ -85,10 +87,14 @@ try{
     preflightTimeMs:nowMs
   });
 
-  assert.strictEqual(built.ready_for_activation_commit,true,built.errors.join('\n'));
+  assert.strictEqual(built.candidate_ready_for_staging,true,built.errors.join('\n'));
+  assert.strictEqual(built.ready_for_activation_commit,false);
+  assert.ok(built.errors.some(function(x){
+    return x.includes('canonical authorization activation record: staged canonical authorization blob')&&
+      x.includes('!= validated candidate blob');
+  }));
   assert.strictEqual(built.candidate_collection_authorized,true);
   assert.strictEqual(built.biological_collection_may_begin,false);
-  assert.deepStrictEqual(built.errors,[]);
   assert.deepStrictEqual(built.mutable_authorization_paths,Array.from(transition.MUTABLE_AUTHORIZATION_PATHS));
   assert.strictEqual(built.post_commit_gates_remaining.length,3);
 
@@ -146,6 +152,12 @@ try{
 
   const candidatePath=path.join(tmp,'candidate.json');
   writeJson(candidatePath,candidate);
+
+  const canonicalAuthCandidateBytes=fs.readFileSync(candidatePath);
+  fs.writeFileSync(canonicalAuthPath,canonicalAuthCandidateBytes);
+  const stageCanonicalAuth=spawnSync('git',['add','--',transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
+  assert.strictEqual(stageCanonicalAuth.status,0,stageCanonicalAuth.stderr);
+
   const validated=transition.evaluateActivationTransition({
     root:root,
     collectorPath:collectorPath,
@@ -155,6 +167,31 @@ try{
     preflightTimeMs:nowMs
   });
   assert.strictEqual(validated.ready_for_activation_commit,true,validated.errors.join('\n'));
+
+  try{
+    fs.writeFileSync(canonicalAuthPath,canonicalAuthBaselineOriginal);
+    const stageFrozenAuth=spawnSync('git',['add','--',transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(stageFrozenAuth.status,0,stageFrozenAuth.stderr);
+
+    const externalOnlyCandidateResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      candidateAuthorizationPath:candidatePath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(externalOnlyCandidateResult.candidate_ready_for_staging,true);
+    assert.strictEqual(externalOnlyCandidateResult.ready_for_activation_commit,false);
+    assert.ok(externalOnlyCandidateResult.errors.some(function(x){
+      return x.includes('canonical authorization activation record: staged canonical authorization blob')&&
+        x.includes('!= validated candidate blob');
+    }));
+  }finally{
+    fs.writeFileSync(canonicalAuthPath,canonicalAuthCandidateBytes);
+    const restageCandidateAuth=spawnSync('git',['add','--',transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(restageCandidateAuth.status,0,restageCandidateAuth.stderr);
+  }
 
   const immutableTamper=clone(candidate);
   immutableTamper.semantic_firewall.may_change_candidate_307=true;
@@ -216,7 +253,6 @@ try{
   assert.strictEqual(badStatusResult.ready_for_activation_commit,false);
   assert.ok(badStatusResult.errors.some(function(x){return x.includes('status must equal');}));
 
-  const canonicalAuthPath=path.join(root,transition.CANONICAL_AUTHORIZATION_REL);
   const canonicalAuthOriginal=fs.readFileSync(canonicalAuthPath,'utf8');
   try{
     const driftedAuth=JSON.parse(canonicalAuthOriginal);
@@ -232,7 +268,8 @@ try{
     });
     assert.strictEqual(repoDriftResult.ready_for_activation_commit,false);
     assert.ok(repoDriftResult.errors.some(function(x){
-      return x.includes('frozen preauthorization record: canonical snapshot blob')&&x.includes('does not match staged blob');
+      return x.includes('canonical authorization activation record')||
+        (x.includes('canonical authorization candidate')&&x.includes('does not match staged blob'));
     }));
   }finally{
     fs.writeFileSync(canonicalAuthPath,canonicalAuthOriginal,'utf8');
@@ -387,7 +424,7 @@ try{
 
   const stagedMismatchOriginal=fs.readFileSync(canonicalCandidatePath);
   try{
-    fs.writeFileSync(canonicalCandidatePath,JSON.stringify(candidate,null,2)+'\n','utf8');
+    fs.writeFileSync(canonicalCandidatePath,JSON.stringify(candidate)+'\n','utf8');
     const stagedMismatchResult=transition.evaluateActivationTransition({
       root:root,
       collectorPath:collectorPath,
@@ -540,6 +577,13 @@ try{
   writeJson(cliHusbandry,cliPacket.husbandry);
   writeJson(cliDeclaration,cliPacket.declaration);
 
+  writeJson(canonicalCollectorPath,cliPacket.collector);
+  const stageCliCollector=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+  assert.strictEqual(stageCliCollector.status,0,stageCliCollector.stderr);
+  fs.writeFileSync(canonicalAuthPath,canonicalAuthBaselineOriginal);
+  const stageCliFrozenAuth=spawnSync('git',['add','--',transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
+  assert.strictEqual(stageCliFrozenAuth.status,0,stageCliFrozenAuth.stderr);
+
   const buildCli=spawnSync(process.execPath,[
     path.join(root,'tools/build-p4-external-validation-activation-transition.js'),
     '--collector',cliCollector,
@@ -550,10 +594,15 @@ try{
   ],{cwd:root,encoding:'utf8'});
   assert.strictEqual(buildCli.status,0,buildCli.stderr+'\n'+buildCli.stdout);
   const buildCliResult=JSON.parse(buildCli.stdout);
-  assert.strictEqual(buildCliResult.ready_for_activation_commit,true);
+  assert.strictEqual(buildCliResult.candidate_ready_for_staging,true);
+  assert.strictEqual(buildCliResult.ready_for_activation_commit,false);
   assert.strictEqual(buildCliResult.candidate_collection_authorized,true);
   assert.strictEqual(buildCliResult.biological_collection_may_begin,false);
   assert.ok(fs.existsSync(cliCandidate));
+
+  fs.writeFileSync(canonicalAuthPath,fs.readFileSync(cliCandidate));
+  const stageCliCandidate=spawnSync('git',['add','--',transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
+  assert.strictEqual(stageCliCandidate.status,0,stageCliCandidate.stderr);
 
   const validateCli=spawnSync(process.execPath,[
     path.join(root,'tools/build-p4-external-validation-activation-transition.js'),
@@ -599,7 +648,7 @@ try{
     immutable_scientific_fields_normalized:true,
     mutable_authorization_paths:transition.MUTABLE_AUTHORIZATION_PATHS.length,
     packet_blobs_bound:true,
-    synthetic_valid_candidate_ready:true,
+    synthetic_valid_candidate_ready_for_staging:true,
     immutable_tamper_rejected:true,
     frozen_repository_auth_drift_rejected:true,
     canonical_authorization_symlink_rejected:true,
@@ -610,6 +659,7 @@ try{
     every_frozen_input_uses_guarded_pinned_snapshot:true,
     final_staged_bindings_rechecked_together:true,
     validated_collector_must_be_staged_canonically:true,
+    validated_candidate_must_be_staged_canonically:true,
     validated_packet_bytes_bound_without_reopen:true,
     outcome_like_metadata_rejected:true,
     future_observed_husbandry_rejected:true,
@@ -622,7 +672,8 @@ try{
 }finally{
   try{
     fs.writeFileSync(canonicalCollectorPath,canonicalCollectorBaselineOriginal);
-    spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
+    fs.writeFileSync(canonicalAuthPath,canonicalAuthBaselineOriginal);
+    spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL,transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
   }catch(_err){}
   fs.rmSync(tmp,{recursive:true,force:true});
 }
