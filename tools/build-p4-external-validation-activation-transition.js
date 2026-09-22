@@ -282,29 +282,61 @@ function gitBlobShaForFile(file){
   return gitBlobShaForBuffer(fs.readFileSync(file));
 }
 
-function gitHeadBlob(root,rel){
+function gitRevBlob(root,rev,rel){
   try{
-    return execFileSync('git',['rev-parse','HEAD:'+rel],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+    return execFileSync('git',['rev-parse',rev+':'+rel],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
   }catch(_err){
     return null;
   }
 }
 
+function gitHeadBlob(root,rel){
+  return gitRevBlob(root,'HEAD',rel);
+}
+
 function validateCommittedActivationBaselines(root){
   const errors=[];
+  const frozenAuth=TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha;
+  const frozenCollector=CANONICAL_COLLECTOR_BLOB;
   const authHead=gitHeadBlob(root,CANONICAL_AUTHORIZATION_REL);
-  if(authHead!==TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha){
+  const collectorHead=gitHeadBlob(root,CANONICAL_COLLECTOR_REL);
+
+  if(authHead===frozenAuth&&collectorHead===frozenCollector){
+    return errors;
+  }
+
+  const parentAuth=gitRevBlob(root,'HEAD^1',CANONICAL_AUTHORIZATION_REL);
+  const parentCollector=gitRevBlob(root,'HEAD^1',CANONICAL_COLLECTOR_REL);
+
+  if(parentAuth!==frozenAuth){
     errors.push(
-      'frozen preauthorization HEAD blob drift '+
-      String(authHead)+' != '+TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha
+      'frozen preauthorization parent blob drift '+
+      String(parentAuth)+' != '+frozenAuth+
+      ' (current HEAD blob '+String(authHead)+')'
+    );
+  }
+  if(parentCollector!==frozenCollector){
+    errors.push(
+      'frozen collector parent blob drift '+
+      String(parentCollector)+' != '+frozenCollector+
+      ' (current HEAD blob '+String(collectorHead)+')'
     );
   }
 
-  const collectorHead=gitHeadBlob(root,CANONICAL_COLLECTOR_REL);
-  if(collectorHead!==CANONICAL_COLLECTOR_BLOB){
+  if(parentAuth===frozenAuth&&parentCollector===frozenCollector){
+    return errors;
+  }
+
+  if(authHead!==frozenAuth){
+    errors.push(
+      'frozen preauthorization HEAD blob drift '+
+      String(authHead)+' != '+frozenAuth
+    );
+  }
+  if(collectorHead!==frozenCollector){
     errors.push(
       'frozen collector HEAD blob drift '+
-      String(collectorHead)+' != '+CANONICAL_COLLECTOR_BLOB
+      String(collectorHead)+' != '+frozenCollector
     );
   }
   return errors;
@@ -925,6 +957,7 @@ module.exports={
   ACTIVATION_METADATA_KEYS:ACTIVATION_METADATA_KEYS,
   gitBlobShaForBuffer:gitBlobShaForBuffer,
   gitBlobShaForFile:gitBlobShaForFile,
+  gitRevBlob:gitRevBlob,
   validateCommittedActivationBaselines:validateCommittedActivationBaselines,
   readJsonSnapshot:readJsonSnapshot,
   readCanonicalSnapshot:readCanonicalSnapshot,
