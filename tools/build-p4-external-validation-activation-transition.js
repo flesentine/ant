@@ -290,6 +290,24 @@ function gitRevBlob(root,rev,rel){
   }
 }
 
+function gitRevBuffer(root,rev,rel){
+  try{
+    return execFileSync('git',['show',rev+':'+rel],{cwd:root,encoding:null,stdio:['ignore','pipe','ignore']});
+  }catch(_err){
+    return null;
+  }
+}
+
+function gitRevJson(root,rev,rel){
+  const buffer=gitRevBuffer(root,rev,rel);
+  if(!buffer) return null;
+  try{
+    return JSON.parse(buffer.toString('utf8'));
+  }catch(_err){
+    return null;
+  }
+}
+
 function gitHeadBlob(root,rel){
   return gitRevBlob(root,'HEAD',rel);
 }
@@ -307,7 +325,6 @@ function validateCommittedActivationBaselines(root){
 
   const parentAuth=gitRevBlob(root,'HEAD^1',CANONICAL_AUTHORIZATION_REL);
   const parentCollector=gitRevBlob(root,'HEAD^1',CANONICAL_COLLECTOR_REL);
-
   if(parentAuth!==frozenAuth){
     errors.push(
       'frozen preauthorization parent blob drift '+
@@ -322,21 +339,40 @@ function validateCommittedActivationBaselines(root){
       ' (current HEAD blob '+String(collectorHead)+')'
     );
   }
+  if(errors.length) return errors;
 
-  if(parentAuth===frozenAuth&&parentCollector===frozenCollector){
+  const headAuthorization=gitRevJson(root,'HEAD',CANONICAL_AUTHORIZATION_REL);
+  const headCollector=gitRevJson(root,'HEAD',CANONICAL_COLLECTOR_REL);
+  if(!headAuthorization){
+    errors.push('activation HEAD authorization must be valid JSON');
+    return errors;
+  }
+  if(!headCollector){
+    errors.push('activation HEAD collector must be valid JSON');
     return errors;
   }
 
-  if(authHead!==frozenAuth){
+  errors.push(...validateCollector(
+    headCollector,
+    TRUSTED_BASE_COLLECTOR,
+    TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha
+  ).map(function(e){return 'activation HEAD collector: '+e;}));
+
+  const metadata=headAuthorization.activation_metadata||{};
+  const packetBinding={
+    collectorGitBlobSha:collectorHead,
+    husbandryGitBlobSha:metadata.husbandry_records_git_blob_sha,
+    declarationGitBlobSha:metadata.precollection_declaration_git_blob_sha
+  };
+  errors.push(...validateCandidateAuthorization(
+    headAuthorization,
+    packetBinding
+  ).map(function(e){return 'activation HEAD authorization: '+e;}));
+
+  if(metadata.collector_record_git_blob_sha!==collectorHead){
     errors.push(
-      'frozen preauthorization HEAD blob drift '+
-      String(authHead)+' != '+frozenAuth
-    );
-  }
-  if(collectorHead!==frozenCollector){
-    errors.push(
-      'frozen collector HEAD blob drift '+
-      String(collectorHead)+' != '+frozenCollector
+      'activation HEAD authorization collector binding '+
+      String(metadata.collector_record_git_blob_sha)+' != committed collector blob '+String(collectorHead)
     );
   }
   return errors;
@@ -958,6 +994,8 @@ module.exports={
   gitBlobShaForBuffer:gitBlobShaForBuffer,
   gitBlobShaForFile:gitBlobShaForFile,
   gitRevBlob:gitRevBlob,
+  gitRevBuffer:gitRevBuffer,
+  gitRevJson:gitRevJson,
   validateCommittedActivationBaselines:validateCommittedActivationBaselines,
   readJsonSnapshot:readJsonSnapshot,
   readCanonicalSnapshot:readCanonicalSnapshot,
