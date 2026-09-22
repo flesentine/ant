@@ -10,9 +10,26 @@ const transition=require('../tools/build-p4-external-validation-activation-trans
 const root=path.resolve(__dirname,'..');
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'antlab-p4-activation-transition-'));
 const canonicalCollectorPath=path.join(root,transition.CANONICAL_COLLECTOR_REL);
-const canonicalCollectorBaselineOriginal=fs.readFileSync(canonicalCollectorPath);
+const canonicalCollectorCheckoutOriginal=fs.readFileSync(canonicalCollectorPath);
 const canonicalAuthPath=path.join(root,transition.CANONICAL_AUTHORIZATION_REL);
-const canonicalAuthBaselineOriginal=fs.readFileSync(canonicalAuthPath);
+const canonicalAuthCheckoutOriginal=fs.readFileSync(canonicalAuthPath);
+
+function trustedFrozenBytes(rel,expectedBlob){
+  for(const rev of ['HEAD','HEAD^1']){
+    const buffer=transition.gitRevBuffer(root,rev,rel);
+    if(buffer&&transition.gitBlobShaForBuffer(buffer)===expectedBlob) return buffer;
+  }
+  throw new Error('unable to load trusted frozen bytes for '+rel+' at blob '+expectedBlob);
+}
+
+const canonicalCollectorBaselineOriginal=trustedFrozenBytes(
+  transition.CANONICAL_COLLECTOR_REL,
+  transition.CANONICAL_COLLECTOR_BLOB
+);
+const canonicalAuthBaselineOriginal=trustedFrozenBytes(
+  transition.CANONICAL_AUTHORIZATION_REL,
+  transition.CANONICAL_AUTHORIZATION_BLOB
+);
 
 function clone(value){
   return JSON.parse(JSON.stringify(value));
@@ -759,6 +776,7 @@ try{
     frozen_repository_auth_drift_rejected:true,
     committed_activation_parent_baselines_required:true,
     exact_activation_head_allowed_when_parent_is_frozen:true,
+    baseline_fixture_seeded_from_trusted_frozen_git_bytes:true,
     canonical_authorization_symlink_rejected:true,
     canonical_ancestor_symlink_rejected:true,
     canonical_candidate_read_race_rejected:true,
@@ -779,8 +797,8 @@ try{
   }));
 }finally{
   try{
-    fs.writeFileSync(canonicalCollectorPath,canonicalCollectorBaselineOriginal);
-    fs.writeFileSync(canonicalAuthPath,canonicalAuthBaselineOriginal);
+    fs.writeFileSync(canonicalCollectorPath,canonicalCollectorCheckoutOriginal);
+    fs.writeFileSync(canonicalAuthPath,canonicalAuthCheckoutOriginal);
     spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL,transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
   }catch(_err){}
   fs.rmSync(tmp,{recursive:true,force:true});
