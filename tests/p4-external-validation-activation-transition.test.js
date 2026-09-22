@@ -109,8 +109,9 @@ try{
   git=spawnSync('git',['commit','-m','restore auth drift collector'],{cwd:baselineRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   const collectorHeadDrift=transition.validateCommittedActivationBaselines(baselineRepo);
+  assert.ok(collectorHeadDrift.length>0);
   assert.ok(collectorHeadDrift.some(function(x){
-    return x.includes('frozen collector parent blob drift')||x.includes('frozen collector HEAD blob drift');
+    return x.includes('parent blob drift')||x.includes('activation HEAD collector:');
   }));
 
   // Fresh isolated repository: an activation HEAD may differ from the frozen blobs
