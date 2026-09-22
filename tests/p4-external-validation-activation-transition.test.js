@@ -66,6 +66,49 @@ function validPacket(nowMs){
 }
 
 try{
+  const baselineRepo=path.join(tmp,'committed-baseline-repo');
+  fs.mkdirSync(path.join(baselineRepo,path.dirname(transition.CANONICAL_AUTHORIZATION_REL)),{recursive:true});
+  fs.writeFileSync(
+    path.join(baselineRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    canonicalAuthBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(baselineRepo,transition.CANONICAL_COLLECTOR_REL),
+    canonicalCollectorBaselineOriginal
+  );
+  let git=spawnSync('git',['init'],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.name','ANTLAB Test'],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['add','.'],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','baseline'],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  assert.deepStrictEqual(transition.validateCommittedActivationBaselines(baselineRepo),[]);
+
+  const driftedHeadAuth=JSON.parse(canonicalAuthBaselineOriginal.toString('utf8'));
+  driftedHeadAuth.semantic_firewall.may_change_candidate_307=true;
+  writeJson(path.join(baselineRepo,transition.CANONICAL_AUTHORIZATION_REL),driftedHeadAuth);
+  git=spawnSync('git',['add',transition.CANONICAL_AUTHORIZATION_REL],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','drift auth'],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  const authHeadDrift=transition.validateCommittedActivationBaselines(baselineRepo);
+  assert.ok(authHeadDrift.some(function(x){return x.includes('frozen preauthorization HEAD blob drift');}));
+
+  fs.writeFileSync(path.join(baselineRepo,transition.CANONICAL_AUTHORIZATION_REL),canonicalAuthBaselineOriginal);
+  const driftedHeadCollector=JSON.parse(canonicalCollectorBaselineOriginal.toString('utf8'));
+  driftedHeadCollector.collector_identity='Prematurely Committed Collector';
+  writeJson(path.join(baselineRepo,transition.CANONICAL_COLLECTOR_REL),driftedHeadCollector);
+  git=spawnSync('git',['add',transition.CANONICAL_AUTHORIZATION_REL,transition.CANONICAL_COLLECTOR_REL],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','restore auth drift collector'],{cwd:baselineRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  const collectorHeadDrift=transition.validateCommittedActivationBaselines(baselineRepo);
+  assert.ok(collectorHeadDrift.some(function(x){return x.includes('frozen collector HEAD blob drift');}));
+
   const nowMs=Date.parse('2026-09-21T04:00:00Z');
   const packet=validPacket(nowMs);
   const collectorPath=path.join(tmp,'collector.json');
@@ -651,6 +694,7 @@ try{
     synthetic_valid_candidate_ready_for_staging:true,
     immutable_tamper_rejected:true,
     frozen_repository_auth_drift_rejected:true,
+    committed_activation_parent_baselines_required:true,
     canonical_authorization_symlink_rejected:true,
     canonical_ancestor_symlink_rejected:true,
     canonical_candidate_read_race_rejected:true,
