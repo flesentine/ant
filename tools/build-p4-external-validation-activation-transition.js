@@ -367,6 +367,9 @@ function validateCommittedActivationBaselines(root){
   }
   if(errors.length) return errors;
 
+  errors.push(...validateActivationCommitSurface(root));
+  if(errors.length) return errors;
+
   const headAuthorization=gitRevJson(root,'HEAD',CANONICAL_AUTHORIZATION_REL);
   const headCollector=gitRevJson(root,'HEAD',CANONICAL_COLLECTOR_REL);
   const headHusbandry=gitRevJson(root,'HEAD',CANONICAL_HUSBANDRY_REL);
@@ -526,6 +529,51 @@ function gitIndexTree(root){
   }
 }
 
+function gitCommittedEntries(root){
+  try{
+    const output=execFileSync(
+      'git',
+      ['diff','--name-status','--no-renames','HEAD^1','HEAD','--'],
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim();
+    if(!output) return [];
+    return output.split(/\r?\n/).filter(Boolean).map(function(line){
+      const parts=line.split('\t');
+      return {status:parts[0],path:parts.slice(1).join('\t')};
+    });
+  }catch(_err){
+    return null;
+  }
+}
+
+function validateActivationCommitSurface(root){
+  const errors=[];
+  const entries=gitCommittedEntries(root);
+  if(!entries){
+    errors.push('activation commit surface: unable to read committed diff HEAD^1..HEAD');
+    return errors;
+  }
+  const allowed=new Set(ACTIVATION_COMMIT_PATHS);
+  const seen=new Set();
+  for(const entry of entries){
+    seen.add(entry.path);
+    if(!allowed.has(entry.path)){
+      errors.push('activation commit surface: unexpected committed path '+entry.path);
+      continue;
+    }
+    if(entry.status!=='M'){
+      errors.push(
+        'activation commit surface: canonical activation path must be a modification, not '+
+        entry.status+': '+entry.path
+      );
+    }
+  }
+  for(const rel of ACTIVATION_COMMIT_PATHS){
+    if(!seen.has(rel)) errors.push('activation commit surface: required committed path missing '+rel);
+  }
+  return errors;
+}
+
 function gitStagedEntries(root){
   try{
     const output=execFileSync(
@@ -571,9 +619,10 @@ function validateActivationStagedSurface(root){
   return errors;
 }
 
-function validateFinalStagedBindings(root,snapshots){
+function validateFinalStagedBindings(root,snapshots,options){
   const errors=[];
   const unique=new Map();
+  const opts=options||{};
   for(const snapshot of snapshots||[]){
     if(!snapshot||!snapshot.rel||!snapshot.git_blob_sha) continue;
     unique.set(snapshot.rel,snapshot);
@@ -599,6 +648,10 @@ function validateFinalStagedBindings(root,snapshots){
         (snapshot.label||rel)+': final staged path is not a regular Git file; index mode='+String(mode)
       );
     }
+  }
+
+  if(opts.requireActivationSurface){
+    errors.push(...validateActivationStagedSurface(root));
   }
 
   const treeAfter=gitIndexTree(root);
@@ -979,8 +1032,11 @@ function evaluateActivationTransition(options){
   ]){
     if(snapshot&&snapshot.rel) finalStagedSnapshots.push(snapshot);
   }
-  commitErrors.push(...validateFinalStagedBindings(root,finalStagedSnapshots));
-  commitErrors.push(...validateActivationStagedSurface(root));
+  commitErrors.push(...validateFinalStagedBindings(
+    root,
+    finalStagedSnapshots,
+    {requireActivationSurface:true}
+  ));
 
   const errors=candidateErrors.concat(commitErrors);
   return {
@@ -1111,6 +1167,8 @@ module.exports={
   readPinnedCanonicalSnapshot:readPinnedCanonicalSnapshot,
   readPinnedCanonicalJsonSnapshot:readPinnedCanonicalJsonSnapshot,
   gitIndexTree:gitIndexTree,
+  gitCommittedEntries:gitCommittedEntries,
+  validateActivationCommitSurface:validateActivationCommitSurface,
   gitStagedEntries:gitStagedEntries,
   validateActivationStagedSurface:validateActivationStagedSurface,
   validateFinalStagedBindings:validateFinalStagedBindings,
