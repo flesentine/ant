@@ -23,6 +23,18 @@ const CANONICAL_AUTHORIZATION_REL=TRUSTED_PREAUTHORIZATION_RECORD.file;
 const CANONICAL_AUTHORIZATION_BLOB=TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha;
 const CANONICAL_COLLECTOR_REL=TRUSTED_FROZEN_COLLECTION_INPUTS.find(function(x){return x.fileKey==='collector_independence_record_file';}).file;
 const CANONICAL_COLLECTOR_BLOB=TRUSTED_FROZEN_COLLECTION_INPUTS.find(function(x){return x.fileKey==='collector_independence_record_file';}).git_blob_sha;
+const CANONICAL_HUSBANDRY_REL='hypotheses/p4_external_validation_colony_husbandry_activation_record_v1.json';
+const CANONICAL_HUSBANDRY_BLOB='3336f763a050ce2fcd1a68fd304ada7fa73a89c4';
+const CANONICAL_DECLARATION_REL='hypotheses/p4_external_validation_precollection_declaration_v1.json';
+const CANONICAL_DECLARATION_BLOB='bee70d4ed04d43cdcc93e0b05505097102d1b051';
+const HUSBANDRY_TEMPLATE_REL=TRUSTED_FROZEN_COLLECTION_INPUTS.find(function(x){return x.fileKey==='colony_husbandry_record_template_file';}).file;
+const HUSBANDRY_TEMPLATE_BLOB=TRUSTED_FROZEN_COLLECTION_INPUTS.find(function(x){return x.fileKey==='colony_husbandry_record_template_file';}).git_blob_sha;
+const ACTIVATION_COMMIT_PATHS=Object.freeze([
+  CANONICAL_AUTHORIZATION_REL,
+  CANONICAL_COLLECTOR_REL,
+  CANONICAL_HUSBANDRY_REL,
+  CANONICAL_DECLARATION_REL
+]);
 
 const ACTIVE_STATUS='active_collection_authorization_prospective_effective_only_after_permanent_main_qualification_before_trial_1';
 const ACTIVE_NEXT_ACTION='Biological collection may begin only after this exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed before trial 1. Until then collection remains forbidden; once effective, record all observation-dependent husbandry and trial provenance prospectively under the frozen contracts.';
@@ -309,73 +321,99 @@ function gitRevJson(root,rev,rel){
   }
 }
 
+function gitRevCommitTimeMs(root,rev){
+  try{
+    const value=execFileSync(
+      'git',
+      ['show','-s','--format=%cI',rev],
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim();
+    const ms=Date.parse(value);
+    return Number.isFinite(ms)?ms:null;
+  }catch(_err){
+    return null;
+  }
+}
+
 function gitHeadBlob(root,rel){
   return gitRevBlob(root,'HEAD',rel);
 }
 
 function validateCommittedActivationBaselines(root){
   const errors=[];
-  const frozenAuth=TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha;
-  const frozenCollector=CANONICAL_COLLECTOR_BLOB;
-  const authHead=gitHeadBlob(root,CANONICAL_AUTHORIZATION_REL);
-  const collectorHead=gitHeadBlob(root,CANONICAL_COLLECTOR_REL);
+  const baselineContracts=[
+    {rel:CANONICAL_AUTHORIZATION_REL,blob:CANONICAL_AUTHORIZATION_BLOB,label:'preauthorization'},
+    {rel:CANONICAL_COLLECTOR_REL,blob:CANONICAL_COLLECTOR_BLOB,label:'collector'},
+    {rel:CANONICAL_HUSBANDRY_REL,blob:CANONICAL_HUSBANDRY_BLOB,label:'husbandry activation record'},
+    {rel:CANONICAL_DECLARATION_REL,blob:CANONICAL_DECLARATION_BLOB,label:'precollection declaration'}
+  ];
+  const headBlobs=new Map(
+    baselineContracts.map(function(item){return [item.rel,gitHeadBlob(root,item.rel)];})
+  );
 
-  if(authHead===frozenAuth&&collectorHead===frozenCollector){
+  if(baselineContracts.every(function(item){return headBlobs.get(item.rel)===item.blob;})){
     return errors;
   }
 
-  const parentAuth=gitRevBlob(root,'HEAD^1',CANONICAL_AUTHORIZATION_REL);
-  const parentCollector=gitRevBlob(root,'HEAD^1',CANONICAL_COLLECTOR_REL);
-  if(parentAuth!==frozenAuth){
-    errors.push(
-      'frozen preauthorization parent blob drift '+
-      String(parentAuth)+' != '+frozenAuth+
-      ' (current HEAD blob '+String(authHead)+')'
-    );
-  }
-  if(parentCollector!==frozenCollector){
-    errors.push(
-      'frozen collector parent blob drift '+
-      String(parentCollector)+' != '+frozenCollector+
-      ' (current HEAD blob '+String(collectorHead)+')'
-    );
+  for(const item of baselineContracts){
+    const parentBlob=gitRevBlob(root,'HEAD^1',item.rel);
+    if(parentBlob!==item.blob){
+      errors.push(
+        'frozen '+item.label+' parent blob drift '+
+        String(parentBlob)+' != '+item.blob+
+        ' (current HEAD blob '+String(headBlobs.get(item.rel))+')'
+      );
+    }
   }
   if(errors.length) return errors;
 
   const headAuthorization=gitRevJson(root,'HEAD',CANONICAL_AUTHORIZATION_REL);
   const headCollector=gitRevJson(root,'HEAD',CANONICAL_COLLECTOR_REL);
-  if(!headAuthorization){
-    errors.push('activation HEAD authorization must be valid JSON');
-    return errors;
+  const headHusbandry=gitRevJson(root,'HEAD',CANONICAL_HUSBANDRY_REL);
+  const headDeclaration=gitRevJson(root,'HEAD',CANONICAL_DECLARATION_REL);
+  const husbandryTemplateBlob=gitRevBlob(root,'HEAD',HUSBANDRY_TEMPLATE_REL);
+  const husbandryTemplate=gitRevJson(root,'HEAD',HUSBANDRY_TEMPLATE_REL);
+  const commitTimeMs=gitRevCommitTimeMs(root,'HEAD');
+
+  if(!headAuthorization) errors.push('activation HEAD authorization must be valid JSON');
+  if(!headCollector) errors.push('activation HEAD collector must be valid JSON');
+  if(!headHusbandry) errors.push('activation HEAD husbandry record must be valid JSON');
+  if(!headDeclaration) errors.push('activation HEAD precollection declaration must be valid JSON');
+  if(husbandryTemplateBlob!==HUSBANDRY_TEMPLATE_BLOB){
+    errors.push(
+      'activation HEAD husbandry template blob drift '+
+      String(husbandryTemplateBlob)+' != '+HUSBANDRY_TEMPLATE_BLOB
+    );
   }
-  if(!headCollector){
-    errors.push('activation HEAD collector must be valid JSON');
-    return errors;
-  }
+  if(!husbandryTemplate) errors.push('activation HEAD husbandry template must be valid JSON');
+  if(!Number.isFinite(commitTimeMs)) errors.push('activation HEAD commit timestamp must be parseable');
+  if(errors.length) return errors;
 
   errors.push(...validateCollector(
     headCollector,
     TRUSTED_BASE_COLLECTOR,
     TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha
   ).map(function(e){return 'activation HEAD collector: '+e;}));
+  errors.push(...validateHusbandry(
+    headHusbandry,
+    husbandryTemplate,
+    commitTimeMs
+  ).map(function(e){return 'activation HEAD husbandry: '+e;}));
+  errors.push(...validateDeclaration(
+    headDeclaration,
+    commitTimeMs
+  ).map(function(e){return 'activation HEAD declaration: '+e;}));
 
-  const metadata=headAuthorization.activation_metadata||{};
   const packetBinding={
-    collectorGitBlobSha:collectorHead,
-    husbandryGitBlobSha:metadata.husbandry_records_git_blob_sha,
-    declarationGitBlobSha:metadata.precollection_declaration_git_blob_sha
+    collectorGitBlobSha:headBlobs.get(CANONICAL_COLLECTOR_REL),
+    husbandryGitBlobSha:headBlobs.get(CANONICAL_HUSBANDRY_REL),
+    declarationGitBlobSha:headBlobs.get(CANONICAL_DECLARATION_REL)
   };
   errors.push(...validateCandidateAuthorization(
     headAuthorization,
     packetBinding
   ).map(function(e){return 'activation HEAD authorization: '+e;}));
 
-  if(metadata.collector_record_git_blob_sha!==collectorHead){
-    errors.push(
-      'activation HEAD authorization collector binding '+
-      String(metadata.collector_record_git_blob_sha)+' != committed collector blob '+String(collectorHead)
-    );
-  }
   return errors;
 }
 
@@ -486,6 +524,51 @@ function gitIndexTree(root){
   }catch(_err){
     return null;
   }
+}
+
+function gitStagedEntries(root){
+  try{
+    const output=execFileSync(
+      'git',
+      ['diff','--cached','--name-status','--no-renames','HEAD','--'],
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim();
+    if(!output) return [];
+    return output.split(/\r?\n/).filter(Boolean).map(function(line){
+      const parts=line.split('\t');
+      return {status:parts[0],path:parts.slice(1).join('\t')};
+    });
+  }catch(_err){
+    return null;
+  }
+}
+
+function validateActivationStagedSurface(root){
+  const errors=[];
+  const entries=gitStagedEntries(root);
+  if(!entries){
+    errors.push('activation staged surface: unable to read staged diff against HEAD');
+    return errors;
+  }
+  const allowed=new Set(ACTIVATION_COMMIT_PATHS);
+  const seen=new Set();
+  for(const entry of entries){
+    seen.add(entry.path);
+    if(!allowed.has(entry.path)){
+      errors.push('activation staged surface: unexpected staged path '+entry.path);
+      continue;
+    }
+    if(entry.status!=='M'){
+      errors.push(
+        'activation staged surface: canonical activation path must be a modification, not '+
+        entry.status+': '+entry.path
+      );
+    }
+  }
+  for(const rel of ACTIVATION_COMMIT_PATHS){
+    if(!seen.has(rel)) errors.push('activation staged surface: required staged path missing '+rel);
+  }
+  return errors;
 }
 
 function validateFinalStagedBindings(root,snapshots){
@@ -725,15 +808,17 @@ function evaluateActivationTransition(options){
   const husbandryPath=path.resolve(options.husbandryPath);
   const declarationPath=path.resolve(options.declarationPath);
   const preflightTimeMs=options.preflightTimeMs===undefined?Date.now():options.preflightTimeMs;
-
   const candidateAuthorizationPath=options.candidateAuthorizationPath?path.resolve(options.candidateAuthorizationPath):null;
+
   const repositoryValidation=validateTransitionRepository(root,{
     collectorPath:collectorPath,
     candidateAuthorizationPath:candidateAuthorizationPath
   });
-  const errors=repositoryValidation.errors;
+  const candidateErrors=repositoryValidation.errors.slice();
   const frozenSnapshots=repositoryValidation.snapshots;
-  if(!Number.isFinite(preflightTimeMs)) errors.push('preflightTimeMs must be a finite epoch-millisecond number');
+  if(!Number.isFinite(preflightTimeMs)){
+    candidateErrors.push('preflightTimeMs must be a finite epoch-millisecond number');
+  }
 
   let husbandryTemplate={};
   const husbandryTemplateSnapshot=frozenSnapshots.colony_husbandry_record_template_file;
@@ -742,59 +827,42 @@ function evaluateActivationTransition(options){
       husbandryTemplate=JSON.parse(husbandryTemplateSnapshot.buffer.toString('utf8'));
       husbandryTemplateSnapshot.json=husbandryTemplate;
     }catch(err){
-      errors.push('colony husbandry template: invalid JSON: '+String(err&&err.message||err));
+      candidateErrors.push('colony husbandry template: invalid JSON: '+String(err&&err.message||err));
     }
   }else{
-    errors.push('colony husbandry template snapshot unavailable');
+    candidateErrors.push('colony husbandry template snapshot unavailable');
   }
 
   const canonicalCollectorAbs=path.resolve(root,CANONICAL_COLLECTOR_REL);
+  const canonicalHusbandryAbs=path.resolve(root,CANONICAL_HUSBANDRY_REL);
+  const canonicalDeclarationAbs=path.resolve(root,CANONICAL_DECLARATION_REL);
+  const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
+
   let collectorSnapshot;
+  let husbandrySnapshot;
+  let declarationSnapshot;
   try{
     collectorSnapshot=collectorPath===canonicalCollectorAbs
       ?readCanonicalJsonSnapshot(root,CANONICAL_COLLECTOR_REL,'canonical collector')
       :readJsonSnapshot(collectorPath);
   }catch(err){
-    errors.push('collector snapshot: '+String(err&&err.message||err));
+    candidateErrors.push('collector snapshot: '+String(err&&err.message||err));
     collectorSnapshot={json:null,git_blob_sha:null};
   }
-
-  let canonicalCollectorCommitSnapshot=null;
   try{
-    canonicalCollectorCommitSnapshot=collectorPath===canonicalCollectorAbs
-      ?collectorSnapshot
-      :readCanonicalJsonSnapshot(
-        root,
-        CANONICAL_COLLECTOR_REL,
-        'canonical collector activation record'
-      );
-    if(
-      collectorSnapshot&&collectorSnapshot.git_blob_sha&&
-      canonicalCollectorCommitSnapshot&&canonicalCollectorCommitSnapshot.git_blob_sha&&
-      canonicalCollectorCommitSnapshot.git_blob_sha!==collectorSnapshot.git_blob_sha
-    ){
-      errors.push(
-        'canonical collector activation record: staged canonical collector blob '+
-        canonicalCollectorCommitSnapshot.git_blob_sha+
-        ' != validated collector blob '+collectorSnapshot.git_blob_sha
-      );
-    }
+    husbandrySnapshot=husbandryPath===canonicalHusbandryAbs
+      ?readCanonicalJsonSnapshot(root,CANONICAL_HUSBANDRY_REL,'canonical husbandry activation record')
+      :readJsonSnapshot(husbandryPath);
   }catch(err){
-    errors.push('canonical collector activation binding: '+String(err&&err.message||err));
-  }
-
-  let husbandrySnapshot;
-  let declarationSnapshot;
-  try{
-    husbandrySnapshot=readJsonSnapshot(husbandryPath);
-  }catch(err){
-    errors.push('husbandry snapshot: '+String(err&&err.message||err));
+    candidateErrors.push('husbandry snapshot: '+String(err&&err.message||err));
     husbandrySnapshot={json:null,git_blob_sha:null};
   }
   try{
-    declarationSnapshot=readJsonSnapshot(declarationPath);
+    declarationSnapshot=declarationPath===canonicalDeclarationAbs
+      ?readCanonicalJsonSnapshot(root,CANONICAL_DECLARATION_REL,'canonical precollection declaration')
+      :readJsonSnapshot(declarationPath);
   }catch(err){
-    errors.push('precollection declaration snapshot: '+String(err&&err.message||err));
+    candidateErrors.push('precollection declaration snapshot: '+String(err&&err.message||err));
     declarationSnapshot={json:null,git_blob_sha:null};
   }
 
@@ -802,13 +870,13 @@ function evaluateActivationTransition(options){
   const husbandry=husbandrySnapshot.json;
   const declaration=declarationSnapshot.json;
 
-  errors.push(...validateCollector(
+  candidateErrors.push(...validateCollector(
     collector,
     TRUSTED_BASE_COLLECTOR,
     TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha
   ));
-  errors.push(...validateHusbandry(husbandry,husbandryTemplate,preflightTimeMs));
-  errors.push(...validateDeclaration(declaration,preflightTimeMs));
+  candidateErrors.push(...validateHusbandry(husbandry,husbandryTemplate,preflightTimeMs));
+  candidateErrors.push(...validateDeclaration(declaration,preflightTimeMs));
 
   const packetBinding={
     collectorGitBlobSha:collectorSnapshot.git_blob_sha,
@@ -819,22 +887,15 @@ function evaluateActivationTransition(options){
   let candidate;
   let candidateSnapshot=null;
   let candidateGitBlobSha=null;
-  const canonicalAuthAbs=path.resolve(root,CANONICAL_AUTHORIZATION_REL);
   if(candidateAuthorizationPath){
     try{
-      if(candidateAuthorizationPath===canonicalAuthAbs){
-        candidateSnapshot=readCanonicalJsonSnapshot(
-          root,
-          CANONICAL_AUTHORIZATION_REL,
-          'canonical authorization candidate'
-        );
-      }else{
-        candidateSnapshot=readJsonSnapshot(candidateAuthorizationPath);
-      }
+      candidateSnapshot=candidateAuthorizationPath===canonicalAuthAbs
+        ?readCanonicalJsonSnapshot(root,CANONICAL_AUTHORIZATION_REL,'canonical authorization candidate')
+        :readJsonSnapshot(candidateAuthorizationPath);
       candidate=candidateSnapshot.json;
       candidateGitBlobSha=candidateSnapshot.git_blob_sha;
     }catch(err){
-      errors.push('candidate authorization snapshot: '+String(err&&err.message||err));
+      candidateErrors.push('candidate authorization snapshot: '+String(err&&err.message||err));
       candidate=null;
     }
   }else{
@@ -844,14 +905,45 @@ function evaluateActivationTransition(options){
     );
   }
 
-  errors.push(...validateCandidateAuthorization(candidate,packetBinding));
+  candidateErrors.push(...validateCandidateAuthorization(candidate,packetBinding));
+  candidateErrors.push(...validateFinalStagedBindings(root,Object.values(frozenSnapshots)));
+  const candidateReadyForStaging=candidateErrors.length===0;
 
-  const stagingSnapshots=Object.values(frozenSnapshots);
-  if(canonicalCollectorCommitSnapshot&&canonicalCollectorCommitSnapshot.rel){
-    stagingSnapshots.push(canonicalCollectorCommitSnapshot);
+  const commitErrors=[];
+  function canonicalCommitSnapshot(rel,label,sourceSnapshot){
+    let snapshot=null;
+    try{
+      snapshot=readCanonicalJsonSnapshot(root,rel,label);
+      if(
+        sourceSnapshot&&sourceSnapshot.git_blob_sha&&
+        snapshot&&snapshot.git_blob_sha!==sourceSnapshot.git_blob_sha
+      ){
+        commitErrors.push(
+          label+': staged canonical blob '+snapshot.git_blob_sha+
+          ' != validated source blob '+sourceSnapshot.git_blob_sha
+        );
+      }
+    }catch(err){
+      commitErrors.push(label+' binding: '+String(err&&err.message||err));
+    }
+    return snapshot;
   }
-  errors.push(...validateFinalStagedBindings(root,stagingSnapshots));
-  const candidateReadyForStaging=errors.length===0;
+
+  const canonicalCollectorCommitSnapshot=canonicalCommitSnapshot(
+    CANONICAL_COLLECTOR_REL,
+    'canonical collector activation record',
+    collectorSnapshot
+  );
+  const canonicalHusbandryCommitSnapshot=canonicalCommitSnapshot(
+    CANONICAL_HUSBANDRY_REL,
+    'canonical husbandry activation record',
+    husbandrySnapshot
+  );
+  const canonicalDeclarationCommitSnapshot=canonicalCommitSnapshot(
+    CANONICAL_DECLARATION_REL,
+    'canonical precollection declaration',
+    declarationSnapshot
+  );
 
   let canonicalAuthorizationCommitSnapshot=null;
   try{
@@ -868,22 +960,29 @@ function evaluateActivationTransition(options){
       canonicalAuthorizationCommitSnapshot&&
       canonicalAuthorizationCommitSnapshot.git_blob_sha!==candidateGitBlobSha
     ){
-      errors.push(
+      commitErrors.push(
         'canonical authorization activation record: staged canonical authorization blob '+
         canonicalAuthorizationCommitSnapshot.git_blob_sha+
         ' != validated candidate blob '+candidateGitBlobSha
       );
     }
   }catch(err){
-    errors.push('canonical authorization activation binding: '+String(err&&err.message||err));
+    commitErrors.push('canonical authorization activation binding: '+String(err&&err.message||err));
   }
 
-  const finalStagedSnapshots=stagingSnapshots.slice();
-  if(canonicalAuthorizationCommitSnapshot&&canonicalAuthorizationCommitSnapshot.rel){
-    finalStagedSnapshots.push(canonicalAuthorizationCommitSnapshot);
+  const finalStagedSnapshots=Object.values(frozenSnapshots);
+  for(const snapshot of [
+    canonicalCollectorCommitSnapshot,
+    canonicalHusbandryCommitSnapshot,
+    canonicalDeclarationCommitSnapshot,
+    canonicalAuthorizationCommitSnapshot
+  ]){
+    if(snapshot&&snapshot.rel) finalStagedSnapshots.push(snapshot);
   }
-  errors.push(...validateFinalStagedBindings(root,finalStagedSnapshots));
+  commitErrors.push(...validateFinalStagedBindings(root,finalStagedSnapshots));
+  commitErrors.push(...validateActivationStagedSurface(root));
 
+  const errors=candidateErrors.concat(commitErrors);
   return {
     schema_version:1,
     id:'P4_external_validation_activation_transition_candidate_v1',
@@ -893,6 +992,7 @@ function evaluateActivationTransition(options){
     biological_collection_may_begin:false,
     errors:errors,
     mutable_authorization_paths:Array.from(MUTABLE_AUTHORIZATION_PATHS),
+    activation_commit_paths:Array.from(ACTIVATION_COMMIT_PATHS),
     manual_verification_required:[
       'collector_identity_and_affiliation_are_real_and_truthful',
       'all_collector_independence_attestations_are_truthful',
@@ -901,7 +1001,7 @@ function evaluateActivationTransition(options){
     ],
     post_commit_gates_remaining:Array.from(POST_COMMIT_GATES),
     candidate_authorization:candidate,
-    note:'candidate_ready_for_staging means the candidate may be copied to the canonical authorization path and staged. ready_for_activation_commit becomes true only when the exact validated collector and authorization candidate blobs are both present in the guarded canonical stage-0 paths. Biological collection remains forbidden until that exact activation commit receives clean exact-head regression/Codex review, is merged, and is qualified by successful permanent-main test and deploy before trial 1.'
+    note:'candidate_ready_for_staging means the validated packet and candidate may be copied into the four canonical activation paths and staged. ready_for_activation_commit becomes true only when the exact validated authorization, collector, husbandry, and declaration blobs are the only staged changes and all frozen bindings remain intact. Biological collection remains forbidden until that exact activation commit receives clean exact-head regression/Codex review, is merged, and is qualified by successful permanent-main test and deploy before trial 1.'
   };
 }
 
@@ -987,6 +1087,11 @@ module.exports={
   CANONICAL_AUTHORIZATION_BLOB:CANONICAL_AUTHORIZATION_BLOB,
   CANONICAL_COLLECTOR_REL:CANONICAL_COLLECTOR_REL,
   CANONICAL_COLLECTOR_BLOB:CANONICAL_COLLECTOR_BLOB,
+  CANONICAL_HUSBANDRY_REL:CANONICAL_HUSBANDRY_REL,
+  CANONICAL_HUSBANDRY_BLOB:CANONICAL_HUSBANDRY_BLOB,
+  CANONICAL_DECLARATION_REL:CANONICAL_DECLARATION_REL,
+  CANONICAL_DECLARATION_BLOB:CANONICAL_DECLARATION_BLOB,
+  ACTIVATION_COMMIT_PATHS:ACTIVATION_COMMIT_PATHS,
   ACTIVE_STATUS:ACTIVE_STATUS,
   ACTIVE_NEXT_ACTION:ACTIVE_NEXT_ACTION,
   TRUSTED_BASE_AUTHORIZATION:TRUSTED_BASE_AUTHORIZATION,
@@ -998,6 +1103,7 @@ module.exports={
   gitRevBlob:gitRevBlob,
   gitRevBuffer:gitRevBuffer,
   gitRevJson:gitRevJson,
+  gitRevCommitTimeMs:gitRevCommitTimeMs,
   validateCommittedActivationBaselines:validateCommittedActivationBaselines,
   readJsonSnapshot:readJsonSnapshot,
   readCanonicalSnapshot:readCanonicalSnapshot,
@@ -1005,6 +1111,8 @@ module.exports={
   readPinnedCanonicalSnapshot:readPinnedCanonicalSnapshot,
   readPinnedCanonicalJsonSnapshot:readPinnedCanonicalJsonSnapshot,
   gitIndexTree:gitIndexTree,
+  gitStagedEntries:gitStagedEntries,
+  validateActivationStagedSurface:validateActivationStagedSurface,
   validateFinalStagedBindings:validateFinalStagedBindings,
   gitIndexMode:gitIndexMode,
   assertCanonicalTrackedRegularFile:assertCanonicalTrackedRegularFile,
