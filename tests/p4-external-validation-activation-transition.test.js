@@ -13,6 +13,12 @@ const canonicalCollectorPath=path.join(root,transition.CANONICAL_COLLECTOR_REL);
 const canonicalCollectorCheckoutOriginal=fs.readFileSync(canonicalCollectorPath);
 const canonicalAuthPath=path.join(root,transition.CANONICAL_AUTHORIZATION_REL);
 const canonicalAuthCheckoutOriginal=fs.readFileSync(canonicalAuthPath);
+const canonicalHusbandryPath=path.join(root,transition.CANONICAL_HUSBANDRY_REL);
+const canonicalHusbandryCheckoutOriginal=fs.readFileSync(canonicalHusbandryPath);
+const canonicalDeclarationPath=path.join(root,transition.CANONICAL_DECLARATION_REL);
+const canonicalDeclarationCheckoutOriginal=fs.readFileSync(canonicalDeclarationPath);
+const activationDocPath=path.join(root,'docs/P4_EXTERNAL_VALIDATION_ACTIVATION.md');
+const activationDocCheckoutOriginal=fs.readFileSync(activationDocPath);
 
 function trustedFrozenBytes(rel,expectedBlob){
   for(const rev of ['HEAD','HEAD^1']){
@@ -30,6 +36,17 @@ const canonicalAuthBaselineOriginal=trustedFrozenBytes(
   transition.CANONICAL_AUTHORIZATION_REL,
   transition.CANONICAL_AUTHORIZATION_BLOB
 );
+const canonicalHusbandryBaselineOriginal=trustedFrozenBytes(
+  transition.CANONICAL_HUSBANDRY_REL,
+  transition.CANONICAL_HUSBANDRY_BLOB
+);
+const canonicalDeclarationBaselineOriginal=trustedFrozenBytes(
+  transition.CANONICAL_DECLARATION_REL,
+  transition.CANONICAL_DECLARATION_BLOB
+);
+const husbandryTemplateRel=transition.TRUSTED_BASE_AUTHORIZATION.frozen_collection_inputs.colony_husbandry_record_template_file;
+const husbandryTemplateBlob=transition.TRUSTED_BASE_AUTHORIZATION.frozen_collection_inputs.colony_husbandry_record_template_git_blob_sha;
+const husbandryTemplateFrozenBytes=trustedFrozenBytes(husbandryTemplateRel,husbandryTemplateBlob);
 
 function clone(value){
   return JSON.parse(JSON.stringify(value));
@@ -93,6 +110,14 @@ try{
     path.join(baselineRepo,transition.CANONICAL_COLLECTOR_REL),
     canonicalCollectorBaselineOriginal
   );
+  fs.writeFileSync(
+    path.join(baselineRepo,transition.CANONICAL_HUSBANDRY_REL),
+    canonicalHusbandryBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(baselineRepo,transition.CANONICAL_DECLARATION_REL),
+    canonicalDeclarationBaselineOriginal
+  );
   let git=spawnSync('git',['init'],{cwd:baselineRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:baselineRepo,encoding:'utf8'});
@@ -143,6 +168,16 @@ try{
     path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),
     canonicalCollectorBaselineOriginal
   );
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_HUSBANDRY_REL),
+    canonicalHusbandryBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_DECLARATION_REL),
+    canonicalDeclarationBaselineOriginal
+  );
+  fs.mkdirSync(path.join(activationRepo,path.dirname(husbandryTemplateRel)),{recursive:true});
+  fs.writeFileSync(path.join(activationRepo,husbandryTemplateRel),husbandryTemplateFrozenBytes);
   git=spawnSync('git',['init'],{cwd:activationRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:activationRepo,encoding:'utf8'});
@@ -154,39 +189,68 @@ try{
   git=spawnSync('git',['commit','-m','frozen baseline'],{cwd:activationRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
 
-  const activatedCollector=JSON.parse(canonicalCollectorBaselineOriginal.toString('utf8'));
-  activatedCollector.collector_identity='Synthetic Activation Head Collector';
-  activatedCollector.collector_team_or_affiliation='Synthetic Activation Head Team';
-  activatedCollector.identity_frozen=true;
-  for(const key of Object.keys(activatedCollector.required_attestations_before_authorization)){
-    activatedCollector.required_attestations_before_authorization[key]=true;
-  }
-  activatedCollector.current_authorization_condition_satisfied=true;
-  const activatedCollectorBytes=Buffer.from(JSON.stringify(activatedCollector,null,2)+'\n','utf8');
+  const activationNowMs=Date.parse('2026-09-21T04:00:00Z');
+  const activationPacket=validPacket(activationNowMs);
+  const activatedCollectorBytes=Buffer.from(JSON.stringify(activationPacket.collector,null,2)+'\n','utf8');
+  const activatedHusbandryBytes=Buffer.from(JSON.stringify(activationPacket.husbandry,null,2)+'\n','utf8');
+  const activatedDeclarationBytes=Buffer.from(JSON.stringify(activationPacket.declaration,null,2)+'\n','utf8');
   const activatedCollectorBlob=transition.gitBlobShaForBuffer(activatedCollectorBytes);
-  const activatedAuth=transition.buildCandidateAuthorization({
+  const activatedHusbandryBlob=transition.gitBlobShaForBuffer(activatedHusbandryBytes);
+  const activatedDeclarationBlob=transition.gitBlobShaForBuffer(activatedDeclarationBytes);
+
+  const badHashAuth=transition.buildCandidateAuthorization({
     collectorGitBlobSha:activatedCollectorBlob,
     husbandryGitBlobSha:'1111111111111111111111111111111111111111',
-    declarationGitBlobSha:'2222222222222222222222222222222222222222'
+    declarationGitBlobSha:activatedDeclarationBlob
   });
-
   fs.writeFileSync(
     path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
-    JSON.stringify(activatedAuth,null,2)+'\n',
-    'utf8'
+    JSON.stringify(badHashAuth,null,2)+'\n','utf8'
   );
-  fs.writeFileSync(
-    path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),
-    activatedCollectorBytes
-  );
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollectorBytes);
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_HUSBANDRY_REL),activatedHusbandryBytes);
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_DECLARATION_REL),activatedDeclarationBytes);
   git=spawnSync('git',['add','.'],{cwd:activationRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
-  git=spawnSync('git',['commit','-m','activation head'],{cwd:activationRepo,encoding:'utf8'});
+  const activationCommitEnv=Object.assign({},process.env,{
+    GIT_AUTHOR_DATE:'2026-09-21T04:00:00Z',
+    GIT_COMMITTER_DATE:'2026-09-21T04:00:00Z'
+  });
+  git=spawnSync('git',['commit','-m','bad activation head packet hash'],{
+    cwd:activationRepo,encoding:'utf8',env:activationCommitEnv
+  });
+  assert.strictEqual(git.status,0,git.stderr);
+  const badHashHead=transition.validateCommittedActivationBaselines(activationRepo);
+  assert.ok(badHashHead.some(function(x){
+    return x.includes('activation HEAD authorization:')&&
+      x.includes('husbandry_records_git_blob_sha');
+  }));
+
+  git=spawnSync('git',['reset','--hard','HEAD^'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+
+  const activatedAuth=transition.buildCandidateAuthorization({
+    collectorGitBlobSha:activatedCollectorBlob,
+    husbandryGitBlobSha:activatedHusbandryBlob,
+    declarationGitBlobSha:activatedDeclarationBlob
+  });
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    JSON.stringify(activatedAuth,null,2)+'\n','utf8'
+  );
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollectorBytes);
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_HUSBANDRY_REL),activatedHusbandryBytes);
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_DECLARATION_REL),activatedDeclarationBytes);
+  git=spawnSync('git',['add','.'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','activation head'],{
+    cwd:activationRepo,encoding:'utf8',env:activationCommitEnv
+  });
   assert.strictEqual(git.status,0,git.stderr);
   assert.deepStrictEqual(
     transition.validateCommittedActivationBaselines(activationRepo),
     [],
-    'exact activation HEAD must be allowed when HEAD^1 contains both frozen baselines'
+    'exact activation HEAD must independently verify all four committed activation records'
   );
 
   const nowMs=Date.parse('2026-09-21T04:00:00Z');
@@ -197,10 +261,6 @@ try{
   writeJson(collectorPath,packet.collector);
   writeJson(husbandryPath,packet.husbandry);
   writeJson(declarationPath,packet.declaration);
-
-  writeJson(canonicalCollectorPath,packet.collector);
-  const stageCanonicalCollector=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
-  assert.strictEqual(stageCanonicalCollector.status,0,stageCanonicalCollector.stderr);
 
   const built=transition.evaluateActivationTransition({
     root:root,
@@ -220,6 +280,22 @@ try{
   assert.strictEqual(built.biological_collection_may_begin,false);
   assert.deepStrictEqual(built.mutable_authorization_paths,Array.from(transition.MUTABLE_AUTHORIZATION_PATHS));
   assert.strictEqual(built.post_commit_gates_remaining.length,3);
+  assert.ok(built.errors.some(function(x){
+    return x.includes('canonical collector activation record: staged canonical blob')&&
+      x.includes('!= validated source blob');
+  }));
+
+  // Candidate generation must work before any mutable activation record is staged.
+  writeJson(canonicalCollectorPath,packet.collector);
+  writeJson(canonicalHusbandryPath,packet.husbandry);
+  writeJson(canonicalDeclarationPath,packet.declaration);
+  const stageCanonicalPacket=spawnSync('git',[
+    'add','--',
+    transition.CANONICAL_COLLECTOR_REL,
+    transition.CANONICAL_HUSBANDRY_REL,
+    transition.CANONICAL_DECLARATION_REL
+  ],{cwd:root,encoding:'utf8'});
+  assert.strictEqual(stageCanonicalPacket.status,0,stageCanonicalPacket.stderr);
 
   const candidate=built.candidate_authorization;
   assert.strictEqual(candidate.status,transition.ACTIVE_STATUS);
@@ -290,6 +366,35 @@ try{
     preflightTimeMs:nowMs
   });
   assert.strictEqual(validated.ready_for_activation_commit,true,validated.errors.join('\n'));
+  assert.deepStrictEqual(
+    validated.activation_commit_paths.slice().sort(),
+    Array.from(transition.ACTIVATION_COMMIT_PATHS).sort()
+  );
+
+  try{
+    fs.writeFileSync(activationDocPath,Buffer.concat([
+      activationDocCheckoutOriginal,
+      Buffer.from('\n<!-- staged-surface-regression -->\n','utf8')
+    ]));
+    const stageExtra=spawnSync('git',['add','--','docs/P4_EXTERNAL_VALIDATION_ACTIVATION.md'],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(stageExtra.status,0,stageExtra.stderr);
+    const extraStagedResult=transition.evaluateActivationTransition({
+      root:root,
+      collectorPath:collectorPath,
+      husbandryPath:husbandryPath,
+      declarationPath:declarationPath,
+      candidateAuthorizationPath:candidatePath,
+      preflightTimeMs:nowMs
+    });
+    assert.strictEqual(extraStagedResult.ready_for_activation_commit,false);
+    assert.ok(extraStagedResult.errors.some(function(x){
+      return x.includes('activation staged surface: unexpected staged path docs/P4_EXTERNAL_VALIDATION_ACTIVATION.md');
+    }));
+  }finally{
+    fs.writeFileSync(activationDocPath,activationDocCheckoutOriginal);
+    const unstageExtra=spawnSync('git',['add','--','docs/P4_EXTERNAL_VALIDATION_ACTIVATION.md'],{cwd:root,encoding:'utf8'});
+    assert.strictEqual(unstageExtra.status,0,unstageExtra.stderr);
+  }
 
   try{
     fs.writeFileSync(canonicalAuthPath,canonicalAuthBaselineOriginal);
@@ -700,12 +805,18 @@ try{
   writeJson(cliHusbandry,cliPacket.husbandry);
   writeJson(cliDeclaration,cliPacket.declaration);
 
-  writeJson(canonicalCollectorPath,cliPacket.collector);
-  const stageCliCollector=spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL],{cwd:root,encoding:'utf8'});
-  assert.strictEqual(stageCliCollector.status,0,stageCliCollector.stderr);
+  fs.writeFileSync(canonicalCollectorPath,canonicalCollectorBaselineOriginal);
+  fs.writeFileSync(canonicalHusbandryPath,canonicalHusbandryBaselineOriginal);
+  fs.writeFileSync(canonicalDeclarationPath,canonicalDeclarationBaselineOriginal);
   fs.writeFileSync(canonicalAuthPath,canonicalAuthBaselineOriginal);
-  const stageCliFrozenAuth=spawnSync('git',['add','--',transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
-  assert.strictEqual(stageCliFrozenAuth.status,0,stageCliFrozenAuth.stderr);
+  const stageCliBaselines=spawnSync('git',[
+    'add','--',
+    transition.CANONICAL_COLLECTOR_REL,
+    transition.CANONICAL_HUSBANDRY_REL,
+    transition.CANONICAL_DECLARATION_REL,
+    transition.CANONICAL_AUTHORIZATION_REL
+  ],{cwd:root,encoding:'utf8'});
+  assert.strictEqual(stageCliBaselines.status,0,stageCliBaselines.stderr);
 
   const buildCli=spawnSync(process.execPath,[
     path.join(root,'tools/build-p4-external-validation-activation-transition.js'),
@@ -723,8 +834,17 @@ try{
   assert.strictEqual(buildCliResult.biological_collection_may_begin,false);
   assert.ok(fs.existsSync(cliCandidate));
 
+  fs.writeFileSync(canonicalCollectorPath,fs.readFileSync(cliCollector));
+  fs.writeFileSync(canonicalHusbandryPath,fs.readFileSync(cliHusbandry));
+  fs.writeFileSync(canonicalDeclarationPath,fs.readFileSync(cliDeclaration));
   fs.writeFileSync(canonicalAuthPath,fs.readFileSync(cliCandidate));
-  const stageCliCandidate=spawnSync('git',['add','--',transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
+  const stageCliCandidate=spawnSync('git',[
+    'add','--',
+    transition.CANONICAL_COLLECTOR_REL,
+    transition.CANONICAL_HUSBANDRY_REL,
+    transition.CANONICAL_DECLARATION_REL,
+    transition.CANONICAL_AUTHORIZATION_REL
+  ],{cwd:root,encoding:'utf8'});
   assert.strictEqual(stageCliCandidate.status,0,stageCliCandidate.stderr);
 
   const validateCli=spawnSync(process.execPath,[
@@ -776,6 +896,7 @@ try{
     frozen_repository_auth_drift_rejected:true,
     committed_activation_parent_baselines_required:true,
     exact_activation_head_allowed_when_parent_is_frozen:true,
+    activation_head_packet_hashes_independently_verified:true,
     baseline_fixture_seeded_from_trusted_frozen_git_bytes:true,
     canonical_authorization_symlink_rejected:true,
     canonical_ancestor_symlink_rejected:true,
@@ -784,6 +905,9 @@ try{
     canonical_snapshot_must_match_staged_blob:true,
     every_frozen_input_uses_guarded_pinned_snapshot:true,
     final_staged_bindings_rechecked_together:true,
+    staged_activation_surface_allowlisted:true,
+    candidate_build_before_canonical_staging:true,
+    durable_husbandry_and_declaration_staged_canonically:true,
     validated_collector_must_be_staged_canonically:true,
     validated_candidate_must_be_staged_canonically:true,
     validated_packet_bytes_bound_without_reopen:true,
@@ -799,7 +923,17 @@ try{
   try{
     fs.writeFileSync(canonicalCollectorPath,canonicalCollectorCheckoutOriginal);
     fs.writeFileSync(canonicalAuthPath,canonicalAuthCheckoutOriginal);
-    spawnSync('git',['add','--',transition.CANONICAL_COLLECTOR_REL,transition.CANONICAL_AUTHORIZATION_REL],{cwd:root,encoding:'utf8'});
+    fs.writeFileSync(canonicalHusbandryPath,canonicalHusbandryCheckoutOriginal);
+    fs.writeFileSync(canonicalDeclarationPath,canonicalDeclarationCheckoutOriginal);
+    fs.writeFileSync(activationDocPath,activationDocCheckoutOriginal);
+    spawnSync('git',[
+      'add','--',
+      transition.CANONICAL_COLLECTOR_REL,
+      transition.CANONICAL_AUTHORIZATION_REL,
+      transition.CANONICAL_HUSBANDRY_REL,
+      transition.CANONICAL_DECLARATION_REL,
+      'docs/P4_EXTERNAL_VALIDATION_ACTIVATION.md'
+    ],{cwd:root,encoding:'utf8'});
   }catch(_err){}
   fs.rmSync(tmp,{recursive:true,force:true});
 }
