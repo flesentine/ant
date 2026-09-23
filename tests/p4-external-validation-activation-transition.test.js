@@ -240,7 +240,7 @@ try{
 
   fs.writeFileSync(
     path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
-    JSON.stringify(activatedAuthForValidCommit,null,2)+'\n','utf8'
+    JSON.stringify(activatedAuth,null,2)+'\n','utf8'
   );
   fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollectorBytes);
   fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_HUSBANDRY_REL),activatedHusbandryBytes);
@@ -267,7 +267,7 @@ try{
   });
   fs.writeFileSync(
     path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
-    JSON.stringify(activatedAuth,null,2)+'\n','utf8'
+    JSON.stringify(activatedAuthForValidCommit,null,2)+'\n','utf8'
   );
   fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollectorBytes);
   fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_HUSBANDRY_REL),activatedHusbandryBytes);
