@@ -1,6 +1,7 @@
 'use strict';
 const assert=require('assert'),fs=require('fs'),path=require('path');
 const {execFileSync}=require('child_process');
+const transition=require('../tools/build-p4-external-validation-activation-transition');
 const root=path.resolve(__dirname,'..');
 const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const blob=p=>execFileSync('git',['hash-object',p],{cwd:root,encoding:'utf8'}).trim();
@@ -20,22 +21,35 @@ const neutralRel='experiments/neutral_y_maze.json';
 
 for(const [rel,sha] of [
   [preregRel,'b8a683e0199e6564a1fedc6f54391a535c32e0e4'],
-  [authRel,'1a40e684313df4259c94a13ef4382eeeb45f391e'],
   [sideRel,'9ffd7ef45a611c93eac35626399632b4f822225a'],
   [poseManifestRel,'ee5f1b46bbca780196117d554f8b708b3f2ed34e'],
   [chemicalRel,'7fc4188e5b4c454c944d555e957f3c2885ab4a30'],
   [husbandryRel,'b0a3a9bac49093c8650e5625666be387519895a4'],
   [videoRel,'231fd746f5aae187e67e7959c9907791a1cc07de'],
   [trialRel,'4072b72f7c3ea2de3a4eb24a37c850bd8b1d1193'],
-  [collectorRel,'02289bed5ef4785bbadc584ef5077b633779d089'],
   [checklistRel,'1d983b319dc3946e6942a019981a490b20c3d049'],
   [simCoreRel,'24777aac3577d442893e4779d70aee4e27761fe8'],
   [neutralRel,'e61793266a7716587ef11fc96e0959f86103931c']
 ]) assert.strictEqual(blob(rel),sha,rel+' blob drift');
 
 const prereg=read(preregRel),auth=read(authRel),side=read(sideRel),manifest=read(poseManifestRel),chemical=read(chemicalRel),husbandry=read(husbandryRel),video=read(videoRel),trial=read(trialRel),collector=read(collectorRel),checklist=read(checklistRel);
-assert.strictEqual(auth.status,'preauthorization_frozen_pending_collector_identity_and_colony_husbandry_setup');
-assert.strictEqual(auth.collection_authorized,false);
+const activated=
+  blob(authRel)!==transition.CANONICAL_AUTHORIZATION_BLOB||
+  blob(collectorRel)!==transition.CANONICAL_COLLECTOR_BLOB;
+if(activated){
+  assert.deepStrictEqual(
+    transition.validateCommittedActivationBaselines(root),
+    [],
+    'activated repository must satisfy the exact activation-head contract'
+  );
+  assert.strictEqual(auth.status,transition.ACTIVE_STATUS);
+  assert.strictEqual(auth.collection_authorized,true);
+}else{
+  assert.strictEqual(blob(authRel),transition.CANONICAL_AUTHORIZATION_BLOB,authRel+' blob drift');
+  assert.strictEqual(blob(collectorRel),transition.CANONICAL_COLLECTOR_BLOB,collectorRel+' blob drift');
+  assert.strictEqual(auth.status,'preauthorization_frozen_pending_collector_identity_and_colony_husbandry_setup');
+  assert.strictEqual(auth.collection_authorized,false);
+}
 assert.strictEqual(auth.qualified_preregistration.git_blob_sha,blob(preregRel));
 assert.strictEqual(auth.qualified_preregistration.qualified_main_commit,'913a0e7e93092779059e6b9967dc97c503e4c9e7');
 assert.strictEqual(auth.qualified_preregistration.qualified_main_run_id,34934333396);
@@ -52,7 +66,10 @@ for(const [fileKey,shaKey,rel] of [
   ['collection_activation_checklist_file','collection_activation_checklist_git_blob_sha',checklistRel]
 ]){
   assert.strictEqual(auth.frozen_collection_inputs[fileKey],rel);
-  assert.strictEqual(auth.frozen_collection_inputs[shaKey],blob(rel));
+  assert.strictEqual(
+    auth.frozen_collection_inputs[shaKey],
+    transition.TRUSTED_BASE_AUTHORIZATION.frozen_collection_inputs[shaKey]
+  );
 }
 
 class RNG{
@@ -197,12 +214,22 @@ assert.strictEqual(trial.firewall.outcome_dependent_schema_change_authorized,fal
 assert.strictEqual(trial.firewall.best_subset_reporting_authorized,false);
 
 assert.strictEqual(collector.status,'identity_pending_collection_not_authorized');
-assert.strictEqual(collector.collector_identity,null);
-assert.strictEqual(collector.collector_team_or_affiliation,null);
-assert.strictEqual(collector.identity_frozen,false);
 assert.ok(Object.prototype.hasOwnProperty.call(collector.required_attestations_before_authorization,'will_not_participate_in_this_dataset_outcome_analysis'));
 assert.strictEqual(collector.required_attestations_before_authorization.will_not_participate_in_dataset_outcome_analysis_before_raw_dataset_hash_freeze,undefined);
-for(const v of Object.values(collector.required_attestations_before_authorization)) assert.strictEqual(v,null);
+if(activated){
+  assert.strictEqual(typeof collector.collector_identity,'string');
+  assert.ok(collector.collector_identity.trim());
+  assert.strictEqual(typeof collector.collector_team_or_affiliation,'string');
+  assert.ok(collector.collector_team_or_affiliation.trim());
+  assert.strictEqual(collector.identity_frozen,true);
+  for(const v of Object.values(collector.required_attestations_before_authorization)) assert.strictEqual(v,true);
+  assert.strictEqual(collector.current_authorization_condition_satisfied,true);
+}else{
+  assert.strictEqual(collector.collector_identity,null);
+  assert.strictEqual(collector.collector_team_or_affiliation,null);
+  assert.strictEqual(collector.identity_frozen,false);
+  for(const v of Object.values(collector.required_attestations_before_authorization)) assert.strictEqual(v,null);
+}
 assert.strictEqual(collector.firewall.collector_participation_in_this_dataset_outcome_analysis_authorized,false);
 assert.strictEqual(collector.firewall.candidate_prediction_disclosure_to_collector_before_dataset_hash_freeze_authorized,false);
 
@@ -228,12 +255,13 @@ assert.strictEqual(auth.activation_rule.requires_exactly_one_chemical_master_sto
 assert.strictEqual(auth.activation_rule.requires_failed_chemical_application_provenance_without_fabrication,true);
 assert.strictEqual(auth.activation_rule.requires_failed_calibration_provenance_without_fabrication,true);
 assert.strictEqual(auth.activation_rule.requires_husbandry_observed_fields_recorded_during_collection_not_prefilled,true);
-assert.strictEqual(auth.gate_checks.collector_identity_frozen,false);
-assert.strictEqual(auth.gate_checks.collector_independence_attestations_all_true,false);
-assert.strictEqual(auth.gate_checks.all_12_colony_husbandry_prospective_setup_fields_complete_and_valid,false);
+assert.strictEqual(auth.gate_checks.collector_identity_frozen,activated);
+assert.strictEqual(auth.gate_checks.collector_independence_attestations_all_true,activated);
+assert.strictEqual(auth.gate_checks.all_12_colony_husbandry_prospective_setup_fields_complete_and_valid,activated);
 assert.strictEqual(auth.gate_checks.new_biological_outcomes_known_to_exist_at_gate,false);
 assert.strictEqual(auth.gate_checks.new_biological_outcome_access_authorized_at_gate,false);
-assert.ok(auth.authorization_blocker.includes('prospective husbandry/source setup fields'));
+if(activated) assert.strictEqual(auth.authorization_blocker,null);
+else assert.ok(auth.authorization_blocker.includes('prospective husbandry/source setup fields'));
 for(const v of Object.values(auth.semantic_firewall)) assert.strictEqual(v,false);
 
-console.log('p4-external-validation-collection-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(authRel),chemical_blob:blob(chemicalRel),husbandry_blob:blob(husbandryRel),video_blob:blob(videoRel),trial_schema_blob:blob(trialRel),release_poses:globalCount,collection_authorized:auth.collection_authorized,blocker:'collector_identity_and_colony_husbandry_setup'}));
+console.log('p4-external-validation-collection-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(authRel),chemical_blob:blob(chemicalRel),husbandry_blob:blob(husbandryRel),video_blob:blob(videoRel),trial_schema_blob:blob(trialRel),release_poses:globalCount,repository_state:activated?'activation_head':'preactivation_frozen',collection_authorized:auth.collection_authorized}));
