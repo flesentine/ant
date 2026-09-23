@@ -141,7 +141,7 @@ try{
   assert.strictEqual(git.status,0,git.stderr);
   const authHeadDrift=transition.validateCommittedActivationBaselines(baselineRepo);
   assert.ok(authHeadDrift.some(function(x){
-    return x.includes('activation HEAD authorization:')||x.includes('activation HEAD authorization collector binding');
+    return x.includes('activation commit surface:');
   }));
 
   fs.writeFileSync(path.join(baselineRepo,transition.CANONICAL_AUTHORIZATION_REL),canonicalAuthBaselineOriginal);
@@ -180,6 +180,7 @@ try{
   );
   fs.mkdirSync(path.join(activationRepo,path.dirname(husbandryTemplateRel)),{recursive:true});
   fs.writeFileSync(path.join(activationRepo,husbandryTemplateRel),husbandryTemplateFrozenBytes);
+  fs.writeFileSync(path.join(activationRepo,'unrelated-model-note.txt'),'baseline\n','utf8');
   git=spawnSync('git',['init'],{cwd:activationRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:activationRepo,encoding:'utf8'});
@@ -236,6 +237,34 @@ try{
     husbandryGitBlobSha:activatedHusbandryBlob,
     declarationGitBlobSha:activatedDeclarationBlob
   });
+
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    JSON.stringify(activatedAuthForValidCommit,null,2)+'\n','utf8'
+  );
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollectorBytes);
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_HUSBANDRY_REL),activatedHusbandryBytes);
+  fs.writeFileSync(path.join(activationRepo,transition.CANONICAL_DECLARATION_REL),activatedDeclarationBytes);
+  fs.writeFileSync(path.join(activationRepo,'unrelated-model-note.txt'),'changed with activation\n','utf8');
+  git=spawnSync('git',['add','.'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','activation head with forbidden fifth path'],{
+    cwd:activationRepo,encoding:'utf8',env:activationCommitEnv
+  });
+  assert.strictEqual(git.status,0,git.stderr);
+  const extraCommittedPath=transition.validateCommittedActivationBaselines(activationRepo);
+  assert.ok(extraCommittedPath.some(function(x){
+    return x.includes('activation commit surface: unexpected committed path unrelated-model-note.txt');
+  }));
+
+  git=spawnSync('git',['reset','--hard','HEAD^'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+
+  const activatedAuthForValidCommit=transition.buildCandidateAuthorization({
+    collectorGitBlobSha:activatedCollectorBlob,
+    husbandryGitBlobSha:activatedHusbandryBlob,
+    declarationGitBlobSha:activatedDeclarationBlob
+  });
   fs.writeFileSync(
     path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
     JSON.stringify(activatedAuth,null,2)+'\n','utf8'
@@ -254,6 +283,88 @@ try{
     [],
     'exact activation HEAD must independently verify all four committed activation records'
   );
+
+  const stagedRaceRepo=path.join(tmp,'staged-surface-race-repo');
+  for(const rel of transition.ACTIVATION_COMMIT_PATHS){
+    fs.mkdirSync(path.join(stagedRaceRepo,path.dirname(rel)),{recursive:true});
+    fs.writeFileSync(path.join(stagedRaceRepo,rel),'baseline '+rel+'\n','utf8');
+  }
+  git=spawnSync('git',['init'],{cwd:stagedRaceRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:stagedRaceRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.name','ANTLAB Test'],{cwd:stagedRaceRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['add','.'],{cwd:stagedRaceRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','baseline'],{cwd:stagedRaceRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+
+  const stagedRaceSnapshots=[];
+  for(const rel of transition.ACTIVATION_COMMIT_PATHS){
+    fs.writeFileSync(path.join(stagedRaceRepo,rel),'valid staged '+rel+'\n','utf8');
+    git=spawnSync('git',['add','--',rel],{cwd:stagedRaceRepo,encoding:'utf8'});
+    assert.strictEqual(git.status,0,git.stderr);
+    const blobResult=spawnSync('git',['rev-parse',':'+rel],{cwd:stagedRaceRepo,encoding:'utf8'});
+    assert.strictEqual(blobResult.status,0,blobResult.stderr);
+    stagedRaceSnapshots.push({rel:rel,label:'race '+rel,git_blob_sha:blobResult.stdout.trim()});
+  }
+
+  const realGit=spawnSync('sh',['-lc','command -v git'],{encoding:'utf8'}).stdout.trim();
+  assert.ok(realGit,'real git executable must be discoverable');
+  const wrapperDir=path.join(tmp,'git-race-wrapper');
+  fs.mkdirSync(wrapperDir,{recursive:true});
+  const wrapperPath=path.join(wrapperDir,'git');
+  const raceMarker=path.join(tmp,'surface-race-fired');
+  const raceCollectorAbs=path.join(stagedRaceRepo,transition.CANONICAL_COLLECTOR_REL);
+  const wrapperSource=`#!/usr/bin/env node
+const fs=require('fs');
+const cp=require('child_process');
+const args=process.argv.slice(2);
+if(args[0]==='diff'&&args.includes('--cached')&&!fs.existsSync(process.env.ANTLAB_RACE_MARKER)){
+  fs.writeFileSync(process.env.ANTLAB_RACE_COLLECTOR,'tampered during surface check\\n','utf8');
+  const add=cp.spawnSync(process.env.ANTLAB_REAL_GIT,['add','--',process.env.ANTLAB_RACE_COLLECTOR_REL],{cwd:process.env.ANTLAB_RACE_ROOT,stdio:'inherit'});
+  if(add.status!==0) process.exit(add.status||1);
+  fs.writeFileSync(process.env.ANTLAB_RACE_MARKER,'fired\\n','utf8');
+}
+const result=cp.spawnSync(process.env.ANTLAB_REAL_GIT,args,{cwd:process.cwd(),encoding:null});
+if(result.stdout) process.stdout.write(result.stdout);
+if(result.stderr) process.stderr.write(result.stderr);
+process.exit(result.status===null?1:result.status);
+`;
+  fs.writeFileSync(wrapperPath,wrapperSource,'utf8');
+  fs.chmodSync(wrapperPath,0o755);
+  const originalPath=process.env.PATH;
+  const raceEnv={
+    ANTLAB_REAL_GIT:realGit,
+    ANTLAB_RACE_ROOT:stagedRaceRepo,
+    ANTLAB_RACE_MARKER:raceMarker,
+    ANTLAB_RACE_COLLECTOR:raceCollectorAbs,
+    ANTLAB_RACE_COLLECTOR_REL:transition.CANONICAL_COLLECTOR_REL
+  };
+  const oldRaceEnv={};
+  try{
+    for(const key of Object.keys(raceEnv)){
+      oldRaceEnv[key]=process.env[key];
+      process.env[key]=raceEnv[key];
+    }
+    process.env.PATH=wrapperDir+path.delimiter+originalPath;
+    const stagedSurfaceRaceErrors=transition.validateFinalStagedBindings(
+      stagedRaceRepo,
+      stagedRaceSnapshots,
+      {requireActivationSurface:true}
+    );
+    assert.strictEqual(fs.existsSync(raceMarker),true,'surface race injection must fire');
+    assert.ok(stagedSurfaceRaceErrors.some(function(x){
+      return x.includes('final staged binding check: stage-0 index tree changed during final validation');
+    }));
+  }finally{
+    process.env.PATH=originalPath;
+    for(const key of Object.keys(raceEnv)){
+      if(oldRaceEnv[key]===undefined) delete process.env[key];
+      else process.env[key]=oldRaceEnv[key];
+    }
+  }
 
   const nowMs=Date.parse('2026-09-21T04:00:00Z');
   const packet=validPacket(nowMs);
@@ -908,6 +1019,8 @@ try{
     every_frozen_input_uses_guarded_pinned_snapshot:true,
     final_staged_bindings_rechecked_together:true,
     staged_activation_surface_allowlisted:true,
+    committed_activation_surface_allowlisted:true,
+    staged_surface_bound_inside_final_index_tree_bracket:true,
     candidate_build_before_canonical_staging:true,
     durable_husbandry_and_declaration_staged_canonically:true,
     validated_collector_must_be_staged_canonically:true,
