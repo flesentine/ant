@@ -737,8 +737,8 @@ try{
     assert.strictEqual(lateIndexMutationInjected,true);
     assert.strictEqual(lateIndexRaceResult.ready_for_activation_commit,false);
     assert.ok(lateIndexRaceResult.errors.some(function(x){
-      return x.includes('canonical collector: final staged blob')&&
-        x.includes('!= validated snapshot blob');
+      return x.includes('canonical collector activation record: staged canonical blob')&&
+        x.includes('!= validated source blob');
     }));
   }finally{
     fs.readFileSync=originalReadFileSyncForLateIndex;
