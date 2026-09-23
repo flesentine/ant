@@ -616,8 +616,8 @@ try{
     fs.writeFileSync(canonicalCandidatePath,candidateReadRaceOriginal);
   }
 
-  const husbandryTemplateRel='hypotheses/p4_external_validation_colony_husbandry_record_template_v1.json';
-  const husbandryTemplatePath=path.join(root,husbandryTemplateRel);
+  const raceHusbandryTemplateRel='hypotheses/p4_external_validation_colony_husbandry_record_template_v1.json';
+  const husbandryTemplatePath=path.join(root,raceHusbandryTemplateRel);
   const husbandryTemplateOriginal=fs.readFileSync(husbandryTemplatePath);
   const tamperedTemplate=JSON.parse(husbandryTemplateOriginal.toString('utf8'));
   tamperedTemplate.collection_observed_or_derived_fields=[];
