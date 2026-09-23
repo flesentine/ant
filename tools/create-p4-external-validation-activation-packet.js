@@ -54,7 +54,11 @@ function sorted(values){
 }
 
 function assertFrozenScaffoldContracts(root){
-  const collector=readJson(path.join(root,FROZEN_COLLECTOR_REL));
+  const frozen=validateFrozenRepository(root);
+  if(frozen.errors.length){
+    throw new Error('frozen repository integrity check failed: '+frozen.errors.join('; '));
+  }
+  const collector=clone(frozen.frozenCollector||readJson(path.join(root,FROZEN_COLLECTOR_REL)));
   if(collector.id!=='P4_external_validation_collector_independence_record_v1'){
     throw new Error('unexpected frozen collector record id');
   }
