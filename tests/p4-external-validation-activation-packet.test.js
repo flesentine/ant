@@ -21,9 +21,9 @@ try{
   assert.deepStrictEqual(result.files,Array.from(scaffolder.OUTPUT_NAMES));
 
   const collector=JSON.parse(fs.readFileSync(path.join(out,'collector.json'),'utf8'));
-  const frozenCollector=JSON.parse(fs.readFileSync(
-    path.join(root,'hypotheses/p4_external_validation_collector_independence_record_v1.json'),'utf8'
-  ));
+  const frozenState=preflight.validateFrozenRepository(root);
+  assert.deepStrictEqual(frozenState.errors,[]);
+  const frozenCollector=frozenState.frozenCollector;
   assert.deepStrictEqual(collector,frozenCollector,'collector scaffold must preserve the frozen fail-closed record exactly');
   assert.strictEqual(collector.collector_identity,null);
   assert.strictEqual(collector.collector_team_or_affiliation,null);
