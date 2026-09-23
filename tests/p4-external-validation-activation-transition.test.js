@@ -342,8 +342,8 @@ try{
     });
     assert.strictEqual(externalOnlyCollectorResult.ready_for_activation_commit,false);
     assert.ok(externalOnlyCollectorResult.errors.some(function(x){
-      return x.includes('canonical collector activation record: staged canonical collector blob')&&
-        x.includes('!= validated collector blob');
+      return x.includes('canonical collector activation record: staged canonical blob')&&
+        x.includes('!= validated source blob');
     }));
   }finally{
     fs.writeFileSync(canonicalCollectorPath,canonicalCollectorValidBytes);
