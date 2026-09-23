@@ -118,6 +118,8 @@ try{
     path.join(baselineRepo,transition.CANONICAL_DECLARATION_REL),
     canonicalDeclarationBaselineOriginal
   );
+  fs.mkdirSync(path.join(baselineRepo,path.dirname(husbandryTemplateRel)),{recursive:true});
+  fs.writeFileSync(path.join(baselineRepo,husbandryTemplateRel),husbandryTemplateFrozenBytes);
   let git=spawnSync('git',['init'],{cwd:baselineRepo,encoding:'utf8'});
   assert.strictEqual(git.status,0,git.stderr);
   git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:baselineRepo,encoding:'utf8'});
