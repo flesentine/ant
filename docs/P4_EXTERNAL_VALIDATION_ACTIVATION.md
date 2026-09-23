@@ -68,9 +68,18 @@ node tools/build-p4-external-validation-activation-transition.js \
 
 The transition builder is intentionally stricter than a generic JSON patch. It embeds the trusted preactivation authorization and collector baselines, verifies every still-immutable frozen repository input, validates the real packet, and then normalizes only the explicit activation-mutable authorization surface. Any change outside that surface fails closed.
 
-Before the builder can report `ready_for_activation_commit=true`, the exact validated collector record must also be copied to the canonical repository path `hypotheses/p4_external_validation_collector_independence_record_v1.json` and staged. An external `--collector` path may be used as the source packet, but its Git-blob SHA must exactly match the guarded canonical stage-0 collector blob that the activation commit would record. This prevents an authorization commit from claiming frozen collector identity/attestations while leaving the repository's durable collector record at the placeholder baseline.
+The initial `--out` build validates the external packet and writes a candidate **before any mutable activation record needs to be staged**. It succeeds when `candidate_ready_for_staging=true` even though `ready_for_activation_commit=false`.
 
-Likewise, the exact generated/validated authorization candidate must be copied to `hypotheses/p4_external_validation_collection_authorization_v1.json` and staged. The initial `--out` build succeeds when `candidate_ready_for_staging=true` even though `ready_for_activation_commit=false`; after both canonical collector and authorization blobs are staged, rerun with `--candidate /path/to/candidate-authorization.json` (or the canonical authorization path). Only an exact blob match at both canonical stage-0 paths can produce `ready_for_activation_commit=true`.
+Before the builder can report `ready_for_activation_commit=true`, the activation commit must durably contain the exact validated bytes at all four canonical paths:
+
+- `hypotheses/p4_external_validation_collection_authorization_v1.json`
+- `hypotheses/p4_external_validation_collector_independence_record_v1.json`
+- `hypotheses/p4_external_validation_colony_husbandry_activation_record_v1.json`
+- `hypotheses/p4_external_validation_precollection_declaration_v1.json`
+
+Copy the validated collector, husbandry, and declaration packet files to their canonical paths, copy the generated candidate to the canonical authorization path, and stage exactly those four files. Their Git-blob SHAs must exactly match the validated snapshots used to build the candidate. Rerun with `--candidate /path/to/candidate-authorization.json` (or the canonical authorization path). The tool rejects any fifth staged path, so model code, execution code, schedules, templates, analysis rules, or unrelated documentation cannot ride along in the activation commit.
+
+The husbandry and declaration records are durable packet evidence, not merely metadata hashes. Exact-head validation on the activation commit independently re-reads the committed collector, husbandry, declaration, and authorization records, revalidates their contracts using the activation commit timestamp, and compares the committed packet blobs against the authorization metadata. This prevents self-referential or mistyped packet hashes from passing post-commit CI.
 
 The candidate authorization may update only operational activation state: the authorization status, the three collector/husbandry gate mirrors, `collection_authorized`, the resolved preactivation blocker, the durable next-action rule, and a fixed activation-metadata object binding the collector, husbandry, and declaration Git-blob hashes. Preregistration, Candidate 307, schedules, templates, apparatus/stimulus contracts, wet-lab recipe, sample size, thresholds, statistical rules, and semantic firewalls remain byte-for-byte semantically unchanged after normalization.
 
@@ -83,7 +92,7 @@ candidate_collection_authorized=true
 biological_collection_may_begin=false
 ~~~
 
-After the exact candidate blob is copied to the canonical authorization path and staged, a clean revalidation may advance `ready_for_activation_commit` to `true`. `candidate_collection_authorized=true` describes the proposed authorization content; `biological_collection_may_begin` remains false because the frozen post-commit gates still apply. Biological trial 1 remains forbidden until that exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed.
+After the exact collector, husbandry, declaration, and candidate authorization blobs are copied to the four canonical paths and staged—and no other staged change exists—a clean revalidation may advance `ready_for_activation_commit` to `true`. `candidate_collection_authorized=true` describes the proposed authorization content; `biological_collection_may_begin` remains false because the frozen post-commit gates still apply. Biological trial 1 remains forbidden until that exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed.
 
 An already-built candidate can be revalidated with `--candidate /path/to/candidate-authorization.json` instead of `--out`. Revalidation requires that exact candidate Git-blob SHA to match the guarded canonical staged authorization blob. The builder refuses to overwrite an existing candidate file and never writes a candidate when the packet or candidate semantics are invalid.
 
