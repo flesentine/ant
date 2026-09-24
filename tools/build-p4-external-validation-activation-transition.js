@@ -14,6 +14,7 @@ const {
   TRUSTED_QUALIFIED_PREREGISTRATION,
   TRUSTED_FROZEN_COLLECTION_INPUTS,
   validateFrozenAuthorizationContract,
+  gitLatestActivationAuthorizationCommit,
   validateCollector,
   validateHusbandry,
   validateDeclaration
@@ -356,6 +357,16 @@ function validateFreshActivationStartState(root){
       );
     }
   }
+  const priorActivationCommit=gitLatestActivationAuthorizationCommit(
+    root,
+    CANONICAL_AUTHORIZATION_REL
+  );
+  if(priorActivationCommit){
+    errors.push(
+      'fresh activation start forbidden because reachable history already contains activation commit '+
+      priorActivationCommit
+    );
+  }
   return errors;
 }
 
@@ -384,11 +395,21 @@ function validateCommittedActivationBaselines(root){
     baselineContracts.map(function(item){return [item.rel,gitHeadBlob(root,item.rel)];})
   );
 
+  const priorActivationCommit=gitLatestActivationAuthorizationCommit(
+    root,
+    CANONICAL_AUTHORIZATION_REL
+  );
   if(baselineContracts.every(function(item){return headBlobs.get(item.rel)===item.blob;})){
+    if(priorActivationCommit){
+      return [
+        'activation lineage: frozen baseline restoration is forbidden after prior activation commit '+
+        priorActivationCommit
+      ];
+    }
     return errors;
   }
 
-  const activationCommit=gitLatestTouchCommit(root,ACTIVATION_COMMIT_PATHS);
+  const activationCommit=priorActivationCommit||gitLatestTouchCommit(root,ACTIVATION_COMMIT_PATHS);
   if(!activationCommit){
     return ['activation lineage: unable to locate commit that last changed the canonical activation records'];
   }
