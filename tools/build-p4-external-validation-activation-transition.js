@@ -339,6 +339,19 @@ function gitHeadBlob(root,rel){
   return gitRevBlob(root,'HEAD',rel);
 }
 
+function gitLatestTouchCommit(root,rels){
+  try{
+    const out=execFileSync(
+      'git',
+      ['log','-1','--format=%H','--'].concat(rels),
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim();
+    return out||null;
+  }catch(_err){
+    return null;
+  }
+}
+
 function validateCommittedActivationBaselines(root){
   const errors=[];
   const baselineContracts=[
@@ -355,41 +368,58 @@ function validateCommittedActivationBaselines(root){
     return errors;
   }
 
+  const activationCommit=gitLatestTouchCommit(root,ACTIVATION_COMMIT_PATHS);
+  if(!activationCommit){
+    return ['activation lineage: unable to locate commit that last changed the canonical activation records'];
+  }
+
+  const activationBlobs=new Map(
+    baselineContracts.map(function(item){
+      return [item.rel,gitRevBlob(root,activationCommit,item.rel)];
+    })
+  );
   for(const item of baselineContracts){
-    const parentBlob=gitRevBlob(root,'HEAD^1',item.rel);
+    if(headBlobs.get(item.rel)!==activationBlobs.get(item.rel)){
+      errors.push(
+        'activation descendant drift for '+item.label+': HEAD blob '+
+        String(headBlobs.get(item.rel))+' != activation commit blob '+
+        String(activationBlobs.get(item.rel))
+      );
+    }
+    const parentBlob=gitRevBlob(root,activationCommit+'^1',item.rel);
     if(parentBlob!==item.blob){
       errors.push(
-        'frozen '+item.label+' parent blob drift '+
+        'frozen '+item.label+' activation-parent blob drift '+
         String(parentBlob)+' != '+item.blob+
-        ' (current HEAD blob '+String(headBlobs.get(item.rel))+')'
+        ' (activation commit '+activationCommit+')'
       );
     }
   }
   if(errors.length) return errors;
 
-  errors.push(...validateActivationCommitSurface(root));
+  errors.push(...validateActivationCommitSurface(root,activationCommit));
   if(errors.length) return errors;
 
-  const headAuthorization=gitRevJson(root,'HEAD',CANONICAL_AUTHORIZATION_REL);
-  const headCollector=gitRevJson(root,'HEAD',CANONICAL_COLLECTOR_REL);
-  const headHusbandry=gitRevJson(root,'HEAD',CANONICAL_HUSBANDRY_REL);
-  const headDeclaration=gitRevJson(root,'HEAD',CANONICAL_DECLARATION_REL);
-  const husbandryTemplateBlob=gitRevBlob(root,'HEAD',HUSBANDRY_TEMPLATE_REL);
-  const husbandryTemplate=gitRevJson(root,'HEAD',HUSBANDRY_TEMPLATE_REL);
-  const commitTimeMs=gitRevCommitTimeMs(root,'HEAD');
+  const headAuthorization=gitRevJson(root,activationCommit,CANONICAL_AUTHORIZATION_REL);
+  const headCollector=gitRevJson(root,activationCommit,CANONICAL_COLLECTOR_REL);
+  const headHusbandry=gitRevJson(root,activationCommit,CANONICAL_HUSBANDRY_REL);
+  const headDeclaration=gitRevJson(root,activationCommit,CANONICAL_DECLARATION_REL);
+  const husbandryTemplateBlob=gitRevBlob(root,activationCommit,HUSBANDRY_TEMPLATE_REL);
+  const husbandryTemplate=gitRevJson(root,activationCommit,HUSBANDRY_TEMPLATE_REL);
+  const commitTimeMs=gitRevCommitTimeMs(root,activationCommit);
 
-  if(!headAuthorization) errors.push('activation HEAD authorization must be valid JSON');
-  if(!headCollector) errors.push('activation HEAD collector must be valid JSON');
-  if(!headHusbandry) errors.push('activation HEAD husbandry record must be valid JSON');
-  if(!headDeclaration) errors.push('activation HEAD precollection declaration must be valid JSON');
+  if(!headAuthorization) errors.push('activation commit authorization must be valid JSON');
+  if(!headCollector) errors.push('activation commit collector must be valid JSON');
+  if(!headHusbandry) errors.push('activation commit husbandry record must be valid JSON');
+  if(!headDeclaration) errors.push('activation commit precollection declaration must be valid JSON');
   if(husbandryTemplateBlob!==HUSBANDRY_TEMPLATE_BLOB){
     errors.push(
-      'activation HEAD husbandry template blob drift '+
+      'activation commit husbandry template blob drift '+
       String(husbandryTemplateBlob)+' != '+HUSBANDRY_TEMPLATE_BLOB
     );
   }
-  if(!husbandryTemplate) errors.push('activation HEAD husbandry template must be valid JSON');
-  if(!Number.isFinite(commitTimeMs)) errors.push('activation HEAD commit timestamp must be parseable');
+  if(!husbandryTemplate) errors.push('activation commit husbandry template must be valid JSON');
+  if(!Number.isFinite(commitTimeMs)) errors.push('activation commit timestamp must be parseable');
   if(errors.length) return errors;
 
   errors.push(...validateCollector(
@@ -408,9 +438,9 @@ function validateCommittedActivationBaselines(root){
   ).map(function(e){return 'activation HEAD declaration: '+e;}));
 
   const packetBinding={
-    collectorGitBlobSha:headBlobs.get(CANONICAL_COLLECTOR_REL),
-    husbandryGitBlobSha:headBlobs.get(CANONICAL_HUSBANDRY_REL),
-    declarationGitBlobSha:headBlobs.get(CANONICAL_DECLARATION_REL)
+    collectorGitBlobSha:activationBlobs.get(CANONICAL_COLLECTOR_REL),
+    husbandryGitBlobSha:activationBlobs.get(CANONICAL_HUSBANDRY_REL),
+    declarationGitBlobSha:activationBlobs.get(CANONICAL_DECLARATION_REL)
   };
   errors.push(...validateCandidateAuthorization(
     headAuthorization,
@@ -529,11 +559,12 @@ function gitIndexTree(root){
   }
 }
 
-function gitCommittedEntries(root){
+function gitCommittedEntries(root,rev){
   try{
+    const target=rev||'HEAD';
     const output=execFileSync(
       'git',
-      ['diff','--name-status','--no-renames','HEAD^1','HEAD','--'],
+      ['diff','--name-status','--no-renames',target+'^1',target,'--'],
       {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
     ).trim();
     if(!output) return [];
@@ -546,11 +577,12 @@ function gitCommittedEntries(root){
   }
 }
 
-function validateActivationCommitSurface(root){
+function validateActivationCommitSurface(root,rev){
   const errors=[];
-  const entries=gitCommittedEntries(root);
+  const target=rev||'HEAD';
+  const entries=gitCommittedEntries(root,target);
   if(!entries){
-    errors.push('activation commit surface: unable to read committed diff HEAD^1..HEAD');
+    errors.push('activation commit surface: unable to read committed diff '+target+'^1..'+target);
     return errors;
   }
   const allowed=new Set(ACTIVATION_COMMIT_PATHS);
@@ -1160,6 +1192,7 @@ module.exports={
   gitRevBuffer:gitRevBuffer,
   gitRevJson:gitRevJson,
   gitRevCommitTimeMs:gitRevCommitTimeMs,
+  gitLatestTouchCommit:gitLatestTouchCommit,
   validateCommittedActivationBaselines:validateCommittedActivationBaselines,
   readJsonSnapshot:readJsonSnapshot,
   readCanonicalSnapshot:readCanonicalSnapshot,
