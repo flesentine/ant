@@ -284,6 +284,19 @@ try{
     'exact activation HEAD must independently verify all four committed activation records'
   );
 
+  fs.writeFileSync(path.join(activationRepo,'post-activation-note.txt'),'descendant commit\n','utf8');
+  git=spawnSync('git',['add','--','post-activation-note.txt'],{cwd:activationRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','unrelated post-activation descendant'],{
+    cwd:activationRepo,encoding:'utf8'
+  });
+  assert.strictEqual(git.status,0,git.stderr);
+  assert.deepStrictEqual(
+    transition.validateCommittedActivationBaselines(activationRepo),
+    [],
+    'unrelated descendant commits must preserve a previously validated activation state'
+  );
+
   const stagedRaceRepo=path.join(tmp,'staged-surface-race-repo');
   for(const rel of transition.ACTIVATION_COMMIT_PATHS){
     fs.mkdirSync(path.join(stagedRaceRepo,path.dirname(rel)),{recursive:true});
@@ -310,8 +323,17 @@ try{
     stagedRaceSnapshots.push({rel:rel,label:'race '+rel,git_blob_sha:blobResult.stdout.trim()});
   }
 
-  const realGit=spawnSync('sh',['-lc','command -v git'],{encoding:'utf8'}).stdout.trim();
-  assert.ok(realGit,'real git executable must be discoverable');
+  const realGit=(process.env.PATH||'').split(path.delimiter).map(function(dir){
+    return path.join(dir,'git');
+  }).find(function(candidate){
+    try{
+      fs.accessSync(candidate,fs.constants.X_OK);
+      return fs.statSync(candidate).isFile();
+    }catch(_err){
+      return false;
+    }
+  });
+  assert.ok(realGit,'real git executable must be discoverable directly from PATH');
   const wrapperDir=path.join(tmp,'git-race-wrapper');
   fs.mkdirSync(wrapperDir,{recursive:true});
   const wrapperPath=path.join(wrapperDir,'git');
@@ -1009,6 +1031,7 @@ process.exit(result.status===null?1:result.status);
     frozen_repository_auth_drift_rejected:true,
     committed_activation_parent_baselines_required:true,
     exact_activation_head_allowed_when_parent_is_frozen:true,
+    activated_state_survives_unrelated_descendant_commits:true,
     activation_head_packet_hashes_independently_verified:true,
     baseline_fixture_seeded_from_trusted_frozen_git_bytes:true,
     canonical_authorization_symlink_rejected:true,
