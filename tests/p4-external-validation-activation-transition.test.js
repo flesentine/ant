@@ -347,6 +347,97 @@ try{
     return x.includes('frozen preactivation baseline restoration is forbidden after prior activation commit');
   }));
 
+  // Reachable activation history must not disappear behind Git's default
+  // path-history simplification. Reproduce an "ours" merge that retains the
+  // frozen baseline tree while an active authorization remains reachable
+  // through the second parent.
+  const mergeHistoryRepo=path.join(tmp,'merge-parent-activation-history-repo');
+  fs.mkdirSync(path.join(mergeHistoryRepo,path.dirname(transition.CANONICAL_AUTHORIZATION_REL)),{recursive:true});
+  fs.writeFileSync(
+    path.join(mergeHistoryRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    canonicalAuthBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(mergeHistoryRepo,transition.CANONICAL_COLLECTOR_REL),
+    canonicalCollectorBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(mergeHistoryRepo,transition.CANONICAL_HUSBANDRY_REL),
+    canonicalHusbandryBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(mergeHistoryRepo,transition.CANONICAL_DECLARATION_REL),
+    canonicalDeclarationBaselineOriginal
+  );
+  fs.mkdirSync(path.join(mergeHistoryRepo,path.dirname(husbandryTemplateRel)),{recursive:true});
+  fs.writeFileSync(path.join(mergeHistoryRepo,husbandryTemplateRel),husbandryTemplateFrozenBytes);
+
+  git=spawnSync('git',['init'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.email','antlab-test@example.invalid'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['config','user.name','ANTLAB Test'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['add','.'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','frozen baseline before side activation'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  const baselineBranchResult=spawnSync('git',['branch','--show-current'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(baselineBranchResult.status,0,baselineBranchResult.stderr);
+  const baselineBranch=baselineBranchResult.stdout.trim();
+  assert.ok(baselineBranch);
+
+  git=spawnSync('git',['checkout','-b','activation-side'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  fs.writeFileSync(
+    path.join(mergeHistoryRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    JSON.stringify(activatedAuthForValidCommit,null,2)+'\n','utf8'
+  );
+  fs.writeFileSync(path.join(mergeHistoryRepo,transition.CANONICAL_COLLECTOR_REL),activatedCollectorBytes);
+  fs.writeFileSync(path.join(mergeHistoryRepo,transition.CANONICAL_HUSBANDRY_REL),activatedHusbandryBytes);
+  fs.writeFileSync(path.join(mergeHistoryRepo,transition.CANONICAL_DECLARATION_REL),activatedDeclarationBytes);
+  git=spawnSync('git',['add','--'].concat(transition.ACTIVATION_COMMIT_PATHS),{
+    cwd:mergeHistoryRepo,encoding:'utf8'
+  });
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','reachable side-branch activation'],{
+    cwd:mergeHistoryRepo,encoding:'utf8',env:activationCommitEnv
+  });
+  assert.strictEqual(git.status,0,git.stderr);
+  const sideActivationResult=spawnSync('git',['rev-parse','HEAD'],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(sideActivationResult.status,0,sideActivationResult.stderr);
+  const sideActivationCommit=sideActivationResult.stdout.trim();
+
+  git=spawnSync('git',['checkout',baselineBranch],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',[
+    'merge','--no-ff','-s','ours','activation-side',
+    '-m','merge activated side while retaining frozen baseline tree'
+  ],{cwd:mergeHistoryRepo,encoding:'utf8'});
+  assert.strictEqual(git.status,0,git.stderr);
+
+  assert.strictEqual(
+    preflight.gitLatestActivationAuthorizationCommit(
+      mergeHistoryRepo,
+      transition.CANONICAL_AUTHORIZATION_REL
+    ),
+    sideActivationCommit,
+    'full-history scan must find active authorization reachable only through a discarded merge parent'
+  );
+  const mergeHistoryFreshErrors=transition.validateFreshActivationStartState(mergeHistoryRepo);
+  assert.ok(mergeHistoryFreshErrors.some(function(x){
+    return x.includes('reachable history already contains activation commit '+sideActivationCommit);
+  }));
+  const mergeHistoryCommittedErrors=transition.validateCommittedActivationBaselines(mergeHistoryRepo);
+  assert.ok(mergeHistoryCommittedErrors.some(function(x){
+    return x.includes('frozen baseline restoration is forbidden after prior activation commit '+sideActivationCommit);
+  }));
+  const mergeHistoryFrozenState=preflight.validateFrozenRepository(mergeHistoryRepo);
+  assert.notStrictEqual(mergeHistoryFrozenState.repository_state,'preactivation_frozen');
+  assert.ok(mergeHistoryFrozenState.errors.some(function(x){
+    return x.includes('frozen preactivation baseline restoration is forbidden after prior activation commit '+sideActivationCommit);
+  }));
+
   const stagedRaceRepo=path.join(tmp,'staged-surface-race-repo');
   for(const rel of transition.ACTIVATION_COMMIT_PATHS){
     fs.mkdirSync(path.join(stagedRaceRepo,path.dirname(rel)),{recursive:true});
@@ -1110,6 +1201,7 @@ process.exit(result.status===null?1:result.status);
     second_activation_commit_readiness_refused:true,
     activated_repository_repeat_readiness_refused_in_full_test:true,
     post_activation_baseline_revert_rejected:true,
+    merge_parent_activation_history_not_simplified:true,
     activation_head_packet_hashes_independently_verified:true,
     baseline_fixture_seeded_from_trusted_frozen_git_bytes:true,
     canonical_authorization_symlink_rejected:true,
