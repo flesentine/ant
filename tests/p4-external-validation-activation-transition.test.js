@@ -21,9 +21,12 @@ const activationDocPath=path.join(root,'docs/P4_EXTERNAL_VALIDATION_ACTIVATION.m
 const activationDocCheckoutOriginal=fs.readFileSync(activationDocPath);
 
 function trustedFrozenBytes(rel,expectedBlob){
-  for(const rev of ['HEAD','HEAD^1']){
-    const buffer=transition.gitRevBuffer(root,rev,rel);
-    if(buffer&&transition.gitBlobShaForBuffer(buffer)===expectedBlob) return buffer;
+  const object=spawnSync('git',['cat-file','blob',expectedBlob],{
+    cwd:root,
+    encoding:null
+  });
+  if(object.status===0&&object.stdout&&transition.gitBlobShaForBuffer(object.stdout)===expectedBlob){
+    return object.stdout;
   }
   throw new Error('unable to load trusted frozen bytes for '+rel+' at blob '+expectedBlob);
 }
