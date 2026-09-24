@@ -107,6 +107,19 @@ function gitRevJson(root,rev,rel){
   }
 }
 
+function gitLatestTouchCommit(root,rels){
+  try{
+    const out=execFileSync(
+      'git',
+      ['log','-1','--format=%H','--'].concat(rels),
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim();
+    return out||null;
+  }catch{
+    return null;
+  }
+}
+
 function isPlaceholder(value){
   if(typeof value!=='string'||!value.trim()) return true;
   const s=value.trim().toLowerCase();
@@ -205,6 +218,7 @@ function validateFrozenRepository(root){
     currentCollectorBlob===collectorContract.git_blob_sha;
 
   let frozenCollector;
+  let activationCommit=null;
   if(preactivation){
     assertBlob(
       errors,root,
@@ -214,22 +228,64 @@ function validateFrozenRepository(root){
     );
     frozenCollector=readJson(path.join(root,collectorRel));
   }else{
-    const parentAuth=gitRevBlob(root,'HEAD^1',authRel);
-    const parentCollector=gitRevBlob(root,'HEAD^1',collectorRel);
-    if(parentAuth!==TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha){
-      errors.push(
-        'activated repository requires frozen preauthorization at HEAD^1: '+
-        String(parentAuth)+' != '+TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha
-      );
+    activationCommit=gitLatestTouchCommit(root,[authRel,collectorRel]);
+    if(!activationCommit){
+      errors.push('activated repository activation lineage commit is unavailable');
+    }else{
+      const activationAuth=gitRevBlob(root,activationCommit,authRel);
+      const activationCollector=gitRevBlob(root,activationCommit,collectorRel);
+      if(currentAuthBlob!==activationAuth){
+        errors.push(
+          'activated repository authorization drift after activation commit: '+
+          String(currentAuthBlob)+' != '+String(activationAuth)
+        );
+      }
+      if(currentCollectorBlob!==activationCollector){
+        errors.push(
+          'activated repository collector drift after activation commit: '+
+          String(currentCollectorBlob)+' != '+String(activationCollector)
+        );
+      }
+
+      const parentAuth=gitRevBlob(root,activationCommit+'^1',authRel);
+      const parentCollector=gitRevBlob(root,activationCommit+'^1',collectorRel);
+      if(parentAuth!==TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha){
+        errors.push(
+          'activated repository requires frozen preauthorization at activation parent: '+
+          String(parentAuth)+' != '+TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha
+        );
+      }
+      if(parentCollector!==collectorContract.git_blob_sha){
+        errors.push(
+          'activated repository requires frozen collector at activation parent: '+
+          String(parentCollector)+' != '+collectorContract.git_blob_sha
+        );
+      }
+      frozenCollector=gitRevJson(root,activationCommit+'^1',collectorRel);
+      if(!frozenCollector) errors.push('activated repository frozen collector baseline is unreadable at activation parent');
     }
-    if(parentCollector!==collectorContract.git_blob_sha){
-      errors.push(
-        'activated repository requires frozen collector at HEAD^1: '+
-        String(parentCollector)+' != '+collectorContract.git_blob_sha
-      );
+
+    const activeBindings=[
+      {rel:authRel,label:'activated repository authorization',expected:currentAuthBlob},
+      {rel:collectorRel,label:'activated repository collector',expected:currentCollectorBlob}
+    ];
+    for(const binding of activeBindings){
+      const indexBlob=gitIndexBlob(root,binding.rel);
+      const worktreeBlob=gitBlob(root,binding.rel);
+      if(indexBlob!==binding.expected){
+        errors.push(
+          binding.label+' staged blob drift '+
+          String(indexBlob)+' != '+String(binding.expected)
+        );
+      }
+      if(worktreeBlob!==binding.expected){
+        errors.push(
+          binding.label+' working-tree blob drift '+
+          String(worktreeBlob)+' != '+String(binding.expected)
+        );
+      }
     }
-    frozenCollector=gitRevJson(root,'HEAD^1',collectorRel);
-    if(!frozenCollector) errors.push('activated repository frozen collector baseline is unreadable at HEAD^1');
+
     if(auth.status!==ACTIVE_STATUS) errors.push('activated repository authorization status mismatch');
     if(auth.collection_authorized!==true) errors.push('activated repository authorization must have collection_authorized=true');
     const gates=auth.gate_checks||{};
@@ -290,7 +346,7 @@ function validateFrozenRepository(root){
     errors,
     authorization:auth,
     frozenCollector,
-    repository_state:preactivation?'preactivation_frozen':'activation_head'
+    repository_state:preactivation?'preactivation_frozen':'activation_active'
   };
 }
 
@@ -542,6 +598,7 @@ module.exports={
   TRUSTED_QUALIFIED_PREREGISTRATION,
   TRUSTED_FROZEN_COLLECTION_INPUTS,
   ACTIVE_STATUS,
+  gitLatestTouchCommit,
   validateFrozenAuthorizationContract,
   isPlaceholder,
   hasOuterWhitespace,
