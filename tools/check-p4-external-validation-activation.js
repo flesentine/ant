@@ -46,6 +46,12 @@ const TRUSTED_QUALIFIED_PREREGISTRATION=Object.freeze({
   git_blob_sha:'b8a683e0199e6564a1fedc6f54391a535c32e0e4'
 });
 
+const ACTIVE_STATUS='active_collection_authorization_prospective_effective_only_after_permanent_main_qualification_before_trial_1';
+const CANONICAL_HUSBANDRY_REL='hypotheses/p4_external_validation_colony_husbandry_activation_record_v1.json';
+const CANONICAL_HUSBANDRY_BLOB='3336f763a050ce2fcd1a68fd304ada7fa73a89c4';
+const CANONICAL_DECLARATION_REL='hypotheses/p4_external_validation_precollection_declaration_v1.json';
+const CANONICAL_DECLARATION_BLOB='bee70d4ed04d43cdcc93e0b05505097102d1b051';
+
 const TRUSTED_FROZEN_COLLECTION_INPUTS=Object.freeze([
   Object.freeze({fileKey:'marked_side_schedule_file',shaKey:'marked_side_schedule_git_blob_sha',label:'marked-side schedule',file:'experiments/p4_external_validation_replication_randomization_v1.json',git_blob_sha:'9ffd7ef45a611c93eac35626399632b4f822225a'}),
   Object.freeze({fileKey:'release_pose_schedule_manifest_file',shaKey:'release_pose_schedule_manifest_git_blob_sha',label:'release-pose manifest',file:'experiments/p4_external_validation_replication_release_pose_schedule_v1.json',git_blob_sha:'ee5f1b46bbca780196117d554f8b708b3f2ed34e'}),
@@ -83,6 +89,59 @@ function gitIndexBlob(root,rel){
   }catch{
     return null;
   }
+}
+
+function gitRevBlob(root,rev,rel){
+  try{
+    return execFileSync('git',['rev-parse',rev+':'+rel],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();
+  }catch{
+    return null;
+  }
+}
+
+function gitRevJson(root,rev,rel){
+  try{
+    return JSON.parse(execFileSync(
+      'git',
+      ['show',rev+':'+rel],
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ));
+  }catch{
+    return null;
+  }
+}
+
+function gitLatestTouchCommit(root,rels){
+  try{
+    const out=execFileSync(
+      'git',
+      ['log','-1','--format=%H','--'].concat(rels),
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim();
+    return out||null;
+  }catch{
+    return null;
+  }
+}
+
+function gitLatestActivationAuthorizationCommit(root,authRel=TRUSTED_PREAUTHORIZATION_RECORD.file){
+  let commits;
+  try{
+    commits=execFileSync(
+      'git',
+      ['log','--format=%H','--',authRel],
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim().split(/\r?\n/).filter(Boolean);
+  }catch{
+    return null;
+  }
+  for(const rev of commits){
+    const record=gitRevJson(root,rev,authRel);
+    if(record&&record.status===ACTIVE_STATUS&&record.collection_authorized===true){
+      return rev;
+    }
+  }
+  return null;
 }
 
 function isPlaceholder(value){
@@ -173,11 +232,154 @@ function validateFrozenAuthorizationContract(auth){
 function validateFrozenRepository(root){
   const errors=[];
   const authRel=TRUSTED_PREAUTHORIZATION_RECORD.file;
+  const collectorContract=trustedFrozenInput('collector_independence_record_file');
+  const collectorRel=collectorContract.file;
   const auth=readJson(path.join(root,authRel));
+  const currentAuthBlob=gitHeadBlob(root,authRel);
+  const currentCollectorBlob=gitHeadBlob(root,collectorRel);
+  const currentHusbandryBlob=gitHeadBlob(root,CANONICAL_HUSBANDRY_REL);
+  const currentDeclarationBlob=gitHeadBlob(root,CANONICAL_DECLARATION_REL);
+  const baselineAtHead=
+    currentAuthBlob===TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha&&
+    currentCollectorBlob===collectorContract.git_blob_sha&&
+    currentHusbandryBlob===CANONICAL_HUSBANDRY_BLOB&&
+    currentDeclarationBlob===CANONICAL_DECLARATION_BLOB;
+  const priorActivationCommit=gitLatestActivationAuthorizationCommit(root,authRel);
+  const preactivation=baselineAtHead&&!priorActivationCommit;
 
-  assertBlob(errors,root,TRUSTED_PREAUTHORIZATION_RECORD.file,TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,'frozen preauthorization record');
+  let frozenCollector;
+  let activationCommit=null;
+  if(baselineAtHead&&priorActivationCommit){
+    errors.push(
+      'frozen preactivation baseline restoration is forbidden after prior activation commit '+
+      priorActivationCommit
+    );
+  }
+  if(preactivation){
+    assertBlob(
+      errors,root,
+      TRUSTED_PREAUTHORIZATION_RECORD.file,
+      TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,
+      'frozen preauthorization record'
+    );
+    assertBlob(
+      errors,root,
+      CANONICAL_HUSBANDRY_REL,
+      CANONICAL_HUSBANDRY_BLOB,
+      'frozen preactivation husbandry record'
+    );
+    assertBlob(
+      errors,root,
+      CANONICAL_DECLARATION_REL,
+      CANONICAL_DECLARATION_BLOB,
+      'frozen preactivation declaration record'
+    );
+    frozenCollector=readJson(path.join(root,collectorRel));
+  }else{
+    activationCommit=priorActivationCommit||gitLatestTouchCommit(root,[
+      authRel,
+      collectorRel,
+      CANONICAL_HUSBANDRY_REL,
+      CANONICAL_DECLARATION_REL
+    ]);
+    if(!activationCommit){
+      errors.push('activated repository activation lineage commit is unavailable');
+    }else{
+      const activationAuth=gitRevBlob(root,activationCommit,authRel);
+      const activationCollector=gitRevBlob(root,activationCommit,collectorRel);
+      if(currentAuthBlob!==activationAuth){
+        errors.push(
+          'activated repository authorization drift after activation commit: '+
+          String(currentAuthBlob)+' != '+String(activationAuth)
+        );
+      }
+      if(currentCollectorBlob!==activationCollector){
+        errors.push(
+          'activated repository collector drift after activation commit: '+
+          String(currentCollectorBlob)+' != '+String(activationCollector)
+        );
+      }
+
+      const parentAuth=gitRevBlob(root,activationCommit+'^1',authRel);
+      const parentCollector=gitRevBlob(root,activationCommit+'^1',collectorRel);
+      const parentHusbandry=gitRevBlob(root,activationCommit+'^1',CANONICAL_HUSBANDRY_REL);
+      const parentDeclaration=gitRevBlob(root,activationCommit+'^1',CANONICAL_DECLARATION_REL);
+      if(parentAuth!==TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha){
+        errors.push(
+          'activated repository requires frozen preauthorization at activation parent: '+
+          String(parentAuth)+' != '+TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha
+        );
+      }
+      if(parentCollector!==collectorContract.git_blob_sha){
+        errors.push(
+          'activated repository requires frozen collector at activation parent: '+
+          String(parentCollector)+' != '+collectorContract.git_blob_sha
+        );
+      }
+      if(parentHusbandry!==CANONICAL_HUSBANDRY_BLOB){
+        errors.push(
+          'activated repository requires frozen husbandry record at activation parent: '+
+          String(parentHusbandry)+' != '+CANONICAL_HUSBANDRY_BLOB
+        );
+      }
+      if(parentDeclaration!==CANONICAL_DECLARATION_BLOB){
+        errors.push(
+          'activated repository requires frozen declaration record at activation parent: '+
+          String(parentDeclaration)+' != '+CANONICAL_DECLARATION_BLOB
+        );
+      }
+      frozenCollector=gitRevJson(root,activationCommit+'^1',collectorRel);
+      if(!frozenCollector) errors.push('activated repository frozen collector baseline is unreadable at activation parent');
+    }
+
+    const activeBindings=[
+      {rel:authRel,label:'activated repository authorization',expected:gitRevBlob(root,activationCommit,authRel)},
+      {rel:collectorRel,label:'activated repository collector',expected:gitRevBlob(root,activationCommit,collectorRel)},
+      {rel:CANONICAL_HUSBANDRY_REL,label:'activated repository husbandry',expected:gitRevBlob(root,activationCommit,CANONICAL_HUSBANDRY_REL)},
+      {rel:CANONICAL_DECLARATION_REL,label:'activated repository declaration',expected:gitRevBlob(root,activationCommit,CANONICAL_DECLARATION_REL)}
+    ];
+    for(const binding of activeBindings){
+      const headBlob=gitHeadBlob(root,binding.rel);
+      if(headBlob!==binding.expected){
+        errors.push(
+          binding.label+' committed descendant drift '+
+          String(headBlob)+' != '+String(binding.expected)
+        );
+      }
+    }
+    for(const binding of activeBindings){
+      const indexBlob=gitIndexBlob(root,binding.rel);
+      const worktreeBlob=gitBlob(root,binding.rel);
+      if(indexBlob!==binding.expected){
+        errors.push(
+          binding.label+' staged blob drift '+
+          String(indexBlob)+' != '+String(binding.expected)
+        );
+      }
+      if(worktreeBlob!==binding.expected){
+        errors.push(
+          binding.label+' working-tree blob drift '+
+          String(worktreeBlob)+' != '+String(binding.expected)
+        );
+      }
+    }
+
+    if(auth.status!==ACTIVE_STATUS) errors.push('activated repository authorization status mismatch');
+    if(auth.collection_authorized!==true) errors.push('activated repository authorization must have collection_authorized=true');
+    const gates=auth.gate_checks||{};
+    for(const key of [
+      'collector_identity_frozen',
+      'collector_independence_attestations_all_true',
+      'all_12_colony_husbandry_prospective_setup_fields_complete_and_valid'
+    ]){
+      if(gates[key]!==true) errors.push('activated repository gate must be true: '+key);
+    }
+  }
+
   errors.push(...validateFrozenAuthorizationContract(auth));
-  if(auth.collection_authorized!==false) errors.push('preflight requires collection_authorized=false before activation commit');
+  if(preactivation&&auth.collection_authorized!==false){
+    errors.push('preflight requires collection_authorized=false before activation commit');
+  }
   if(auth.gate_checks?.new_biological_outcomes_known_to_exist_at_gate!==false) errors.push('authorization gate says biological outcomes are already known');
   if(auth.gate_checks?.new_biological_outcome_access_authorized_at_gate!==false) errors.push('authorization gate permits biological outcome access');
   if(auth.gate_checks?.candidate_307_prediction_disclosure_to_collector_authorized!==false) errors.push('authorization gate permits Candidate 307 prediction disclosure');
@@ -190,7 +392,20 @@ function validateFrozenRepository(root){
   );
 
   for(const item of TRUSTED_FROZEN_COLLECTION_INPUTS){
+    if(!preactivation&&item.fileKey==='collector_independence_record_file') continue;
     assertBlob(errors,root,item.file,item.git_blob_sha,item.label);
+  }
+
+  if(!preactivation&&frozenCollector){
+    const activeCollector=readJson(path.join(root,collectorRel));
+    errors.push(...validateCollector(
+      activeCollector,
+      frozenCollector,
+      TRUSTED_QUALIFIED_PREREGISTRATION.git_blob_sha
+    ).map(function(e){return 'activated repository collector: '+e;}));
+    if(auth.activation_metadata?.collector_record_git_blob_sha!==currentCollectorBlob){
+      errors.push('activated repository authorization collector blob binding mismatch');
+    }
   }
 
   const releaseContract=trustedFrozenInput('release_pose_schedule_manifest_file');
@@ -205,7 +420,12 @@ function validateFrozenRepository(root){
     }
   }
 
-  return {errors,authorization:auth};
+  return {
+    errors,
+    authorization:auth,
+    frozenCollector,
+    repository_state:preactivation?'preactivation_frozen':'activation_active'
+  };
 }
 
 function validateCollector(record,frozenRecord,preregBlob){
@@ -373,7 +593,8 @@ function evaluatePreflight({root,collectorPath,husbandryPath,declarationPath,pre
   const frozen=validateFrozenRepository(root);
   const auth=frozen.authorization;
   const husbandryTemplate=readJson(path.join(root,trustedFrozenInput('colony_husbandry_record_template_file').file));
-  const frozenCollector=readJson(path.join(root,trustedFrozenInput('collector_independence_record_file').file));
+  const frozenCollector=frozen.frozenCollector||
+    readJson(path.join(root,trustedFrozenInput('collector_independence_record_file').file));
   const collector=readJson(collectorPath);
   const husbandry=readJson(husbandryPath);
   const declaration=readJson(declarationPath);
@@ -454,6 +675,13 @@ module.exports={
   TRUSTED_PREAUTHORIZATION_RECORD,
   TRUSTED_QUALIFIED_PREREGISTRATION,
   TRUSTED_FROZEN_COLLECTION_INPUTS,
+  ACTIVE_STATUS,
+  CANONICAL_HUSBANDRY_REL,
+  CANONICAL_HUSBANDRY_BLOB,
+  CANONICAL_DECLARATION_REL,
+  CANONICAL_DECLARATION_BLOB,
+  gitLatestTouchCommit,
+  gitLatestActivationAuthorizationCommit,
   validateFrozenAuthorizationContract,
   isPlaceholder,
   hasOuterWhitespace,
