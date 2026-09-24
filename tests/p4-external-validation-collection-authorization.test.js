@@ -264,4 +264,4 @@ if(activated) assert.strictEqual(auth.authorization_blocker,null);
 else assert.ok(auth.authorization_blocker.includes('prospective husbandry/source setup fields'));
 for(const v of Object.values(auth.semantic_firewall)) assert.strictEqual(v,false);
 
-console.log('p4-external-validation-collection-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(authRel),chemical_blob:blob(chemicalRel),husbandry_blob:blob(husbandryRel),video_blob:blob(videoRel),trial_schema_blob:blob(trialRel),release_poses:globalCount,repository_state:activated?'activation_head':'preactivation_frozen',collection_authorized:auth.collection_authorized}));
+console.log('p4-external-validation-collection-authorization.test.js PASS '+JSON.stringify({authorization_blob:blob(authRel),chemical_blob:blob(chemicalRel),husbandry_blob:blob(husbandryRel),video_blob:blob(videoRel),trial_schema_blob:blob(trialRel),release_poses:globalCount,repository_state:activated?'activation_active':'preactivation_frozen',collection_authorized:auth.collection_authorized}));
