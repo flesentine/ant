@@ -129,7 +129,7 @@ function gitLatestActivationAuthorizationCommit(root,authRel=TRUSTED_PREAUTHORIZ
   try{
     commits=execFileSync(
       'git',
-      ['log','--format=%H','--',authRel],
+      ['log','--full-history','--format=%H','--',authRel],
       {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
     ).trim().split(/\r?\n/).filter(Boolean);
   }catch{
