@@ -6,6 +6,7 @@ const os=require('os');
 const path=require('path');
 const {spawnSync}=require('child_process');
 const transition=require('../tools/build-p4-external-validation-activation-transition');
+const preflight=require('../tools/check-p4-external-validation-activation');
 
 const root=path.resolve(__dirname,'..');
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'antlab-p4-activation-transition-'));
@@ -300,9 +301,50 @@ try{
     'unrelated descendant commits must preserve a previously validated activation state'
   );
   const secondActivationStartErrors=transition.validateFreshActivationStartState(activationRepo);
-  assert.ok(secondActivationStartErrors.length>=4);
-  assert.ok(secondActivationStartErrors.every(function(x){
+  assert.ok(secondActivationStartErrors.filter(function(x){
     return x.includes('fresh activation start requires frozen');
+  }).length>=4);
+  assert.ok(secondActivationStartErrors.some(function(x){
+    return x.includes('reachable history already contains activation commit');
+  }));
+
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_AUTHORIZATION_REL),
+    canonicalAuthBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_COLLECTOR_REL),
+    canonicalCollectorBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_HUSBANDRY_REL),
+    canonicalHusbandryBaselineOriginal
+  );
+  fs.writeFileSync(
+    path.join(activationRepo,transition.CANONICAL_DECLARATION_REL),
+    canonicalDeclarationBaselineOriginal
+  );
+  git=spawnSync('git',['add','--'].concat(transition.ACTIVATION_COMMIT_PATHS),{
+    cwd:activationRepo,encoding:'utf8'
+  });
+  assert.strictEqual(git.status,0,git.stderr);
+  git=spawnSync('git',['commit','-m','forbidden revert to frozen activation baselines'],{
+    cwd:activationRepo,encoding:'utf8'
+  });
+  assert.strictEqual(git.status,0,git.stderr);
+
+  const revertedCommittedState=transition.validateCommittedActivationBaselines(activationRepo);
+  assert.ok(revertedCommittedState.some(function(x){
+    return x.includes('frozen baseline restoration is forbidden after prior activation commit');
+  }));
+  const revertedFreshStart=transition.validateFreshActivationStartState(activationRepo);
+  assert.ok(revertedFreshStart.some(function(x){
+    return x.includes('reachable history already contains activation commit');
+  }));
+  const revertedFrozenState=preflight.validateFrozenRepository(activationRepo);
+  assert.notStrictEqual(revertedFrozenState.repository_state,'preactivation_frozen');
+  assert.ok(revertedFrozenState.errors.some(function(x){
+    return x.includes('frozen preactivation baseline restoration is forbidden after prior activation commit');
   }));
 
   const stagedRaceRepo=path.join(tmp,'staged-surface-race-repo');
@@ -1067,6 +1109,7 @@ process.exit(result.status===null?1:result.status);
     activated_state_survives_unrelated_descendant_commits:true,
     second_activation_commit_readiness_refused:true,
     activated_repository_repeat_readiness_refused_in_full_test:true,
+    post_activation_baseline_revert_rejected:true,
     activation_head_packet_hashes_independently_verified:true,
     baseline_fixture_seeded_from_trusted_frozen_git_bytes:true,
     canonical_authorization_symlink_rejected:true,
