@@ -24,6 +24,52 @@ try{
   const frozenState=preflight.validateFrozenRepository(root);
   assert.deepStrictEqual(frozenState.errors,[]);
 
+  if(frozenState.repository_state==='preactivation_frozen'){
+    for(const [label,rel] of [
+      ['husbandry',preflight.CANONICAL_HUSBANDRY_REL],
+      ['declaration',preflight.CANONICAL_DECLARATION_REL]
+    ]){
+      const driftRoot=path.join(tmp,'committed-'+label+'-drift');
+      const addWorktree=spawnSync('git',['worktree','add','--quiet','--detach',driftRoot,'HEAD'],{
+        cwd:root,
+        encoding:'utf8'
+      });
+      assert.strictEqual(addWorktree.status,0,addWorktree.stderr);
+      try{
+        const driftPath=path.join(driftRoot,rel);
+        const drifted=JSON.parse(fs.readFileSync(driftPath,'utf8'));
+        drifted._regression_committed_preactivation_drift=true;
+        fs.writeFileSync(driftPath,JSON.stringify(drifted,null,2)+'\n','utf8');
+
+        const add=spawnSync('git',['add','--',rel],{cwd:driftRoot,encoding:'utf8'});
+        assert.strictEqual(add.status,0,add.stderr);
+        const commit=spawnSync('git',[
+          '-c','user.name=ANTLAB Regression',
+          '-c','user.email=antlab-regression@example.invalid',
+          'commit','--quiet','-m','regression: committed '+label+' preactivation drift'
+        ],{cwd:driftRoot,encoding:'utf8'});
+        assert.strictEqual(commit.status,0,commit.stderr);
+
+        const driftState=preflight.validateFrozenRepository(driftRoot);
+        assert.notStrictEqual(
+          driftState.repository_state,
+          'preactivation_frozen',
+          'committed '+label+' drift must not remain classified as frozen preactivation'
+        );
+        assert.ok(
+          driftState.errors.length>0,
+          'committed '+label+' drift must fail frozen repository validation'
+        );
+      }finally{
+        const removeWorktree=spawnSync('git',['worktree','remove','--force',driftRoot],{
+          cwd:root,
+          encoding:'utf8'
+        });
+        assert.strictEqual(removeWorktree.status,0,removeWorktree.stderr);
+      }
+    }
+  }
+
   if(frozenState.repository_state==='activation_active'){
     const authRel='hypotheses/p4_external_validation_collection_authorization_v1.json';
     const authPath=path.join(root,authRel);
@@ -200,6 +246,7 @@ try{
     observed_fields_prefilled:false,
     overwrite_refused:true,
     frozen_drift_rejected_before_output:true,
+    committed_preactivation_husbandry_and_declaration_drift_rejected:true,
     activated_authorization_head_index_worktree_binding_enforced:true,
     activated_all_four_records_head_index_worktree_binding_enforced:true,
     ready_for_activation_commit:false,
