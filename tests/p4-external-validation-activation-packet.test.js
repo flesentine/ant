@@ -46,6 +46,30 @@ try{
       assert.ok(indexDrift.errors.some(function(x){
         return x.includes('activated repository authorization staged blob drift');
       }));
+
+      const husbandryRel=preflight.CANONICAL_HUSBANDRY_REL;
+      const husbandryPath=path.join(root,husbandryRel);
+      const husbandryOriginal=fs.readFileSync(husbandryPath,'utf8');
+      fs.writeFileSync(husbandryPath,husbandryOriginal.replace('"records": [','"records": [\n    {"tampered": true},'));
+      const husbandryWorktreeDrift=preflight.validateFrozenRepository(root);
+      assert.ok(husbandryWorktreeDrift.errors.some(function(x){
+        return x.includes('activated repository husbandry working-tree blob drift');
+      }));
+      fs.writeFileSync(husbandryPath,husbandryOriginal,'utf8');
+
+      const declarationRel=preflight.CANONICAL_DECLARATION_REL;
+      const declarationPath=path.join(root,declarationRel);
+      const declarationOriginal=fs.readFileSync(declarationPath,'utf8');
+      fs.writeFileSync(declarationPath,declarationOriginal.replace('"attested_by"','"attested_by_tampered"'));
+      const stageDeclaration=spawnSync('git',['add','--',declarationRel],{cwd:root,encoding:'utf8'});
+      assert.strictEqual(stageDeclaration.status,0,stageDeclaration.stderr);
+      fs.writeFileSync(declarationPath,declarationOriginal,'utf8');
+      const declarationIndexDrift=preflight.validateFrozenRepository(root);
+      assert.ok(declarationIndexDrift.errors.some(function(x){
+        return x.includes('activated repository declaration staged blob drift');
+      }));
+      const resetDeclaration=spawnSync('git',['reset','HEAD','--',declarationRel],{cwd:root,encoding:'utf8'});
+      assert.strictEqual(resetDeclaration.status,0,resetDeclaration.stderr);
     }finally{
       fs.writeFileSync(authPath,authOriginal,'utf8');
       const resetIndex=spawnSync('git',['reset','HEAD','--',authRel],{cwd:root,encoding:'utf8'});
@@ -177,6 +201,7 @@ try{
     overwrite_refused:true,
     frozen_drift_rejected_before_output:true,
     activated_authorization_head_index_worktree_binding_enforced:true,
+    activated_all_four_records_head_index_worktree_binding_enforced:true,
     ready_for_activation_commit:false,
     collection_authorized:false
   }));
