@@ -299,6 +299,11 @@ try{
     [],
     'unrelated descendant commits must preserve a previously validated activation state'
   );
+  const secondActivationStartErrors=transition.validateFreshActivationStartState(activationRepo);
+  assert.ok(secondActivationStartErrors.length>=4);
+  assert.ok(secondActivationStartErrors.every(function(x){
+    return x.includes('fresh activation start requires frozen');
+  }));
 
   const stagedRaceRepo=path.join(tmp,'staged-surface-race-repo');
   for(const rel of transition.ACTIVATION_COMMIT_PATHS){
@@ -1035,6 +1040,7 @@ process.exit(result.status===null?1:result.status);
     committed_activation_parent_baselines_required:true,
     exact_activation_head_allowed_when_parent_is_frozen:true,
     activated_state_survives_unrelated_descendant_commits:true,
+    second_activation_commit_readiness_refused:true,
     activation_head_packet_hashes_independently_verified:true,
     baseline_fixture_seeded_from_trusted_frozen_git_bytes:true,
     canonical_authorization_symlink_rejected:true,
