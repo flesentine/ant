@@ -1,0 +1,29 @@
+name: PR61 synthetic activation descendant audit abd8570d
+on:
+  push:
+    branches:
+      - audit/pr61-abd8570d-synthetic
+permissions:
+  contents: read
+jobs:
+  synthetic-activation-descendant-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact synthetic descendant head
+        uses: actions/checkout@v4
+        with:
+          ref: 866cd1b2d98570f762a8c91f48c5ce77df063738
+          fetch-depth: 0
+      - name: Verify activation lineage
+        run: |
+          test "$(git rev-parse HEAD)" = "866cd1b2d98570f762a8c91f48c5ce77df063738"
+          test "$(git rev-parse HEAD^1)" = "3954e081dc3eb63d51e8755481bce69b1522ae31"
+          test "$(git rev-parse HEAD~2)" = "abd8570d327cb8ef96ab9135b16b94e16e00db18"
+          git diff --name-status HEAD~2 HEAD^1
+          git diff --name-status HEAD^1 HEAD
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
