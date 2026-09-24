@@ -397,6 +397,7 @@ process.exit(result.status===null?1:result.status);
   }
 
   const nowMs=Date.parse('2026-09-21T04:00:00Z');
+  const repositoryStartsFresh=transition.validateFreshActivationStartState(root).length===0;
   const packet=validPacket(nowMs);
   const collectorPath=path.join(tmp,'collector.json');
   const husbandryPath=path.join(tmp,'husbandry.json');
@@ -508,7 +509,16 @@ process.exit(result.status===null?1:result.status);
     candidateAuthorizationPath:candidatePath,
     preflightTimeMs:nowMs
   });
-  assert.strictEqual(validated.ready_for_activation_commit,true,validated.errors.join('\n'));
+  assert.strictEqual(
+    validated.ready_for_activation_commit,
+    repositoryStartsFresh,
+    validated.errors.join('\n')
+  );
+  if(!repositoryStartsFresh){
+    assert.ok(validated.errors.some(function(x){
+      return x.includes('fresh activation start requires frozen');
+    }));
+  }
   assert.deepStrictEqual(
     validated.activation_commit_paths.slice().sort(),
     Array.from(transition.ACTIVATION_COMMIT_PATHS).sort()
@@ -923,7 +933,12 @@ process.exit(result.status===null?1:result.status);
       declarationPath:raceDeclarationPath,
       preflightTimeMs:nowMs
     });
-    assert.strictEqual(raceResult.ready_for_activation_commit,true,raceResult.errors.join('\n'));
+    assert.strictEqual(raceResult.candidate_ready_for_staging,true,raceResult.errors.join('\n'));
+    assert.strictEqual(
+      raceResult.ready_for_activation_commit,
+      repositoryStartsFresh,
+      raceResult.errors.join('\n')
+    );
     assert.strictEqual(collectorReadCount,1,'collector packet must be read exactly once');
     assert.strictEqual(
       raceResult.candidate_authorization.activation_metadata.collector_record_git_blob_sha,
@@ -998,8 +1013,18 @@ process.exit(result.status===null?1:result.status);
     '--candidate',cliCandidate,
     '--json'
   ],{cwd:root,encoding:'utf8'});
-  assert.strictEqual(validateCli.status,0,validateCli.stderr+'\n'+validateCli.stdout);
-  assert.strictEqual(JSON.parse(validateCli.stdout).ready_for_activation_commit,true);
+  assert.strictEqual(
+    validateCli.status,
+    repositoryStartsFresh?0:2,
+    validateCli.stderr+'\n'+validateCli.stdout
+  );
+  const validateCliResult=JSON.parse(validateCli.stdout);
+  assert.strictEqual(validateCliResult.ready_for_activation_commit,repositoryStartsFresh);
+  if(!repositoryStartsFresh){
+    assert.ok(validateCliResult.errors.some(function(x){
+      return x.includes('fresh activation start requires frozen');
+    }));
+  }
 
   const sentinel=fs.readFileSync(cliCandidate,'utf8');
   const overwriteCli=spawnSync(process.execPath,[
@@ -1041,6 +1066,7 @@ process.exit(result.status===null?1:result.status);
     exact_activation_head_allowed_when_parent_is_frozen:true,
     activated_state_survives_unrelated_descendant_commits:true,
     second_activation_commit_readiness_refused:true,
+    activated_repository_repeat_readiness_refused_in_full_test:true,
     activation_head_packet_hashes_independently_verified:true,
     baseline_fixture_seeded_from_trusted_frozen_git_bytes:true,
     canonical_authorization_symlink_rejected:true,
