@@ -124,6 +124,26 @@ function gitLatestTouchCommit(root,rels){
   }
 }
 
+function gitLatestActivationAuthorizationCommit(root,authRel=TRUSTED_PREAUTHORIZATION_RECORD.file){
+  let commits;
+  try{
+    commits=execFileSync(
+      'git',
+      ['log','--format=%H','--',authRel],
+      {cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}
+    ).trim().split(/\r?\n/).filter(Boolean);
+  }catch{
+    return null;
+  }
+  for(const rev of commits){
+    const record=gitRevJson(root,rev,authRel);
+    if(record&&record.status===ACTIVE_STATUS&&record.collection_authorized===true){
+      return rev;
+    }
+  }
+  return null;
+}
+
 function isPlaceholder(value){
   if(typeof value!=='string'||!value.trim()) return true;
   const s=value.trim().toLowerCase();
@@ -219,14 +239,22 @@ function validateFrozenRepository(root){
   const currentCollectorBlob=gitHeadBlob(root,collectorRel);
   const currentHusbandryBlob=gitHeadBlob(root,CANONICAL_HUSBANDRY_REL);
   const currentDeclarationBlob=gitHeadBlob(root,CANONICAL_DECLARATION_REL);
-  const preactivation=
+  const baselineAtHead=
     currentAuthBlob===TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha&&
     currentCollectorBlob===collectorContract.git_blob_sha&&
     currentHusbandryBlob===CANONICAL_HUSBANDRY_BLOB&&
     currentDeclarationBlob===CANONICAL_DECLARATION_BLOB;
+  const priorActivationCommit=gitLatestActivationAuthorizationCommit(root,authRel);
+  const preactivation=baselineAtHead&&!priorActivationCommit;
 
   let frozenCollector;
   let activationCommit=null;
+  if(baselineAtHead&&priorActivationCommit){
+    errors.push(
+      'frozen preactivation baseline restoration is forbidden after prior activation commit '+
+      priorActivationCommit
+    );
+  }
   if(preactivation){
     assertBlob(
       errors,root,
@@ -248,7 +276,7 @@ function validateFrozenRepository(root){
     );
     frozenCollector=readJson(path.join(root,collectorRel));
   }else{
-    activationCommit=gitLatestTouchCommit(root,[
+    activationCommit=priorActivationCommit||gitLatestTouchCommit(root,[
       authRel,
       collectorRel,
       CANONICAL_HUSBANDRY_REL,
@@ -653,6 +681,7 @@ module.exports={
   CANONICAL_DECLARATION_REL,
   CANONICAL_DECLARATION_BLOB,
   gitLatestTouchCommit,
+  gitLatestActivationAuthorizationCommit,
   validateFrozenAuthorizationContract,
   isPlaceholder,
   hasOuterWhitespace,
