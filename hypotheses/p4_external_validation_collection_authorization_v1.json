@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "P4_external_validation_collection_authorization_v1",
-  "status": "preauthorization_frozen_pending_collector_identity_and_colony_husbandry_setup",
+  "status": "active_collection_authorization_prospective_effective_only_after_permanent_main_qualification_before_trial_1",
   "freeze_date_local": "2026-09-14",
   "qualified_preregistration": {
     "file": "hypotheses/p4_external_validation_new_dataset_preregistration_v1.json",
@@ -41,15 +41,15 @@
     "video_calibration_record_template_frozen": true,
     "trial_record_schema_frozen": true,
     "collection_activation_checklist_frozen": true,
-    "collector_identity_frozen": false,
-    "collector_independence_attestations_all_true": false,
+    "collector_identity_frozen": true,
+    "collector_independence_attestations_all_true": true,
     "new_biological_outcomes_known_to_exist_at_gate": false,
     "new_biological_outcome_access_authorized_at_gate": false,
     "candidate_307_prediction_disclosure_to_collector_authorized": false,
-    "all_12_colony_husbandry_prospective_setup_fields_complete_and_valid": false
+    "all_12_colony_husbandry_prospective_setup_fields_complete_and_valid": true
   },
-  "collection_authorized": false,
-  "authorization_blocker": "A real independent collector or collection team has not yet been identified and frozen, and the 12 colonies' prospective husbandry/source setup fields have not yet been completed. Collection must not begin until collector identity/affiliation is nonempty and frozen, every independence attestation is true including complete exclusion from this dataset's outcome analysis, all 12 prospective colony setup records satisfy the frozen source-nest/acclimation/feeding/deprivation/water/light-cycle setup requirements, the single master-stock batch and all failure-provenance rules remain frozen, regression/Codex review is clean on the exact head, and the activation change is qualified on permanent main before the first biological trial. Observed first-trial/test-day/lights-on-window evidence is recorded during collection rather than prefilled at activation.",
+  "collection_authorized": true,
+  "authorization_blocker": null,
   "activation_rule": {
     "checklist_file": "hypotheses/p4_external_validation_collection_activation_checklist_v1.json",
     "checklist_git_blob_sha": "1d983b319dc3946e6942a019981a490b20c3d049",
@@ -85,5 +85,24 @@
     "may_access_candidate_prediction_during_collection": false,
     "may_authorize_canonical_promotion": false
   },
-  "next_action": "Prospectively bind a real independent collector/team and complete the 12 colonies' activation-time husbandry/source setup fields under the frozen template; then activate collection under the unchanged schedules/templates. Record first-trial timestamps, observed test dates/lights-on compliance, and other observation-dependent husbandry fields prospectively as collection occurs."
+  "next_action": "Biological collection may begin only after this exact activation commit has clean exact-head regression and Codex review, is merged, and its permanent-main test and deploy both succeed before trial 1. Until then collection remains forbidden; once effective, record all observation-dependent husbandry and trial provenance prospectively under the frozen contracts.",
+  "activation_metadata": {
+    "schema_version": 1,
+    "activation_candidate_kind": "prospective_collection_activation",
+    "frozen_preauthorization_git_blob_sha": "1a40e684313df4259c94a13ef4382eeeb45f391e",
+    "collector_record_git_blob_sha": "580003d021574411af8ebe00dc8c0d2ba7c691ce",
+    "husbandry_records_git_blob_sha": "e892d3d5ff2ab3471e2481d4d1bcc0231d364e94",
+    "precollection_declaration_git_blob_sha": "012b1d2b587349b04cded2c65adda0707e19f03e",
+    "preflight_ready_for_activation_commit": true,
+    "collection_authorized_in_candidate": true,
+    "collection_effective_only_after_permanent_main_qualification_before_trial_1": true,
+    "no_biological_collection_has_started": true,
+    "no_new_biological_outcome_has_been_accessed": true,
+    "candidate_307_prediction_has_not_been_disclosed_to_collector": true,
+    "post_commit_gates_required": [
+      "activation_regression_passes_on_exact_head",
+      "fresh_codex_review_is_clean_on_exact_head",
+      "activation_commit_is_qualified_on_permanent_main"
+    ]
+  }
 }
