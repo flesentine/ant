@@ -1,0 +1,21 @@
+name: UX experiment explainer audit
+on:
+  push:
+    branches:
+      - audit/ux-explainer-0093cfa
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 0093cfa87078387a5f722c4ad4fd971021abf568
+          fetch-depth: 0
+      - name: Verify exact UX head
+        run: test "$(git rev-parse HEAD)" = "0093cfa87078387a5f722c4ad4fd971021abf568"
+      - name: Check browser script syntax
+        run: node --check src/app.js
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
