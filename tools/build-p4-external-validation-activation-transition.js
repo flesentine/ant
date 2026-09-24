@@ -339,6 +339,26 @@ function gitHeadBlob(root,rel){
   return gitRevBlob(root,'HEAD',rel);
 }
 
+function validateFreshActivationStartState(root){
+  const errors=[];
+  const baselines=[
+    {rel:CANONICAL_AUTHORIZATION_REL,blob:CANONICAL_AUTHORIZATION_BLOB,label:'authorization'},
+    {rel:CANONICAL_COLLECTOR_REL,blob:CANONICAL_COLLECTOR_BLOB,label:'collector'},
+    {rel:CANONICAL_HUSBANDRY_REL,blob:CANONICAL_HUSBANDRY_BLOB,label:'husbandry activation record'},
+    {rel:CANONICAL_DECLARATION_REL,blob:CANONICAL_DECLARATION_BLOB,label:'precollection declaration'}
+  ];
+  for(const item of baselines){
+    const head=gitHeadBlob(root,item.rel);
+    if(head!==item.blob){
+      errors.push(
+        'fresh activation start requires frozen '+item.label+' at HEAD: '+
+        String(head)+' != '+item.blob
+      );
+    }
+  }
+  return errors;
+}
+
 function gitLatestTouchCommit(root,rels){
   try{
     const out=execFileSync(
@@ -995,6 +1015,7 @@ function evaluateActivationTransition(options){
   const candidateReadyForStaging=candidateErrors.length===0;
 
   const commitErrors=[];
+  commitErrors.push(...validateFreshActivationStartState(root));
   function canonicalCommitSnapshot(rel,label,sourceSnapshot){
     let snapshot=null;
     try{
@@ -1192,6 +1213,7 @@ module.exports={
   gitRevBuffer:gitRevBuffer,
   gitRevJson:gitRevJson,
   gitRevCommitTimeMs:gitRevCommitTimeMs,
+  validateFreshActivationStartState:validateFreshActivationStartState,
   gitLatestTouchCommit:gitLatestTouchCommit,
   validateCommittedActivationBaselines:validateCommittedActivationBaselines,
   readJsonSnapshot:readJsonSnapshot,
