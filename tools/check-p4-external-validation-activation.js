@@ -47,6 +47,8 @@ const TRUSTED_QUALIFIED_PREREGISTRATION=Object.freeze({
 });
 
 const ACTIVE_STATUS='active_collection_authorization_prospective_effective_only_after_permanent_main_qualification_before_trial_1';
+const CANONICAL_HUSBANDRY_REL='hypotheses/p4_external_validation_colony_husbandry_activation_record_v1.json';
+const CANONICAL_DECLARATION_REL='hypotheses/p4_external_validation_precollection_declaration_v1.json';
 
 const TRUSTED_FROZEN_COLLECTION_INPUTS=Object.freeze([
   Object.freeze({fileKey:'marked_side_schedule_file',shaKey:'marked_side_schedule_git_blob_sha',label:'marked-side schedule',file:'experiments/p4_external_validation_replication_randomization_v1.json',git_blob_sha:'9ffd7ef45a611c93eac35626399632b4f822225a'}),
@@ -228,7 +230,12 @@ function validateFrozenRepository(root){
     );
     frozenCollector=readJson(path.join(root,collectorRel));
   }else{
-    activationCommit=gitLatestTouchCommit(root,[authRel,collectorRel]);
+    activationCommit=gitLatestTouchCommit(root,[
+      authRel,
+      collectorRel,
+      CANONICAL_HUSBANDRY_REL,
+      CANONICAL_DECLARATION_REL
+    ]);
     if(!activationCommit){
       errors.push('activated repository activation lineage commit is unavailable');
     }else{
@@ -266,9 +273,20 @@ function validateFrozenRepository(root){
     }
 
     const activeBindings=[
-      {rel:authRel,label:'activated repository authorization',expected:currentAuthBlob},
-      {rel:collectorRel,label:'activated repository collector',expected:currentCollectorBlob}
+      {rel:authRel,label:'activated repository authorization',expected:gitRevBlob(root,activationCommit,authRel)},
+      {rel:collectorRel,label:'activated repository collector',expected:gitRevBlob(root,activationCommit,collectorRel)},
+      {rel:CANONICAL_HUSBANDRY_REL,label:'activated repository husbandry',expected:gitRevBlob(root,activationCommit,CANONICAL_HUSBANDRY_REL)},
+      {rel:CANONICAL_DECLARATION_REL,label:'activated repository declaration',expected:gitRevBlob(root,activationCommit,CANONICAL_DECLARATION_REL)}
     ];
+    for(const binding of activeBindings){
+      const headBlob=gitHeadBlob(root,binding.rel);
+      if(headBlob!==binding.expected){
+        errors.push(
+          binding.label+' committed descendant drift '+
+          String(headBlob)+' != '+String(binding.expected)
+        );
+      }
+    }
     for(const binding of activeBindings){
       const indexBlob=gitIndexBlob(root,binding.rel);
       const worktreeBlob=gitBlob(root,binding.rel);
@@ -598,6 +616,8 @@ module.exports={
   TRUSTED_QUALIFIED_PREREGISTRATION,
   TRUSTED_FROZEN_COLLECTION_INPUTS,
   ACTIVE_STATUS,
+  CANONICAL_HUSBANDRY_REL,
+  CANONICAL_DECLARATION_REL,
   gitLatestTouchCommit,
   validateFrozenAuthorizationContract,
   isPlaceholder,
