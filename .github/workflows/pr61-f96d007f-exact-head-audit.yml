@@ -1,0 +1,24 @@
+name: PR61 exact-head audit f96d007f
+on:
+  push:
+    branches:
+      - audit/pr61-f96d007f-exact-head
+permissions:
+  contents: read
+jobs:
+  exact-head-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: f96d007f156520cb62a480ff8c65d4d4e3225b11
+          fetch-depth: 0
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "f96d007f156520cb62a480ff8c65d4d4e3225b11"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
