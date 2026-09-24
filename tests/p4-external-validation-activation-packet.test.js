@@ -23,6 +23,37 @@ try{
   const collector=JSON.parse(fs.readFileSync(path.join(out,'collector.json'),'utf8'));
   const frozenState=preflight.validateFrozenRepository(root);
   assert.deepStrictEqual(frozenState.errors,[]);
+
+  if(frozenState.repository_state==='activation_active'){
+    const authRel='hypotheses/p4_external_validation_collection_authorization_v1.json';
+    const authPath=path.join(root,authRel);
+    const authOriginal=fs.readFileSync(authPath,'utf8');
+    try{
+      const tampered=JSON.parse(authOriginal);
+      tampered.semantic_firewall.may_change_candidate_307=true;
+      fs.writeFileSync(authPath,JSON.stringify(tampered,null,2)+'\n','utf8');
+
+      const worktreeDrift=preflight.validateFrozenRepository(root);
+      assert.ok(worktreeDrift.errors.some(function(x){
+        return x.includes('activated repository authorization working-tree blob drift');
+      }));
+
+      const stageTamper=spawnSync('git',['add','--',authRel],{cwd:root,encoding:'utf8'});
+      assert.strictEqual(stageTamper.status,0,stageTamper.stderr);
+      fs.writeFileSync(authPath,authOriginal,'utf8');
+
+      const indexDrift=preflight.validateFrozenRepository(root);
+      assert.ok(indexDrift.errors.some(function(x){
+        return x.includes('activated repository authorization staged blob drift');
+      }));
+    }finally{
+      fs.writeFileSync(authPath,authOriginal,'utf8');
+      const resetIndex=spawnSync('git',['reset','HEAD','--',authRel],{cwd:root,encoding:'utf8'});
+      assert.strictEqual(resetIndex.status,0,resetIndex.stderr);
+    }
+    assert.deepStrictEqual(preflight.validateFrozenRepository(root).errors,[]);
+  }
+
   const frozenCollector=frozenState.frozenCollector;
   assert.deepStrictEqual(collector,frozenCollector,'collector scaffold must preserve the frozen fail-closed record exactly');
   assert.strictEqual(collector.collector_identity,null);
@@ -145,6 +176,7 @@ try{
     observed_fields_prefilled:false,
     overwrite_refused:true,
     frozen_drift_rejected_before_output:true,
+    activated_authorization_head_index_worktree_binding_enforced:true,
     ready_for_activation_commit:false,
     collection_authorized:false
   }));
