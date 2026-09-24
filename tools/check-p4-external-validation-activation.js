@@ -48,7 +48,9 @@ const TRUSTED_QUALIFIED_PREREGISTRATION=Object.freeze({
 
 const ACTIVE_STATUS='active_collection_authorization_prospective_effective_only_after_permanent_main_qualification_before_trial_1';
 const CANONICAL_HUSBANDRY_REL='hypotheses/p4_external_validation_colony_husbandry_activation_record_v1.json';
+const CANONICAL_HUSBANDRY_BLOB='3336f763a050ce2fcd1a68fd304ada7fa73a89c4';
 const CANONICAL_DECLARATION_REL='hypotheses/p4_external_validation_precollection_declaration_v1.json';
+const CANONICAL_DECLARATION_BLOB='bee70d4ed04d43cdcc93e0b05505097102d1b051';
 
 const TRUSTED_FROZEN_COLLECTION_INPUTS=Object.freeze([
   Object.freeze({fileKey:'marked_side_schedule_file',shaKey:'marked_side_schedule_git_blob_sha',label:'marked-side schedule',file:'experiments/p4_external_validation_replication_randomization_v1.json',git_blob_sha:'9ffd7ef45a611c93eac35626399632b4f822225a'}),
@@ -215,9 +217,13 @@ function validateFrozenRepository(root){
   const auth=readJson(path.join(root,authRel));
   const currentAuthBlob=gitHeadBlob(root,authRel);
   const currentCollectorBlob=gitHeadBlob(root,collectorRel);
+  const currentHusbandryBlob=gitHeadBlob(root,CANONICAL_HUSBANDRY_REL);
+  const currentDeclarationBlob=gitHeadBlob(root,CANONICAL_DECLARATION_REL);
   const preactivation=
     currentAuthBlob===TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha&&
-    currentCollectorBlob===collectorContract.git_blob_sha;
+    currentCollectorBlob===collectorContract.git_blob_sha&&
+    currentHusbandryBlob===CANONICAL_HUSBANDRY_BLOB&&
+    currentDeclarationBlob===CANONICAL_DECLARATION_BLOB;
 
   let frozenCollector;
   let activationCommit=null;
@@ -227,6 +233,18 @@ function validateFrozenRepository(root){
       TRUSTED_PREAUTHORIZATION_RECORD.file,
       TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha,
       'frozen preauthorization record'
+    );
+    assertBlob(
+      errors,root,
+      CANONICAL_HUSBANDRY_REL,
+      CANONICAL_HUSBANDRY_BLOB,
+      'frozen preactivation husbandry record'
+    );
+    assertBlob(
+      errors,root,
+      CANONICAL_DECLARATION_REL,
+      CANONICAL_DECLARATION_BLOB,
+      'frozen preactivation declaration record'
     );
     frozenCollector=readJson(path.join(root,collectorRel));
   }else{
@@ -256,6 +274,8 @@ function validateFrozenRepository(root){
 
       const parentAuth=gitRevBlob(root,activationCommit+'^1',authRel);
       const parentCollector=gitRevBlob(root,activationCommit+'^1',collectorRel);
+      const parentHusbandry=gitRevBlob(root,activationCommit+'^1',CANONICAL_HUSBANDRY_REL);
+      const parentDeclaration=gitRevBlob(root,activationCommit+'^1',CANONICAL_DECLARATION_REL);
       if(parentAuth!==TRUSTED_PREAUTHORIZATION_RECORD.git_blob_sha){
         errors.push(
           'activated repository requires frozen preauthorization at activation parent: '+
@@ -266,6 +286,18 @@ function validateFrozenRepository(root){
         errors.push(
           'activated repository requires frozen collector at activation parent: '+
           String(parentCollector)+' != '+collectorContract.git_blob_sha
+        );
+      }
+      if(parentHusbandry!==CANONICAL_HUSBANDRY_BLOB){
+        errors.push(
+          'activated repository requires frozen husbandry record at activation parent: '+
+          String(parentHusbandry)+' != '+CANONICAL_HUSBANDRY_BLOB
+        );
+      }
+      if(parentDeclaration!==CANONICAL_DECLARATION_BLOB){
+        errors.push(
+          'activated repository requires frozen declaration record at activation parent: '+
+          String(parentDeclaration)+' != '+CANONICAL_DECLARATION_BLOB
         );
       }
       frozenCollector=gitRevJson(root,activationCommit+'^1',collectorRel);
@@ -617,7 +649,9 @@ module.exports={
   TRUSTED_FROZEN_COLLECTION_INPUTS,
   ACTIVE_STATUS,
   CANONICAL_HUSBANDRY_REL,
+  CANONICAL_HUSBANDRY_BLOB,
   CANONICAL_DECLARATION_REL,
+  CANONICAL_DECLARATION_BLOB,
   gitLatestTouchCommit,
   validateFrozenAuthorizationContract,
   isPlaceholder,
