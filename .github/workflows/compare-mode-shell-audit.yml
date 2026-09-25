@@ -1,0 +1,23 @@
+name: Compare mode shell audit
+on:
+  push:
+    branches:
+      - audit/compare-01-d5f16af
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: d5f16af9c60fcea6596005e925c337703b59021f
+          fetch-depth: 0
+      - name: Verify exact compare shell head
+        run: test "$(git rev-parse HEAD)" = "d5f16af9c60fcea6596005e925c337703b59021f"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
