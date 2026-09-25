@@ -10,7 +10,7 @@
     return window.AntLabIntegrity.Simulation;
   }
   const canvas=document.getElementById('labCanvas'),ctx=canvas.getContext('2d');
-  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
+  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),compareCanvasA:document.getElementById('compareCanvasA'),compareCanvasB:document.getElementById('compareCanvasB'),comparePlaceholderA:document.getElementById('comparePlaceholderA'),comparePlaceholderB:document.getElementById('comparePlaceholderB'),compareStatusA:document.getElementById('compareStatusA'),compareStatusB:document.getElementById('compareStatusB'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
   const EXPERIMENT_EXPLANATIONS={
     'open_arena_short_control.json':{
       summary:'One simulated ant enters the center of the open arena after a 20 cm constrained approach under a DCM solvent-control condition.',
@@ -58,6 +58,34 @@
     branch_choice:'left/right branch choice'
   };
   const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';
+  function drawCompareCanvasPlaceholder(canvas,label){
+    if(!canvas)return;
+    const c=canvas.getContext('2d');
+    const w=canvas.width,h=canvas.height;
+    c.clearRect(0,0,w,h);
+    c.fillStyle='#090b0d';
+    c.fillRect(0,0,w,h);
+    c.strokeStyle='rgba(148,163,184,.08)';
+    c.lineWidth=1;
+    const step=48;
+    for(let x=step;x<w;x+=step){c.beginPath();c.moveTo(x,0);c.lineTo(x,h);c.stroke();}
+    for(let y=step;y<h;y+=step){c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();}
+    c.strokeStyle='rgba(217,249,157,.16)';
+    c.setLineDash([8,8]);
+    c.strokeRect(28,28,w-56,h-56);
+    c.setLineDash([]);
+    c.fillStyle='rgba(217,249,157,.72)';
+    c.font='700 18px ui-monospace, monospace';
+    c.textAlign='center';
+    c.fillText(label,w/2,h/2-8);
+    c.fillStyle='rgba(142,153,164,.72)';
+    c.font='13px ui-monospace, monospace';
+    c.fillText('simulation hookup arrives in step 3',w/2,h/2+18);
+  }
+  function initializeCompareCanvases(){
+    drawCompareCanvasPlaceholder(ui.compareCanvasA,'CONDITION A');
+    drawCompareCanvasPlaceholder(ui.compareCanvasB,'CONDITION B');
+  }
   function setSingleControlsDisabled(disabled){
     [ui.experiment,ui.seed,ui.speed,ui.play,ui.step,ui.reset,ui.trails,ui.ids,ui.contacts].forEach(control=>{
       if(control)control.disabled=disabled;
@@ -72,6 +100,7 @@
       simBudget=0;
       ui.play.textContent='Run';
       ui.status.textContent='COMPARE SETUP';
+      initializeCompareCanvases();
     }else{
       ui.status.textContent=sim?(sim.allFinished()?'COMPLETE':'PAUSED'):'LOADING';
     }
@@ -125,5 +154,5 @@
   function updateInspector(){if(selectedId==null||!sim)return;const a=sim.ants.find(x=>x.id===selectedId);if(!a)return;ui.workerId.textContent=`#${a.id}`;ui.workerX.textContent=`${a.x.toFixed(2)} mm`;ui.workerY.textContent=`${a.y.toFixed(2)} mm`;ui.workerHeading.textContent=`${((((a.heading*180/Math.PI)%360)+360)%360).toFixed(1)}°`;ui.workerState.textContent=a.state;ui.workerBioState.textContent=a.agentState?`${a.agentState.experience}; ${a.agentState.travel_direction}; ${a.agentState.feeding_state}; recent travel ${a.agentState.recent_travel_mm} mm`:'—';ui.workerOutcome.textContent=a.outcome||'—';}
   canvas.addEventListener('click',e=>{if(!sim)return;const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*canvas.width,my=(e.clientY-r.top)/r.height*canvas.height;let best=null,bestD=Infinity;for(const a of sim.ants){const c=toCanvas(a.x,a.y),d=(c.x-mx)**2+(c.y-my)**2;if(d<bestD){bestD=d;best=a;}}if(best&&bestD<18**2){selectedId=best.id;ui.inspectorEmpty.hidden=true;ui.inspectorData.hidden=false;updateInspector();}});
   ui.singleModeBtn.addEventListener('click',()=>setViewMode('single'));ui.compareModeBtn.addEventListener('click',()=>setViewMode('compare'));
-  ui.play.addEventListener('click',()=>{if(!sim)return;running=!running;ui.play.textContent=running?'Pause':'Run';ui.status.textContent=running?'RUNNING':'PAUSED';});ui.reset.addEventListener('click',reset);ui.step.addEventListener('click',()=>{if(!sim)return;running=false;ui.play.textContent='Run';const remaining=Math.max(0,sim.experiment.duration_s-sim.time);if(remaining<=1e-9){const alreadyFinished=sim.allFinished();if(!alreadyFinished)sim.runUntilComplete(0);const outcomes=sim.summary().outcomes||{};ui.status.textContent=outcomes.timeout>0?'DURATION':'COMPLETE';updateMetrics();draw();return;}sim.runFor(Math.min(1,remaining),FIXED_DT);const durationReached=sim.time>=sim.experiment.duration_s-1e-9&&!sim.allFinished();if(durationReached)sim.runUntilComplete(0);ui.status.textContent=durationReached?'DURATION':(sim.allFinished()?'COMPLETE':'PAUSED');updateMetrics();draw();});ui.seed.addEventListener('change',reset);ui.experiment.addEventListener('change',reset);setViewMode('single');reset();requestAnimationFrame(frame);
+  ui.play.addEventListener('click',()=>{if(!sim)return;running=!running;ui.play.textContent=running?'Pause':'Run';ui.status.textContent=running?'RUNNING':'PAUSED';});ui.reset.addEventListener('click',reset);ui.step.addEventListener('click',()=>{if(!sim)return;running=false;ui.play.textContent='Run';const remaining=Math.max(0,sim.experiment.duration_s-sim.time);if(remaining<=1e-9){const alreadyFinished=sim.allFinished();if(!alreadyFinished)sim.runUntilComplete(0);const outcomes=sim.summary().outcomes||{};ui.status.textContent=outcomes.timeout>0?'DURATION':'COMPLETE';updateMetrics();draw();return;}sim.runFor(Math.min(1,remaining),FIXED_DT);const durationReached=sim.time>=sim.experiment.duration_s-1e-9&&!sim.allFinished();if(durationReached)sim.runUntilComplete(0);ui.status.textContent=durationReached?'DURATION':(sim.allFinished()?'COMPLETE':'PAUSED');updateMetrics();draw();});ui.seed.addEventListener('change',reset);ui.experiment.addEventListener('change',reset);initializeCompareCanvases();setViewMode('single');reset();requestAnimationFrame(frame);
 })();
