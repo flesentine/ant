@@ -1,0 +1,23 @@
+name: Compare synchronized playback audit
+on:
+  push:
+    branches:
+      - audit/compare-06-dcbd1c1
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dcbd1c1478383466c8032018484076423a9028ff
+          fetch-depth: 0
+      - name: Verify exact synchronized-playback head
+        run: test "$(git rev-parse HEAD)" = "dcbd1c1478383466c8032018484076423a9028ff"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
