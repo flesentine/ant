@@ -1,0 +1,23 @@
+name: Compare open-arena pair audit
+on:
+  push:
+    branches:
+      - audit/compare-05-3197d23
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 3197d23f8de0bc3281fdb679b7c866ca7a68a1e5
+          fetch-depth: 0
+      - name: Verify exact comparison head
+        run: test "$(git rev-parse HEAD)" = "3197d23f8de0bc3281fdb679b7c866ca7a68a1e5"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
