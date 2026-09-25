@@ -96,6 +96,7 @@ node tests/compare-mode-shell.test.js
 node tests/compare-dual-canvas.test.js
 node tests/compare-paired-state.test.js
 node tests/compare-matched-seeds.test.js
+node tests/compare-open-arena-pair.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
@@ -111,6 +112,7 @@ node --check tests/compare-mode-shell.test.js
 node --check tests/compare-dual-canvas.test.js
 node --check tests/compare-paired-state.test.js
 node --check tests/compare-matched-seeds.test.js
+node --check tests/compare-open-arena-pair.test.js
 node --check tests/p4-external-validation-activation-preflight.test.js
 node --check tests/p4-external-validation-activation-packet.test.js
 node --check tests/p4-external-validation-activation-transition.test.js

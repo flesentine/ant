@@ -107,22 +107,26 @@
     for(const ant of targetSim.ants){const p=comparePoint(canvas,targetSim,ant.x,ant.y);c.save();c.translate(p.x,p.y);c.rotate(ant.heading);c.fillStyle=ant.finished?'#60a5fa':'#f5f5f4';c.beginPath();c.ellipse(0,0,4.5,2.8,0,0,Math.PI*2);c.fill();c.beginPath();c.arc(5,0,1.8,0,Math.PI*2);c.fill();c.restore();}
   }
   async function resetComparePair(){
-    const generation=++comparePair.generation,filename=ui.experiment.value,seed=Number(ui.seed.value)||1;
+    const generation=++comparePair.generation,seed=Number(ui.seed.value)||1;
     ui.compareStatusA.textContent='LOADING';ui.compareStatusB.textContent='LOADING';
     ui.comparePlaceholderA.hidden=false;ui.comparePlaceholderB.hidden=false;
     try{
-      const bundle=await loadBundle(filename);if(generation!==comparePair.generation||viewMode!=='compare')return;
-      const Simulation=simulationClassFor(bundle);
-      comparePair.a=new Simulation(bundle,seed);
-      comparePair.b=new Simulation(bundle,seed);
+      const [bundleA,bundleB]=await Promise.all([
+        loadBundle('open_arena_short_control.json'),
+        loadBundle('open_arena_long_control.json')
+      ]);
+      if(generation!==comparePair.generation||viewMode!=='compare')return;
+      const SimulationA=simulationClassFor(bundleA),SimulationB=simulationClassFor(bundleB);
+      comparePair.a=new SimulationA(bundleA,seed);
+      comparePair.b=new SimulationB(bundleB,seed);
       ui.compareTitleA.textContent=comparePair.a.experiment.title;
       ui.compareTitleB.textContent=comparePair.b.experiment.title;
-      ui.compareStatusA.textContent=`READY · seed ${seed} · MATCHED`;
-      ui.compareStatusB.textContent=`READY · seed ${seed} · MATCHED`;
+      ui.compareStatusA.textContent=`20 cm · seed ${seed} · MATCHED`;
+      ui.compareStatusB.textContent=`100 cm · seed ${seed} · MATCHED`;
       ui.comparePlaceholderA.hidden=true;ui.comparePlaceholderB.hidden=true;
       drawCompareSimulation(ui.compareCanvasA,comparePair.a);
       drawCompareSimulation(ui.compareCanvasB,comparePair.b);
-      ui.status.textContent='COMPARE READY';
+      ui.status.textContent='20 cm VS 100 cm READY';
     }catch(err){
       if(generation!==comparePair.generation)return;
       console.error(err);ui.compareStatusA.textContent='LOAD ERROR';ui.compareStatusB.textContent='LOAD ERROR';ui.status.textContent='COMPARE ERROR';
