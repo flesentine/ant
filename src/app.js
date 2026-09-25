@@ -10,7 +10,7 @@
     return window.AntLabIntegrity.Simulation;
   }
   const canvas=document.getElementById('labCanvas'),ctx=canvas.getContext('2d');
-  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),compareCanvasA:document.getElementById('compareCanvasA'),compareCanvasB:document.getElementById('compareCanvasB'),comparePlaceholderA:document.getElementById('comparePlaceholderA'),comparePlaceholderB:document.getElementById('comparePlaceholderB'),compareStatusA:document.getElementById('compareStatusA'),compareStatusB:document.getElementById('compareStatusB'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
+  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),compareCanvasA:document.getElementById('compareCanvasA'),compareCanvasB:document.getElementById('compareCanvasB'),comparePlaceholderA:document.getElementById('comparePlaceholderA'),comparePlaceholderB:document.getElementById('comparePlaceholderB'),compareStatusA:document.getElementById('compareStatusA'),compareStatusB:document.getElementById('compareStatusB'),compareTitleA:document.getElementById('compareATitle'),compareTitleB:document.getElementById('compareBTitle'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
   const EXPERIMENT_EXPLANATIONS={
     'open_arena_short_control.json':{
       summary:'One simulated ant enters the center of the open arena after a 20 cm constrained approach under a DCM solvent-control condition.',
@@ -57,7 +57,7 @@
     exit_coordinate:'exit location',
     branch_choice:'left/right branch choice'
   };
-  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';
+  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';const comparePair={a:null,b:null,generation:0};
   function drawCompareCanvasPlaceholder(canvas,label){
     if(!canvas)return;
     const c=canvas.getContext('2d');
@@ -86,6 +86,48 @@
     drawCompareCanvasPlaceholder(ui.compareCanvasA,'CONDITION A');
     drawCompareCanvasPlaceholder(ui.compareCanvasB,'CONDITION B');
   }
+  function compareTransform(canvas,targetSim){
+    const margin=20,w=targetSim.apparatus.world.width,h=targetSim.apparatus.world.height,s=Math.min((canvas.width-margin*2)/w,(canvas.height-margin*2)/h);
+    return{s,ox:(canvas.width-w*s)/2,oy:(canvas.height-h*s)/2};
+  }
+  function comparePoint(canvas,targetSim,x,y){const t=compareTransform(canvas,targetSim);return{x:t.ox+x*t.s,y:t.oy+y*t.s};}
+  function drawComparePrimitive(c,canvas,targetSim,p,fill,stroke){
+    const t=compareTransform(canvas,targetSim);c.save();c.fillStyle=fill;c.strokeStyle=stroke;c.lineWidth=1;
+    if(p.type==='rect'){c.beginPath();c.rect(t.ox+p.x*t.s,t.oy+p.y*t.s,p.width*t.s,p.height*t.s);c.fill();c.stroke();}
+    else if(p.type==='circle'){const q=comparePoint(canvas,targetSim,p.x,p.y);c.beginPath();c.arc(q.x,q.y,p.radius*t.s,0,Math.PI*2);c.fill();c.stroke();}
+    else if(p.type==='corridor'){const a=comparePoint(canvas,targetSim,p.x1,p.y1),b=comparePoint(canvas,targetSim,p.x2,p.y2);c.lineCap='round';c.lineWidth=p.width*t.s;c.strokeStyle=fill;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.lineWidth=1;c.strokeStyle=stroke;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();}
+    c.restore();
+  }
+  function drawCompareSimulation(canvas,targetSim){
+    if(!canvas||!targetSim)return;
+    const c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);c.fillStyle='#090b0d';c.fillRect(0,0,canvas.width,canvas.height);
+    for(const p of targetSim.apparatus.geometry.primitives)drawComparePrimitive(c,canvas,targetSim,p,'rgba(148,163,184,.10)','rgba(255,255,255,.18)');
+    for(const r of targetSim.scoringProfile.regions||[])drawComparePrimitive(c,canvas,targetSim,r.shape||r,'rgba(96,165,250,.15)','rgba(96,165,250,.60)');
+    const e=targetSim.compiled.entry,q=comparePoint(canvas,targetSim,e.x,e.y);c.strokeStyle='rgba(217,249,157,.55)';c.beginPath();c.arc(q.x,q.y,6,0,Math.PI*2);c.stroke();
+    for(const ant of targetSim.ants){const p=comparePoint(canvas,targetSim,ant.x,ant.y);c.save();c.translate(p.x,p.y);c.rotate(ant.heading);c.fillStyle=ant.finished?'#60a5fa':'#f5f5f4';c.beginPath();c.ellipse(0,0,4.5,2.8,0,0,Math.PI*2);c.fill();c.beginPath();c.arc(5,0,1.8,0,Math.PI*2);c.fill();c.restore();}
+  }
+  async function resetComparePair(){
+    const generation=++comparePair.generation,filename=ui.experiment.value,seed=Number(ui.seed.value)||1;
+    ui.compareStatusA.textContent='LOADING';ui.compareStatusB.textContent='LOADING';
+    ui.comparePlaceholderA.hidden=false;ui.comparePlaceholderB.hidden=false;
+    try{
+      const bundle=await loadBundle(filename);if(generation!==comparePair.generation||viewMode!=='compare')return;
+      const Simulation=simulationClassFor(bundle);
+      comparePair.a=new Simulation(bundle,seed);
+      comparePair.b=new Simulation(bundle,seed+1);
+      ui.compareTitleA.textContent=comparePair.a.experiment.title;
+      ui.compareTitleB.textContent=comparePair.b.experiment.title;
+      ui.compareStatusA.textContent=`READY · seed ${seed}`;
+      ui.compareStatusB.textContent=`READY · seed ${seed+1}`;
+      ui.comparePlaceholderA.hidden=true;ui.comparePlaceholderB.hidden=true;
+      drawCompareSimulation(ui.compareCanvasA,comparePair.a);
+      drawCompareSimulation(ui.compareCanvasB,comparePair.b);
+      ui.status.textContent='COMPARE READY';
+    }catch(err){
+      if(generation!==comparePair.generation)return;
+      console.error(err);ui.compareStatusA.textContent='LOAD ERROR';ui.compareStatusB.textContent='LOAD ERROR';ui.status.textContent='COMPARE ERROR';
+    }
+  }
   function setSingleControlsDisabled(disabled){
     [ui.experiment,ui.seed,ui.speed,ui.play,ui.step,ui.reset,ui.trails,ui.ids,ui.contacts].forEach(control=>{
       if(control)control.disabled=disabled;
@@ -101,6 +143,7 @@
       ui.play.textContent='Run';
       ui.status.textContent='COMPARE SETUP';
       initializeCompareCanvases();
+      resetComparePair();
     }else{
       ui.status.textContent=sim?(sim.allFinished()?'COMPLETE':'PAUSED'):'LOADING';
     }
