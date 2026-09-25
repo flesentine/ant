@@ -57,7 +57,7 @@
     exit_coordinate:'exit location',
     branch_choice:'left/right branch choice'
   };
-  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';const comparePair={a:null,b:null,generation:0};
+  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';const comparePair={a:null,b:null,generation:0,clock:0,seed:null};
   function drawCompareCanvasPlaceholder(canvas,label){
     if(!canvas)return;
     const c=canvas.getContext('2d');
@@ -108,6 +108,7 @@
   }
   async function resetComparePair(){
     const generation=++comparePair.generation,seed=Number(ui.seed.value)||1;
+    running=false;simBudget=0;comparePair.clock=0;comparePair.seed=seed;ui.play.textContent='Run';
     ui.compareStatusA.textContent='LOADING';ui.compareStatusB.textContent='LOADING';
     ui.comparePlaceholderA.hidden=false;ui.comparePlaceholderB.hidden=false;
     try{
@@ -132,10 +133,46 @@
       console.error(err);ui.compareStatusA.textContent='LOAD ERROR';ui.compareStatusB.textContent='LOAD ERROR';ui.status.textContent='COMPARE ERROR';
     }
   }
+  function compareSimActive(targetSim){
+    return Boolean(targetSim)&&!targetSim.allFinished()&&targetSim.time<targetSim.experiment.duration_s-1e-9;
+  }
+  function finalizeCompareDuration(targetSim){
+    if(targetSim&&targetSim.time>=targetSim.experiment.duration_s-1e-9&&!targetSim.allFinished())targetSim.runUntilComplete(0);
+  }
+  function advanceCompareFixedStep(){
+    const {a,b}=comparePair;
+    if(!a||!b)return true;
+    if(compareSimActive(a))a.step(FIXED_DT);
+    if(compareSimActive(b))b.step(FIXED_DT);
+    comparePair.clock+=FIXED_DT;
+    finalizeCompareDuration(a);finalizeCompareDuration(b);
+    return !compareSimActive(a)&&!compareSimActive(b);
+  }
+  function updateComparePlaybackStatus(){
+    if(!comparePair.a||!comparePair.b)return;
+    const stateFor=s=>s.allFinished()?'COMPLETE':(s.time>=s.experiment.duration_s-1e-9?'DURATION':(running?'RUNNING':'PAUSED'));
+    ui.compareStatusA.textContent=`20 cm · ${comparePair.a.time.toFixed(1)} s · ${stateFor(comparePair.a)}`;
+    ui.compareStatusB.textContent=`100 cm · ${comparePair.b.time.toFixed(1)} s · ${stateFor(comparePair.b)}`;
+  }
+  function renderComparePair(){
+    if(!comparePair.a||!comparePair.b)return;
+    drawCompareSimulation(ui.compareCanvasA,comparePair.a);
+    drawCompareSimulation(ui.compareCanvasB,comparePair.b);
+    updateComparePlaybackStatus();
+  }
+  function stepCompareOneSecond(){
+    if(!comparePair.a||!comparePair.b)return;
+    running=false;ui.play.textContent='Run';simBudget=0;
+    const steps=Math.round(1/FIXED_DT);
+    let done=false;
+    for(let i=0;i<steps&&!done;i++)done=advanceCompareFixedStep();
+    renderComparePair();
+    ui.status.textContent=done?'COMPARE COMPLETE':'COMPARE PAUSED';
+  }
   function setSingleControlsDisabled(disabled){
-    [ui.experiment,ui.seed,ui.speed,ui.play,ui.step,ui.reset,ui.trails,ui.ids,ui.contacts].forEach(control=>{
-      if(control)control.disabled=disabled;
-    });
+    ui.experiment.disabled=disabled;
+    [ui.trails,ui.ids,ui.contacts].forEach(control=>{if(control)control.disabled=disabled;});
+    [ui.seed,ui.speed,ui.play,ui.step,ui.reset].forEach(control=>{if(control)control.disabled=false;});
   }
   function setViewMode(mode){
     const next=mode==='compare'?'compare':'single';
@@ -162,7 +199,20 @@
   async function json(path){if(cache.has(path))return cache.get(path);const r=await fetch(path);if(!r.ok)throw new Error(`Could not load ${path}: HTTP ${r.status}`);const v=await r.json();cache.set(path,v);return v;}
   async function loadBundle(filename){const experiment=await json(`./experiments/${filename}`);const [model,apparatus,state,observation,scoring]=await Promise.all([json(`./models/${experiment.model}.json`),json(`./apparatus/${experiment.apparatus}.json`),json(`./states/${experiment.state}.json`),json(`./observations/${experiment.observation}.json`),json(`./scoring/${experiment.scoring}.json`)]);return{experiment,model,apparatus,state,observation,scoring};}
   async function reset(){const generation=++resetGeneration,filename=ui.experiment.value,seed=Number(ui.seed.value)||1;running=false;selectedId=null;simBudget=0;sim=null;ui.play.textContent='Run';ui.status.textContent='LOADING';try{const bundle=await loadBundle(filename);if(generation!==resetGeneration)return;const Simulation=simulationClassFor(bundle);sim=new Simulation(bundle,seed);ui.status.textContent='PAUSED';ui.inspectorData.hidden=true;ui.inspectorEmpty.hidden=false;updateDefinition();updateExplainer();updateMetrics();draw();}catch(err){if(generation!==resetGeneration)return;console.error(err);ui.status.textContent='LOAD ERROR';ui.protocolNote.textContent=err.message;}}
-  function frame(now){const wallDt=Math.min(.05,(now-lastWallTime)/1000);lastWallTime=now;if(running&&sim){simBudget+=wallDt*Number(ui.speed.value);let safety=0;while(simBudget>=FIXED_DT&&safety++<5000){sim.step(FIXED_DT);simBudget-=FIXED_DT;const durationReached=sim.time>=sim.experiment.duration_s&&!sim.allFinished();if(sim.allFinished()||durationReached){if(durationReached)sim.runUntilComplete(0);running=false;ui.play.textContent='Run';ui.status.textContent=durationReached?'DURATION':'COMPLETE';break;}}}if(sim){draw();updateMetrics();updateInspector();}requestAnimationFrame(frame);}
+  function frame(now){
+    const wallDt=Math.min(.05,(now-lastWallTime)/1000);lastWallTime=now;
+    if(running&&viewMode==='single'&&sim){
+      simBudget+=wallDt*Number(ui.speed.value);let safety=0;
+      while(simBudget>=FIXED_DT&&safety++<5000){sim.step(FIXED_DT);simBudget-=FIXED_DT;const durationReached=sim.time>=sim.experiment.duration_s&&!sim.allFinished();if(sim.allFinished()||durationReached){if(durationReached)sim.runUntilComplete(0);running=false;ui.play.textContent='Run';ui.status.textContent=durationReached?'DURATION':'COMPLETE';break;}}
+    }else if(running&&viewMode==='compare'&&comparePair.a&&comparePair.b){
+      simBudget+=wallDt*Number(ui.speed.value);let safety=0,done=false;
+      while(simBudget>=FIXED_DT&&safety++<5000&&!done){done=advanceCompareFixedStep();simBudget-=FIXED_DT;}
+      if(done){running=false;ui.play.textContent='Run';ui.status.textContent='COMPARE COMPLETE';}
+    }
+    if(viewMode==='single'&&sim){draw();updateMetrics();updateInspector();}
+    else if(viewMode==='compare'&&comparePair.a&&comparePair.b)renderComparePair();
+    requestAnimationFrame(frame);
+  }
   function transform(){const margin=28,w=sim.apparatus.world.width,h=sim.apparatus.world.height,s=Math.min((canvas.width-margin*2)/w,(canvas.height-margin*2)/h);return{s,ox:(canvas.width-w*s)/2,oy:(canvas.height-h*s)/2};}function toCanvas(x,y){const t=transform();return{x:t.ox+x*t.s,y:t.oy+y*t.s};}
   function drawPrimitive(p,fill,stroke){const t=transform();ctx.save();ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=1.2;if(p.type==='rect'){ctx.beginPath();ctx.rect(t.ox+p.x*t.s,t.oy+p.y*t.s,p.width*t.s,p.height*t.s);ctx.fill();ctx.stroke();}else if(p.type==='circle'){const c=toCanvas(p.x,p.y);ctx.beginPath();ctx.arc(c.x,c.y,p.radius*t.s,0,Math.PI*2);ctx.fill();ctx.stroke();}else if(p.type==='corridor'){const a=toCanvas(p.x1,p.y1),b=toCanvas(p.x2,p.y2);ctx.lineCap='round';ctx.lineWidth=p.width*t.s;ctx.strokeStyle=fill;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.lineWidth=1.2;ctx.strokeStyle=stroke;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}ctx.restore();}
   function drawExternalFields(){const trail=sim?.apparatus?.external_fields?.painted_trail;if(!trail?.line_segment_mm||!(Number(sim?.p4DoseRatio)>0))return;const s=trail.line_segment_mm,a=toCanvas(s.x1,s.y1),b=toCanvas(s.x2,s.y2);ctx.save();ctx.lineCap='round';ctx.strokeStyle='rgba(250,204,21,.22)';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.strokeStyle='rgba(250,204,21,.9)';ctx.lineWidth=2;ctx.setLineDash([7,5]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(250,204,21,.88)';ctx.font='11px ui-monospace';ctx.fillText('PHEROMONE TRAIL',b.x+8,b.y);ctx.restore();}
@@ -201,5 +251,18 @@
   function updateInspector(){if(selectedId==null||!sim)return;const a=sim.ants.find(x=>x.id===selectedId);if(!a)return;ui.workerId.textContent=`#${a.id}`;ui.workerX.textContent=`${a.x.toFixed(2)} mm`;ui.workerY.textContent=`${a.y.toFixed(2)} mm`;ui.workerHeading.textContent=`${((((a.heading*180/Math.PI)%360)+360)%360).toFixed(1)}°`;ui.workerState.textContent=a.state;ui.workerBioState.textContent=a.agentState?`${a.agentState.experience}; ${a.agentState.travel_direction}; ${a.agentState.feeding_state}; recent travel ${a.agentState.recent_travel_mm} mm`:'—';ui.workerOutcome.textContent=a.outcome||'—';}
   canvas.addEventListener('click',e=>{if(!sim)return;const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*canvas.width,my=(e.clientY-r.top)/r.height*canvas.height;let best=null,bestD=Infinity;for(const a of sim.ants){const c=toCanvas(a.x,a.y),d=(c.x-mx)**2+(c.y-my)**2;if(d<bestD){bestD=d;best=a;}}if(best&&bestD<18**2){selectedId=best.id;ui.inspectorEmpty.hidden=true;ui.inspectorData.hidden=false;updateInspector();}});
   ui.singleModeBtn.addEventListener('click',()=>setViewMode('single'));ui.compareModeBtn.addEventListener('click',()=>setViewMode('compare'));
-  ui.play.addEventListener('click',()=>{if(!sim)return;running=!running;ui.play.textContent=running?'Pause':'Run';ui.status.textContent=running?'RUNNING':'PAUSED';});ui.reset.addEventListener('click',reset);ui.step.addEventListener('click',()=>{if(!sim)return;running=false;ui.play.textContent='Run';const remaining=Math.max(0,sim.experiment.duration_s-sim.time);if(remaining<=1e-9){const alreadyFinished=sim.allFinished();if(!alreadyFinished)sim.runUntilComplete(0);const outcomes=sim.summary().outcomes||{};ui.status.textContent=outcomes.timeout>0?'DURATION':'COMPLETE';updateMetrics();draw();return;}sim.runFor(Math.min(1,remaining),FIXED_DT);const durationReached=sim.time>=sim.experiment.duration_s-1e-9&&!sim.allFinished();if(durationReached)sim.runUntilComplete(0);ui.status.textContent=durationReached?'DURATION':(sim.allFinished()?'COMPLETE':'PAUSED');updateMetrics();draw();});ui.seed.addEventListener('change',reset);ui.experiment.addEventListener('change',reset);initializeCompareCanvases();setViewMode('single');reset();requestAnimationFrame(frame);
+  ui.play.addEventListener('click',()=>{
+    if(viewMode==='compare'){
+      if(!comparePair.a||!comparePair.b)return;
+      running=!running;ui.play.textContent=running?'Pause':'Run';ui.status.textContent=running?'COMPARE RUNNING':'COMPARE PAUSED';updateComparePlaybackStatus();return;
+    }
+    if(!sim)return;running=!running;ui.play.textContent=running?'Pause':'Run';ui.status.textContent=running?'RUNNING':'PAUSED';
+  });
+  ui.reset.addEventListener('click',()=>{if(viewMode==='compare')resetComparePair();else reset();});
+  ui.step.addEventListener('click',()=>{
+    if(viewMode==='compare'){stepCompareOneSecond();return;}
+    if(!sim)return;running=false;ui.play.textContent='Run';const remaining=Math.max(0,sim.experiment.duration_s-sim.time);if(remaining<=1e-9){const alreadyFinished=sim.allFinished();if(!alreadyFinished)sim.runUntilComplete(0);const outcomes=sim.summary().outcomes||{};ui.status.textContent=outcomes.timeout>0?'DURATION':'COMPLETE';updateMetrics();draw();return;}sim.runFor(Math.min(1,remaining),FIXED_DT);const durationReached=sim.time>=sim.experiment.duration_s-1e-9&&!sim.allFinished();if(durationReached)sim.runUntilComplete(0);ui.status.textContent=durationReached?'DURATION':(sim.allFinished()?'COMPLETE':'PAUSED');updateMetrics();draw();
+  });
+  ui.seed.addEventListener('change',()=>{if(viewMode==='compare')resetComparePair();else reset();});
+  ui.experiment.addEventListener('change',reset);initializeCompareCanvases();setViewMode('single');reset();requestAnimationFrame(frame);
 })();
