@@ -114,11 +114,11 @@
       const bundle=await loadBundle(filename);if(generation!==comparePair.generation||viewMode!=='compare')return;
       const Simulation=simulationClassFor(bundle);
       comparePair.a=new Simulation(bundle,seed);
-      comparePair.b=new Simulation(bundle,seed+1);
+      comparePair.b=new Simulation(bundle,seed);
       ui.compareTitleA.textContent=comparePair.a.experiment.title;
       ui.compareTitleB.textContent=comparePair.b.experiment.title;
-      ui.compareStatusA.textContent=`READY · seed ${seed}`;
-      ui.compareStatusB.textContent=`READY · seed ${seed+1}`;
+      ui.compareStatusA.textContent=`READY · seed ${seed} · MATCHED`;
+      ui.compareStatusB.textContent=`READY · seed ${seed} · MATCHED`;
       ui.comparePlaceholderA.hidden=true;ui.comparePlaceholderB.hidden=true;
       drawCompareSimulation(ui.compareCanvasA,comparePair.a);
       drawCompareSimulation(ui.compareCanvasB,comparePair.b);
