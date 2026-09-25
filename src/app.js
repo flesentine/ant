@@ -142,8 +142,10 @@
   function advanceCompareFixedStep(){
     const {a,b}=comparePair;
     if(!a||!b)return true;
-    if(compareSimActive(a))a.step(FIXED_DT);
-    if(compareSimActive(b))b.step(FIXED_DT);
+    const activeA=compareSimActive(a),activeB=compareSimActive(b);
+    if(!activeA&&!activeB)return true;
+    if(activeA)a.step(FIXED_DT);
+    if(activeB)b.step(FIXED_DT);
     comparePair.clock+=FIXED_DT;
     finalizeCompareDuration(a);finalizeCompareDuration(b);
     return !compareSimActive(a)&&!compareSimActive(b);
