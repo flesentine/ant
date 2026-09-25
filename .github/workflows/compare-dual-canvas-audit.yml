@@ -1,0 +1,23 @@
+name: Compare dual canvas audit
+on:
+  push:
+    branches:
+      - audit/compare-02-fc2023c
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fc2023cefe2d62160f5ffb4e0b21a2f008617765
+          fetch-depth: 0
+      - name: Verify exact dual-canvas head
+        run: test "$(git rev-parse HEAD)" = "fc2023cefe2d62160f5ffb4e0b21a2f008617765"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
