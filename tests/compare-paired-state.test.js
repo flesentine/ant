@@ -5,7 +5,7 @@ const html=fs.readFileSync('index.html','utf8');
 const css=fs.readFileSync('src/style.css','utf8');
 const app=fs.readFileSync('src/app.js','utf8');
 
-assert.ok(app.includes("const comparePair={a:null,b:null,generation:0}"),'paired state container missing');
+assert.ok(app.includes("const comparePair={a:null,b:null,generation:0,clock:0,seed:null};"),'paired state container missing');
 assert.ok(app.includes("comparePair.a=new SimulationA(bundleA,seed);"),'Condition A must own its own Simulation instance');
 assert.ok(app.includes("comparePair.b=new SimulationB(bundleB,seed);"),'Condition B must own an independent Simulation instance using the matched seed');
 assert.ok(app.includes("async function resetComparePair()"),'paired reset/load path missing');
@@ -16,6 +16,6 @@ assert.ok(app.includes("generation!==comparePair.generation||viewMode!=='compare
 assert.ok(app.includes("function compareTransform(canvas,targetSim)"),'paired renderer must use per-simulation geometry');
 assert.ok(app.includes("targetSim.apparatus.geometry.primitives"),'paired renderer must draw each simulation apparatus');
 assert.ok(css.includes(".compare-canvas-placeholder[hidden] { display:none; }"),'loaded compare state must reveal canvases cleanly');
-assert.ok(html.includes('Condition A is the 20 cm approach and Condition B is the 100 cm approach'),'paired experiment status copy missing');
+assert.ok(html.includes('20 CM ↔ 100 CM'),'paired experiment status copy missing');
 
 console.log('compare-paired-state.test.js PASS');
