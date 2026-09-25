@@ -1,0 +1,23 @@
+name: Compare matched-seed audit
+on:
+  push:
+    branches:
+      - audit/compare-04-7404725
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 74047253354587db627347b16bd8b3a00c0f4270
+          fetch-depth: 0
+      - name: Verify exact matched-seed head
+        run: test "$(git rev-parse HEAD)" = "74047253354587db627347b16bd8b3a00c0f4270"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
