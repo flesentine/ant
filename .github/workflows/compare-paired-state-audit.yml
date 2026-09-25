@@ -1,0 +1,23 @@
+name: Compare paired-state audit
+on:
+  push:
+    branches:
+      - audit/compare-03-8c41e09
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8c41e09b38d03dd344708564a119de967699288c
+          fetch-depth: 0
+      - name: Verify exact paired-state head
+        run: test "$(git rev-parse HEAD)" = "8c41e09b38d03dd344708564a119de967699288c"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
