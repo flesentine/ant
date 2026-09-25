@@ -21,6 +21,6 @@ assert.strictEqual(short.observation,long.observation,'comparison must hold obse
 assert.strictEqual(short.scoring,long.scoring,'comparison must hold scoring constant');
 assert.deepStrictEqual(short.protocol.treatment,long.protocol.treatment,'comparison must hold solvent treatment constant');
 assert.ok(html.includes('20 CM ↔ 100 CM'),'compare shell must identify the active pair');
-assert.ok(html.includes('Condition A is the 20 cm approach and Condition B is the 100 cm approach'),'pair explanation missing');
+assert.ok(html.includes('Matched-seed comparison of the 20 cm and 100 cm open-arena control approaches.'),'pair explanation missing');
 
 console.log('compare-open-arena-pair.test.js PASS');
