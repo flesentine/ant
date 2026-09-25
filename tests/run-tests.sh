@@ -93,6 +93,7 @@ node tests/p4-external-validation-activation-packet.test.js
 node tests/p4-external-validation-activation-transition.test.js
 node tests/p4-visual-simulator.test.js
 node tests/compare-mode-shell.test.js
+node tests/compare-dual-canvas.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
@@ -105,6 +106,7 @@ node --check src/p4.js
 node --check src/app.js
 node --check tests/p4-visual-simulator.test.js
 node --check tests/compare-mode-shell.test.js
+node --check tests/compare-dual-canvas.test.js
 node --check tests/p4-external-validation-activation-preflight.test.js
 node --check tests/p4-external-validation-activation-packet.test.js
 node --check tests/p4-external-validation-activation-transition.test.js
