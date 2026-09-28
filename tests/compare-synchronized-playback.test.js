@@ -16,6 +16,6 @@ assert.ok(app.includes("if(viewMode==='compare')resetComparePair();else reset();
 assert.ok(app.includes("if(viewMode==='compare')resetComparePair();else reset();"),'compare reset routing missing');
 assert.ok(app.includes("ui.seed.addEventListener('change',()=>{if(viewMode==='compare')resetComparePair();else reset();});"),'seed changes must reset both compare simulations');
 assert.ok(app.includes("[ui.seed,ui.speed,ui.play,ui.step,ui.reset].forEach(control=>{if(control)control.disabled=false;});"),'compare transport controls must remain enabled');
-assert.ok(html.includes('Run, Pause, Speed, Step 1 s, Reset, and seed changes control both simulations together.'),'synchronized playback user-facing note missing');
+assert.ok(html.includes('Replay same seed')&&html.includes('Next seed'),'compare transport UI must retain explicit seed replay controls after synchronized playback');
 
 console.log('compare-synchronized-playback.test.js PASS');
