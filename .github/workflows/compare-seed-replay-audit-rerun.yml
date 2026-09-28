@@ -1,0 +1,23 @@
+name: Compare seed replay audit rerun
+on:
+  push:
+    branches:
+      - audit/compare-07-c985bb9
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c985bb9dd5083afb976c5bc602446a14bf901f11
+          fetch-depth: 0
+      - name: Verify exact seed-replay head
+        run: test "$(git rev-parse HEAD)" = "c985bb9dd5083afb976c5bc602446a14bf901f11"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
