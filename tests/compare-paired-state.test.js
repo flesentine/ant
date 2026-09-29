@@ -5,7 +5,7 @@ const html=fs.readFileSync('index.html','utf8');
 const css=fs.readFileSync('src/style.css','utf8');
 const app=fs.readFileSync('src/app.js','utf8');
 
-assert.ok(app.includes("const comparePair={a:null,b:null,generation:0,clock:0,seed:null,selectedId:null};"),'paired state container missing');
+assert.ok(app.includes("const comparePair={a:null,b:null,generation:0,clock:0,seed:null,selectedId:null,presetId:null};"),'paired state container missing');
 assert.ok(app.includes("comparePair.a=new SimulationA(bundleA,seed);"),'Condition A must own its own Simulation instance');
 assert.ok(app.includes("comparePair.b=new SimulationB(bundleB,seed);"),'Condition B must own an independent Simulation instance using the matched seed');
 assert.ok(app.includes("async function resetComparePair()"),'paired reset/load path missing');
