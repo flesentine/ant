@@ -12,7 +12,7 @@ assert.ok(html.includes('WHAT THIS SEED SHOWS'),'plain-English summary kicker mi
 assert.ok(html.includes('Plain-English comparison'),'plain-English summary heading missing');
 assert.ok(html.includes('aria-live="polite"'),'live summary must update accessibly');
 assert.ok(html.includes('Descriptive simulation output only; this does not establish a biological effect.'),'initial scientific caveat missing');
-assert.ok(html.includes('Step 11 adds trajectory overlay.'),'step-10 completion copy missing');
+assert.ok(html.includes('TRAJECTORY OVERLAY'),'plain-English summary must flow into the trajectory overlay feature');
 
 assert.ok(app.includes('function compareDifferenceClause(a,b'),'comparison sentence delta helper missing');
 assert.ok(app.includes('const delta=b-a'),'plain-English differences must preserve B minus A direction');
