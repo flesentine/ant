@@ -1,0 +1,23 @@
+name: Compare P4 marked-zero audit
+on:
+  push:
+    branches:
+      - audit/compare-13-bcdaced
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: bcdaced02816a1aac78e776d246d584c295647fc
+          fetch-depth: 0
+      - name: Verify exact P4 marked-zero head
+        run: test "$(git rev-parse HEAD)" = "bcdaced02816a1aac78e776d246d584c295647fc"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
