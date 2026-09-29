@@ -23,6 +23,6 @@ assert.ok(app.includes("ui.replaySeedBtn.addEventListener('click',replaySameComp
 assert.ok(app.includes("ui.nextSeedBtn.addEventListener('click',nextCompareSeed)"),'Next seed listener missing');
 assert.ok(app.includes("ui.compareSeedReadout.textContent=`Seed ${seed} · matched A/B`;"),'matched seed readout must track the loaded pair');
 assert.ok(css.includes('.compare-seed-tools'),'compare seed toolbar styling missing');
-assert.ok(html.includes('Step 9 adds side-by-side comparison metrics.'),'step-8 handoff copy missing');
+assert.ok(html.includes('LIVE COMPARISON'),'seed replay controls must coexist with the live comparison panel');
 
 console.log('compare-seed-replay.test.js PASS');

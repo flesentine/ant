@@ -29,6 +29,6 @@ assert.ok(app.includes("ui.compareCanvasB.addEventListener('click'"),'Condition 
 assert.ok(css.includes('.compare-match-card'),'matched worker card styling missing');
 assert.ok(css.includes('.compare-match-glyph'),'A/B link glyph styling missing');
 assert.ok(css.includes('.dot.matched'),'matched worker legend styling missing');
-assert.ok(html.includes('Step 9 adds side-by-side comparison metrics.'),'step-8 completion copy missing');
+assert.ok(html.includes('LIVE COMPARISON'),'matched-worker view must flow into the comparison metrics panel');
 
 console.log('compare-matched-worker-visualization.test.js PASS');
