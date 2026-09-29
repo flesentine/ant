@@ -237,7 +237,7 @@
     const started=Math.max(comparePair.a?.time||0,comparePair.b?.time||0)>1e-9;
     if(!started)return'The matched pair is ready. Start the run to compare the 20 cm and 100 cm conditions.';
     const clauses=[];
-    const edge=compareDifferenceClause(a.edgeTime,b.edgeTime,{digits:2,unit:' s',positive:'later to the arena edge',negative:'sooner to the arena edge'});
+    const edge=compareDifferenceClause(a.edgeTime,b.edgeTime,{digits:2,unit:' s',positive:'later',negative:'sooner'});
     if(edge)clauses.push(`reached the arena edge ${edge}`);
     const distance=compareDifferenceClause(a.distance,b.distance,{digits:1,unit:' mm',positive:'farther',negative:'less far'});
     if(distance)clauses.push(`traveled ${distance}`);
