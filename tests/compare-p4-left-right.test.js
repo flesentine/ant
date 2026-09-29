@@ -9,9 +9,9 @@ const html=fs.readFileSync('index.html','utf8');
 
 assert.ok(app.includes("'p4-left-vs-right':{"),'P4 left-vs-right preset missing');
 assert.ok(app.includes("fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_right_consistency_v1.json'"),'P4 left-vs-right preset files incorrect');
-assert.ok(app.includes("labelA:'P4 left-marked',labelB:'P4 right-marked',readyStatus:'P4 LEFT VS RIGHT',metricMode:'branch-choice',p4Diagnostic:true,enabled:true"),'P4 left-vs-right must be enabled as a branch-choice diagnostic');
-assert.ok(html.includes('Both frozen P4 diagnostic presets are now available'),'step-14 availability copy missing');
-assert.ok(html.includes('Step 15 improves comparison legends.'),'step-15 handoff copy missing');
+assert.ok(app.includes("difference:'Which Y-maze arm carries the same frozen P4 dose'"),'P4 left-vs-right legend must state the mirrored-side difference');
+assert.ok(html.includes('All comparison presets are available.'),'all-presets availability copy missing');
+assert.ok(html.includes('Step 16 adds a comparison completion state.'),'step-15 completion handoff copy missing');
 
 assert.ok(app.includes('function compareOverlayCoordinateSystemCompatible(a,b)'),'geometry-aware overlay compatibility helper missing');
 assert.ok(app.includes("const frame=apparatus=>({world:apparatus.world,geometry:apparatus.geometry,boundary:apparatus.boundary,entry_points:apparatus.entry_points,terminal_regions:apparatus.terminal_regions});"),'overlay coordinate frame must exclude only treatment-specific external fields');

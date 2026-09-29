@@ -10,7 +10,7 @@ for(const id of ['compareMatchTitle','compareMatchWorker','compareMatchDetail'])
 }
 assert.ok(html.includes('Matched simulated worker'),'matched-worker heading missing');
 assert.ok(html.includes('Same seed + worker ID across both conditions'),'pairing basis must be explicit');
-assert.ok((html.match(/Matched worker W0/g)||[]).length===2,'each pane legend must identify the matched worker');
+assert.strictEqual((html.match(/<div class="compare-mini-legend"[\s\S]*?Matched worker W0[\s\S]*?<\/div>/g)||[]).length,2,'each pane legend must identify the matched worker');
 
 assert.ok(app.includes('function matchedCompareWorkerIds()'),'matched ID resolver missing');
 assert.ok(app.includes('const idsB=new Set(comparePair.b.ants.map(ant=>String(ant.id)))'),'matched IDs must be resolved across both simulations');
