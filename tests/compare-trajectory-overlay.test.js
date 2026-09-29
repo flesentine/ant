@@ -13,7 +13,7 @@ assert.ok(html.includes('Matched paths on one arena'),'trajectory overlay title 
 assert.ok(html.includes('20 cm · A'),'Condition A overlay legend missing');
 assert.ok(html.includes('100 cm · B'),'Condition B overlay legend missing');
 assert.ok(html.includes('Display-only trajectory history sampled every 0.25 s; not a new measurement endpoint.'),'display-only overlay boundary missing');
-assert.ok(html.includes('P4 left vs right remains locked until step 14.'),'step-13 preset handoff copy missing');
+assert.ok(html.includes('Step 15 improves comparison legends.'),'step-14 handoff copy missing');
 
 assert.ok(app.includes("const comparePaths={a:new Map(),b:new Map(),nextSample:.25,loading:false};"),'overlay history must be kept outside simulation state');
 assert.ok(app.includes('const COMPARE_PATH_SAMPLE_S=.25;'),'trajectory history sampling interval missing');
@@ -27,7 +27,9 @@ assert.ok(app.includes('recordCompareTrajectoryPoints(done);'),'shared fixed-ste
 assert.ok(!app.includes('comparePaths.a=comparePair.a.ants[0].tail'),'overlay must not depend on the bounded ant.tail display cache');
 
 assert.ok(app.includes('function drawCompareTrajectoryOverlay()'),'trajectory overlay renderer missing');
-assert.ok(app.includes("if(comparePair.a.apparatus.id!==comparePair.b.apparatus.id)"),'overlay must refuse incompatible apparatus coordinate systems');
+assert.ok(app.includes('function compareOverlayCoordinateSystemCompatible(a,b)'),'overlay coordinate-system compatibility check missing');
+assert.ok(app.includes("return JSON.stringify(frame(a.apparatus))===JSON.stringify(frame(b.apparatus));"),'overlay compatibility must compare coordinates rather than apparatus IDs');
+assert.ok(!app.includes("comparePair.a.apparatus.id!==comparePair.b.apparatus.id"),'overlay must not reject mirrored apparatus IDs when their coordinate systems match');
 assert.ok(app.includes("drawCompareOverlayPath(c,canvas,simA,pathA,{stroke:'#d9f99d',width:4});"),'Condition A overlay path missing');
 assert.ok(app.includes("drawCompareOverlayPath(c,canvas,simA,pathB,{stroke:'#60a5fa',dashed:true,width:2.5});"),'Condition B dashed overlay path missing');
 assert.ok(app.includes('not a new measurement endpoint.'),'runtime overlay note must preserve measurement boundary');
