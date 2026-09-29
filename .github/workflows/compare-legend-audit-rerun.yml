@@ -1,0 +1,23 @@
+name: Compare legend audit rerun
+on:
+  push:
+    branches:
+      - audit/compare-15-daab9c4
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: daab9c47db0e6c457ab9cef46a9d37e19c9ab753
+          fetch-depth: 0
+      - name: Verify exact comparison-legend head
+        run: test "$(git rev-parse HEAD)" = "daab9c47db0e6c457ab9cef46a9d37e19c9ab753"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
