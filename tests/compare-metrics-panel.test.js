@@ -19,7 +19,7 @@ assert.ok(html.includes('Observed metrics'),'comparison panel heading missing');
 assert.ok(html.includes('B − A'),'delta direction must be explicit');
 assert.ok(html.includes('Time to arena edge'),'edge-time row missing');
 assert.ok(html.includes('Central-zone fraction'),'central-zone row missing');
-assert.ok(html.includes('Observed A/B values and B − A deltas now update live'),'step-9 completion copy missing');
+assert.ok(html.includes('WHAT THIS SEED SHOWS'),'metrics panel must flow into the plain-English summary');
 
 assert.ok(app.includes('function compareObservedSnapshot(targetSim)'),'observed snapshot adapter missing');
 assert.ok(app.includes("const summary=targetSim.summary(),means=summary.observed_metrics?.means||{}"),'comparison values must come from observed measurement summaries');
