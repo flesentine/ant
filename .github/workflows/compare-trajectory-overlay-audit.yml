@@ -1,0 +1,23 @@
+name: Compare trajectory overlay audit
+on:
+  push:
+    branches:
+      - audit/compare-11-c6edf18
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c6edf18befce53d8ce4e4b9c2c73c50d5dbe1be3
+          fetch-depth: 0
+      - name: Verify exact trajectory-overlay head
+        run: test "$(git rev-parse HEAD)" = "c6edf18befce53d8ce4e4b9c2c73c50d5dbe1be3"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
