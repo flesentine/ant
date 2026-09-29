@@ -10,7 +10,7 @@
     return window.AntLabIntegrity.Simulation;
   }
   const canvas=document.getElementById('labCanvas'),ctx=canvas.getContext('2d');
-  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),compareCanvasA:document.getElementById('compareCanvasA'),compareCanvasB:document.getElementById('compareCanvasB'),comparePlaceholderA:document.getElementById('comparePlaceholderA'),comparePlaceholderB:document.getElementById('comparePlaceholderB'),compareStatusA:document.getElementById('compareStatusA'),compareStatusB:document.getElementById('compareStatusB'),compareTitleA:document.getElementById('compareATitle'),compareTitleB:document.getElementById('compareBTitle'),replaySeedBtn:document.getElementById('replaySeedBtn'),nextSeedBtn:document.getElementById('nextSeedBtn'),compareSeedReadout:document.getElementById('compareSeedReadout'),compareMatchWorker:document.getElementById('compareMatchWorker'),compareMatchDetail:document.getElementById('compareMatchDetail'),compareSpeedA:document.getElementById('compareSpeedA'),compareSpeedB:document.getElementById('compareSpeedB'),compareSpeedDelta:document.getElementById('compareSpeedDelta'),compareDistanceA:document.getElementById('compareDistanceA'),compareDistanceB:document.getElementById('compareDistanceB'),compareDistanceDelta:document.getElementById('compareDistanceDelta'),compareStraightnessA:document.getElementById('compareStraightnessA'),compareStraightnessB:document.getElementById('compareStraightnessB'),compareStraightnessDelta:document.getElementById('compareStraightnessDelta'),compareEdgeTimeA:document.getElementById('compareEdgeTimeA'),compareEdgeTimeB:document.getElementById('compareEdgeTimeB'),compareEdgeTimeDelta:document.getElementById('compareEdgeTimeDelta'),compareCentralA:document.getElementById('compareCentralA'),compareCentralB:document.getElementById('compareCentralB'),compareCentralDelta:document.getElementById('compareCentralDelta'),compareOutcomeA:document.getElementById('compareOutcomeA'),compareOutcomeB:document.getElementById('compareOutcomeB'),compareOutcomeDelta:document.getElementById('compareOutcomeDelta'),compareMetricsNote:document.getElementById('compareMetricsNote'),compareSummaryText:document.getElementById('compareSummaryText'),compareSummaryQualifier:document.getElementById('compareSummaryQualifier'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
+  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),compareCanvasA:document.getElementById('compareCanvasA'),compareCanvasB:document.getElementById('compareCanvasB'),comparePlaceholderA:document.getElementById('comparePlaceholderA'),comparePlaceholderB:document.getElementById('comparePlaceholderB'),compareStatusA:document.getElementById('compareStatusA'),compareStatusB:document.getElementById('compareStatusB'),compareTitleA:document.getElementById('compareATitle'),compareTitleB:document.getElementById('compareBTitle'),replaySeedBtn:document.getElementById('replaySeedBtn'),nextSeedBtn:document.getElementById('nextSeedBtn'),compareSeedReadout:document.getElementById('compareSeedReadout'),compareMatchWorker:document.getElementById('compareMatchWorker'),compareMatchDetail:document.getElementById('compareMatchDetail'),compareSpeedA:document.getElementById('compareSpeedA'),compareSpeedB:document.getElementById('compareSpeedB'),compareSpeedDelta:document.getElementById('compareSpeedDelta'),compareDistanceA:document.getElementById('compareDistanceA'),compareDistanceB:document.getElementById('compareDistanceB'),compareDistanceDelta:document.getElementById('compareDistanceDelta'),compareStraightnessA:document.getElementById('compareStraightnessA'),compareStraightnessB:document.getElementById('compareStraightnessB'),compareStraightnessDelta:document.getElementById('compareStraightnessDelta'),compareEdgeTimeA:document.getElementById('compareEdgeTimeA'),compareEdgeTimeB:document.getElementById('compareEdgeTimeB'),compareEdgeTimeDelta:document.getElementById('compareEdgeTimeDelta'),compareCentralA:document.getElementById('compareCentralA'),compareCentralB:document.getElementById('compareCentralB'),compareCentralDelta:document.getElementById('compareCentralDelta'),compareOutcomeA:document.getElementById('compareOutcomeA'),compareOutcomeB:document.getElementById('compareOutcomeB'),compareOutcomeDelta:document.getElementById('compareOutcomeDelta'),compareMetricsNote:document.getElementById('compareMetricsNote'),compareSummaryText:document.getElementById('compareSummaryText'),compareSummaryQualifier:document.getElementById('compareSummaryQualifier'),showCompareOverlay:document.getElementById('showCompareOverlay'),compareOverlayBody:document.getElementById('compareOverlayBody'),compareOverlayCanvas:document.getElementById('compareOverlayCanvas'),compareOverlayNote:document.getElementById('compareOverlayNote'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
   const EXPERIMENT_EXPLANATIONS={
     'open_arena_short_control.json':{
       summary:'One simulated ant enters the center of the open arena after a 20 cm constrained approach under a DCM solvent-control condition.',
@@ -57,7 +57,7 @@
     exit_coordinate:'exit location',
     branch_choice:'left/right branch choice'
   };
-  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';const comparePair={a:null,b:null,generation:0,clock:0,seed:null,selectedId:null};
+  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';const comparePair={a:null,b:null,generation:0,clock:0,seed:null,selectedId:null};const comparePaths={a:new Map(),b:new Map(),nextSample:.25,loading:false};
   function drawCompareCanvasPlaceholder(canvas,label){
     if(!canvas)return;
     const c=canvas.getContext('2d');
@@ -136,6 +136,64 @@
     for(const ant of targetSim.ants){const p=comparePoint(canvas,targetSim,ant.x,ant.y),d=(p.x-mx)**2+(p.y-my)**2;if(d<bestD){bestD=d;best=ant;}}
     if(best&&bestD<22**2&&matchedCompareWorkerIds().some(id=>String(id)===String(best.id))){comparePair.selectedId=best.id;renderComparePair();}
   }
+  const COMPARE_PATH_SAMPLE_S=.25;
+  function comparePathPush(pathMap,id,ant,time){
+    if(!ant)return;
+    const key=String(id),path=pathMap.get(key)||[],last=path[path.length-1];
+    if(!last||Math.hypot(ant.x-last.x,ant.y-last.y)>1e-9)path.push({x:ant.x,y:ant.y,time});
+    pathMap.set(key,path);
+  }
+  function recordCompareTrajectoryPoints(force=false){
+    if(!comparePair.a||!comparePair.b)return;
+    if(!force&&comparePair.clock+1e-9<comparePaths.nextSample)return;
+    for(const id of matchedCompareWorkerIds()){
+      const antA=comparePair.a.ants.find(ant=>String(ant.id)===String(id));
+      const antB=comparePair.b.ants.find(ant=>String(ant.id)===String(id));
+      comparePathPush(comparePaths.a,id,antA,comparePair.a.time);
+      comparePathPush(comparePaths.b,id,antB,comparePair.b.time);
+    }
+    while(comparePaths.nextSample<=comparePair.clock+1e-9)comparePaths.nextSample+=COMPARE_PATH_SAMPLE_S;
+  }
+  function resetCompareTrajectoryHistory(){
+    comparePaths.a=new Map();comparePaths.b=new Map();comparePaths.nextSample=COMPARE_PATH_SAMPLE_S;
+    recordCompareTrajectoryPoints(true);
+  }
+  function drawCompareOverlayMessage(message){
+    const canvas=ui.compareOverlayCanvas,c=canvas.getContext('2d');
+    c.clearRect(0,0,canvas.width,canvas.height);c.fillStyle='#090b0d';c.fillRect(0,0,canvas.width,canvas.height);
+    c.fillStyle='#6f7b85';c.font='13px ui-monospace, monospace';c.textAlign='center';c.fillText(message,canvas.width/2,canvas.height/2);
+  }
+  function drawCompareOverlayPath(c,canvas,targetSim,path,{stroke,dashed=false,width=2.5}){
+    if(!path||path.length<2)return;
+    c.save();c.strokeStyle=stroke;c.lineWidth=width;c.lineJoin='round';c.lineCap='round';c.setLineDash(dashed?[8,6]:[]);
+    c.beginPath();
+    path.forEach((point,index)=>{const p=comparePoint(canvas,targetSim,point.x,point.y);if(index===0)c.moveTo(p.x,p.y);else c.lineTo(p.x,p.y);});
+    c.stroke();c.restore();
+  }
+  function drawCompareTrajectoryOverlay(){
+    const visible=Boolean(ui.showCompareOverlay?.checked);
+    ui.compareOverlayBody.hidden=!visible;
+    if(!visible)return;
+    if(comparePaths.loading){drawCompareOverlayMessage('Loading matched trajectories…');return;}
+    if(!comparePair.a||!comparePair.b){drawCompareOverlayMessage('Matched trajectory data will appear here.');return;}
+    if(comparePair.a.apparatus.id!==comparePair.b.apparatus.id){
+      drawCompareOverlayMessage('Overlay unavailable: the paired apparatuses differ.');
+      ui.compareOverlayNote.textContent='Display-only overlay requires the same apparatus coordinate system on both sides.';
+      return;
+    }
+    const canvas=ui.compareOverlayCanvas,c=canvas.getContext('2d'),simA=comparePair.a;
+    c.clearRect(0,0,canvas.width,canvas.height);c.fillStyle='#090b0d';c.fillRect(0,0,canvas.width,canvas.height);
+    for(const primitive of simA.apparatus.geometry.primitives)drawComparePrimitive(c,canvas,simA,primitive,'rgba(148,163,184,.08)','rgba(255,255,255,.15)');
+    for(const region of simA.scoringProfile.regions||[])drawComparePrimitive(c,canvas,simA,region.shape||region,'rgba(96,165,250,.08)','rgba(96,165,250,.34)');
+    const id=comparePair.selectedId??matchedCompareWorkerIds()[0],key=String(id),pathA=comparePaths.a.get(key)||[],pathB=comparePaths.b.get(key)||[];
+    drawCompareOverlayPath(c,canvas,simA,pathA,{stroke:'#d9f99d',width:4});
+    drawCompareOverlayPath(c,canvas,simA,pathB,{stroke:'#60a5fa',dashed:true,width:2.5});
+    const start=pathA[0]||pathB[0];
+    if(start){const p=comparePoint(canvas,simA,start.x,start.y);c.fillStyle='#090b0d';c.strokeStyle='#f5f5f4';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,5,0,Math.PI*2);c.fill();c.stroke();}
+    for(const [path,color] of [[pathA,'#d9f99d'],[pathB,'#60a5fa']]){const end=path[path.length-1];if(end){const p=comparePoint(canvas,simA,end.x,end.y);c.fillStyle=color;c.beginPath();c.arc(p.x,p.y,4,0,Math.PI*2);c.fill();}}
+    ui.compareOverlayNote.textContent=`Worker W${id} · seed ${comparePair.seed} · display-only path history sampled about every 0.25 s · A ${pathA.length} points · B ${pathB.length} points · not a new measurement endpoint.`;
+  }
+  function toggleCompareTrajectoryOverlay(){drawCompareTrajectoryOverlay();}
   function normalizeCompareSeed(value){
     const seed=Math.trunc(Number(value));
     return Number.isSafeInteger(seed)&&seed>=1?seed:1;
@@ -144,7 +202,9 @@
     const generation=++comparePair.generation,seed=normalizeCompareSeed(ui.seed.value);
     ui.seed.value=String(seed);
     running=false;simBudget=0;comparePair.clock=0;comparePair.seed=seed;comparePair.selectedId=null;ui.play.textContent='Run';
+    comparePaths.a=new Map();comparePaths.b=new Map();comparePaths.nextSample=COMPARE_PATH_SAMPLE_S;comparePaths.loading=true;
     ui.compareSeedReadout.textContent=`Seed ${seed} · matched A/B`;
+    drawCompareTrajectoryOverlay();
     ui.compareStatusA.textContent='LOADING';ui.compareStatusB.textContent='LOADING';
     ui.comparePlaceholderA.hidden=false;ui.comparePlaceholderB.hidden=false;
     try{
@@ -161,11 +221,12 @@
       ui.compareStatusA.textContent=`20 cm · seed ${seed} · MATCHED`;
       ui.compareStatusB.textContent=`100 cm · seed ${seed} · MATCHED`;
       ui.comparePlaceholderA.hidden=true;ui.comparePlaceholderB.hidden=true;
+      updateCompareMatchDisplay();resetCompareTrajectoryHistory();comparePaths.loading=false;
       renderComparePair();
       ui.status.textContent='20 cm VS 100 cm READY';
     }catch(err){
       if(generation!==comparePair.generation)return;
-      console.error(err);ui.compareStatusA.textContent='LOAD ERROR';ui.compareStatusB.textContent='LOAD ERROR';ui.status.textContent='COMPARE ERROR';
+      console.error(err);comparePaths.loading=false;ui.compareStatusA.textContent='LOAD ERROR';ui.compareStatusB.textContent='LOAD ERROR';ui.status.textContent='COMPARE ERROR';drawCompareTrajectoryOverlay();
     }
   }
   function replaySameCompareSeed(){
@@ -196,7 +257,9 @@
     if(activeB)b.step(FIXED_DT);
     comparePair.clock+=FIXED_DT;
     finalizeCompareDuration(a);finalizeCompareDuration(b);
-    return !compareSimActive(a)&&!compareSimActive(b);
+    const done=!compareSimActive(a)&&!compareSimActive(b);
+    recordCompareTrajectoryPoints(done);
+    return done;
   }
   function updateComparePlaybackStatus(){
     if(!comparePair.a||!comparePair.b)return;
@@ -288,6 +351,7 @@
     updateCompareMatchDisplay();
     drawCompareSimulation(ui.compareCanvasA,comparePair.a);
     drawCompareSimulation(ui.compareCanvasB,comparePair.b);
+    drawCompareTrajectoryOverlay();
     updateCompareMetrics();
     updateComparePlaybackStatus();
   }
@@ -383,6 +447,7 @@
   canvas.addEventListener('click',e=>{if(!sim)return;const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*canvas.width,my=(e.clientY-r.top)/r.height*canvas.height;let best=null,bestD=Infinity;for(const a of sim.ants){const c=toCanvas(a.x,a.y),d=(c.x-mx)**2+(c.y-my)**2;if(d<bestD){bestD=d;best=a;}}if(best&&bestD<18**2){selectedId=best.id;ui.inspectorEmpty.hidden=true;ui.inspectorData.hidden=false;updateInspector();}});
   ui.singleModeBtn.addEventListener('click',()=>setViewMode('single'));ui.compareModeBtn.addEventListener('click',()=>setViewMode('compare'));
   ui.replaySeedBtn.addEventListener('click',replaySameCompareSeed);ui.nextSeedBtn.addEventListener('click',nextCompareSeed);
+  ui.showCompareOverlay.addEventListener('change',toggleCompareTrajectoryOverlay);
   ui.compareCanvasA.addEventListener('click',event=>selectCompareWorkerFromCanvas(ui.compareCanvasA,comparePair.a,event));ui.compareCanvasB.addEventListener('click',event=>selectCompareWorkerFromCanvas(ui.compareCanvasB,comparePair.b,event));
   ui.play.addEventListener('click',()=>{
     if(viewMode==='compare'){
