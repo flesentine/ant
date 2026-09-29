@@ -1,0 +1,23 @@
+name: Compare metrics panel audit rerun
+on:
+  push:
+    branches:
+      - audit/compare-09-5b4c6c2
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5b4c6c2111ff11738b71d2a30855d99d8d8896af
+          fetch-depth: 0
+      - name: Verify exact comparison-metrics head
+        run: test "$(git rev-parse HEAD)" = "5b4c6c2111ff11738b71d2a30855d99d8d8896af"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
