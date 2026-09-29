@@ -11,9 +11,7 @@ const css=fs.readFileSync('src/style.css','utf8');
 assert.ok(app.includes("'p4-marked-vs-zero':{"),'P4 marked-vs-zero preset missing');
 assert.ok(app.includes("fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_neutral_consistency_v1.json'"),'P4 marked-vs-zero pair must use frozen left-marked and exact zero-dose experiments');
 assert.ok(app.includes("metricMode:'branch-choice',p4Diagnostic:true,enabled:true"),'P4 marked-vs-zero must be enabled as a branch-choice diagnostic');
-assert.ok(app.includes("enabled:false,unlockStep:14"),'P4 left-vs-right must remain locked until step 14');
-assert.ok(html.includes('P4 marked vs exact zero-dose is now available'),'step-13 availability copy missing');
-assert.ok(html.includes('P4 left vs right remains locked until step 14.'),'step-14 handoff copy missing');
+assert.ok(html.includes('Both frozen P4 diagnostic presets are now available'),'P4 diagnostics availability copy missing');
 
 for(const id of ['compareMetricsTitle','compareMetricsModeLabel','compareMetricsDeltaLabel','compareOutcomeLabel','compareMetricSpeedRow','compareMetricDistanceRow','compareMetricStraightnessRow','compareMetricEdgeTimeRow','compareMetricCentralRow']){
   assert.ok(html.includes('id="'+id+'"'),'missing preset-aware metric UI #'+id);
@@ -26,11 +24,11 @@ assert.ok(app.includes("ui.compareOutcomeLabel.textContent=branchChoice?'Branch 
 assert.ok(app.includes('row.hidden=branchChoice'),'irrelevant numeric rows must hide for branch-choice presets');
 assert.ok(css.includes('.compare-metrics-row[hidden] { display:none; }'),'hidden P4 metric rows must not occupy layout');
 
-assert.ok(app.includes('function drawCompareExternalField(c,canvas,targetSim)'),'compare P4 trail renderer missing');
-assert.ok(app.includes("if(!trail?.line_segment_mm||!(Number(targetSim?.p4DoseRatio)>0))return;"),'zero-dose pane must suppress painted-trail rendering');
-assert.ok(app.includes("c.fillText('P4 MARKED TRAIL'"),'marked P4 trail label missing');
+assert.ok(app.includes('function drawCompareExternalField(c,canvas,targetSim,{'),'compare P4 trail renderer missing');
+assert.ok(app.includes("if(!trail?.line_segment_mm||!(Number(targetSim?.p4DoseRatio)>0))return false;"),'zero-dose pane must suppress painted-trail rendering');
+assert.ok(app.includes("trailLabel=label||(side?`P4 ${String(side).toUpperCase()} TRAIL`:'P4 MARKED TRAIL')"),'marked P4 trail label must identify the active side');
 assert.ok(app.includes('drawCompareExternalField(c,canvas,targetSim);'),'P4 trail must render in paired condition canvas');
-assert.ok(app.includes('drawCompareExternalField(c,canvas,simA);'),'P4 trail must render in trajectory overlay from condition A');
+assert.ok(app.includes("label:'A · MARKED TRAIL'"),'P4 marked condition must render in the trajectory overlay');
 
 assert.ok(app.includes("const choices=observedRows.map(row=>row.branch_choice).filter(Boolean);"),'branch choice must come from observed measurement rows');
 assert.ok(app.includes("branchChoice:choices.length?choices.map(choice=>String(choice).toUpperCase()).join(', '):'—'"),'observed branch choice adapter missing');

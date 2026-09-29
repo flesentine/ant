@@ -74,7 +74,7 @@
       id:'p4-left-vs-right',label:'P4 · left-marked vs right-marked',badge:'P4 LEFT ↔ RIGHT',
       description:'Frozen Candidate 307 comparison with the marked arm mirrored from left to right.',
       fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_right_consistency_v1.json',
-      labelA:'P4 left-marked',labelB:'P4 right-marked',readyStatus:'P4 LEFT VS RIGHT',enabled:false,unlockStep:14
+      labelA:'P4 left-marked',labelB:'P4 right-marked',readyStatus:'P4 LEFT VS RIGHT',metricMode:'branch-choice',p4Diagnostic:true,enabled:true
     }
   };
   const DEFAULT_COMPARE_PRESET_ID='open-arena-20-vs-100';
@@ -101,7 +101,7 @@
     ui.compareMetricsDeltaLabel.textContent=branchChoice?'Relation':'Δ';
     ui.compareOutcomeLabel.textContent=branchChoice?'Branch choice':'Outcome';
     for(const row of [ui.compareMetricSpeedRow,ui.compareMetricDistanceRow,ui.compareMetricStraightnessRow,ui.compareMetricEdgeTimeRow,ui.compareMetricCentralRow])row.hidden=branchChoice;
-    ui.comparePresetHelp.textContent=!preset.enabled?`Preset unlocks in step ${preset.unlockStep}.`:preset.p4Diagnostic?'Active preset · frozen P4 diagnostic; left/right unlocks in step 14.':'Active preset · P4 marked vs zero-dose is available; left/right unlocks in step 14.';
+    ui.comparePresetHelp.textContent=!preset.enabled?`Preset unlocks in step ${preset.unlockStep}.`:preset.p4Diagnostic?'Active preset · frozen P4 diagnostic only; official biological execution remains unauthorized.':'Active preset · all Compare presets are available.';
   }
   function initializeComparePresets(){
     ui.comparePresetSelect.replaceChildren();
@@ -172,13 +172,19 @@
     ui.compareMatchWorker.textContent=`Worker W${id} ↔ Worker W${id}`;
     ui.compareMatchDetail.textContent=`Seed ${comparePair.seed} · paired by seed + worker ID · A ${comparePair.a.time.toFixed(1)} s · B ${comparePair.b.time.toFixed(1)} s`;
   }
-  function drawCompareExternalField(c,canvas,targetSim){
+  function drawCompareExternalField(c,canvas,targetSim,{stroke='rgba(250,204,21,.92)',halo='rgba(250,204,21,.20)',label=null,dashed=true}={}){
     const trail=targetSim?.apparatus?.external_fields?.painted_trail;
-    if(!trail?.line_segment_mm||!(Number(targetSim?.p4DoseRatio)>0))return;
+    if(!trail?.line_segment_mm||!(Number(targetSim?.p4DoseRatio)>0))return false;
     const segment=trail.line_segment_mm,a=comparePoint(canvas,targetSim,segment.x1,segment.y1),b=comparePoint(canvas,targetSim,segment.x2,segment.y2);
-    c.save();c.lineCap='round';c.strokeStyle='rgba(250,204,21,.20)';c.lineWidth=9;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();
-    c.strokeStyle='rgba(250,204,21,.92)';c.lineWidth=2;c.setLineDash([7,5]);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.setLineDash([]);
-    c.fillStyle='rgba(250,204,21,.90)';c.font='700 10px ui-monospace, monospace';c.fillText('P4 MARKED TRAIL',b.x+7,b.y);c.restore();
+    const side=targetSim?.experiment?.protocol?.treatment?.marked_side,trailLabel=label||(side?`P4 ${String(side).toUpperCase()} TRAIL`:'P4 MARKED TRAIL');
+    c.save();c.lineCap='round';c.strokeStyle=halo;c.lineWidth=9;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();
+    c.strokeStyle=stroke;c.lineWidth=2;c.setLineDash(dashed?[7,5]:[]);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.setLineDash([]);
+    c.fillStyle=stroke;c.font='700 10px ui-monospace, monospace';c.fillText(trailLabel,b.x+7,b.y);c.restore();return true;
+  }
+  function compareOverlayCoordinateSystemCompatible(a,b){
+    if(!a?.apparatus||!b?.apparatus)return false;
+    const frame=apparatus=>({world:apparatus.world,geometry:apparatus.geometry,boundary:apparatus.boundary,entry_points:apparatus.entry_points,terminal_regions:apparatus.terminal_regions});
+    return JSON.stringify(frame(a.apparatus))===JSON.stringify(frame(b.apparatus));
   }
   function drawCompareSimulation(canvas,targetSim){
     if(!canvas||!targetSim)return;
@@ -242,23 +248,24 @@
     if(!visible)return;
     if(comparePaths.loading){drawCompareOverlayMessage('Loading matched trajectories…');return;}
     if(!comparePair.a||!comparePair.b){drawCompareOverlayMessage('Matched trajectory data will appear here.');return;}
-    if(comparePair.a.apparatus.id!==comparePair.b.apparatus.id){
-      drawCompareOverlayMessage('Overlay unavailable: the paired apparatuses differ.');
-      ui.compareOverlayNote.textContent='Display-only overlay requires the same apparatus coordinate system on both sides.';
+    if(!compareOverlayCoordinateSystemCompatible(comparePair.a,comparePair.b)){
+      drawCompareOverlayMessage('Overlay unavailable: the paired coordinate systems differ.');
+      ui.compareOverlayNote.textContent='Display-only overlay requires matching world, geometry, boundary, entry, and terminal coordinates on both sides.';
       return;
     }
     const canvas=ui.compareOverlayCanvas,c=canvas.getContext('2d'),simA=comparePair.a;
     c.clearRect(0,0,canvas.width,canvas.height);c.fillStyle='#090b0d';c.fillRect(0,0,canvas.width,canvas.height);
     for(const primitive of simA.apparatus.geometry.primitives)drawComparePrimitive(c,canvas,simA,primitive,'rgba(148,163,184,.08)','rgba(255,255,255,.15)');
     for(const region of simA.scoringProfile.regions||[])drawComparePrimitive(c,canvas,simA,region.shape||region,'rgba(96,165,250,.08)','rgba(96,165,250,.34)');
-    drawCompareExternalField(c,canvas,simA);
+    const trailA=drawCompareExternalField(c,canvas,simA,{stroke:'rgba(250,204,21,.95)',halo:'rgba(250,204,21,.17)',label:'A · MARKED TRAIL'});
+    const trailB=drawCompareExternalField(c,canvas,comparePair.b,{stroke:'rgba(251,146,60,.95)',halo:'rgba(251,146,60,.15)',label:'B · MARKED TRAIL'});
     const id=comparePair.selectedId??matchedCompareWorkerIds()[0],key=String(id),pathA=comparePaths.a.get(key)||[],pathB=comparePaths.b.get(key)||[];
     drawCompareOverlayPath(c,canvas,simA,pathA,{stroke:'#d9f99d',width:4});
     drawCompareOverlayPath(c,canvas,simA,pathB,{stroke:'#60a5fa',dashed:true,width:2.5});
     const start=pathA[0]||pathB[0];
     if(start){const p=comparePoint(canvas,simA,start.x,start.y);c.fillStyle='#090b0d';c.strokeStyle='#f5f5f4';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,5,0,Math.PI*2);c.fill();c.stroke();}
     for(const [path,color] of [[pathA,'#d9f99d'],[pathB,'#60a5fa']]){const end=path[path.length-1];if(end){const p=comparePoint(canvas,simA,end.x,end.y);c.fillStyle=color;c.beginPath();c.arc(p.x,p.y,4,0,Math.PI*2);c.fill();}}
-    ui.compareOverlayNote.textContent=`Worker W${id} · seed ${comparePair.seed} · display-only path history sampled about every 0.25 s · A ${pathA.length} points · B ${pathB.length} points · not a new measurement endpoint.`;
+    ui.compareOverlayNote.textContent=`Worker W${id} · seed ${comparePair.seed} · display-only path history sampled about every 0.25 s · A ${pathA.length} points · B ${pathB.length} points · active marked trails ${Number(trailA)+Number(trailB)} · not a new measurement endpoint.`;
   }
   function toggleCompareTrajectoryOverlay(){drawCompareTrajectoryOverlay();}
   function normalizeCompareSeed(value){

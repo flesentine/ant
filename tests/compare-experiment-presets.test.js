@@ -9,8 +9,8 @@ for(const id of ['comparePresetSelect','comparePresetHelp','comparePresetDescrip
   assert.ok(html.includes(`id="${id}"`),`missing preset UI #${id}`);
 }
 assert.ok(html.includes('Comparison preset'),'preset selector label missing');
-assert.ok(html.includes('P4 marked vs exact zero-dose is now available'),'step-13 preset availability copy missing');
-assert.ok(html.includes('P4 left vs right remains locked until step 14.'),'step-13 handoff copy missing');
+assert.ok(html.includes('All comparison presets are available.'),'all-presets availability copy missing');
+assert.ok(html.includes('Both frozen P4 diagnostic presets are now available'),'step-14 completion copy missing');
 
 assert.ok(app.includes("const COMPARE_PRESETS={"),'central compare preset registry missing');
 assert.ok(app.includes("'open-arena-20-vs-100':{"),'open-arena preset missing');
@@ -23,7 +23,7 @@ assert.ok(app.includes("metricMode:'branch-choice',p4Diagnostic:true,enabled:tru
 
 assert.ok(app.includes("'p4-left-vs-right':{"),'P4 left-vs-right preset must be staged');
 assert.ok(app.includes("fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_right_consistency_v1.json'"),'P4 left-vs-right preset files incorrect');
-assert.ok(app.includes("enabled:false,unlockStep:14"),'P4 left-vs-right must remain locked until step 14');
+assert.ok(app.includes("labelA:'P4 left-marked',labelB:'P4 right-marked',readyStatus:'P4 LEFT VS RIGHT',metricMode:'branch-choice',p4Diagnostic:true,enabled:true"),'P4 left-vs-right must be enabled as a branch-choice diagnostic');
 
 assert.ok(app.includes("const DEFAULT_COMPARE_PRESET_ID='open-arena-20-vs-100';"),'default compare preset must remain open arena');
 assert.ok(app.includes('function selectedComparePreset()'),'preset selection resolver missing');
