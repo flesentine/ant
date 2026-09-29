@@ -103,6 +103,7 @@ node tests/compare-matched-worker-visualization.test.js
 node tests/compare-metrics-panel.test.js
 node tests/compare-plain-language-summary.test.js
 node tests/compare-trajectory-overlay.test.js
+node tests/compare-experiment-presets.test.js
 node tests/p3-runtime.test.js
 node --check src/sim-core.js
 node --check src/measurement.js
@@ -125,6 +126,7 @@ node --check tests/compare-matched-worker-visualization.test.js
 node --check tests/compare-metrics-panel.test.js
 node --check tests/compare-plain-language-summary.test.js
 node --check tests/compare-trajectory-overlay.test.js
+node --check tests/compare-experiment-presets.test.js
 node --check tests/p4-external-validation-activation-preflight.test.js
 node --check tests/p4-external-validation-activation-packet.test.js
 node --check tests/p4-external-validation-activation-transition.test.js

@@ -13,7 +13,7 @@ assert.ok(html.includes('Matched paths on one arena'),'trajectory overlay title 
 assert.ok(html.includes('20 cm · A'),'Condition A overlay legend missing');
 assert.ok(html.includes('100 cm · B'),'Condition B overlay legend missing');
 assert.ok(html.includes('Display-only trajectory history sampled every 0.25 s; not a new measurement endpoint.'),'display-only overlay boundary missing');
-assert.ok(html.includes('Step 12 adds reusable experiment presets.'),'step-11 completion copy missing');
+assert.ok(html.includes('P4 presets are staged but locked until steps 13–14.'),'step-12 preset handoff copy missing');
 
 assert.ok(app.includes("const comparePaths={a:new Map(),b:new Map(),nextSample:.25,loading:false};"),'overlay history must be kept outside simulation state');
 assert.ok(app.includes('const COMPARE_PATH_SAMPLE_S=.25;'),'trajectory history sampling interval missing');

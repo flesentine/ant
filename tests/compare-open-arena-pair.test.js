@@ -6,12 +6,12 @@ const html=fs.readFileSync('index.html','utf8');
 const short=JSON.parse(fs.readFileSync('experiments/open_arena_short_control.json','utf8'));
 const long=JSON.parse(fs.readFileSync('experiments/open_arena_long_control.json','utf8'));
 
-assert.ok(app.includes("loadBundle('open_arena_short_control.json')"),'Condition A must load the 20 cm control');
-assert.ok(app.includes("loadBundle('open_arena_long_control.json')"),'Condition B must load the 100 cm control');
-assert.ok(app.includes("const [bundleA,bundleB]=await Promise.all"),'comparison pair should load both conditions together');
+assert.ok(app.includes("fileA:'open_arena_short_control.json'"),'default preset must reference the 20 cm control');
+assert.ok(app.includes("fileB:'open_arena_long_control.json'"),'default preset must reference the 100 cm control');
+assert.ok(app.includes("loadBundle(preset.fileA)")&&app.includes("loadBundle(preset.fileB)"),'comparison pair must load both conditions through the active preset');
 assert.ok(app.includes("comparePair.a=new SimulationA(bundleA,seed);"),'20 cm condition must use bundle A');
 assert.ok(app.includes("comparePair.b=new SimulationB(bundleB,seed);"),'100 cm condition must use bundle B');
-assert.ok(app.includes("ui.status.textContent='20 cm VS 100 cm READY';"),'ready state must identify the active comparison');
+assert.ok(app.includes("ui.status.textContent=`${preset.readyStatus} READY`;"),'ready state must identify the active preset');
 
 assert.strictEqual(short.protocol.approach_distance_mm,200,'short control must remain 20 cm');
 assert.strictEqual(long.protocol.approach_distance_mm,1000,'long control must remain 100 cm');
