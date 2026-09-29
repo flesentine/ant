@@ -10,7 +10,7 @@ const css=fs.readFileSync('src/style.css','utf8');
 
 assert.ok(app.includes("'p4-marked-vs-zero':{"),'P4 marked-vs-zero preset missing');
 assert.ok(app.includes("fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_neutral_consistency_v1.json'"),'P4 marked-vs-zero pair must use frozen left-marked and exact zero-dose experiments');
-assert.ok(app.includes("metricMode:'branch-choice',p4Diagnostic:true,enabled:true"),'P4 marked-vs-zero must be enabled as a branch-choice diagnostic');
+assert.ok(app.includes("difference:'P4 painted-trail dose',treatmentA:'Left arm marked · 0.0048 hindgut eq/cm',treatmentB:'Exact zero-dose identity control'"),'P4 marked-vs-zero legend must state the designed dose difference');
 assert.ok(html.includes('Both frozen P4 diagnostic presets are now available'),'P4 diagnostics availability copy missing');
 
 for(const id of ['compareMetricsTitle','compareMetricsModeLabel','compareMetricsDeltaLabel','compareOutcomeLabel','compareMetricSpeedRow','compareMetricDistanceRow','compareMetricStraightnessRow','compareMetricEdgeTimeRow','compareMetricCentralRow']){
