@@ -10,7 +10,7 @@ for(const id of ['comparePresetSelect','comparePresetHelp','comparePresetDescrip
 }
 assert.ok(html.includes('Comparison preset'),'preset selector label missing');
 assert.ok(html.includes('All comparison presets are available.'),'all-presets availability copy missing');
-assert.ok(html.includes('Both frozen P4 diagnostic presets are now available'),'step-14 completion copy missing');
+assert.ok(html.includes('Compare legends now explain A/B paths'),'step-15 completion copy missing');
 
 assert.ok(app.includes("const COMPARE_PRESETS={"),'central compare preset registry missing');
 assert.ok(app.includes("'open-arena-20-vs-100':{"),'open-arena preset missing');
