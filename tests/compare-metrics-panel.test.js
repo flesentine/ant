@@ -43,6 +43,6 @@ assert.ok(css.includes('.compare-metrics-table { min-width:570px; }'),'mobile me
 const singleLegend=html.match(/<div class="legend">[\s\S]*?<\/div>/)?.[0]||'';
 assert.ok(singleLegend.includes('<i class="dot ant"></i>Worker'),'single-run legend must remain generic');
 assert.ok(!singleLegend.includes('Matched worker'),'single-run legend must not claim an A/B match');
-assert.strictEqual((html.match(/Matched worker W0/g)||[]).length,2,'both compare panes must identify the matched worker');
+assert.strictEqual((html.match(/<div class="compare-mini-legend"[\s\S]*?Matched worker W0[\s\S]*?<\/div>/g)||[]).length,2,'both compare pane legends must identify the matched worker');
 
 console.log('compare-metrics-panel.test.js PASS');
