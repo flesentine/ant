@@ -24,7 +24,7 @@ assert.ok(app.includes("ui.compareOutcomeLabel.textContent=branchChoice?'Branch 
 assert.ok(app.includes('row.hidden=branchChoice'),'irrelevant numeric rows must hide for branch-choice presets');
 assert.ok(css.includes('.compare-metrics-row[hidden] { display:none; }'),'hidden P4 metric rows must not occupy layout');
 
-assert.ok(app.includes('function drawCompareExternalField(c,canvas,targetSim)'),'compare P4 trail renderer missing');
+assert.ok(app.includes('function drawCompareExternalField(c,canvas,targetSim,{'),'compare P4 trail renderer missing');
 assert.ok(app.includes("if(!trail?.line_segment_mm||!(Number(targetSim?.p4DoseRatio)>0))return;"),'zero-dose pane must suppress painted-trail rendering');
 assert.ok(app.includes("trailLabel=label||(side?`P4 ${String(side).toUpperCase()} TRAIL`:'P4 MARKED TRAIL')"),'marked P4 trail label must identify the active side');
 assert.ok(app.includes('drawCompareExternalField(c,canvas,targetSim);'),'P4 trail must render in paired condition canvas');
