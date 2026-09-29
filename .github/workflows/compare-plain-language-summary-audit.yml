@@ -1,0 +1,23 @@
+name: Compare plain-language summary audit
+on:
+  push:
+    branches:
+      - audit/compare-10-b68cc4d
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: b68cc4db98d52dfcb865fe166f4637aa91f1af6a
+          fetch-depth: 0
+      - name: Verify exact summary head
+        run: test "$(git rev-parse HEAD)" = "b68cc4db98d52dfcb865fe166f4637aa91f1af6a"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
