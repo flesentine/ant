@@ -110,6 +110,7 @@ button.primary { background:var(--accent); color:#111; border-color:var(--accent
 .compare-metrics-table { display:grid; }
 .compare-metrics-row { display:grid; grid-template-columns:minmax(130px,1.35fr) repeat(3,minmax(88px,.8fr)); align-items:center; min-width:0; border-bottom:1px solid rgba(255,255,255,.055); }
 .compare-metrics-row:last-child { border-bottom:0; }
+.compare-metrics-row[hidden] { display:none; }
 .compare-metrics-row > * { min-width:0; padding:9px 11px; }
 .compare-metrics-row > span { color:var(--muted); font-size:10px; }
 .compare-metrics-row > strong { color:#dce2e5; font:700 11px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace; text-align:right; }

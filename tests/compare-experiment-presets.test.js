@@ -9,17 +9,17 @@ for(const id of ['comparePresetSelect','comparePresetHelp','comparePresetDescrip
   assert.ok(html.includes(`id="${id}"`),`missing preset UI #${id}`);
 }
 assert.ok(html.includes('Comparison preset'),'preset selector label missing');
-assert.ok(html.includes('P4 presets unlock in steps 13–14.'),'future preset lock copy missing');
-assert.ok(html.includes('P4 presets are staged but locked until steps 13–14.'),'step-12 completion copy missing');
+assert.ok(html.includes('P4 marked vs exact zero-dose is now available'),'step-13 preset availability copy missing');
+assert.ok(html.includes('P4 left vs right remains locked until step 14.'),'step-13 handoff copy missing');
 
 assert.ok(app.includes("const COMPARE_PRESETS={"),'central compare preset registry missing');
 assert.ok(app.includes("'open-arena-20-vs-100':{"),'open-arena preset missing');
 assert.ok(app.includes("fileA:'open_arena_short_control.json',fileB:'open_arena_long_control.json'"),'open-arena preset files incorrect');
-assert.ok(app.includes("labelA:'20 cm',labelB:'100 cm',readyStatus:'20 cm VS 100 cm',enabled:true"),'open-arena preset must remain enabled by default');
+assert.ok(app.includes("labelA:'20 cm',labelB:'100 cm',readyStatus:'20 cm VS 100 cm',metricMode:'numeric',enabled:true"),'open-arena preset must remain enabled by default');
 
 assert.ok(app.includes("'p4-marked-vs-zero':{"),'P4 marked-vs-zero preset must be staged');
 assert.ok(app.includes("fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_neutral_consistency_v1.json'"),'P4 marked-vs-zero preset files incorrect');
-assert.ok(app.includes("enabled:false,unlockStep:13"),'P4 marked-vs-zero must remain locked until step 13');
+assert.ok(app.includes("metricMode:'branch-choice',p4Diagnostic:true,enabled:true"),'P4 marked-vs-zero must be enabled as the step-13 branch-choice diagnostic');
 
 assert.ok(app.includes("'p4-left-vs-right':{"),'P4 left-vs-right preset must be staged');
 assert.ok(app.includes("fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_right_consistency_v1.json'"),'P4 left-vs-right preset files incorrect');

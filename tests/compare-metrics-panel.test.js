@@ -22,7 +22,7 @@ assert.ok(html.includes('Central-zone fraction'),'central-zone row missing');
 assert.ok(html.includes('WHAT THIS SEED SHOWS'),'metrics panel must flow into the plain-English summary');
 
 assert.ok(app.includes('function compareObservedSnapshot(targetSim)'),'observed snapshot adapter missing');
-assert.ok(app.includes("const summary=targetSim.summary(),means=summary.observed_metrics?.means||{}"),'comparison values must come from observed measurement summaries');
+assert.ok(app.includes("const summary=targetSim.summary(),means=summary.observed_metrics?.means||{},observedRows=summary.observed_metrics?.ants||[]"),'comparison values must come from observed measurement summaries');
 assert.ok(app.includes('function formatCompareDelta(a,b'),'delta formatter missing');
 assert.ok(app.includes('const delta=b-a'),'delta must be Condition B minus Condition A');
 assert.ok(app.includes("return Number.isFinite(value)"),'missing values must be handled without fabricated numbers');
