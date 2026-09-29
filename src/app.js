@@ -10,7 +10,7 @@
     return window.AntLabIntegrity.Simulation;
   }
   const canvas=document.getElementById('labCanvas'),ctx=canvas.getContext('2d');
-  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),compareCanvasA:document.getElementById('compareCanvasA'),compareCanvasB:document.getElementById('compareCanvasB'),comparePlaceholderA:document.getElementById('comparePlaceholderA'),comparePlaceholderB:document.getElementById('comparePlaceholderB'),compareStatusA:document.getElementById('compareStatusA'),compareStatusB:document.getElementById('compareStatusB'),compareTitleA:document.getElementById('compareATitle'),compareTitleB:document.getElementById('compareBTitle'),replaySeedBtn:document.getElementById('replaySeedBtn'),nextSeedBtn:document.getElementById('nextSeedBtn'),compareSeedReadout:document.getElementById('compareSeedReadout'),compareMatchWorker:document.getElementById('compareMatchWorker'),compareMatchDetail:document.getElementById('compareMatchDetail'),compareSpeedA:document.getElementById('compareSpeedA'),compareSpeedB:document.getElementById('compareSpeedB'),compareSpeedDelta:document.getElementById('compareSpeedDelta'),compareDistanceA:document.getElementById('compareDistanceA'),compareDistanceB:document.getElementById('compareDistanceB'),compareDistanceDelta:document.getElementById('compareDistanceDelta'),compareStraightnessA:document.getElementById('compareStraightnessA'),compareStraightnessB:document.getElementById('compareStraightnessB'),compareStraightnessDelta:document.getElementById('compareStraightnessDelta'),compareEdgeTimeA:document.getElementById('compareEdgeTimeA'),compareEdgeTimeB:document.getElementById('compareEdgeTimeB'),compareEdgeTimeDelta:document.getElementById('compareEdgeTimeDelta'),compareCentralA:document.getElementById('compareCentralA'),compareCentralB:document.getElementById('compareCentralB'),compareCentralDelta:document.getElementById('compareCentralDelta'),compareOutcomeA:document.getElementById('compareOutcomeA'),compareOutcomeB:document.getElementById('compareOutcomeB'),compareOutcomeDelta:document.getElementById('compareOutcomeDelta'),compareMetricsNote:document.getElementById('compareMetricsNote'),compareSummaryText:document.getElementById('compareSummaryText'),compareSummaryQualifier:document.getElementById('compareSummaryQualifier'),showCompareOverlay:document.getElementById('showCompareOverlay'),compareOverlayBody:document.getElementById('compareOverlayBody'),compareOverlayCanvas:document.getElementById('compareOverlayCanvas'),compareOverlayNote:document.getElementById('compareOverlayNote'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
+  const ui={singleModeBtn:document.getElementById('singleModeBtn'),compareModeBtn:document.getElementById('compareModeBtn'),singleModeView:document.getElementById('singleModeView'),compareModeView:document.getElementById('compareModeView'),comparePresetSelect:document.getElementById('comparePresetSelect'),comparePresetHelp:document.getElementById('comparePresetHelp'),comparePresetDescription:document.getElementById('comparePresetDescription'),comparePresetBadge:document.getElementById('comparePresetBadge'),compareCanvasA:document.getElementById('compareCanvasA'),compareCanvasB:document.getElementById('compareCanvasB'),comparePlaceholderA:document.getElementById('comparePlaceholderA'),comparePlaceholderB:document.getElementById('comparePlaceholderB'),compareStatusA:document.getElementById('compareStatusA'),compareStatusB:document.getElementById('compareStatusB'),compareTitleA:document.getElementById('compareATitle'),compareTitleB:document.getElementById('compareBTitle'),replaySeedBtn:document.getElementById('replaySeedBtn'),nextSeedBtn:document.getElementById('nextSeedBtn'),compareSeedReadout:document.getElementById('compareSeedReadout'),compareMatchWorker:document.getElementById('compareMatchWorker'),compareMatchDetail:document.getElementById('compareMatchDetail'),compareSpeedA:document.getElementById('compareSpeedA'),compareSpeedB:document.getElementById('compareSpeedB'),compareSpeedDelta:document.getElementById('compareSpeedDelta'),compareDistanceA:document.getElementById('compareDistanceA'),compareDistanceB:document.getElementById('compareDistanceB'),compareDistanceDelta:document.getElementById('compareDistanceDelta'),compareStraightnessA:document.getElementById('compareStraightnessA'),compareStraightnessB:document.getElementById('compareStraightnessB'),compareStraightnessDelta:document.getElementById('compareStraightnessDelta'),compareEdgeTimeA:document.getElementById('compareEdgeTimeA'),compareEdgeTimeB:document.getElementById('compareEdgeTimeB'),compareEdgeTimeDelta:document.getElementById('compareEdgeTimeDelta'),compareCentralA:document.getElementById('compareCentralA'),compareCentralB:document.getElementById('compareCentralB'),compareCentralDelta:document.getElementById('compareCentralDelta'),compareOutcomeA:document.getElementById('compareOutcomeA'),compareOutcomeB:document.getElementById('compareOutcomeB'),compareOutcomeDelta:document.getElementById('compareOutcomeDelta'),compareMetricsNote:document.getElementById('compareMetricsNote'),compareSummaryText:document.getElementById('compareSummaryText'),compareSummaryQualifier:document.getElementById('compareSummaryQualifier'),showCompareOverlay:document.getElementById('showCompareOverlay'),compareOverlayBody:document.getElementById('compareOverlayBody'),compareOverlayCanvas:document.getElementById('compareOverlayCanvas'),compareOverlayNote:document.getElementById('compareOverlayNote'),compareOverlayLabelA:document.getElementById('compareOverlayLabelA'),compareOverlayLabelB:document.getElementById('compareOverlayLabelB'),compareMetricsLabelA:document.getElementById('compareMetricsLabelA'),compareMetricsLabelB:document.getElementById('compareMetricsLabelB'),experiment:document.getElementById('experimentSelect'),seed:document.getElementById('seedInput'),speed:document.getElementById('speedSelect'),play:document.getElementById('playBtn'),step:document.getElementById('stepBtn'),reset:document.getElementById('resetBtn'),status:document.getElementById('runStatus'),trails:document.getElementById('showTrails'),ids:document.getElementById('showIds'),contacts:document.getElementById('showContacts'),simTime:document.getElementById('simTime'),meanSpeed:document.getElementById('meanSpeed'),completed:document.getElementById('completedCount'),outcome:document.getElementById('outcomeValue'),straightness:document.getElementById('straightnessValue'),distance:document.getElementById('distanceValue'),truthDistance:document.getElementById('truthDistanceValue'),modelId:document.getElementById('modelId'),modelHash:document.getElementById('modelHash'),stateId:document.getElementById('stateId'),stateHash:document.getElementById('stateHash'),resolvedStateHash:document.getElementById('resolvedStateHash'),apparatusId:document.getElementById('apparatusId'),observationId:document.getElementById('observationId'),scoringId:document.getElementById('scoringId'),experimentHash:document.getElementById('experimentHash'),calibrationRole:document.getElementById('calibrationRole'),protocolNote:document.getElementById('protocolNote'),explainSummary:document.getElementById('explainSummary'),explainGoal:document.getElementById('explainGoal'),explainWorkers:document.getElementById('explainWorkers'),explainDuration:document.getElementById('explainDuration'),explainLegend:document.getElementById('explainLegend'),explainMetrics:document.getElementById('explainMetrics'),explainNow:document.getElementById('explainNow'),measurementNote:document.getElementById('measurementNote'),inspectorEmpty:document.getElementById('inspectorEmpty'),inspectorData:document.getElementById('inspectorData'),workerId:document.getElementById('workerId'),workerX:document.getElementById('workerX'),workerY:document.getElementById('workerY'),workerHeading:document.getElementById('workerHeading'),workerState:document.getElementById('workerState'),workerBioState:document.getElementById('workerBioState'),workerOutcome:document.getElementById('workerOutcome')};
   const EXPERIMENT_EXPLANATIONS={
     'open_arena_short_control.json':{
       summary:'One simulated ant enters the center of the open arena after a 20 cm constrained approach under a DCM solvent-control condition.',
@@ -57,7 +57,58 @@
     exit_coordinate:'exit location',
     branch_choice:'left/right branch choice'
   };
-  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';const comparePair={a:null,b:null,generation:0,clock:0,seed:null,selectedId:null};const comparePaths={a:new Map(),b:new Map(),nextSample:.25,loading:false};
+  const COMPARE_PRESETS={
+    'open-arena-20-vs-100':{
+      id:'open-arena-20-vs-100',label:'Open arena · 20 cm vs 100 cm',badge:'20 CM ↔ 100 CM',
+      description:'Matched-seed comparison of the 20 cm and 100 cm open-arena control approaches.',
+      fileA:'open_arena_short_control.json',fileB:'open_arena_long_control.json',
+      labelA:'20 cm',labelB:'100 cm',readyStatus:'20 cm VS 100 cm',enabled:true
+    },
+    'p4-marked-vs-zero':{
+      id:'p4-marked-vs-zero',label:'P4 · marked vs zero-dose',badge:'P4 MARKED ↔ ZERO',
+      description:'Frozen Candidate 307 marked-arm comparison against the exact zero-dose neutral identity control.',
+      fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_neutral_consistency_v1.json',
+      labelA:'P4 marked',labelB:'Zero-dose',readyStatus:'P4 MARKED VS ZERO-DOSE',enabled:false,unlockStep:13
+    },
+    'p4-left-vs-right':{
+      id:'p4-left-vs-right',label:'P4 · left-marked vs right-marked',badge:'P4 LEFT ↔ RIGHT',
+      description:'Frozen Candidate 307 comparison with the marked arm mirrored from left to right.',
+      fileA:'y_maze_p4_left_consistency_v1.json',fileB:'y_maze_p4_right_consistency_v1.json',
+      labelA:'P4 left-marked',labelB:'P4 right-marked',readyStatus:'P4 LEFT VS RIGHT',enabled:false,unlockStep:14
+    }
+  };
+  const DEFAULT_COMPARE_PRESET_ID='open-arena-20-vs-100';
+  const cache=new Map();let sim=null,running=false,selectedId=null,lastWallTime=performance.now(),simBudget=0,resetGeneration=0,viewMode='single';const comparePair={a:null,b:null,generation:0,clock:0,seed:null,selectedId:null,presetId:null};const comparePaths={a:new Map(),b:new Map(),nextSample:.25,loading:false};
+  function selectedComparePreset(){
+    const requested=COMPARE_PRESETS[ui.comparePresetSelect?.value];
+    if(requested?.enabled)return requested;
+    if(ui.comparePresetSelect)ui.comparePresetSelect.value=DEFAULT_COMPARE_PRESET_ID;
+    return COMPARE_PRESETS[DEFAULT_COMPARE_PRESET_ID];
+  }
+  function currentComparePreset(){
+    return COMPARE_PRESETS[comparePair.presetId]||selectedComparePreset();
+  }
+  function applyComparePresetUi(preset){
+    ui.comparePresetDescription.textContent=preset.description;
+    ui.comparePresetBadge.textContent=preset.badge;
+    ui.compareMetricsLabelA.textContent=`${preset.labelA} · A`;
+    ui.compareMetricsLabelB.textContent=`${preset.labelB} · B`;
+    ui.compareOverlayLabelA.textContent=`${preset.labelA} · A`;
+    ui.compareOverlayLabelB.textContent=`${preset.labelB} · B`;
+    ui.comparePresetHelp.textContent=preset.enabled?'Active preset · P4 presets unlock in steps 13–14.':`Preset unlocks in step ${preset.unlockStep}.`;
+  }
+  function initializeComparePresets(){
+    ui.comparePresetSelect.replaceChildren();
+    for(const preset of Object.values(COMPARE_PRESETS)){
+      const option=document.createElement('option');
+      option.value=preset.id;
+      option.textContent=preset.enabled?preset.label:`${preset.label} — step ${preset.unlockStep}`;
+      option.disabled=!preset.enabled;
+      ui.comparePresetSelect.appendChild(option);
+    }
+    ui.comparePresetSelect.value=DEFAULT_COMPARE_PRESET_ID;
+    applyComparePresetUi(COMPARE_PRESETS[DEFAULT_COMPARE_PRESET_ID]);
+  }
   function drawCompareCanvasPlaceholder(canvas,label){
     if(!canvas)return;
     const c=canvas.getContext('2d');
@@ -199,9 +250,10 @@
     return Number.isSafeInteger(seed)&&seed>=1?seed:1;
   }
   async function resetComparePair(){
-    const generation=++comparePair.generation,seed=normalizeCompareSeed(ui.seed.value);
+    const preset=selectedComparePreset(),generation=++comparePair.generation,seed=normalizeCompareSeed(ui.seed.value);
     ui.seed.value=String(seed);
-    running=false;simBudget=0;comparePair.clock=0;comparePair.seed=seed;comparePair.selectedId=null;ui.play.textContent='Run';
+    running=false;simBudget=0;comparePair.clock=0;comparePair.seed=seed;comparePair.selectedId=null;comparePair.presetId=preset.id;ui.play.textContent='Run';
+    applyComparePresetUi(preset);
     comparePaths.a=new Map();comparePaths.b=new Map();comparePaths.nextSample=COMPARE_PATH_SAMPLE_S;comparePaths.loading=true;
     ui.compareSeedReadout.textContent=`Seed ${seed} · matched A/B`;
     drawCompareTrajectoryOverlay();
@@ -209,8 +261,8 @@
     ui.comparePlaceholderA.hidden=false;ui.comparePlaceholderB.hidden=false;
     try{
       const [bundleA,bundleB]=await Promise.all([
-        loadBundle('open_arena_short_control.json'),
-        loadBundle('open_arena_long_control.json')
+        loadBundle(preset.fileA),
+        loadBundle(preset.fileB)
       ]);
       if(generation!==comparePair.generation||viewMode!=='compare')return;
       const SimulationA=simulationClassFor(bundleA),SimulationB=simulationClassFor(bundleB);
@@ -218,12 +270,12 @@
       comparePair.b=new SimulationB(bundleB,seed);
       ui.compareTitleA.textContent=comparePair.a.experiment.title;
       ui.compareTitleB.textContent=comparePair.b.experiment.title;
-      ui.compareStatusA.textContent=`20 cm · seed ${seed} · MATCHED`;
-      ui.compareStatusB.textContent=`100 cm · seed ${seed} · MATCHED`;
+      ui.compareStatusA.textContent=`${preset.labelA} · seed ${seed} · MATCHED`;
+      ui.compareStatusB.textContent=`${preset.labelB} · seed ${seed} · MATCHED`;
       ui.comparePlaceholderA.hidden=true;ui.comparePlaceholderB.hidden=true;
       updateCompareMatchDisplay();resetCompareTrajectoryHistory();comparePaths.loading=false;
       renderComparePair();
-      ui.status.textContent='20 cm VS 100 cm READY';
+      ui.status.textContent=`${preset.readyStatus} READY`;
     }catch(err){
       if(generation!==comparePair.generation)return;
       console.error(err);comparePaths.loading=false;ui.compareStatusA.textContent='LOAD ERROR';ui.compareStatusB.textContent='LOAD ERROR';ui.status.textContent='COMPARE ERROR';drawCompareTrajectoryOverlay();
@@ -263,9 +315,9 @@
   }
   function updateComparePlaybackStatus(){
     if(!comparePair.a||!comparePair.b)return;
-    const stateFor=s=>s.allFinished()?'COMPLETE':(s.time>=s.experiment.duration_s-1e-9?'DURATION':(running?'RUNNING':'PAUSED'));
-    ui.compareStatusA.textContent=`20 cm · ${comparePair.a.time.toFixed(1)} s · ${stateFor(comparePair.a)}`;
-    ui.compareStatusB.textContent=`100 cm · ${comparePair.b.time.toFixed(1)} s · ${stateFor(comparePair.b)}`;
+    const preset=currentComparePreset(),stateFor=s=>s.allFinished()?'COMPLETE':(s.time>=s.experiment.duration_s-1e-9?'DURATION':(running?'RUNNING':'PAUSED'));
+    ui.compareStatusA.textContent=`${preset.labelA} · ${comparePair.a.time.toFixed(1)} s · ${stateFor(comparePair.a)}`;
+    ui.compareStatusB.textContent=`${preset.labelB} · ${comparePair.b.time.toFixed(1)} s · ${stateFor(comparePair.b)}`;
   }
   function compareObservedSnapshot(targetSim){
     const summary=targetSim.summary(),means=summary.observed_metrics?.means||{};
@@ -297,8 +349,8 @@
     return`${amount}${unit} ${delta>0?positive:negative}`;
   }
   function buildCompareSummary(a,b){
-    const started=Math.max(comparePair.a?.time||0,comparePair.b?.time||0)>1e-9;
-    if(!started)return'The matched pair is ready. Start the run to compare the 20 cm and 100 cm conditions.';
+    const preset=currentComparePreset(),started=Math.max(comparePair.a?.time||0,comparePair.b?.time||0)>1e-9;
+    if(!started)return`The matched pair is ready. Start the run to compare ${preset.labelA} and ${preset.labelB}.`;
     const clauses=[];
     const edge=compareDifferenceClause(a.edgeTime,b.edgeTime,{digits:2,unit:' s',positive:'later',negative:'sooner'});
     if(edge)clauses.push(`reached the arena edge ${edge}`);
@@ -311,14 +363,14 @@
     const central=compareDifferenceClause(a.central,b.central,{digits:3,unit:'',positive:'higher in central-zone fraction',negative:'lower in central-zone fraction'});
     if(central)clauses.push(`was ${central}`);
     const finished=(comparePair.a?.allFinished()||comparePair.a?.time>=comparePair.a?.experiment.duration_s-1e-9)&&(comparePair.b?.allFinished()||comparePair.b?.time>=comparePair.b?.experiment.duration_s-1e-9);
-    const prefix=finished?'For this completed simulated seed, the 100 cm condition':'So far for this simulated seed, the 100 cm condition';
+    const prefix=finished?`For this completed simulated seed, the ${preset.labelB} condition`:`So far for this simulated seed, the ${preset.labelB} condition`;
     if(!clauses.length){
       const comparable=[a.speed,a.distance,a.straightness,a.edgeTime,a.central].some(Number.isFinite);
-      return comparable?`${prefix} has no displayed difference from the 20 cm condition at the current metric precision.`:'Observed differences are not available yet for this matched seed.';
+      return comparable?`${prefix} has no displayed difference from the ${preset.labelA} condition at the current metric precision.`:'Observed differences are not available yet for this matched seed.';
     }
     const selected=clauses.slice(0,3);
     const joined=selected.length===1?selected[0]:selected.length===2?`${selected[0]} and ${selected[1]}`:`${selected[0]}, ${selected[1]}, and ${selected[2]}`;
-    return`${prefix} ${joined} than the 20 cm condition.`;
+    return`${prefix} ${joined} than the ${preset.labelA} condition.`;
   }
   function updateCompareSummary(a,b){
     ui.compareSummaryText.textContent=buildCompareSummary(a,b);
@@ -446,6 +498,7 @@
   function updateInspector(){if(selectedId==null||!sim)return;const a=sim.ants.find(x=>x.id===selectedId);if(!a)return;ui.workerId.textContent=`#${a.id}`;ui.workerX.textContent=`${a.x.toFixed(2)} mm`;ui.workerY.textContent=`${a.y.toFixed(2)} mm`;ui.workerHeading.textContent=`${((((a.heading*180/Math.PI)%360)+360)%360).toFixed(1)}°`;ui.workerState.textContent=a.state;ui.workerBioState.textContent=a.agentState?`${a.agentState.experience}; ${a.agentState.travel_direction}; ${a.agentState.feeding_state}; recent travel ${a.agentState.recent_travel_mm} mm`:'—';ui.workerOutcome.textContent=a.outcome||'—';}
   canvas.addEventListener('click',e=>{if(!sim)return;const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)/r.width*canvas.width,my=(e.clientY-r.top)/r.height*canvas.height;let best=null,bestD=Infinity;for(const a of sim.ants){const c=toCanvas(a.x,a.y),d=(c.x-mx)**2+(c.y-my)**2;if(d<bestD){bestD=d;best=a;}}if(best&&bestD<18**2){selectedId=best.id;ui.inspectorEmpty.hidden=true;ui.inspectorData.hidden=false;updateInspector();}});
   ui.singleModeBtn.addEventListener('click',()=>setViewMode('single'));ui.compareModeBtn.addEventListener('click',()=>setViewMode('compare'));
+  ui.comparePresetSelect.addEventListener('change',()=>{if(viewMode==='compare')resetComparePair();});
   ui.replaySeedBtn.addEventListener('click',replaySameCompareSeed);ui.nextSeedBtn.addEventListener('click',nextCompareSeed);
   ui.showCompareOverlay.addEventListener('change',toggleCompareTrajectoryOverlay);
   ui.compareCanvasA.addEventListener('click',event=>selectCompareWorkerFromCanvas(ui.compareCanvasA,comparePair.a,event));ui.compareCanvasB.addEventListener('click',event=>selectCompareWorkerFromCanvas(ui.compareCanvasB,comparePair.b,event));
@@ -462,5 +515,5 @@
     if(!sim)return;running=false;ui.play.textContent='Run';const remaining=Math.max(0,sim.experiment.duration_s-sim.time);if(remaining<=1e-9){const alreadyFinished=sim.allFinished();if(!alreadyFinished)sim.runUntilComplete(0);const outcomes=sim.summary().outcomes||{};ui.status.textContent=outcomes.timeout>0?'DURATION':'COMPLETE';updateMetrics();draw();return;}sim.runFor(Math.min(1,remaining),FIXED_DT);const durationReached=sim.time>=sim.experiment.duration_s-1e-9&&!sim.allFinished();if(durationReached)sim.runUntilComplete(0);ui.status.textContent=durationReached?'DURATION':(sim.allFinished()?'COMPLETE':'PAUSED');updateMetrics();draw();
   });
   ui.seed.addEventListener('change',()=>{if(viewMode==='compare')resetComparePair();else reset();});
-  ui.experiment.addEventListener('change',reset);initializeCompareCanvases();setViewMode('single');reset();requestAnimationFrame(frame);
+  ui.experiment.addEventListener('change',reset);initializeComparePresets();initializeCompareCanvases();setViewMode('single');reset();requestAnimationFrame(frame);
 })();
