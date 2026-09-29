@@ -1,0 +1,23 @@
+name: Compare P4 left-right audit rerun
+on:
+  push:
+    branches:
+      - audit/compare-14-c7db5c8
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c7db5c8d5ef8884b5a3f3a819c8ea48be20b0f62
+          fetch-depth: 0
+      - name: Verify exact P4 left-right head
+        run: test "$(git rev-parse HEAD)" = "c7db5c8d5ef8884b5a3f3a819c8ea48be20b0f62"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
