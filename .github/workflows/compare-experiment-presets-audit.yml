@@ -1,0 +1,23 @@
+name: Compare experiment presets audit
+on:
+  push:
+    branches:
+      - audit/compare-12-7309033
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 7309033504bdbc3a1d6b96e7565cad32e4d45331
+          fetch-depth: 0
+      - name: Verify exact preset head
+        run: test "$(git rev-parse HEAD)" = "7309033504bdbc3a1d6b96e7565cad32e4d45331"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full ANTLAB suite
+        run: bash tests/run-tests.sh
